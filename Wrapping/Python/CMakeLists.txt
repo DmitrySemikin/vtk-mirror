@@ -46,6 +46,11 @@ if(VTK_ENABLE_KITS)
   foreach(kit IN LISTS vtk_kits)
     set(kit_srcs)
     set(_module_depends)
+    # Set KIT_* variables used to configure vtkPythonKitInit.cxx.in
+    set(KIT_REAL_PYTHON_MODULE_INIT_DECLS)
+    set(KIT_REAL_PYTHON_MODULE_INIT_CALLS)
+    set(KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS)
+    set(KIT_NAME ${kit}${_kit_suffix})
     foreach(module IN LISTS _${kit}_modules)
       vtk_module_load(${module})
       vtk_module_headers_load(${module})
@@ -53,6 +58,15 @@ if(VTK_ENABLE_KITS)
       vtk_add_python_wrapping(${module} module_srcs)
       list(APPEND kit_srcs ${module_srcs})
       list(APPEND _module_depends ${${module}_DEPENDS})
+      set(KIT_REAL_PYTHON_MODULE_INIT_DECLS "${KIT_REAL_PYTHON_MODULE_INIT_DECLS}
+extern \"C\" void real_init${module}Python(const char *modulename);
+")
+      set(KIT_REAL_PYTHON_MODULE_INIT_CALLS "${KIT_REAL_PYTHON_MODULE_INIT_CALLS}
+real_init${module}Python(\"${KIT_NAME}Python\");
+")
+      set(KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS "${KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS}
+real_init${module}Python(\"lib${KIT_NAME}Python\");
+")
     endforeach()
     # Compose kit python module dependency list.
     set(_kit_depends)
@@ -65,6 +79,14 @@ if(VTK_ENABLE_KITS)
     endforeach()
     list(REMOVE_DUPLICATES _kit_depends)
     set(${kit}${_kit_suffix}_DEPENDS ${_kit_depends})
+    # Configure vtkPythonKitInit.cxx.in
+    set(_kit_init_src ${CMAKE_CURRENT_BINARY_DIR}/${kit}${_kit_suffix}PythonInit.cxx)
+    configure_file(
+      ${VTK_CMAKE_DIR}/vtkPythonKitInit.cxx.in
+      ${_kit_init_src}
+      )
+    list(APPEND kit_srcs ${_kit_init_src})
+    # Wrap kit.
     vtk_add_python_wrapping_library(${kit}${_kit_suffix} kit_srcs ${_${kit}_modules})
   endforeach()
 endif()
