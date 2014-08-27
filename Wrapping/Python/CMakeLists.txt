@@ -34,60 +34,38 @@ set(VTK_PYTHON_MODULES_AND_KITS ${VTK_PYTHON_MODULES})
 set(_vtk_python_modules_only ${VTK_PYTHON_MODULES})
 if(VTK_ENABLE_KITS)
   set(_vtk_kits_with_suffix)
-  set(_kit_suffix "Kit") # Required to avoid conflict with targets like vtkFiltersPython
+  set(VTK_KIT_SUFFIX "Kit") # Required to avoid conflict with targets like vtkFiltersPython
   # Create list of module that do not belong to any kits
   foreach(kit IN LISTS vtk_kits)
     # XXX Variable '_${kit}_modules' is set in vtkModuleTop.cmake
     list(REMOVE_ITEM _vtk_python_modules_only ${_${kit}_modules})
-    list(APPEND _vtk_kits_with_suffix ${kit}${_kit_suffix})
+    list(APPEND _vtk_kits_with_suffix ${kit}${VTK_KIT_SUFFIX})
   endforeach()
   set(VTK_PYTHON_MODULES_AND_KITS ${_vtk_kits_with_suffix} ${_vtk_python_modules_only})
   # Loop through all kits that should wrapped, and wrap them.
   foreach(kit IN LISTS vtk_kits)
     set(kit_srcs)
     set(_module_depends)
-    # Set KIT_* variables used to configure vtkPythonKitInit.cxx.in
-    set(KIT_REAL_PYTHON_MODULE_INIT_DECLS)
-    set(KIT_REAL_PYTHON_MODULE_INIT_CALLS)
-    set(KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS)
-    set(KIT_NAME ${kit}${_kit_suffix})
     foreach(module IN LISTS _${kit}_modules)
       vtk_module_load(${module})
       vtk_module_headers_load(${module})
       vtk_include_recurse(${module})
-      vtk_add_python_wrapping(${module} module_srcs)
-      list(APPEND kit_srcs ${module_srcs})
       list(APPEND _module_depends ${${module}_DEPENDS})
-      set(KIT_REAL_PYTHON_MODULE_INIT_DECLS "${KIT_REAL_PYTHON_MODULE_INIT_DECLS}
-extern \"C\" void real_init${module}Python(const char *modulename);
-")
-      set(KIT_REAL_PYTHON_MODULE_INIT_CALLS "${KIT_REAL_PYTHON_MODULE_INIT_CALLS}
-real_init${module}Python(\"${KIT_NAME}Python\");
-")
-      set(KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS "${KIT_REAL_PYTHON_MODULE_WITH_LIBPREFIX_INIT_CALLS}
-real_init${module}Python(\"lib${KIT_NAME}Python\");
-")
     endforeach()
+    vtk_add_python_wrapping("${_${kit}_modules}" kit_srcs ${kit}${VTK_KIT_SUFFIX})
     # Compose kit python module dependency list.
     set(_kit_depends)
     foreach(dep IN LISTS _module_depends)
       if(${dep}_KIT)
-        list(APPEND _kit_depends ${${dep}_KIT}${_kit_suffix})
+        list(APPEND _kit_depends ${${dep}_KIT}${VTK_KIT_SUFFIX})
       else()
         list(APPEND _kit_depends ${dep})
       endif()
     endforeach()
     list(REMOVE_DUPLICATES _kit_depends)
-    set(${kit}${_kit_suffix}_DEPENDS ${_kit_depends})
-    # Configure vtkPythonKitInit.cxx.in
-    set(_kit_init_src ${CMAKE_CURRENT_BINARY_DIR}/${kit}${_kit_suffix}PythonInit.cxx)
-    configure_file(
-      ${VTK_CMAKE_DIR}/vtkPythonKitInit.cxx.in
-      ${_kit_init_src}
-      )
-    list(APPEND kit_srcs ${_kit_init_src})
+    set(${kit}${VTK_KIT_SUFFIX}_DEPENDS ${_kit_depends})
     # Wrap kit.
-    vtk_add_python_wrapping_library(${kit}${_kit_suffix} kit_srcs ${_${kit}_modules})
+    vtk_add_python_wrapping_library(${kit}${VTK_KIT_SUFFIX} kit_srcs ${kit})
   endforeach()
 endif()
 # Loop through all modules that should be wrapped, and wrap them.
@@ -102,7 +80,7 @@ foreach(module IN LISTS _vtk_python_modules_only)
     set(_module_depends_with_kits)
     foreach(dep IN LISTS ${module}_DEPENDS)
       if(${dep}_KIT)
-        list(APPEND _module_depends_with_kits ${${dep}_KIT}${_kit_suffix})
+        list(APPEND _module_depends_with_kits ${${dep}_KIT}${VTK_KIT_SUFFIX})
       else()
         list(APPEND _module_depends_with_kits ${dep})
       endif()

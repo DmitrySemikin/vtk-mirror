@@ -213,8 +213,8 @@ macro(vtk_find_header header include_dirs full_path)
   endforeach()
 endmacro()
 
-# Macro that just takes the name of the module, figure the rest out from there.
-macro(vtk_wrap_python TARGET SRC_LIST_NAME module)
+# Macro that just takes the a list of module names, figure the rest out from there.
+macro(vtk_wrap_python TARGET SRC_LIST_NAME)
   if(NOT VTK_WRAP_PYTHON_INIT_EXE)
     if(TARGET vtkWrapPythonInit)
       set(VTK_WRAP_PYTHON_INIT_EXE vtkWrapPythonInit)
@@ -242,13 +242,17 @@ macro(vtk_wrap_python TARGET SRC_LIST_NAME module)
   # start writing the input file for the init file
   set(VTK_WRAPPER_INIT_DATA "${TARGET}")
 
-  # all the include directories
-  if(${module}_INCLUDE_DIRS)
-    set(TMP_INCLUDE_DIRS ${${module}_INCLUDE_DIRS})
-  elseif(VTK_WRAP_INCLUDE_DIRS)
-    set(TMP_INCLUDE_DIRS ${VTK_WRAP_INCLUDE_DIRS})
+  set(TMP_INCLUDE_DIRS)
+  foreach(module ${ARGN})
+    # all the include directories
+    if(${module}_INCLUDE_DIRS)
+      list(APPEND TMP_INCLUDE_DIRS ${${module}_INCLUDE_DIRS})
+    endif()
+  endforeach()
+  if(VTK_WRAP_INCLUDE_DIRS)
+    list(APPEND TMP_INCLUDE_DIRS ${VTK_WRAP_INCLUDE_DIRS})
   else()
-    set(TMP_INCLUDE_DIRS ${VTK_INCLUDE_DIRS})
+    list(APPEND TMP_INCLUDE_DIRS ${VTK_INCLUDE_DIRS})
   endif()
   if(EXTRA_PYTHON_INCLUDE_DIRS)
     list(APPEND TMP_INCLUDE_DIRS ${EXTRA_PYTHON_INCLUDE_DIRS})
@@ -275,6 +279,8 @@ macro(vtk_wrap_python TARGET SRC_LIST_NAME module)
   set(_args_file ${CMAKE_CURRENT_BINARY_DIR}/${TARGET}.args)
   configure_file(${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in
                  ${_args_file} @ONLY)
+
+  foreach(module ${ARGN})
 
   # Decide what to do for each header.
   foreach(header ${${module}_HEADERS})
@@ -328,6 +334,8 @@ macro(vtk_wrap_python TARGET SRC_LIST_NAME module)
       # message("${header} will not be wrapped.")
     endif()
   endforeach()
+
+  endforeach() # end ARGN loop
 
   # finish the data file for the init file
   configure_file(
