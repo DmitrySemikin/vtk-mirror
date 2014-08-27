@@ -29,8 +29,33 @@ macro(vtk_include_recurse module)
   include_directories(${${module}_PYTHON_INCLUDE_DIRS})
 endmacro()
 
+
+set(VTK_PYTHON_MODULES_AND_KITS ${VTK_PYTHON_MODULES})
+set(_vtk_python_modules_only ${VTK_PYTHON_MODULES})
+if(VTK_ENABLE_KITS)
+  set(_vtk_kits_with_suffix)
+  set(_kit_suffix "Kit") # Required to avoid conflict with targets like vtkFiltersPython
+  # Create list of module that do not belong to any kits
+  foreach(kit IN LISTS vtk_kits)
+    list(REMOVE_ITEM _vtk_python_modules_only ${_${kit}_modules})
+    list(APPEND _vtk_kits_with_suffix ${kit}${_kit_suffix})
+  endforeach()
+  set(VTK_PYTHON_MODULES_AND_KITS ${_vtk_kits_with_suffix} ${_vtk_python_modules_only})
+  # Loop through all kits that should wrapped, and wrap them.
+  foreach(kit IN LISTS vtk_kits)
+    set(kit_srcs)
+    foreach(module IN LISTS _${kit}_modules)
+      vtk_module_load(${module})
+      vtk_module_headers_load(${module})
+      vtk_include_recurse(${module})
+      vtk_add_python_wrapping(${module} module_srcs)
+      list(APPEND kit_srcs ${module_srcs})
+    endforeach()
+    vtk_add_python_wrapping_library(${kit}${_kit_suffix} kit_srcs ${_${kit}_modules})
+  endforeach()
+endif()
 # Loop through all modules that should be wrapped, and wrap them.
-foreach(module ${VTK_PYTHON_MODULES})
+foreach(module IN LISTS _vtk_python_modules_only)
   vtk_module_load(${module})
   vtk_module_headers_load(${module})
   vtk_include_recurse(${module})
@@ -41,9 +66,6 @@ endforeach()
 option(VTK_ENABLE_VTKPYTHON "Enable vtkpython and pvtkpython binaries" ON)
 mark_as_advanced(VTK_ENABLE_VTKPYTHON)
 if(VTK_ENABLE_VTKPYTHON)
-
-# Now to build the vtkPython executable, configure the .py files etc.
-get_property(VTK_PYTHON_MODULES GLOBAL PROPERTY VTK_PYTHON_WRAPPED)
 
 vtk_module_load(vtkWrappingPythonCore)
 vtk_module_load(vtkPython)
@@ -167,7 +189,7 @@ if(PYTHON_EXECUTABLE)
 # Wrapping/Python/vtk/*.py
   unset(VTK_PYTHON_FILES)
   unset(VTK_PYTHON_IMPORT_ALL)
-  foreach(module ${VTK_PYTHON_MODULES})
+  foreach(module IN LISTS VTK_PYTHON_MODULES_AND_KITS)
     set(VTK_PYTHON_IMPORT_ALL
       "${VTK_PYTHON_IMPORT_ALL}from .${module} import *\n")
     configure_file(vtk/module.py.in vtk/${module}.py @ONLY)
@@ -296,7 +318,7 @@ if(PYTHON_EXECUTABLE)
 
     # Install python extension library that backs the modules
     if (BUILD_SHARED_LIBS AND NOT VTK_INSTALL_NO_LIBRARIES)
-      foreach(module ${VTK_PYTHON_MODULES})
+      foreach(module IN LISTS VTK_PYTHON_MODULES_AND_KITS)
         install(TARGETS ${module}Python
           RUNTIME DESTINATION ${VTK_INSTALL_RUNTIME_DIR} COMPONENT RuntimeLibraries
           LIBRARY DESTINATION ${VTK_INSTALL_PYTHON_MODULE_DIR}/vtk COMPONENT RuntimeLibraries
