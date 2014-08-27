@@ -8,7 +8,27 @@ if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
    endif()
 endif()
 
-function(vtk_add_python_wrapping module_name sources_var)
+function(_concatenate_files input_files output_file)
+  file(WRITE ${output_file} "") # Clear
+  foreach(file IN LISTS input_files)
+    file(READ ${file} content)
+    file(APPEND ${output_file} "${content}")
+  endforeach()
+endfunction()
+
+# To support wrapping of either module or kit, this function
+# has two signatures:
+# 1) vtk_add_python_wrapping(<module_name> <sources_var>)
+# 2) vtk_add_python_wrapping("<module_name>[ <module_name>]" <sources_var> <kit_name>)
+#
+# XXX It manually concatenate the hierarchy and hint files. Instead
+#     the wrapping executable could be update to understand list of these.
+function(vtk_add_python_wrapping module_names sources_var)
+  if("${ARGV2}" MATCHES ".+")
+    set(target ${ARGN})
+  else()
+    set(target ${module_names})
+  endif()
   if(NOT VTK_WRAP_PYTHON_INIT_EXE)
     if(TARGET vtkWrapPythonInit)
       set (VTK_WRAP_PYTHON_INIT_EXE vtkWrapPythonInit)
@@ -17,17 +37,31 @@ function(vtk_add_python_wrapping module_name sources_var)
     endif()
   endif()
 
-  set(EXTRA_PYTHON_INCLUDE_DIRS ${${module_name}_PYTHON_INCLUDE_DIRS})
+  set(EXTRA_PYTHON_INCLUDE_DIRS)
+  set(KIT_HIERARCHY_FILES)
+  set(VTK_WRAP_HINTS_FILES)
 
-  if(NOT ${module_name}_EXCLUDE_FROM_WRAP_HIERARCHY)
-    set(KIT_HIERARCHY_FILE ${${module_name}_WRAP_HIERARCHY_FILE})
+  foreach(module_name IN LISTS module_names)
+    list(APPEND EXTRA_PYTHON_INCLUDE_DIRS ${${module_name}_PYTHON_INCLUDE_DIRS})
+
+    if(NOT ${module_name}_EXCLUDE_FROM_WRAP_HIERARCHY)
+      list(APPEND KIT_HIERARCHY_FILES ${${module_name}_WRAP_HIERARCHY_FILE})
+    endif()
+
+    if(${module_name}_WRAP_HINTS AND EXISTS "${${module_name}_WRAP_HINTS}")
+      list(APPEND VTK_WRAP_HINTS_FILES "${${module_name}_WRAP_HINTS}")
+    endif()
+  endforeach()
+
+  set(KIT_HIERARCHY_FILE ${CMAKE_CURRENT_BINARY_DIR}/${target}Hierarchy.txt)
+  _concatenate_files("${KIT_HIERARCHY_FILES}" ${KIT_HIERARCHY_FILE})
+
+  if(VTK_WRAP_HINTS_FILES)
+    set(VTK_WRAP_HINTS ${CMAKE_CURRENT_BINARY_DIR}/${target}_hints)
+    _concatenate_files("${VTK_WRAP_HINTS_FILES}" ${VTK_WRAP_HINTS})
   endif()
 
-  if(${module_name}_WRAP_HINTS AND EXISTS "${${module_name}_WRAP_HINTS}")
-    set(VTK_WRAP_HINTS "${${module_name}_WRAP_HINTS}")
-  endif()
-
-  vtk_wrap_python(${module_name}Python Python_SRCS ${module_name})
+  vtk_wrap_python(${target}Python Python_SRCS "${module_names}")
   set(${sources_var} "${Python_SRCS}" "${extra_srcs}" PARENT_SCOPE)
 endfunction()
 
@@ -75,7 +109,11 @@ function(vtk_add_python_wrapping_library module srcs)
       set_property(TARGET ${module}PythonD APPEND PROPERTY COMPILE_DEFINITIONS
         "${submodule}_AUTOINIT=1(${submodule})")
     endif()
-    list(APPEND top_srcs ${submodule}PythonInit.cxx)
+    set(prefix ${submodule})
+    if(_${submodule}_is_kit)
+      set(prefix ${prefix}${VTK_KIT_SUFFIX})
+    endif()
+    list(APPEND top_srcs ${prefix}PythonInit.cxx)
     target_link_libraries(${module}PythonD LINK_PUBLIC ${submodule})
   endforeach ()
 
