@@ -171,7 +171,8 @@ Follow these steps:
     how to try it.  Use `@username` syntax to draw attention of
     specific developers.  If your change is a fix for the `release`
     branch, indicate this so that a maintainer knows it should be
-    merged to `release`.
+    merged to `release`.  Users mentioned this way will receive
+    notifications (usually email) for future activity on the request.
 
     Optionally use a fenced code block with type `message`, such as
 
@@ -181,7 +182,17 @@ Follow these steps:
 
     to specify text to be included in the generated merge commit message
     when the topic is [merged](#merge-a-topic).  Do not use `@username`
-    syntax in this block as it will not be interpreted.
+    syntax in this block as it will not be interpreted.  An example of a
+    description for a merge request:
+
+        This branch requires Java 1.x which is not generally available yet.
+        Java 1.x is available from *<...further instructions...>*
+
+        ```message
+        Add support for Java 1.x to the wrapping infrastructure.
+        ```
+
+        Cc: @user1 @user2
 
 Review a Merge Request
 ----------------------
