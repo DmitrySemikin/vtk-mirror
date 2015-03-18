@@ -18,6 +18,8 @@ Setup
 Before you begin, perform initial setup:
 
 1.  Register [GitLab Access].
+    Be sure to fork VTK through gitlab (top right) so as to have a place
+    for your changes to be pushed to.
 
 2.  Follow the [download instructions](download.md#clone) to create a
     local VTK clone:
