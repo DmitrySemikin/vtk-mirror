@@ -25,6 +25,8 @@ Other Tasks
 * [Learn Git](http://public.kitware.com/Wiki/Git/Resources) -
   Third-party documentation
 
+* [VTK Git FAQ](faq.md) - FAQ
+
 Branches
 --------
 
