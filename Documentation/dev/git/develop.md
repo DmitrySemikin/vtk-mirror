@@ -240,6 +240,11 @@ References to `me` and `@username` will automatically be transformed
 into a real name and email address according to the user's GitLab
 account profile.
 
+If a `Rejected-by` trailer is present in a comment by a developer, the request
+will be blocked from being merged.  A branch much also have at least one
+`Acked-by` from a developer other than the submitter to be accepted as well
+(`Do: merge` implies `Acked-by`).
+
 ### Robot Reviews ###
 
 The "Kitware Robot" automatically performs basic checks on the commits
