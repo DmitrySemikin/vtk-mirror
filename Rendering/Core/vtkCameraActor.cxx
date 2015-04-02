@@ -91,23 +91,15 @@ void vtkCameraActor::ReleaseGraphicsResources(vtkWindow *window)
 }
 
 //-------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkCameraActor::GetBounds()
+vtkBoundingBox vtkCameraActor::ComputeBoundingBox(vtkViewport *vp)
 {
-  // we cannot initialize the Bounds the same way vtkBoundingBox does because
-  // vtkProp3D::GetLength() does not check if the Bounds are initialized or
-  // not and makes a call to sqrt(). This call to sqrt with invalid values
-  // would raise a floating-point overflow exception (notably on BCC).
-  // As vtkMath::UninitializeBounds initialized finite unvalid bounds, it
-  // passes silently and GetLength() returns 0.
-  vtkMath::UninitializeBounds(this->Bounds);
-
+  vtkBoundingBox bbox;
   this->UpdateViewProps();
   if(this->FrustumActor!=0 && this->FrustumActor->GetUseBounds())
     {
-    this->FrustumActor->GetBounds(this->Bounds);
+    bbox = this->FrustumActor->ComputeBoundingBox(vp);
     }
-  return this->Bounds;
+  return bbox;
 }
 
 //-------------------------------------------------------------------------

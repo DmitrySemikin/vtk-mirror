@@ -327,15 +327,15 @@ int vtkPolygonalSurfacePointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkPolygonalSurfacePointPlacer::ValidateWorldPosition( double worldPos[3],
-                                           double *vtkNotUsed(worldOrient) )
+int vtkPolygonalSurfacePointPlacer::ValidateWorldPosition(
+    vtkRenderer *ren, double worldPos[3], double *vtkNotUsed(worldOrient) )
 {
-  return this->ValidateWorldPosition( worldPos );
+  return this->ValidateWorldPosition( ren, worldPos );
 }
 
 //----------------------------------------------------------------------
 int vtkPolygonalSurfacePointPlacer::ValidateWorldPosition(
-                     double vtkNotUsed(worldPos)[3] )
+    vtkRenderer *, double vtkNotUsed(worldPos)[3] )
 {
   return 1;
 }

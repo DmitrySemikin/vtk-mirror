@@ -85,10 +85,7 @@ public:
   // resources to release.
   void ReleaseGraphicsResources(vtkWindow *);
 
-  // Description:
-  // Get the bounds for this prop assembly as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  // May return NULL in some cases (meaning the bounds is undefined).
-  double *GetBounds();
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Shallow copy of this vtkPropAssembly.

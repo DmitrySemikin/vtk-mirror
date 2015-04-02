@@ -239,7 +239,8 @@ double vtkCellPicker::IntersectWithLine(double p1[3], double p2[3],
                                           double tol,
                                           vtkAssemblyPath *path,
                                           vtkProp3D *prop,
-                                          vtkAbstractMapper3D *m)
+                                          vtkAbstractMapper3D *m,
+                                          vtkRenderer *)
 {
   vtkMapper *mapper = 0;
   vtkAbstractVolumeMapper *volumeMapper = 0;
@@ -942,7 +943,7 @@ double vtkCellPicker::IntersectImageWithLine(const double p1[3],
 
   // Get the bounds to discover any cropping that has been applied
   double bounds[6];
-  imageMapper->GetBounds(bounds);
+  imageMapper->ComputeBoundingBox(this->Renderer).GetBounds(bounds);
 
   // Convert bounds to structured coords
   for (int k = 0; k < 3; k++)

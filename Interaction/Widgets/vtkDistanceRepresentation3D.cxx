@@ -31,7 +31,7 @@
 #include "vtkMath.h"
 #include "vtkWindow.h"
 #include "vtkSmartPointer.h"
-#include "vtkBox.h"
+#include "vtkBoundingBox.h"
 #include "vtkGlyph3D.h"
 #include "vtkCylinderSource.h"
 #include "vtkDoubleArray.h"
@@ -99,9 +99,6 @@ vtkDistanceRepresentation3D::vtkDistanceRepresentation3D()
 
   this->Distance = 0.0;
 
-  // The bounding box
-  this->BoundingBox = vtkBox::New();
-
   // Scaling the label
   this->LabelScaleSpecified = false;
 
@@ -132,8 +129,6 @@ vtkDistanceRepresentation3D::~vtkDistanceRepresentation3D()
   this->Glyph3D->Delete();
   this->GlyphMapper->Delete();
   this->GlyphActor->Delete();
-
-  this->BoundingBox->Delete();
 }
 
 //----------------------------------------------------------------------
@@ -221,17 +216,16 @@ void vtkDistanceRepresentation3D::GetPoint2DisplayPosition(double pos[3])
 }
 
 //----------------------------------------------------------------------
-double *vtkDistanceRepresentation3D::GetBounds()
+vtkBoundingBox vtkDistanceRepresentation3D::ComputeBoundingBox(vtkViewport *vp)
 {
+  vtkBoundingBox bbox = this->LabelActor->ComputeBoundingBox(vp);
   if(this->Point1Representation && this->Point2Representation)
     {
     this->BuildRepresentation();
-    this->BoundingBox->SetBounds(this->Point1Representation->GetBounds());
-    this->BoundingBox->AddBounds(this->Point2Representation->GetBounds());
+    bbox.AddBox(this->Point1Representation->ComputeBoundingBox(vp));
+    bbox.AddBox(this->Point2Representation->ComputeBoundingBox(vp));
     }
-  this->BoundingBox->AddBounds(this->LineActor->GetBounds());
-
-  return this->BoundingBox->GetBounds();
+  return bbox;
 }
 
 //----------------------------------------------------------------------
@@ -239,7 +233,6 @@ void vtkDistanceRepresentation3D::BuildRepresentation()
 {
   if ( this->GetMTime() > this->BuildTime ||
        this->LabelActor->GetMTime() > this->BuildTime ||
-       this->BoundingBox->GetMTime() > this->BuildTime ||
        this->GlyphActor->GetMTime() > this->BuildTime ||
        this->LineActor->GetMTime() > this->BuildTime ||
        this->Point1Representation->GetMTime() > this->BuildTime ||

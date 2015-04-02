@@ -613,15 +613,13 @@ bool vtkGlyph3DMapper::GetBoundsInternal(vtkDataSet* ds, double ds_bounds[6])
 }
 
 //-------------------------------------------------------------------------
-double* vtkGlyph3DMapper::GetBounds()
+vtkBoundingBox vtkGlyph3DMapper::ComputeBoundingBox(vtkViewport *)
 {
-  //  static double bounds[] = {-1.0,1.0, -1.0,1.0, -1.0,1.0};
-  vtkMath::UninitializeBounds(this->Bounds);
-
+  vtkBoundingBox bbox;
   // do we have an input
   if ( ! this->GetNumberOfInputConnections(0) )
     {
-    return this->Bounds;
+    return bbox;
     }
   if (!this->Static)
     {
@@ -639,21 +637,22 @@ double* vtkGlyph3DMapper::GetBounds()
     this->Update();
     }
 
+  double bounds[6];
   vtkDataObject* dobj = this->GetInputDataObject(0, 0);
   vtkDataSet* ds = vtkDataSet::SafeDownCast(dobj);
   if (ds)
     {
-    this->GetBoundsInternal(ds, this->Bounds);
-    return this->Bounds;
+    this->GetBoundsInternal(ds, bounds);
+    bbox.AddBounds(bounds);
+    return bbox;
     }
 
   vtkCompositeDataSet* cd = vtkCompositeDataSet::SafeDownCast(dobj);
   if (!cd)
     {
-    return this->Bounds;
+    return bbox;
     }
 
-  vtkBoundingBox bbox;
   vtkCompositeDataIterator* iter = cd->NewIterator();
   for (iter->InitTraversal(); !iter->IsDoneWithTraversal();
     iter->GoToNextItem())
@@ -661,19 +660,13 @@ double* vtkGlyph3DMapper::GetBounds()
     ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
     if (ds)
       {
-      bbox.AddBounds(ds->GetBounds());
+      ds->GetBounds(bounds);
+      bbox.AddBounds(bounds);
       }
     }
-  bbox.GetBounds(this->Bounds);
   iter->Delete();
-  return this->Bounds;
-
-}
-
-//-------------------------------------------------------------------------
-void vtkGlyph3DMapper::GetBounds(double bounds[6])
-{
-  this->Superclass::GetBounds(bounds);
+  bbox.AddBounds(bounds);
+  return bbox;
 }
 
 // ---------------------------------------------------------------------------

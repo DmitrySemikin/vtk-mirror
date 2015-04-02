@@ -37,7 +37,6 @@ class vtkPolyDataMapper;
 class vtkActor;
 class vtkVectorText;
 class vtkFollower;
-class vtkBox;
 class vtkCylinderSource;
 class vtkGlyph3D;
 class vtkDoubleArray;
@@ -112,7 +111,7 @@ public:
   virtual int ComputeInteractionState(int X, int Y, int modify=0);
   virtual void StartWidgetInteraction(double e[2]);
   virtual void WidgetInteraction(double e[2]);
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // Methods required by vtkProp superclass.
@@ -172,9 +171,6 @@ protected:
   vtkGlyph3D        *Glyph3D;
   vtkPolyDataMapper *GlyphMapper;
   vtkActor          *GlyphActor;
-
-  // Support GetBounds() method
-  vtkBox *BoundingBox;
 
   double LastEventPosition[3];
 

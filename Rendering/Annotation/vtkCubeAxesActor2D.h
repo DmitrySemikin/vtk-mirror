@@ -105,6 +105,8 @@ public:
                  double& zmin, double& zmax);
   void GetBounds(double bounds[6]);
 
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
+
   // Description:
   // Explicitly specify the range of values used on the bounds.
   // The ranges are specified according to (xmin,xmax, ymin,ymax, zmin,zmax),

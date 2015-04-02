@@ -31,7 +31,7 @@
 #include "vtkMath.h"
 #include "vtkWindow.h"
 #include "vtkSmartPointer.h"
-#include "vtkBox.h"
+#include "vtkBoundingBox.h"
 #include "vtkGlyph3D.h"
 #include "vtkCylinderSource.h"
 #include "vtkDoubleArray.h"
@@ -98,9 +98,6 @@ vtkAxesTransformRepresentation::vtkAxesTransformRepresentation()
   this->GlyphActor = vtkActor::New();
   this->GlyphActor->SetMapper(this->GlyphMapper);
 
-  // The bounding box
-  this->BoundingBox = vtkBox::New();
-
   this->LabelFormat = NULL;
 
   this->Tolerance = 1;
@@ -134,8 +131,6 @@ vtkAxesTransformRepresentation::~vtkAxesTransformRepresentation()
   this->Glyph3D->Delete();
   this->GlyphMapper->Delete();
   this->GlyphActor->Delete();
-
-  this->BoundingBox->Delete();
 }
 
 //----------------------------------------------------------------------
@@ -181,15 +176,18 @@ void vtkAxesTransformRepresentation::GetOriginDisplayPosition(double pos[3])
 }
 
 //----------------------------------------------------------------------
-double *vtkAxesTransformRepresentation::GetBounds()
+vtkBoundingBox
+vtkAxesTransformRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
 
-  this->BoundingBox->SetBounds(this->OriginRepresentation->GetBounds());
-  this->BoundingBox->AddBounds(this->SelectionRepresentation->GetBounds());
-  this->BoundingBox->AddBounds(this->LineActor->GetBounds());
+  vtkBoundingBox bbox;
 
-  return this->BoundingBox->GetBounds();
+  bbox.AddBox(this->OriginRepresentation->ComputeBoundingBox(vp));
+  bbox.AddBox(this->SelectionRepresentation->ComputeBoundingBox(vp));
+  bbox.AddBox(this->LineActor->ComputeBoundingBox(vp));
+
+  return bbox;
 }
 
 //----------------------------------------------------------------------

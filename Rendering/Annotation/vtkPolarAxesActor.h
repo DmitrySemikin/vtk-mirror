@@ -249,6 +249,8 @@ public:
                  double& zmin, double& zmax);
   void GetBounds(double bounds[6]);
 
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
+
 protected:
   vtkPolarAxesActor();
   ~vtkPolarAxesActor();

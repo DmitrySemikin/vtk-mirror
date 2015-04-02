@@ -92,7 +92,7 @@ public:
   virtual int RenderOpaqueGeometry(vtkViewport *viewport);
   virtual int RenderTranslucentPolygonalGeometry(vtkViewport *viewport);
   virtual int HasTranslucentPolygonalGeometry();
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // A label may be associated with the seed. The string can be set via

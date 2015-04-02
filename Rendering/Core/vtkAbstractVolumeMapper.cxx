@@ -23,9 +23,6 @@
 // Construct a vtkAbstractVolumeMapper
 vtkAbstractVolumeMapper::vtkAbstractVolumeMapper()
 {
-  vtkMath::UninitializeBounds(this->Bounds);
-  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
-
   this->ScalarMode = VTK_SCALAR_MODE_DEFAULT;
 
   this->ArrayName = new char[1];
@@ -39,21 +36,17 @@ vtkAbstractVolumeMapper::~vtkAbstractVolumeMapper()
   delete[] this->ArrayName;
 }
 
-// Get the bounds for the input of this mapper as
-// (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkAbstractVolumeMapper::GetBounds()
+vtkBoundingBox vtkAbstractVolumeMapper::ComputeBoundingBox(vtkViewport *)
 {
-  if ( ! this->GetDataSetInput() )
-    {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
-    }
-  else
+  vtkBoundingBox bbox;
+  if (vtkDataSet *input = this->GetDataSetInput())
     {
     this->Update();
-    this->GetDataSetInput()->GetBounds(this->Bounds);
-    return this->Bounds;
+    double bounds[6];
+    input->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
+  return bbox;
 }
 
 vtkDataObject *vtkAbstractVolumeMapper::GetDataObjectInput()

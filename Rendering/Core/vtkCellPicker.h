@@ -205,7 +205,7 @@ protected:
 
   virtual double IntersectWithLine(double p1[3], double p2[3], double tol,
                                   vtkAssemblyPath *path, vtkProp3D *p,
-                                  vtkAbstractMapper3D *m);
+                                  vtkAbstractMapper3D *m, vtkRenderer *ren);
 
   virtual double IntersectActorWithLine(const double p1[3], const double p2[3],
                                         double t1, double t2, double tol,

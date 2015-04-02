@@ -70,7 +70,12 @@ transform RotateWXYZ -20 0.0 -0.7 0.7
 
 volume SetUserTransform transform
 
-set c [volume GetCenter]
+# Find the center of the volume:
+set bbox [volume ComputeBoundingBox ren]
+set c "0 0 0"
+lset c 0 [expr [expr [lindex $bbox 0] + [lindex $bbox 1] ] * 0.5]
+lset c 1 [expr [expr [lindex $bbox 2] + [lindex $bbox 3] ] * 0.5]
+lset c 2 [expr [expr [lindex $bbox 4] + [lindex $bbox 5] ] * 0.5]
 
 vtkPlane volumeClip
 volumeClip SetNormal 0 1 0

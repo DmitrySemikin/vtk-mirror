@@ -69,12 +69,7 @@ public:
   vtkSetMacro(GhostLevel, int);
   vtkGetMacro(GhostLevel, int);
 
-  // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double bounds[6])
-    { this->Superclass::GetBounds(bounds); }
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Make a shallow copy of this mapper.
@@ -120,7 +115,7 @@ protected:
   // Called in GetBounds(). When this method is called, the consider the input
   // to be updated depending on whether this->Static is set or not. This method
   // simply obtains the bounds from the data-object and returns it.
-  virtual void ComputeBounds();
+  virtual void ComputeBounds(double bounds[6]);
 
   int Piece;
   int NumberOfPieces;

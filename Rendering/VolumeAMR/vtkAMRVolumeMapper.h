@@ -51,12 +51,7 @@ public:
   virtual void SetInputConnection (vtkAlgorithmOutput *input)
   {this->SetInputConnection(0, input);}
 
-  // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double bounds[6])
-    {this->vtkVolumeMapper::GetBounds(bounds); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Control how the mapper works with scalar point data and cell attribute
@@ -188,7 +183,7 @@ public:
   {this->SetRequestedRenderMode(vtkAMRVolumeMapper::GPURenderMode);}
 
   // Description:
-  // Set interpolation mode for downsampling (lowres GPU)
+  // Set interpolation mode for downsamvppling (lowres GPU)
   // (initial value: cubic).
   void SetInterpolationMode(int mode);
   int GetInterpolationMode();
@@ -284,7 +279,6 @@ protected:
   vtkAMRResampleFilter *Resampler;
   vtkUniformGrid *Grid;
   int NumberOfSamples[3];
-  double Bounds[6];
   // This indicates that the input has meta data for
   // doing demand driven operations.
   bool HasMetaData;

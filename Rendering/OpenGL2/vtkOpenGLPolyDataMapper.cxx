@@ -1441,14 +1441,14 @@ void vtkOpenGLPolyDataMapper::RenderEdges(vtkRenderer* ren, vtkActor *actor)
 
 
 //-------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper::ComputeBounds()
+void vtkOpenGLPolyDataMapper::ComputeBounds(double bounds[])
 {
   if (!this->GetInput())
     {
-    vtkMath::UninitializeBounds(this->Bounds);
+    vtkMath::UninitializeBounds(bounds);
     return;
     }
-  this->GetInput()->GetBounds(this->Bounds);
+  this->GetInput()->GetBounds(bounds);
 }
 
 //-------------------------------------------------------------------------

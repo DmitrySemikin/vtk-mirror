@@ -224,14 +224,16 @@ int vtkBoundedPlanePointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkBoundedPlanePointPlacer::ValidateWorldPosition( double worldPos[3],
+int vtkBoundedPlanePointPlacer::ValidateWorldPosition( vtkRenderer *ren,
+                                                       double worldPos[3],
                                                        double* vtkNotUsed(worldOrient) )
 {
-  return this->ValidateWorldPosition( worldPos );
+  return this->ValidateWorldPosition( ren, worldPos );
 }
 
 //----------------------------------------------------------------------
-int vtkBoundedPlanePointPlacer::ValidateWorldPosition( double worldPos[3] )
+int vtkBoundedPlanePointPlacer::ValidateWorldPosition(vtkRenderer *,
+                                                      double worldPos[3] )
 {
     // Now check against the bounding planes
     if ( this->BoundingPlanes )

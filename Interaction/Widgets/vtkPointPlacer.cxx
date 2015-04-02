@@ -72,14 +72,16 @@ int vtkPointPlacer::ComputeWorldPosition( vtkRenderer * ren,
 }
 
 //----------------------------------------------------------------------
-int vtkPointPlacer::ValidateWorldPosition( double vtkNotUsed(worldPos)[3] )
+int vtkPointPlacer::ValidateWorldPosition(vtkRenderer *vtkNotUsed(ren),
+                                          double vtkNotUsed(worldPos)[3] )
 {
   return 1;
 }
 
 //----------------------------------------------------------------------
-int vtkPointPlacer::ValidateWorldPosition( double vtkNotUsed(worldPos)[3],
-                                   double vtkNotUsed(worldOrient)[9] )
+int vtkPointPlacer::ValidateWorldPosition(vtkRenderer *vtkNotUsed(ren),
+                                          double vtkNotUsed(worldPos)[3],
+                                          double vtkNotUsed(worldOrient)[9] )
 {
   return 1;
 }

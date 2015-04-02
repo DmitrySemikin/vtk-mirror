@@ -341,13 +341,6 @@ HasTranslucentPolygonalGeometry()
   return this->Balloon->HasTranslucentPolygonalGeometry();
 }
 
-
-//----------------------------------------------------------------------
-double *vtkTexturedButtonRepresentation2D::GetBounds()
-{
-  return NULL;
-}
-
 //----------------------------------------------------------------------
 void vtkTexturedButtonRepresentation2D::GetActors(vtkPropCollection *pc)
 {

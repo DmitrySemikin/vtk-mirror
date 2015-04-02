@@ -82,11 +82,8 @@ int TestImageSliceMapperOrient2D(int argc, char* argv[])
       imageMapper->SetInputConnection(reader->GetOutputPort());
       }
 
-    double *bounds = imageMapper->GetBounds();
     double point[3];
-    point[0] = 0.5*(bounds[0] + bounds[1]);
-    point[1] = 0.5*(bounds[2] + bounds[3]);
-    point[2] = 0.5*(bounds[4] + bounds[5]);
+    imageMapper->GetCenter(renderer, point);
 
     camera->SetFocalPoint(point);
     point[imageMapper->GetOrientation()] += 1.0;

@@ -132,21 +132,19 @@ double vtkSphereHandleRepresentation::GetSphereRadius()
 }
 
 //-------------------------------------------------------------------------
-double* vtkSphereHandleRepresentation::GetBounds()
+vtkBoundingBox
+vtkSphereHandleRepresentation::ComputeBoundingBox(vtkViewport *)
 {
-  static double bounds[6];
   double center[3];
-  double radius = this->Sphere->GetRadius();
   this->Sphere->GetCenter(center);
+  double radius = this->Sphere->GetRadius();
 
-  bounds[0] = this->PlaceFactor*(center[0]-radius);
-  bounds[1] = this->PlaceFactor*(center[0]+radius);
-  bounds[2] = this->PlaceFactor*(center[1]-radius);
-  bounds[3] = this->PlaceFactor*(center[1]+radius);
-  bounds[4] = this->PlaceFactor*(center[2]-radius);
-  bounds[5] = this->PlaceFactor*(center[2]+radius);
-
-  return bounds;
+  return vtkBoundingBox(this->PlaceFactor * (center[0] - radius),
+                        this->PlaceFactor * (center[0] + radius),
+                        this->PlaceFactor * (center[1] - radius),
+                        this->PlaceFactor * (center[1] + radius),
+                        this->PlaceFactor * (center[2] - radius),
+                        this->PlaceFactor * (center[2] + radius));
 }
 
 //-------------------------------------------------------------------------
@@ -406,13 +404,9 @@ void vtkSphereHandleRepresentation::Scale(double *p1, double *p2, double eventPo
   v[1] = p2[1] - p1[1];
   v[2] = p2[2] - p1[2];
 
-  double *bounds = this->GetBounds();
-
   // Compute the scale factor
-  double sf = vtkMath::Norm(v) /
-    sqrt( (bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-          (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-          (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  vtkBoundingBox bbox = this->ComputeBoundingBox(this->Renderer);
+  double sf = vtkMath::Norm(v) / bbox.GetDiagonalLength();
 
   if ( eventPos[1] > this->LastEventPosition[1] )
     {

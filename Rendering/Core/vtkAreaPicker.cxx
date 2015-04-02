@@ -251,12 +251,8 @@ int vtkAreaPicker::PickProps(vtkRenderer *renderer)
         if ( mapper )
           {
           propCandidate->PokeMatrix(path->GetLastNode()->GetMatrix());
-          double* bds = propCandidate->GetBounds();
+          propCandidate->ComputeBoundingBox(this->Renderer).GetBounds(bounds);
           propCandidate->PokeMatrix(NULL);
-          for (int i = 0; i < 6; i++)
-            {
-            bounds[i] = bds[i];
-            }
 
           double dist;
           if (this->ABoxFrustumIsect(bounds, dist))

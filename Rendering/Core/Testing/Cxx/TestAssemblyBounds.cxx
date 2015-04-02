@@ -85,7 +85,7 @@ int TestAssemblyBounds (int , char *[])
   renderer->AddActor(assembly);
 
   double clipActorBounds[6];
-  actor1->GetBounds(clipActorBounds);
+  actor1->ComputeBoundingBox(renderer).GetBounds(clipActorBounds);
 
   std::cout << "First actor is entirely clipped, so its bounds are not valid"
             << std::endl;
@@ -97,7 +97,7 @@ int TestAssemblyBounds (int , char *[])
             << ", " << clipActorBounds[5] << "] " << std::endl;
 
   double clipActor2Bounds[6];
-  actor2->GetBounds(clipActor2Bounds);
+  actor2->ComputeBoundingBox(renderer).GetBounds(clipActor2Bounds);
 
   std::cout << "Only the second sphere is visible with these bounds"
             << std::endl;

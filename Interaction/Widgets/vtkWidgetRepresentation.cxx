@@ -18,6 +18,7 @@
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkInteractorObserver.h"
+#include "vtkMath.h"
 #include "vtkPickingManager.h"
 
 //----------------------------------------------------------------------
@@ -135,6 +136,14 @@ GetAssemblyPath(double X, double Y, double Z, vtkAbstractPropPicker* picker)
 void vtkWidgetRepresentation::AdjustBounds(double bounds[6], double newBounds[6],
                                            double center[3])
 {
+  if (!vtkMath::AreBoundsInitialized(bounds))
+    {
+    center[0] = center[1] = center[2] = 0.;
+    newBounds[0] = newBounds[2] = newBounds[4] = -this->PlaceFactor;
+    newBounds[1] = newBounds[3] = newBounds[5] = this->PlaceFactor;
+    return;
+    }
+
   center[0] = (bounds[0] + bounds[1])/2.0;
   center[1] = (bounds[2] + bounds[3])/2.0;
   center[2] = (bounds[4] + bounds[5])/2.0;
@@ -163,6 +172,12 @@ void vtkWidgetRepresentation::ShallowCopy(vtkProp *prop)
 int vtkWidgetRepresentation::ComputeInteractionState(int, int, int)
 {
   return 0;
+}
+
+//----------------------------------------------------------------------
+vtkBoundingBox vtkWidgetRepresentation::ComputeBoundingBox(vtkViewport *)
+{
+  return vtkBoundingBox();
 }
 
 //----------------------------------------------------------------------

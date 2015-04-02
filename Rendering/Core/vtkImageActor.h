@@ -78,13 +78,7 @@ public:
   void GetDisplayExtent(int extent[6]);
   int *GetDisplayExtent() {return this->DisplayExtent;}
 
-  // Description:
-  // Get the bounds of this image actor. Either copy the bounds
-  // into a user provided array or return a pointer to an array.
-  // In either case the boudns is expressed as a 6-vector
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  double *GetBounds();
-  void GetBounds(double bounds[6]) { this->Superclass::GetBounds(bounds); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Get the bounds of the data that is displayed by this image

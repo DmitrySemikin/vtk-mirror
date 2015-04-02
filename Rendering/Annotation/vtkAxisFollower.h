@@ -129,11 +129,12 @@ protected:
                                    vtkAxisActor *axis);
 
  // \NOTE: Not used as of now.
- void ComputerAutoCenterTranslation(const double& autoScaleFactor,
+ void ComputerAutoCenterTranslation(vtkViewport *vp,
+                                    const double& autoScaleFactor,
                                     double translation[3]);
 
 
- int  TestDistanceVisibility();
+ int  TestDistanceVisibility(vtkRenderer *ren);
  void ExecuteViewAngleVisibility(double normal[3]);
 
  bool IsTextUpsideDown(double* a, double* b);

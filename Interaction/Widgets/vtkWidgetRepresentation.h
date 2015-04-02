@@ -152,7 +152,7 @@ public:
   // these methods properly may result in the representation not appearing in the scene
   // (i.e., not implementing the Render() methods properly) or leaking graphics resources
   // (i.e., not implementing ReleaseGraphicsResources() properly).
-  virtual double *GetBounds() {return NULL;}
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
   virtual void ShallowCopy(vtkProp *prop);
   virtual void GetActors(vtkPropCollection *) {}
   virtual void GetActors2D(vtkPropCollection *) {}

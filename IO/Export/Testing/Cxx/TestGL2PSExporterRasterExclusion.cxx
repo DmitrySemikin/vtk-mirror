@@ -77,9 +77,8 @@ int TestGL2PSExporterRasterExclusion( int, char *[] )
   text3->GetTextProperty()->SetOrientation(0);
   text3->GetTextProperty()->SetColor(0.2, 1.0, 0.2);
 
+
   vtkNew<vtkCubeAxesActor> axes;
-  coneMapper->Update();
-  axes->SetBounds(coneMapper->GetBounds());
 
   vtkNew<vtkRenderer> ren;
   axes->SetCamera(ren->GetActiveCamera());
@@ -89,6 +88,11 @@ int TestGL2PSExporterRasterExclusion( int, char *[] )
   ren->AddActor(text2.GetPointer());
   ren->AddActor(text3.GetPointer());
   ren->SetBackground(0.8, 0.8, 0.8);
+
+  double coneBounds[6];
+  coneMapper->Update();
+  coneMapper->ComputeBoundingBox(ren.GetPointer()).GetBounds(coneBounds);
+  axes->SetBounds(coneBounds);
 
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);

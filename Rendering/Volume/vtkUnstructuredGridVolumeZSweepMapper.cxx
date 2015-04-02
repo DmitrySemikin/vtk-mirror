@@ -4448,7 +4448,7 @@ double vtkUnstructuredGridVolumeZSweepMapper::GetMinimumBoundsDepth(
   vtkVolume   *vol )
 {
   double bounds[6];
-  vol->GetBounds( bounds );
+  vol->ComputeBoundingBox(ren).GetBounds(bounds);
 
   ren->ComputeAspect();
   double *aspect = ren->GetAspect();

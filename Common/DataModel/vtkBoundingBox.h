@@ -26,6 +26,8 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkSystemIncludes.h"
 
+class vtkMatrix4x4;
+
 class VTKCOMMONDATAMODEL_EXPORT vtkBoundingBox
 {
 public:
@@ -96,6 +98,10 @@ public:
   // Returns 1 if the boxes intersect else returns 0
   int Intersects(const vtkBoundingBox &bbox) const;
 
+  // Description:
+  // Transform the corners of this bounding by the supplied matrix and update
+  // the bounding box with the transformed points.
+  void Transform(vtkMatrix4x4 *mat);
 
   // Desciption:
   // Intersect this box with the half space defined by plane.

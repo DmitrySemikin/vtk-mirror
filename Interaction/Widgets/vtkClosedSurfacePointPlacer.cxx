@@ -302,14 +302,15 @@ int vtkClosedSurfacePointPlacer
 }
 
 //----------------------------------------------------------------------
-int vtkClosedSurfacePointPlacer::ValidateWorldPosition( double worldPos[3],
-                                                       double* vtkNotUsed(worldOrient) )
+int vtkClosedSurfacePointPlacer::ValidateWorldPosition(
+    vtkRenderer *ren, double worldPos[3], double* vtkNotUsed(worldOrient))
 {
-  return this->ValidateWorldPosition( worldPos );
+  return this->ValidateWorldPosition(ren, worldPos);
 }
 
 //----------------------------------------------------------------------
-int vtkClosedSurfacePointPlacer::ValidateWorldPosition( double worldPos[3] )
+int vtkClosedSurfacePointPlacer::ValidateWorldPosition(vtkRenderer *,
+                                                       double worldPos[3] )
 {
   this->BuildPlanes();
 

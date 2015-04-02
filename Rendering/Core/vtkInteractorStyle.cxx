@@ -359,7 +359,13 @@ void vtkInteractorStyle::HighlightProp3D(vtkProp3D *prop3D)
         }
       this->PickedRenderer = this->CurrentRenderer;
       }
-    this->Outline->SetBounds(prop3D->GetBounds());
+    vtkBoundingBox bbox = prop3D->ComputeBoundingBox(this->PickedRenderer);
+    if (bbox.IsValid())
+      {
+      double bounds[6];
+      bbox.GetBounds(bounds);
+      this->Outline->SetBounds(bounds);
+      }
     }
 }
 

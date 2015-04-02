@@ -142,9 +142,10 @@ int main (int argc, char *argv[])
   // center of the volume, and the camera position will be 400mm to the
   // patient's left (which is our right).
   vtkCamera *camera = ren->GetActiveCamera();
-  double *c = volume->GetCenter();
-  camera->SetFocalPoint(c[0], c[1], c[2]);
-  camera->SetPosition(c[0] + 400, c[1], c[2]);
+  double volumeCenter[3];
+  volume->GetCenter(ren, volumeCenter);
+  camera->SetFocalPoint(volumeCenter[0], volumeCenter[1], volumeCenter[2]);
+  camera->SetPosition(volumeCenter[0] + 400, volumeCenter[1], volumeCenter[2]);
   camera->SetViewUp(0, 0, -1);
 
   // Increase the size of the render window

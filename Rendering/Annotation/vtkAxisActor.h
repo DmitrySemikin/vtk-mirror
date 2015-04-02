@@ -124,6 +124,8 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
   double *GetBounds(void);
   void   GetBounds(double bounds[6]);
 
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
+
   // Description:
   // Set/Get the format with which to print the labels on the axis.
   vtkSetStringMacro(LabelFormat);
@@ -311,8 +313,8 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
   void ReleaseGraphicsResources(vtkWindow *);
 
 //BTX
-  double ComputeMaxLabelLength(const double [3]);
-  double ComputeTitleLength(const double [3]);
+  double ComputeMaxLabelLength(vtkViewport *vp, const double [3]);
+  double ComputeTitleLength(vtkViewport *vp, const double [3]);
 //ETX
   void SetLabelScale(const double scale);
   void SetLabelScale(int labelIndex, const double scale);
@@ -502,11 +504,11 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
   void SetLabelPositions(vtkViewport *, bool);
   void SetLabelPositions2D(vtkViewport *, bool);
 
-  void BuildTitle(bool);
+  void BuildTitle(vtkViewport *vp, bool);
   void BuildTitle2D(vtkViewport *viewport, bool);
 
   void SetAxisPointsAndLines(void);
-  bool BuildTickPoints(double p1[3], double p2[3], bool force);
+  bool BuildTickPoints(vtkViewport *vp, double p1[3], double p2[3], bool force);
 
   bool TickVisibilityChanged(void);
   vtkProperty *NewTitleProperty();

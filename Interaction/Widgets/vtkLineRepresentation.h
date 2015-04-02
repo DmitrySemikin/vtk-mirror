@@ -47,7 +47,6 @@ class vtkProperty;
 class vtkPolyData;
 class vtkPolyDataAlgorithm;
 class vtkPointHandleRepresentation3D;
-class vtkBox;
 class vtkFollower;
 class vtkVectorText;
 class vtkPolyDataMapper;
@@ -148,7 +147,7 @@ public:
   virtual int ComputeInteractionState(int X, int Y, int modify=0);
   virtual void StartWidgetInteraction(double e[2]);
   virtual void WidgetInteraction(double e[2]);
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // Methods supporting the rendering process.
@@ -281,9 +280,6 @@ protected:
   double StartLineHandle[3];
   double Length;
   double LastEventPosition[3];
-
-  // Support GetBounds() method
-  vtkBox *BoundingBox;
 
   // Need to keep track if we have successfully initialized the display position.
   // The widget tends to do stuff in world coordinates, put if the renderer has

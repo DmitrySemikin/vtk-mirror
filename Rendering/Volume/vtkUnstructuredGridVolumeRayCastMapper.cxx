@@ -673,7 +673,7 @@ double vtkUnstructuredGridVolumeRayCastMapper::
 GetMinimumBoundsDepth( vtkRenderer *ren, vtkVolume   *vol )
 {
   double bounds[6];
-  vol->GetBounds( bounds );
+  vol->ComputeBoundingBox(ren).GetBounds(bounds);
 
   vtkTransform *perspectiveTransform = vtkTransform::New();
   vtkMatrix4x4 *perspectiveMatrix = vtkMatrix4x4::New();

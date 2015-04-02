@@ -1657,12 +1657,12 @@ void vtkCubeAxesActor::BuildAxes(vtkViewport *viewport)
     center[1] = (bounds[3] - bounds[2]) * 0.5;
     center[2] = (bounds[5] - bounds[4]) * 0.5;
 
-    double lenX = this->XAxes[0]->ComputeMaxLabelLength(center);
-    double lenY = this->YAxes[0]->ComputeMaxLabelLength(center);
-    double lenZ = this->ZAxes[0]->ComputeMaxLabelLength(center);
-    double lenTitleX = this->XAxes[0]->ComputeTitleLength(center);
-    double lenTitleY = this->YAxes[0]->ComputeTitleLength(center);
-    double lenTitleZ = this->ZAxes[0]->ComputeTitleLength(center);
+    double lenX = this->XAxes[0]->ComputeMaxLabelLength(viewport, center);
+    double lenY = this->YAxes[0]->ComputeMaxLabelLength(viewport, center);
+    double lenZ = this->ZAxes[0]->ComputeMaxLabelLength(viewport, center);
+    double lenTitleX = this->XAxes[0]->ComputeTitleLength(viewport, center);
+    double lenTitleY = this->YAxes[0]->ComputeTitleLength(viewport, center);
+    double lenTitleZ = this->ZAxes[0]->ComputeTitleLength(viewport, center);
     double maxLabelLength = this->MaxOf(lenX, lenY, lenZ, 0.);
     double maxTitleLength = this->MaxOf(lenTitleX, lenTitleY, lenTitleZ, 0.);
     double bWidth  = bounds[1] - bounds[0];

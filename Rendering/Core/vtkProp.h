@@ -26,6 +26,7 @@
 #define vtkProp_h
 
 #include "vtkRenderingCoreModule.h" // For export macro
+#include "vtkBoundingBox.h"// For ComputeBoundingBox
 #include "vtkObject.h"
 
 class vtkAssemblyPath;
@@ -102,8 +103,18 @@ public:
   // Description:
   // Get the bounds for this Prop as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
   // in world coordinates. NULL means that the bounds are not defined.
-  virtual double *GetBounds()
-    { return NULL; }
+  // This method has been deprecated and may not be implemented in all props.
+  // Use the overload that takes a viewport instead. This method will call the
+  // new signature with a NULL viewport.
+  VTK_LEGACY(virtual double *GetBounds());
+  VTK_LEGACY(virtual void GetBounds(double bounds[6]));
+
+  // Description:
+  // Get the bounds for this prop in world coordinates. Overrides should handle
+  // the case where @a viewport is NULL, but may fail if there not sufficient
+  // information in that case.
+  // Returns a valid (vtkBoundingBox::IsValid()) object when successful.
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Shallow copy of this vtkProp.
@@ -404,6 +415,13 @@ protected:
 private:
   vtkProp(const vtkProp&);  // Not implemented.
   void operator=(const vtkProp&);  // Not implemented.
+
+#ifndef VTK_LEGACY_REMOVE
+  // Temporary variable to implement the legacy viewport-less GetBounds method
+  // that returns an array.
+  double LegacyBounds[6];
+  bool InGetBounds; // Detect endless recursion
+#endif // VTK_LEGACY_REMOVE
 };
 
 #endif

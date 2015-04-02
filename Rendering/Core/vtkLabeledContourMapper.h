@@ -52,11 +52,7 @@ public:
   void SetInputData(vtkPolyData *in);
   vtkPolyData *GetInput();
 
-  // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double bounds[6]);
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // The text property used to label the lines. Note that both vertical and
@@ -95,8 +91,6 @@ public:
 protected:
   vtkLabeledContourMapper();
   ~vtkLabeledContourMapper();
-
-  virtual void ComputeBounds();
 
   virtual int FillInputPortInformation(int, vtkInformation*);
 

@@ -16,6 +16,7 @@
 #include "vtkActor.h"
 #include "vtkAssemblyNode.h"
 #include "vtkAssemblyPaths.h"
+#include "vtkBoundingBox.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkProp3DCollection.h"
@@ -350,70 +351,29 @@ void vtkAssembly::BuildPaths(vtkAssemblyPaths *paths, vtkAssemblyPath *path)
     }
 }
 
-// Get the bounds for the assembly as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkAssembly::GetBounds()
+vtkBoundingBox vtkAssembly::ComputeBoundingBox(vtkViewport *vp)
 {
   this->UpdatePaths();
 
   // now calculate the new bounds
-  this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_DOUBLE_MAX;
-  this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_DOUBLE_MAX;
-
-  int propVisible = 0;
+  vtkBoundingBox bbox;
 
   vtkAssemblyPath *path;
   vtkCollectionSimpleIterator sit;
   for (this->Paths->InitTraversal(sit);
     (path = this->Paths->GetNextPath(sit));)
     {
-    vtkProp3D* prop3D = static_cast<vtkProp3D *>(path->GetLastNode()->GetViewProp());
+    vtkProp3D* prop3D =
+        static_cast<vtkProp3D*>(path->GetLastNode()->GetViewProp());
     if (prop3D->GetVisibility() && prop3D->GetUseBounds())
       {
-      propVisible = 1;
       prop3D->PokeMatrix(path->GetLastNode()->GetMatrix());
-      double* bounds = prop3D->GetBounds();
+      bbox.AddBox(prop3D->ComputeBoundingBox(vp));
       prop3D->PokeMatrix(NULL);
-
-      // Skip any props that have uninitialized bounds
-      if (bounds == NULL || !vtkMath::AreBoundsInitialized(bounds))
-        {
-        continue;
-        }
-
-      double bbox[24];
-      // fill out vertices of a bounding box
-      bbox[ 0] = bounds[1]; bbox[ 1] = bounds[3]; bbox[ 2] = bounds[5];
-      bbox[ 3] = bounds[1]; bbox[ 4] = bounds[2]; bbox[ 5] = bounds[5];
-      bbox[ 6] = bounds[0]; bbox[ 7] = bounds[2]; bbox[ 8] = bounds[5];
-      bbox[ 9] = bounds[0]; bbox[10] = bounds[3]; bbox[11] = bounds[5];
-      bbox[12] = bounds[1]; bbox[13] = bounds[3]; bbox[14] = bounds[4];
-      bbox[15] = bounds[1]; bbox[16] = bounds[2]; bbox[17] = bounds[4];
-      bbox[18] = bounds[0]; bbox[19] = bounds[2]; bbox[20] = bounds[4];
-      bbox[21] = bounds[0]; bbox[22] = bounds[3]; bbox[23] = bounds[4];
-
-      for (int i = 0; i < 8; i++)
-        {
-        for (int n = 0; n < 3; n++)
-          {
-          if (bbox[i*3+n] < this->Bounds[n*2])
-            {
-            this->Bounds[n*2] = bbox[i*3+n];
-            }
-          if (bbox[i*3+n] > this->Bounds[n*2+1])
-            {
-            this->Bounds[n*2+1] = bbox[i*3+n];
-            }
-          }//for each coordinate axis
-        }//for each point of box
       }//if visible && prop3d
     }//for each path
 
-  if (!propVisible)
-    {
-    vtkMath::UninitializeBounds(this->Bounds);
-    }
-
-  return this->Bounds;
+  return bbox;
 }
 
 unsigned long int vtkAssembly::GetMTime()

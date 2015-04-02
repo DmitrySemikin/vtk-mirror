@@ -15,6 +15,7 @@
 #include "vtkVolume.h"
 
 #include "vtkAbstractVolumeMapper.h"
+#include "vtkBoundingBox.h"
 #include "vtkCamera.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkDataArray.h"
@@ -189,7 +190,8 @@ double vtkVolume::ComputeScreenCoverage( vtkViewport *vp )
     double *aspect = ren->GetAspect();
     vtkMatrix4x4 *mat = cam->GetCompositeProjectionTransformMatrix(
       aspect[0]/aspect[1], 0.0, 1.0 );
-    double *bounds = this->GetBounds();
+    double bounds[6];
+    this->ComputeBoundingBox(vp).GetBounds(bounds);
     double minX =  1.0;
     double maxX = -1.0;
     double minY =  1.0;
@@ -230,111 +232,17 @@ double vtkVolume::ComputeScreenCoverage( vtkViewport *vp )
   return coverage;
 }
 
-// Get the bounds for this Volume as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkVolume::GetBounds()
+vtkBoundingBox vtkVolume::ComputeBoundingBox(vtkViewport *vp)
 {
-  int i,n;
-  double *bounds, bbox[24], *fptr;
+  vtkBoundingBox bbox = this->Mapper ? this->Mapper->ComputeBoundingBox(vp)
+                                     : vtkBoundingBox();
 
-  // get the bounds of the Mapper if we have one
-  if (!this->Mapper)
+  if (bbox.IsValid())
     {
-    return this->Bounds;
+    bbox.Transform(this->GetMatrix());
     }
 
-  bounds = this->Mapper->GetBounds();
-  // Check for the special case when the mapper's bounds are unknown
-  if (!bounds)
-    {
-    return bounds;
-    }
-
-  // fill out vertices of a bounding box
-  bbox[ 0] = bounds[1]; bbox[ 1] = bounds[3]; bbox[ 2] = bounds[5];
-  bbox[ 3] = bounds[1]; bbox[ 4] = bounds[2]; bbox[ 5] = bounds[5];
-  bbox[ 6] = bounds[0]; bbox[ 7] = bounds[2]; bbox[ 8] = bounds[5];
-  bbox[ 9] = bounds[0]; bbox[10] = bounds[3]; bbox[11] = bounds[5];
-  bbox[12] = bounds[1]; bbox[13] = bounds[3]; bbox[14] = bounds[4];
-  bbox[15] = bounds[1]; bbox[16] = bounds[2]; bbox[17] = bounds[4];
-  bbox[18] = bounds[0]; bbox[19] = bounds[2]; bbox[20] = bounds[4];
-  bbox[21] = bounds[0]; bbox[22] = bounds[3]; bbox[23] = bounds[4];
-
-  // make sure matrix (transform) is up-to-date
-  this->ComputeMatrix();
-
-  // and transform into actors coordinates
-  fptr = bbox;
-  for (n = 0; n < 8; n++)
-    {
-    double homogeneousPt[4] = {fptr[0], fptr[1], fptr[2], 1.0};
-    this->Matrix->MultiplyPoint(homogeneousPt, homogeneousPt);
-    fptr[0] = homogeneousPt[0] / homogeneousPt[3];
-    fptr[1] = homogeneousPt[1] / homogeneousPt[3];
-    fptr[2] = homogeneousPt[2] / homogeneousPt[3];
-    fptr += 3;
-    }
-
-  // now calc the new bounds
-  this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_DOUBLE_MAX;
-  this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_DOUBLE_MAX;
-  for (i = 0; i < 8; i++)
-    {
-    for (n = 0; n < 3; n++)
-      {
-      if (bbox[i*3+n] < this->Bounds[n*2])
-        {
-        this->Bounds[n*2] = bbox[i*3+n];
-        }
-      if (bbox[i*3+n] > this->Bounds[n*2+1])
-        {
-        this->Bounds[n*2+1] = bbox[i*3+n];
-        }
-      }
-    }
-
-  return this->Bounds;
-}
-
-// Get the minimum X bound
-double vtkVolume::GetMinXBound( )
-{
-  this->GetBounds();
-  return this->Bounds[0];
-}
-
-// Get the maximum X bound
-double vtkVolume::GetMaxXBound( )
-{
-  this->GetBounds();
-  return this->Bounds[1];
-}
-
-// Get the minimum Y bound
-double vtkVolume::GetMinYBound( )
-{
-  this->GetBounds();
-  return this->Bounds[2];
-}
-
-// Get the maximum Y bound
-double vtkVolume::GetMaxYBound( )
-{
-  this->GetBounds();
-  return this->Bounds[3];
-}
-
-// Get the minimum Z bound
-double vtkVolume::GetMinZBound( )
-{
-  this->GetBounds();
-  return this->Bounds[4];
-}
-
-// Get the maximum Z bound
-double vtkVolume::GetMaxZBound( )
-{
-  this->GetBounds();
-  return this->Bounds[5];
+  return bbox;
 }
 
 // If the volume mapper is of type VTK_FRAMEBUFFER_VOLUME_MAPPER, then
@@ -785,17 +693,17 @@ void vtkVolume::PrintSelf(ostream& os, vtkIndent indent)
     }
 
   // make sure our bounds are up to date
-  if ( this->Mapper )
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  if (bbox.IsValid())
     {
-      this->GetBounds();
-      os << indent << "Bounds: (" << this->Bounds[0] << ", "
-         << this->Bounds[1] << ") (" << this->Bounds[2] << ") ("
-         << this->Bounds[3] << ") (" << this->Bounds[4] << ") ("
-         << this->Bounds[5] << ")\n";
+    os << indent << "Bounds (without viewport): "
+       << "(" << bbox.GetBound(0) << ", " << bbox.GetBound(1) << ") "
+       << "(" << bbox.GetBound(2) << ", " << bbox.GetBound(3) << ") "
+       << "(" << bbox.GetBound(4) << ", " << bbox.GetBound(5) << ")\n";
     }
   else
     {
-    os << indent << "Bounds: (not defined)\n";
+    os << indent << "Bounds: (not defined, invalid, or require viewport)\n";
     }
 }
 

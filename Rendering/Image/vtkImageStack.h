@@ -82,10 +82,7 @@ public:
   // Get the property for the currently active image.
   vtkImageProperty *GetProperty();
 
-  // Description:
-  // Get the combined bounds of all of the images.
-  double *GetBounds();
-  void GetBounds(double bounds[6]) { this->vtkProp3D::GetBounds( bounds ); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Return the max MTime of all the images.

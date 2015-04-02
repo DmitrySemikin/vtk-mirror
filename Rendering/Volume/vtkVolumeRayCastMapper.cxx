@@ -1237,7 +1237,7 @@ int vtkVolumeRayCastMapper::ComputeRowBounds(vtkVolume   *vol,
 
   double camPos[3];
   double worldBounds[6];
-  vol->GetBounds( worldBounds );
+  vol->ComputeBoundingBox(ren).GetBounds(worldBounds);
   int insideFlag = 0;
   ren->GetActiveCamera()->GetPosition( camPos );
   if ( camPos[0] >= worldBounds[0] &&

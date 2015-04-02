@@ -56,8 +56,9 @@ vtkMapper::vtkMapper()
   this->ScalarMode = VTK_SCALAR_MODE_DEFAULT;
   this->ScalarMaterialMode = VTK_MATERIALMODE_DEFAULT;
 
-  vtkMath::UninitializeBounds(this->Bounds);
-  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+#ifndef VTK_LEGACY_REMOVE
+  vtkMath::UninitializeBounds(this->LegacyBounds);
+#endif // VTK_LEGACY_REMOVE
 
   this->RenderTime = 0.0;
 
@@ -97,22 +98,44 @@ vtkMapper::~vtkMapper()
 
 // Get the bounds for the input of this mapper as
 // (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
+#ifndef VTK_LEGACY_REMOVE
 double *vtkMapper::GetBounds()
 {
-  vtkDataSet *input = this->GetInput();
-  if ( ! input )
-    {
-      vtkMath::UninitializeBounds(this->Bounds);
-    }
-  else
+  VTK_LEGACY_REPLACED_BODY(
+        double* vtkMapper::GetBounds(), "VTK 6.3",
+        bool vtkMapper::GetBounds(vtkViewport*, double[6]))
+
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  bbox.GetBounds(this->LegacyBounds);
+  return bbox.IsValid() ? this->LegacyBounds : NULL;
+}
+
+void vtkMapper::GetBounds(double bounds[6])
+{
+  VTK_LEGACY_REPLACED_BODY(
+        void vtkMapper::GetBounds(double *), "VTK 6.3",
+        bool vtkMapper::GetBounds(vtkViewport*, double[6]))
+
+  this->ComputeBoundingBox(NULL).GetBounds(bounds);
+}
+#endif // VTK_LEGACY_REMOVE
+
+vtkBoundingBox vtkMapper::ComputeBoundingBox(vtkViewport *)
+{
+  vtkBoundingBox bbox;
+
+  if (vtkDataSet *input = this->GetInput())
     {
     if (!this->Static)
       {
       this->Update();
       }
-    input->GetBounds(this->Bounds);
+    double bounds[6];
+    input->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
-  return this->Bounds;
+
+  return bbox;
 }
 
 vtkDataSet *vtkMapper::GetInput()

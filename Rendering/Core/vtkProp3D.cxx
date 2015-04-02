@@ -45,9 +45,9 @@ vtkProp3D::vtkProp3D()
   this->Scale[1] = 1.0;
   this->Scale[2] = 1.0;
 
-  vtkMath::UninitializeBounds(this->Bounds);
-
-  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+#ifndef VTK_LEGACY_REMOVE
+  this->LegacyCenter[0] = this->LegacyCenter[1] = this->LegacyCenter[2] = 0.0;
+#endif // VTK_LEGACY_REMOVE
 
   this->UserMatrix = NULL;
   this->UserTransform = NULL;
@@ -427,68 +427,53 @@ void vtkProp3D::ComputeMatrix()
     }
 }
 
+#ifndef VTK_LEGACY_REMOVE
 //----------------------------------------------------------------------------
-// Get the bounds for this Prop3D as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-void vtkProp3D::GetBounds(double bounds[6])
+double* vtkProp3D::GetCenter()
 {
-  this->GetBounds();
-  for (int i=0; i<6; i++)
-    {
-    bounds[i] = this->Bounds[i];
-    }
+  VTK_LEGACY_REPLACED_BODY(
+        double* vtkProp3D::GetCenter(), "VTK 6.3",
+        bool vtkProp3D::GetCenter(vtkViewport*, double[3]))
+
+  return this->GetCenter(NULL, this->LegacyCenter) ? this->LegacyCenter : NULL;
 }
+#endif // VTK_LEGACY_REMOVE
 
 //----------------------------------------------------------------------------
 // Get the center of the bounding box in world coordinates.
-double *vtkProp3D::GetCenter()
+bool vtkProp3D::GetCenter(vtkViewport *vp, double center[3])
 {
-  this->GetBounds();
-  this->Center[0] = (this->Bounds[1] + this->Bounds[0])/2.0;
-  this->Center[1] = (this->Bounds[3] + this->Bounds[2])/2.0;
-  this->Center[2] = (this->Bounds[5] + this->Bounds[4])/2.0;
-
-  return this->Center;
+  vtkBoundingBox bbox = this->ComputeBoundingBox(vp);
+  bbox.GetCenter(center);
+  if (bbox.IsValid())
+    {
+    bbox.GetCenter(center);
+    return true;
+    }
+  else
+    {
+    std::fill(center, center + 3, 0.);
+    return false;
+    }
 }
+
+#ifndef VTK_LEGACY_REMOVE
+//----------------------------------------------------------------------------
+double vtkProp3D::GetLength()
+{
+  VTK_LEGACY_REPLACED_BODY(
+        double vtkProp3D::GetLength(), "VTK 6.3",
+        double vtkProp3D::GetLength(vtkViewport*))
+  return this->GetLength(NULL);
+}
+#endif // VTK_LEGACY_REMOVE
 
 //----------------------------------------------------------------------------
 // Get the length of the diagonal of the bounding box.
-double vtkProp3D::GetLength()
+double vtkProp3D::GetLength(vtkViewport *vp)
 {
-  double diff, l=0.0;
-  int i;
-
-  this->GetBounds();
-  for (i=0; i<3; i++)
-    {
-    diff = this->Bounds[2*i+1] - this->Bounds[2*i];
-    l += diff * diff;
-    }
-
-  return sqrt(l);
-}
-
-//----------------------------------------------------------------------------
-// Get the Prop3D's x range in world coordinates.
-double *vtkProp3D::GetXRange()
-{
-  this->GetBounds();
-  return this->Bounds;
-}
-
-//----------------------------------------------------------------------------
-// Get the Prop3D's y range in world coordinates.
-double *vtkProp3D::GetYRange()
-{
-  this->GetBounds();
-  return &(this->Bounds[2]);
-}
-
-//----------------------------------------------------------------------------
-// Get the Prop3D's z range in world coordinates.
-double *vtkProp3D::GetZRange()
-{
-  this->GetBounds();
-  return &(this->Bounds[4]);
+  vtkBoundingBox bbox = this->ComputeBoundingBox(vp);
+  return bbox.IsValid() ? bbox.GetDiagonalLength() : 0.;
 }
 
 //----------------------------------------------------------------------------
@@ -505,16 +490,12 @@ void vtkProp3D::ShallowCopy(vtkProp *prop)
       this->Origin[i] = p->Origin[i];
       this->Position[i] = p->Position[i];
       this->Orientation[i] = p->Orientation[i];
-      this->Center[i] = p->Center[i];
+#ifndef VTK_LEGACY_REMOVE
+      this->LegacyCenter[i] = p->LegacyCenter[i];
+#endif // VTK_LEGACY_REMOVE
       this->Scale[i] = p->Scale[i];
       }
     this->Transform->DeepCopy(p->Transform);
-
-    for (i=0; i < 6; i++)
-      {
-      this->Bounds[i] = p->Bounds[i];
-      }
-
     this->SetUserTransform(p->UserTransform);
     }
 
@@ -634,20 +615,20 @@ void vtkProp3D::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Scale: (" << this->Scale[0] << ", "
      << this->Scale[1] << ", " << this->Scale[2] << ")\n";
 
-  double *bounds = this->GetBounds();
-  if ( bounds != NULL )
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  if (bbox.IsValid())
     {
-    os << indent << "Bounds: \n";
+    os << indent << "Bounds (with NULL viewport): \n";
     os << indent << "  Xmin,Xmax: ("
-       << this->Bounds[0] << ", " << this->Bounds[1] << ")\n";
+       << bbox.GetBound(0) << ", " << bbox.GetBound(1) << ")\n";
     os << indent << "  Ymin,Ymax: ("
-       << this->Bounds[2] << ", " << this->Bounds[3] << ")\n";
+       << bbox.GetBound(2) << ", " << bbox.GetBound(3) << ")\n";
     os << indent << "  Zmin,Zmax: ("
-       << this->Bounds[4] << ", " << this->Bounds[5] << ")\n";
+       << bbox.GetBound(4) << ", " << bbox.GetBound(5) << ")\n";
     }
   else
     {
-    os << indent << "Bounds: (not defined)\n";
+    os << indent << "Bounds: (not defined, invalid, or requires viewport)\n";
     }
 
   os << indent << "UserTransform: ";

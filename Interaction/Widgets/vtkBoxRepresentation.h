@@ -161,7 +161,7 @@ public:
   virtual int  ComputeInteractionState(int X, int Y, int modify=0);
   virtual void StartWidgetInteraction(double e[2]);
   virtual void WidgetInteraction(double e[2]);
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Methods supporting, and required by, the rendering process.
@@ -231,9 +231,6 @@ protected:
 
   // Transform the hexahedral points (used for rotations)
   vtkTransform *Transform;
-
-  // Support GetBounds() method
-  vtkBox *BoundingBox;
 
   // Properties used to control the appearance of selected objects and
   // the manipulator in general.

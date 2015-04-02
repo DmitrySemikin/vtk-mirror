@@ -373,15 +373,15 @@ void vtkPainterPolyDataMapper::RenderPiece(vtkRenderer* ren, vtkActor* act)
 }
 
 //-------------------------------------------------------------------------
-void vtkPainterPolyDataMapper::ComputeBounds()
+void vtkPainterPolyDataMapper::ComputeBounds(double bounds[6])
 {
   if (!this->GetInput())
     {
-    vtkMath::UninitializeBounds(this->Bounds);
+    vtkMath::UninitializeBounds(bounds);
     return;
     }
 
-  this->GetInput()->GetBounds(this->Bounds);
+  this->GetInput()->GetBounds(bounds);
 
   // if the mapper has a painter, update the bounds in the painter
   vtkPainter *painter = this->GetPainter();
@@ -393,7 +393,7 @@ void vtkPainterPolyDataMapper::ComputeBounds()
       this->UpdatePainterInformation();
       this->PainterUpdateTime.Modified();
       }
-    painter->UpdateBounds(this->Bounds);
+    painter->UpdateBounds(bounds);
     }
 }
 

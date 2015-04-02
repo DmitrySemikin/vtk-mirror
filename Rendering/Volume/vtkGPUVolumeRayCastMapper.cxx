@@ -518,15 +518,13 @@ void vtkGPUVolumeRayCastMapper::CreateCanonicalView(
   vtkCamera *canonicalViewCamera=vtkCamera::New();
 
   // Code from vtkFixedPointVolumeRayCastMapper:
-  double *center=volume->GetCenter();
-  double bounds[6];
-  volume->GetBounds(bounds);
-  double d=sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-                (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-                (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  vtkBoundingBox bbox = volume->ComputeBoundingBox(ren);
+  double center[3];
+  bbox.GetCenter(center);
+  double d = bbox.GetDiagonalLength();
 
   // For now use x distance - need to change this
-  d=bounds[1]-bounds[0];
+  d = bbox.GetLength(0);
 
   // Set up the camera in parallel
   canonicalViewCamera->SetFocalPoint(center);

@@ -38,7 +38,7 @@ for { set i 0 } { $i < 9 } { incr i } {
 
 byuReader Update
 
-set diagonal [byuActor0 GetLength]
+set diagonal [byuActor0 GetLength ren1]
 set i 0
 for { set j -1 } { $j < 2 } { incr j } {
     for { set k -1 } { $k < 2 } { incr k } {

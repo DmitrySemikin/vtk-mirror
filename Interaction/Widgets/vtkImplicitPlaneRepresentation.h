@@ -55,7 +55,6 @@ class vtkFeatureEdges;
 class vtkPolyData;
 class vtkPolyDataAlgorithm;
 class vtkTransform;
-class vtkBox;
 class vtkLookupTable;
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkImplicitPlaneRepresentation : public vtkWidgetRepresentation
@@ -226,7 +225,7 @@ public:
   virtual void EndWidgetInteraction(double newEventPos[2]);
   // Decsription:
   // Methods supporting the rendering process.
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
   virtual void GetActors(vtkPropCollection *pc);
   virtual void ReleaseGraphicsResources(vtkWindow*);
   virtual int RenderOpaqueGeometry(vtkViewport*);
@@ -366,9 +365,6 @@ protected:
   void CreateDefaultProperties();
 
   void GeneratePlane();
-
-  // Support GetBounds() method
-  vtkBox *BoundingBox;
 
 private:
   vtkImplicitPlaneRepresentation(const vtkImplicitPlaneRepresentation&);  //Not implemented

@@ -182,19 +182,18 @@ void vtkProp3DFollower::ComputeMatrix()
     }
 }
 
-//-----------------------------------------------------------------------------
-double *vtkProp3DFollower::GetBounds()
+//----------------------------------------------------------------------------
+vtkBoundingBox vtkProp3DFollower::ComputeBoundingBox(vtkViewport *viewport)
 {
+  vtkBoundingBox bbox;
+
   if ( this->Device )
     {
-    this->ComputeMatrix();
-    this->Device->SetUserMatrix(this->Matrix);
-    return this->Device->GetBounds();
+    this->Device->SetUserMatrix(this->GetMatrix());
+    bbox = this->Device->ComputeBoundingBox(viewport);
     }
-  else
-    {
-    return NULL;
-    }
+
+  return bbox;
 }
 
 

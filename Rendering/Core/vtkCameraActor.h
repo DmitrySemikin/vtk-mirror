@@ -64,9 +64,7 @@ public:
   // resources to release.
   void ReleaseGraphicsResources(vtkWindow *);
 
-  // Description:
-  // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  double *GetBounds();
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Get the actors mtime plus consider its properties and texture if set.

@@ -17,6 +17,7 @@
 #include "vtkAssemblyNode.h"
 #include "vtkAssemblyPath.h"
 #include "vtkAssemblyPaths.h"
+#include "vtkBoundingBox.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkProp.h"
@@ -245,71 +246,23 @@ void vtkPropAssembly::ReleaseGraphicsResources(vtkWindow *renWin)
     }
 }
 
-// Get the bounds for the assembly as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkPropAssembly::GetBounds()
+vtkBoundingBox vtkPropAssembly::ComputeBoundingBox(vtkViewport *viewport)
 {
-  vtkProp *part;
-  int i, n;
-  double *bounds, bbox[24];
-  int partVisible=0;
+  vtkBoundingBox bbox;
 
-  // carefully compute the bounds
+  // VERY carefully compute the bounds
   vtkCollectionSimpleIterator pit;
+  vtkProp *part = NULL;
   for ( this->Parts->InitTraversal(pit);
         (part=this->Parts->GetNextProp(pit)); )
     {
-    if ( part->GetVisibility() && part->GetUseBounds() )
+    if (part->GetVisibility() && part->GetUseBounds())
       {
-      bounds = part->GetBounds();
-
-      if ( bounds != NULL )
-        {
-        //  For the purposes of GetBounds, an object is visisble only if
-        //  its visibility is on and it has visible parts.
-        if (!partVisible)
-          {
-          // initialize the bounds
-          this->Bounds[0] =this->Bounds[2] =this->Bounds[4] = VTK_DOUBLE_MAX;
-          this->Bounds[1] =this->Bounds[3] =this->Bounds[5] = -VTK_DOUBLE_MAX;
-          partVisible = 1;
-          }
-
-        // fill out vertices of a bounding box
-        bbox[ 0] = bounds[1]; bbox[ 1] = bounds[3]; bbox[ 2] = bounds[5];
-        bbox[ 3] = bounds[1]; bbox[ 4] = bounds[2]; bbox[ 5] = bounds[5];
-        bbox[ 6] = bounds[0]; bbox[ 7] = bounds[2]; bbox[ 8] = bounds[5];
-        bbox[ 9] = bounds[0]; bbox[10] = bounds[3]; bbox[11] = bounds[5];
-        bbox[12] = bounds[1]; bbox[13] = bounds[3]; bbox[14] = bounds[4];
-        bbox[15] = bounds[1]; bbox[16] = bounds[2]; bbox[17] = bounds[4];
-        bbox[18] = bounds[0]; bbox[19] = bounds[2]; bbox[20] = bounds[4];
-        bbox[21] = bounds[0]; bbox[22] = bounds[3]; bbox[23] = bounds[4];
-
-        for (i = 0; i < 8; i++)
-          {
-          for (n = 0; n < 3; n++)
-            {
-            if (bbox[i*3+n] < this->Bounds[n*2])
-              {
-              this->Bounds[n*2] = bbox[i*3+n];
-              }
-            if (bbox[i*3+n] > this->Bounds[n*2+1])
-              {
-              this->Bounds[n*2+1] = bbox[i*3+n];
-              }
-            }
-          }//for each point of box
-        }//if bounds
-      }//for each part
+      bbox.AddBox(part->ComputeBoundingBox(viewport));
+      }//if part visible
     }//for each part
 
-  if ( ! partVisible )
-    {
-    return NULL;
-    }
-  else
-    {
-    return this->Bounds;
-    }
+  return bbox;
 }
 
 unsigned long int vtkPropAssembly::GetMTime()

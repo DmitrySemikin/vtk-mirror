@@ -130,7 +130,7 @@ void vtkContourRepresentation::AddNodeAtPositionInternal( double worldPos[3],
     // Give the point placer a chance to validate the updated node. If its not
     // valid, discard the LineInterpolator's change.
     if ( didNodeChange && !this->PointPlacer->ValidateWorldPosition(
-                node->WorldPosition, worldOrient ) )
+           this->Renderer, node->WorldPosition, worldOrient ) )
       {
       node->WorldPosition[0] = worldPos[0];
       node->WorldPosition[1] = worldPos[1];
@@ -210,7 +210,8 @@ int vtkContourRepresentation::AddNodeAtWorldPosition( double worldPos[3],
                                                       double worldOrient[9] )
 {
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos, worldOrient ) )
+  if ( !this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos,
+                                                 worldOrient))
     {
     return 0;
     }
@@ -235,7 +236,7 @@ int vtkContourRepresentation::AddNodeAtWorldPosition(
 int vtkContourRepresentation::AddNodeAtWorldPosition( double worldPos[3] )
 {
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos ) )
+  if (!this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos))
     {
     return 0;
     }
@@ -341,7 +342,8 @@ int vtkContourRepresentation::SetActiveNodeToWorldPosition( double worldPos[3],
     }
 
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos, worldOrient ) )
+  if (!this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos,
+                                                worldOrient))
     {
     return 0;
     }
@@ -362,7 +364,7 @@ int vtkContourRepresentation::SetActiveNodeToWorldPosition( double worldPos[3] )
     }
 
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos ) )
+  if ( !this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos) )
     {
     return 0;
     }
@@ -636,7 +638,8 @@ int vtkContourRepresentation::SetNthNodeWorldPosition( int n, double worldPos[3]
     }
 
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos, worldOrient ) )
+  if (!this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos,
+                                                worldOrient))
     {
     return 0;
     }
@@ -655,7 +658,7 @@ int vtkContourRepresentation::SetNthNodeWorldPosition( int n, double worldPos[3]
     }
 
   // Check if this is a valid location
-  if ( !this->PointPlacer->ValidateWorldPosition( worldPos ) )
+  if (!this->PointPlacer->ValidateWorldPosition(this->Renderer, worldPos))
     {
     return 0;
     }
@@ -1136,7 +1139,7 @@ int vtkContourRepresentation::ComputeInteractionState(
 //---------------------------------------------------------------------
 int vtkContourRepresentation::UpdateContour()
 {
-  this->PointPlacer->UpdateInternalState();
+  this->PointPlacer->UpdateInternalState(this->Renderer);
 
   //even if just the camera has moved we need to mark the locator
   //as needing to be rebuilt
@@ -1316,7 +1319,7 @@ void vtkContourRepresentation
       // Give the point placer a chance to validate the updated node. If its
       // not valid, discard the LineInterpolator's change.
       if ( didNodeChange && !this->PointPlacer->ValidateWorldPosition(
-                node->WorldPosition, worldOrient ) )
+                this->Renderer, node->WorldPosition, worldOrient ) )
         {
         node->WorldPosition[0] = worldPos[0];
         node->WorldPosition[1] = worldPos[1];

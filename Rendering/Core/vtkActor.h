@@ -124,11 +124,7 @@ public:
   // Returns the Mapper that this actor is getting its data from.
   vtkGetObjectMacro(Mapper, vtkMapper);
 
-  // Description:
-  // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
-  // method GetBounds(double bounds[6]) is available from the superclass.)
-  void GetBounds(double bounds[6]) {this->vtkProp3D::GetBounds( bounds );}
-  double *GetBounds();
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Apply the current properties to all parts that compose this actor.
@@ -169,8 +165,9 @@ protected:
   vtkTexture *Texture;
   vtkMapper *Mapper;
 
-  // Bounds are cached in an actor - the MapperBounds are also cache to
+  // Bounds are cached in an actor - the MapperBounds are also cached to
   // help know when the Bounds need to be recomputed.
+  double Bounds[6];
   double MapperBounds[6];
   vtkTimeStamp BoundsMTime;
 

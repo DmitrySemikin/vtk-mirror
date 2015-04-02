@@ -42,7 +42,7 @@ double vtkFrustumCoverageCuller::Cull( vtkRenderer *ren,
 {
   vtkProp            *prop;
   double               total_time;
-  double             *bounds, center[3];
+  double             center[3];
   double               radius = 0.0;
   double              planes[24], d;
   double               coverage, screen_bounds[4];
@@ -90,8 +90,6 @@ double vtkFrustumCoverageCuller::Cull( vtkRenderer *ren,
       previous_time = prop->GetRenderTimeMultiplier();
       }
 
-    // Get the bounds of the prop and compute an enclosing sphere
-    bounds = prop->GetBounds();
 
     // We start with a coverage of 1.0 and set it to zero if the prop
     // is culled during the plane tests
@@ -99,54 +97,41 @@ double vtkFrustumCoverageCuller::Cull( vtkRenderer *ren,
     // make sure the bounds are defined - they won't be for a 2D prop which
     // means that they will never be culled. Maybe this should be changed in
     // the future?
-    if (bounds)
+    // Get the bounds of the prop and compute an enclosing sphere
+    vtkBoundingBox bbox = prop->GetUseBounds() ? prop->ComputeBoundingBox(ren)
+                                               : vtkBoundingBox();
+    if (bbox.IsValid())
       {
-      // a duff dataset like a polydata with no cells will have bad bounds
-      if (!vtkMath::AreBoundsInitialized(bounds))
+      bbox.GetCenter(center);
+      radius = 0.5 * bbox.GetDiagonalLength();
+      for ( i = 0; i < 6; i++ )
         {
-        coverage = 0.0;
-        }
-      else
-        {
-        center[0] = (bounds[0] + bounds[1]) / 2.0;
-        center[1] = (bounds[2] + bounds[3]) / 2.0;
-        center[2] = (bounds[4] + bounds[5]) / 2.0;
-        radius = 0.5 * sqrt( ( bounds[1] - bounds[0] ) *
-                             ( bounds[1] - bounds[0] ) +
-                             ( bounds[3] - bounds[2] ) *
-                             ( bounds[3] - bounds[2] ) +
-                             ( bounds[5] - bounds[4] ) *
-                             ( bounds[5] - bounds[4] ) );
-        for ( i = 0; i < 6; i++ )
+        // Compute how far the center of the sphere is from this plane
+        d = planes[i*4 + 0] * center[0] +
+            planes[i*4 + 1] * center[1] +
+            planes[i*4 + 2] * center[2] +
+            planes[i*4 + 3];
+        // If d < -radius the prop is not within the view frustum
+        if ( d < -radius )
           {
-          // Compute how far the center of the sphere is from this plane
-          d =
-          planes[i*4 + 0] * center[0] +
-          planes[i*4 + 1] * center[1] +
-          planes[i*4 + 2] * center[2] +
-          planes[i*4 + 3];
-          // If d < -radius the prop is not within the view frustum
-          if ( d < -radius )
-            {
-            coverage = 0.0;
-            i = 7;
-            }
-          // The first four planes are the ones bounding the edges of the
-          // view plane (the last two are the near and far planes) The
-          // distance from the edge of the sphere to these planes is stored
-          // to compute coverage.
-          if ( i < 4 )
-            {
-            screen_bounds[i] = d - radius;
-            }
-          // The fifth plane is the near plane - use the distance to
-          // the center (d) as the value to sort by
-          if ( i == 4 )
-            {
-            distanceList[propLoop] = d;
-            }
+          coverage = 0.0;
+          break;
+          }
+        // The first four planes are the ones bounding the edges of the
+        // view plane (the last two are the near and far planes) The
+        // distance from the edge of the sphere to these planes is stored
+        // to compute coverage.
+        if ( i < 4 )
+          {
+          screen_bounds[i] = d - radius;
+          }
+        // The fifth plane is the near plane - use the distance to
+        // the center (d) as the value to sort by
+        if ( i == 4 )
+          {
+          distanceList[propLoop] = d;
+          }
         }
-      }
       // If the prop wasn't culled during the plane tests...
       if ( coverage > 0.0 )
         {

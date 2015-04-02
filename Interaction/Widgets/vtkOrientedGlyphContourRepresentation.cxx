@@ -940,11 +940,18 @@ void vtkOrientedGlyphContourRepresentation::SetShowSelectedNodes(
     }
 }
 
-//----------------------------------------------------------------------
-double* vtkOrientedGlyphContourRepresentation::GetBounds()
+//------------------------------------------------------------------------------
+vtkBoundingBox
+vtkOrientedGlyphContourRepresentation::ComputeBoundingBox(vtkViewport *)
 {
-  return this->Lines->GetPoints() ?
-         this->Lines->GetPoints()->GetBounds() : NULL;
+  vtkBoundingBox bbox;
+  if (this->Lines->GetPoints())
+    {
+    double bounds[6];
+    this->Lines->GetPoints()->GetBounds(bounds);
+    bbox.AddBounds(bounds);
+    }
+  return bbox;
 }
 
 //-----------------------------------------------------------------------------

@@ -105,7 +105,7 @@ protected:
 
   // Description:
   // Need to loop over the hierarchy to compute bounds
-  virtual void ComputeBounds();
+  virtual void ComputeBounds(double bounds[6]);
 
   // Description:
   // Time stamp for computation of bounds.

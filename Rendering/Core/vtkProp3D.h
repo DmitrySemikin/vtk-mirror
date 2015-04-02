@@ -150,32 +150,14 @@ public:
   virtual void GetMatrix(double m[16]);
 
   // Description:
-  // Return a reference to the Prop3D's composite transform.
-
-  // Description:
-  // Get the bounds for this Prop3D as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  void GetBounds(double bounds[6]);
-  virtual double *GetBounds() = 0;
-
-  // Description:
   // Get the center of the bounding box in world coordinates.
-  double *GetCenter();
-
-  // Description:
-  // Get the Prop3D's x range in world coordinates.
-  double *GetXRange();
-
-  // Description:
-  // Get the Prop3D's y range in world coordinates.
-  double *GetYRange();
-
-  // Description:
-  // Get the Prop3D's z range in world coordinates.
-  double *GetZRange();
+  VTK_LEGACY(double* GetCenter());
+  bool GetCenter(vtkViewport *vp, double center[3]);
 
   // Description:
   // Get the length of the diagonal of the bounding box.
-  double GetLength();
+  VTK_LEGACY(double GetLength());
+  double GetLength(vtkViewport *vp);
 
   // Description:
   // Rotate the Prop3D in degrees about the X axis using the right hand
@@ -298,14 +280,17 @@ protected:
   double Position[3];
   double Orientation[3];
   double Scale[3];
-  double Center[3];
   vtkTransform *Transform;
-  double Bounds[6];
   vtkProp3D *CachedProp3D; //support the PokeMatrix() method
   int IsIdentity;
+
 private:
   vtkProp3D(const vtkProp3D&);  // Not implemented.
   void operator=(const vtkProp3D&);  // Not implemented.
+
+#ifndef VTK_LEGACY_REMOVE
+  double LegacyCenter[3];
+#endif // VTK_LEGACY_REMOVE
 };
 
 #endif

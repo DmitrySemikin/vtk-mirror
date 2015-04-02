@@ -141,7 +141,7 @@ vtkPolyData * vtkAbstractPolygonalHandleRepresentation3D::GetHandle()
 void vtkAbstractPolygonalHandleRepresentation3D::SetWorldPosition(double p[3])
 {
   if (!this->Renderer || !this->PointPlacer ||
-                          this->PointPlacer->ValidateWorldPosition( p ))
+      this->PointPlacer->ValidateWorldPosition( this->Renderer, p ))
     {
     this->WorldPosition->SetValue( p );
     this->WorldPositionTime.Modified();
@@ -604,14 +604,11 @@ void vtkAbstractPolygonalHandleRepresentation3D::UpdateLabel()
     // Place the label on the North east of the handle. We need to take into
     // account the viewup vector and the direction of the camera, so that we
     // can bring it on the closest plane of the widget facing the camera.
-    double labelPosition[3], vup[3], directionOfProjection[3], xAxis[3], bounds[6];
+    double labelPosition[3], vup[3], directionOfProjection[3], xAxis[3];
     this->Renderer->GetActiveCamera()->GetViewUp(vup);
     this->Renderer->GetActiveCamera()->GetDirectionOfProjection(directionOfProjection);
     vtkMath::Cross( directionOfProjection, vup, xAxis );
-    this->Mapper->GetBounds(bounds);
-    double width = sqrt( (bounds[1] - bounds[0]) * (bounds[1] - bounds[0]) +
-                         (bounds[3] - bounds[2]) * (bounds[3] - bounds[2]) +
-                         (bounds[5] - bounds[4]) * (bounds[5] - bounds[4]) );
+    double width = this->Mapper->GetLength(this->Renderer);
     this->GetWorldPosition(labelPosition);
     labelPosition[0] += width/2.0 * xAxis[0];
     labelPosition[1] += width/2.0 * xAxis[1];
@@ -736,10 +733,11 @@ int vtkAbstractPolygonalHandleRepresentation3D::HasTranslucentPolygonalGeometry(
 }
 
 //-----------------------------------------------------------------------------
-double* vtkAbstractPolygonalHandleRepresentation3D::GetBounds()
+vtkBoundingBox
+vtkAbstractPolygonalHandleRepresentation3D::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
-  return this->Actor ? this->Actor->GetBounds() : NULL;
+  return this->Actor ? this->Actor->ComputeBoundingBox(vp) : vtkBoundingBox();
 }
 
 //-----------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkImageActor.h"
 
+#include "vtkBoundingBox.h"
 #include "vtkObjectFactory.h"
 #include "vtkImageData.h"
 #include "vtkMath.h"
@@ -341,64 +342,22 @@ void vtkImageActor::GetDisplayBounds(double bounds[6])
     }
 }
 
+
 //----------------------------------------------------------------------------
-// Get the bounds for this Prop3D as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkImageActor::GetBounds()
+vtkBoundingBox vtkImageActor::ComputeBoundingBox(vtkViewport *)
 {
-  int i,n;
-  double *bounds, bbox[24], *fptr;
+  double bounds[6];
+  this->GetDisplayBounds(bounds);
 
-  bounds = this->GetDisplayBounds();
-  // Check for the special case when the data bounds are unknown
-  if (!bounds)
+  vtkBoundingBox bbox;
+  bbox.AddBounds(bounds);
+
+  if (bbox.IsValid())
     {
-    return bounds;
+    bbox.Transform(this->GetMatrix());
     }
 
-  // fill out vertices of a bounding box
-  bbox[ 0] = bounds[1]; bbox[ 1] = bounds[3]; bbox[ 2] = bounds[5];
-  bbox[ 3] = bounds[1]; bbox[ 4] = bounds[2]; bbox[ 5] = bounds[5];
-  bbox[ 6] = bounds[0]; bbox[ 7] = bounds[2]; bbox[ 8] = bounds[5];
-  bbox[ 9] = bounds[0]; bbox[10] = bounds[3]; bbox[11] = bounds[5];
-  bbox[12] = bounds[1]; bbox[13] = bounds[3]; bbox[14] = bounds[4];
-  bbox[15] = bounds[1]; bbox[16] = bounds[2]; bbox[17] = bounds[4];
-  bbox[18] = bounds[0]; bbox[19] = bounds[2]; bbox[20] = bounds[4];
-  bbox[21] = bounds[0]; bbox[22] = bounds[3]; bbox[23] = bounds[4];
-
-  // make sure matrix (transform) is up-to-date
-  this->ComputeMatrix();
-
-  // and transform into actors coordinates
-  fptr = bbox;
-  for (n = 0; n < 8; n++)
-    {
-    double homogeneousPt[4] = {fptr[0], fptr[1], fptr[2], 1.0};
-    this->Matrix->MultiplyPoint(homogeneousPt, homogeneousPt);
-    fptr[0] = homogeneousPt[0] / homogeneousPt[3];
-    fptr[1] = homogeneousPt[1] / homogeneousPt[3];
-    fptr[2] = homogeneousPt[2] / homogeneousPt[3];
-    fptr += 3;
-    }
-
-  // now calc the new bounds
-  this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_DOUBLE_MAX;
-  this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_DOUBLE_MAX;
-  for (i = 0; i < 8; i++)
-    {
-    for (n = 0; n < 3; n++)
-      {
-      if (bbox[i*3+n] < this->Bounds[n*2])
-        {
-        this->Bounds[n*2] = bbox[i*3+n];
-        }
-      if (bbox[i*3+n] > this->Bounds[n*2+1])
-        {
-        this->Bounds[n*2+1] = bbox[i*3+n];
-        }
-      }
-    }
-
-  return this->Bounds;
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

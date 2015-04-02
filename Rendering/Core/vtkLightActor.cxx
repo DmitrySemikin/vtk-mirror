@@ -40,8 +40,6 @@ vtkLightActor::vtkLightActor()
   this->ConeActor=0;
   this->CameraLight=0;
   this->FrustumActor=0;
-
-  this->BoundingBox=new vtkBoundingBox;
 }
 
 // ----------------------------------------------------------------------------
@@ -70,7 +68,6 @@ vtkLightActor::~vtkLightActor()
     {
     this->CameraLight->Delete();
     }
-  delete this->BoundingBox;
 }
 
 // ----------------------------------------------------------------------------
@@ -129,46 +126,25 @@ void vtkLightActor::ReleaseGraphicsResources(vtkWindow *window)
 }
 
 //-------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkLightActor::GetBounds()
+vtkBoundingBox vtkLightActor::ComputeBoundingBox(vtkViewport *viewport)
 {
-  this->Bounds[0] = this->Bounds[2] = this->Bounds[4] = VTK_DOUBLE_MAX;
-  this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_DOUBLE_MAX;
+  vtkBoundingBox bbox;
 
   this->UpdateViewProps();
 
-  this->BoundingBox->Reset();
-
-  if(this->ConeActor!=0)
+  if (this->ConeActor)
     {
-    if(this->ConeActor->GetUseBounds())
+    if (this->ConeActor->GetUseBounds())
       {
-      this->BoundingBox->AddBounds(this->ConeActor->GetBounds());
+      bbox.AddBox(this->ConeActor->ComputeBoundingBox(viewport));
       }
-    if(this->FrustumActor->GetUseBounds())
+    if (this->FrustumActor->GetUseBounds())
       {
-      this->BoundingBox->AddBounds(this->FrustumActor->GetBounds());
+      bbox.AddBox(this->FrustumActor->ComputeBoundingBox(viewport));
       }
     }
 
-  int i=0;
-  while(i<6)
-    {
-    this->Bounds[i]=this->BoundingBox->GetBound(i);
-    ++i;
-    }
-  if(this->Bounds[0]==VTK_DOUBLE_MAX)
-    {
-    // we cannot initialize the Bounds the same way vtkBoundingBox does because
-    // vtkProp3D::GetLength() does not check if the Bounds are initialized or
-    // not and makes a call to sqrt(). This call to sqrt with invalid values
-    // would raise a floating-point overflow exception (notably on BCC).
-    // As vtkMath::UninitializeBounds initialized finite unvalid bounds, it
-    // passes silently and GetLength() returns 0.
-    vtkMath::UninitializeBounds(this->Bounds);
-    }
-
-  return this->Bounds;
+  return bbox;
 }
 
 //-------------------------------------------------------------------------

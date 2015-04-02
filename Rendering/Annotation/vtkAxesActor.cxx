@@ -15,6 +15,7 @@
 #include "vtkAxesActor.h"
 
 #include "vtkActor.h"
+#include "vtkBoundingBox.h"
 #include "vtkCaptionActor2D.h"
 #include "vtkConeSource.h"
 #include "vtkCylinderSource.h"
@@ -30,6 +31,9 @@
 #include "vtkSphereSource.h"
 #include "vtkTextProperty.h"
 #include "vtkTransform.h"
+
+#include <algorithm>
+#include <cmath>
 
 vtkStandardNewMacro(vtkAxesActor);
 
@@ -329,79 +333,41 @@ void vtkAxesActor::ReleaseGraphicsResources(vtkWindow *win)
 }
 
 //----------------------------------------------------------------------------
-void vtkAxesActor::GetBounds(double bounds[6])
-{
-  double *bds = this->GetBounds();
-  bounds[0] = bds[0];
-  bounds[1] = bds[1];
-  bounds[2] = bds[2];
-  bounds[3] = bds[3];
-  bounds[4] = bds[4];
-  bounds[5] = bds[5];
-}
-
-//----------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkAxesActor::GetBounds()
+vtkBoundingBox vtkAxesActor::ComputeBoundingBox(vtkViewport *vp)
 {
   double bounds[6];
-  int i;
+  vtkBoundingBox bbox;
 
-  this->XAxisShaft->GetBounds(this->Bounds);
-
-  this->YAxisShaft->GetBounds(bounds);
-  for ( i = 0; i < 3; ++i )
+  bbox.AddBox(this->XAxisShaft->ComputeBoundingBox(vp));
+  bbox.AddBox(this->YAxisShaft->ComputeBoundingBox(vp));
+  bbox.AddBox(this->ZAxisShaft->ComputeBoundingBox(vp));
+  bbox.AddBox(this->XAxisTip->ComputeBoundingBox(vp));
+  bbox.AddBox(this->YAxisTip->ComputeBoundingBox(vp));
+  bbox.AddBox(this->ZAxisTip->ComputeBoundingBox(vp));
+  if (vtkDataSet *ds = this->YAxisShaft->GetMapper()->GetInput())
     {
-    this->Bounds[2*i+1] =
-      (bounds[2*i+1]>this->Bounds[2*i+1])?(bounds[2*i+1]):(this->Bounds[2*i+1]);
+    ds->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
 
-  this->ZAxisShaft->GetBounds(bounds);
-  for ( i = 0; i < 3; ++i )
+  if (!bbox.IsValid())
     {
-    this->Bounds[2*i+1] =
-      (bounds[2*i+1]>this->Bounds[2*i+1])?(bounds[2*i+1]):(this->Bounds[2*i+1]);
+    return bbox;
     }
 
-  this->XAxisTip->GetBounds(bounds);
-  for ( i = 0; i < 3; ++i )
-    {
-    this->Bounds[2*i+1] =
-      (bounds[2*i+1]>this->Bounds[2*i+1])?(bounds[2*i+1]):(this->Bounds[2*i+1]);
-    }
-
-  this->YAxisTip->GetBounds(bounds);
-  for ( i = 0; i < 3; ++i )
-    {
-    this->Bounds[2*i+1] =
-      (bounds[2*i+1]>this->Bounds[2*i+1])?(bounds[2*i+1]):(this->Bounds[2*i+1]);
-    }
-
-  this->ZAxisTip->GetBounds(bounds);
-  for ( i = 0; i < 3; ++i )
-    {
-    this->Bounds[2*i+1] =
-      (bounds[2*i+1]>this->Bounds[2*i+1])?(bounds[2*i+1]):(this->Bounds[2*i+1]);
-    }
-
-  double dbounds[6];
-  (vtkPolyDataMapper::SafeDownCast(this->YAxisShaft->GetMapper()))->
-    GetInput()->GetBounds( dbounds );
-
-  for ( i = 0; i < 3; ++i )
-    {
-    this->Bounds[2*i+1] =
-      (dbounds[2*i+1]>this->Bounds[2*i+1])?(dbounds[2*i+1]):(this->Bounds[2*i+1]);
-    }
+  bbox.GetBounds(bounds);
 
   // We want this actor to rotate / re-center about the origin, so give it
   // the bounds it would have if the axes were symmetric.
-  for ( i = 0; i < 3; ++i )
+  for (int i = 0; i < 3; ++i)
     {
-    this->Bounds[2*i] = -this->Bounds[2*i+1];
+    double val = std::max(std::fabs(bounds[2*i]), std::fabs(bounds[2*i+1]));
+    bounds[2*i] = -val;
+    bounds[2*i+1] = val;
     }
 
-  return this->Bounds;
+  bbox.AddBounds(bounds);
+  return bbox;
 }
 
 //----------------------------------------------------------------------------
@@ -733,19 +699,20 @@ void vtkAxesActor::UpdateProps()
   this->YAxisLabel->SetCaption( this->YAxisLabelText );
   this->ZAxisLabel->SetCaption( this->ZAxisLabelText );
 
-  this->XAxisShaft->GetBounds(bounds);
+  // These polydata actors have viewport independent bounds, just pass NULL:
+  this->XAxisShaft->ComputeBoundingBox(NULL).GetBounds(bounds);
   double offset = this->NormalizedLabelPosition[0]*(bounds[1]-bounds[0]);
   this->XAxisLabel->SetAttachmentPoint( bounds[0] + offset,
                                  bounds[2] - (bounds[3]-bounds[2])*2.0,
                                  bounds[5] + (bounds[5]-bounds[4])/2.0);
 
-  this->YAxisShaft->GetBounds(bounds);
+  this->YAxisShaft->ComputeBoundingBox(NULL).GetBounds(bounds);
   offset = this->NormalizedLabelPosition[1]*(bounds[3]-bounds[2]);
   this->YAxisLabel->SetAttachmentPoint( (bounds[0]+bounds[1])/2,
                                  bounds[2] + offset,
                                  bounds[5] + (bounds[5]-bounds[4])/2.0 );
 
-  this->ZAxisShaft->GetBounds(bounds);
+  this->ZAxisShaft->ComputeBoundingBox(NULL).GetBounds(bounds);
   offset = this->NormalizedLabelPosition[2]*(bounds[5]-bounds[4]);
   this->ZAxisLabel->SetAttachmentPoint( bounds[0],
                                  bounds[2] - (bounds[3]-bounds[2])*2.0,

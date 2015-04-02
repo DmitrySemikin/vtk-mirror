@@ -285,24 +285,16 @@ vtkPolyData *vtkLabeledContourMapper::GetInput()
 }
 
 //------------------------------------------------------------------------------
-double *vtkLabeledContourMapper::GetBounds()
+vtkBoundingBox vtkLabeledContourMapper::ComputeBoundingBox(vtkViewport *)
 {
-  if (this->GetNumberOfInputConnections(0) == 0)
+  vtkBoundingBox bbox;
+  if (vtkPolyData *input = this->GetInput())
     {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
+    double bounds[6];
+    input->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
-  else
-    {
-    this->ComputeBounds();
-    return this->Bounds;
-    }
-}
-
-//------------------------------------------------------------------------------
-void vtkLabeledContourMapper::GetBounds(double bounds[])
-{
-  this->Superclass::GetBounds(bounds);
+  return bbox;
 }
 
 //------------------------------------------------------------------------------
@@ -341,12 +333,6 @@ void vtkLabeledContourMapper::ReleaseGraphicsResources(vtkWindow *win)
     {
     this->TextActors[i]->ReleaseGraphicsResources(win);
     }
-}
-
-//------------------------------------------------------------------------------
-void vtkLabeledContourMapper::ComputeBounds()
-{
-  this->GetInput()->GetBounds(this->Bounds);
 }
 
 //------------------------------------------------------------------------------

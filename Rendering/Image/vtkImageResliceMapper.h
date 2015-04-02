@@ -148,12 +148,7 @@ public:
   // Get the mtime for the mapper.
   unsigned long GetMTime();
 
-  // Description:
-  // The bounding box (array of six doubles) of the data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  double *GetBounds();
-  void GetBounds(double bounds[6])
-    { this->vtkAbstractMapper3D::GetBounds(bounds); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Handle requests from the pipeline executive.

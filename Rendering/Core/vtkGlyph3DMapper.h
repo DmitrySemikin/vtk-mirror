@@ -171,11 +171,7 @@ public:
 
   // Description:
   // Redefined to take into account the bounds of the scaled glyphs.
-  virtual double *GetBounds();
-
-  // Description:
-  // Same as superclass. Appear again to stop warnings about hidden method.
-  virtual void GetBounds(double bounds[6]);
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // All the work is done is derived classes.

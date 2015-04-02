@@ -339,11 +339,15 @@ public:
   static double GetResolveCoincidentTopologyZShift();
 
   // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double bounds[6])
-    { this->vtkAbstractMapper3D::GetBounds(bounds); }
+  // Get the bounds for this Prop as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
+  // in world coordinates. NULL means that the bounds are not defined.
+  // This method has been deprecated and may not be implemented in all props.
+  // Use the overload that takes a viewport instead. This method will call the
+  // new signature with a NULL viewport.
+  VTK_LEGACY(virtual double *GetBounds());
+  VTK_LEGACY(virtual void GetBounds(double bounds[6]));
+
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // This instance variable is used by vtkLODActor to determine which
@@ -464,6 +468,10 @@ protected:
 private:
   vtkMapper(const vtkMapper&);  // Not implemented.
   void operator=(const vtkMapper&);  // Not implemented.
+
+#ifndef VTK_LEGACY_REMOVE // No longer needed once legacy GetBounds() is removed
+  double LegacyBounds[6];
+#endif
 };
 
 #endif

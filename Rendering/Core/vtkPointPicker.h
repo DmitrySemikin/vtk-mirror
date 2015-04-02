@@ -60,7 +60,7 @@ protected:
 
   double IntersectWithLine(double p1[3], double p2[3], double tol,
                           vtkAssemblyPath *path, vtkProp3D *p,
-                          vtkAbstractMapper3D *m);
+                          vtkAbstractMapper3D *m, vtkRenderer *ren);
   void Initialize();
 
 private:

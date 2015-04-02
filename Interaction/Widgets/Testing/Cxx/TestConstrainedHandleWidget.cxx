@@ -101,31 +101,32 @@ int TestConstrainedHandleWidget( int argc, char *argv[] )
   ren1->SetBackground(0.1, 0.2, 0.4);
   renWin->SetSize(300, 300);
 
-  handleRep->SetPosition(imageActor->GetCenter());
+  double imageCenter[3];
+  imageActor->GetCenter(ren1, imageCenter);
+  handleRep->SetPosition(imageCenter);
   handleRep->SetProjectionNormalToYAxis();
-  handleRep->SetProjectionPosition(imageActor->GetCenter()[1]);
+  handleRep->SetProjectionPosition(imageCenter[1]);
 
-  double bounds[6];
-  imageActor->GetBounds( bounds );
+  vtkBoundingBox bbox = imageActor->ComputeBoundingBox(ren1);
 
   vtkSmartPointer<vtkPlane> p1 =
     vtkSmartPointer<vtkPlane>::New();
-  p1->SetOrigin( bounds[0], bounds[2], bounds[4] );
+  p1->SetOrigin( const_cast<double*>(bbox.GetMinPoint()) );
   p1->SetNormal( 1.0, 0.0, 0.0 );
 
   vtkSmartPointer<vtkPlane> p2 =
     vtkSmartPointer<vtkPlane>::New();
-  p2->SetOrigin( bounds[0], bounds[2], bounds[4] );
+  p2->SetOrigin( const_cast<double*>(bbox.GetMinPoint()) );
   p2->SetNormal( 0.0, 0.0, 1.0 );
 
   vtkSmartPointer<vtkPlane> p3 =
     vtkSmartPointer<vtkPlane>::New();
-  p3->SetOrigin( bounds[1], bounds[3], bounds[5] );
+  p3->SetOrigin( const_cast<double*>(bbox.GetMaxPoint()) );
   p3->SetNormal( -1.0, 0.0, 0.0 );
 
   vtkSmartPointer<vtkPlane> p4 =
     vtkSmartPointer<vtkPlane>::New();
-  p4->SetOrigin( bounds[1], bounds[3], bounds[5] );
+  p4->SetOrigin( const_cast<double*>(bbox.GetMaxPoint()) );
   p4->SetNormal( 0.0, 0.0, -1.0 );
 
   handleRep->AddBoundingPlane(p1);

@@ -152,7 +152,7 @@ public:
 
   // Description:
   // Methods to make this class properly act like a vtkWidgetRepresentation.
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
   virtual void BuildRepresentation();
   virtual void StartWidgetInteraction(double eventPos[2]);
   virtual void WidgetInteraction(double eventPos[2]);

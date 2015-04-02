@@ -732,13 +732,13 @@ int vtkGraphMapper::FillInputPortInformation(
 }
 
 //----------------------------------------------------------------------------
-double *vtkGraphMapper::GetBounds()
+vtkBoundingBox vtkGraphMapper::ComputeBoundingBox(vtkViewport *)
 {
+  vtkBoundingBox bbox;
   vtkGraph *graph = vtkGraph::SafeDownCast(this->GetExecutive()->GetInputData(0, 0));
   if (!graph)
     {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
+    return bbox;
     }
   if (!this->Static)
     {
@@ -747,11 +747,12 @@ double *vtkGraphMapper::GetBounds()
     }
   if (!graph)
     {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
+    return bbox;
     }
-  graph->GetBounds(this->Bounds);
-  return this->Bounds;
+  double bounds[6];
+  graph->GetBounds(bounds);
+  bbox.AddBounds(bounds);
+  return bbox;
 }
 
 #if 1

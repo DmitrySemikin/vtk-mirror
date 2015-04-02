@@ -61,11 +61,7 @@ public:
   vtkTypeMacro(vtkLODProp3D, vtkProp3D);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  // Description:
-  // Standard vtkProp method to get 3D bounds of a 3D prop
-  double *GetBounds();
-  void GetBounds(double bounds[6])
-    { this->vtkProp3D::GetBounds( bounds ); }
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Add a level of detail with a given mapper, property, backface property,

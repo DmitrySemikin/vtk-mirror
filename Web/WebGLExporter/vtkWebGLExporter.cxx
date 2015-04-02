@@ -150,7 +150,7 @@ void vtkWebGLExporter::parseRenderer(vtkRenderer *renderer, const char* vtkNotUs
         vtkActor* actor = vtkActor::SafeDownCast(allactors->GetItemAsObject(j));
         unsigned long key = (unsigned long)actor;
         unsigned long previousValue = this->Internal->OldActorTimestamp[key];
-        this->parseActor(actor, previousValue, (long)renderer, renderer->GetLayer(), trt != NULL);
+        this->parseActor(actor, renderer, previousValue, (long)renderer, renderer->GetLayer(), trt != NULL);
         }
       allactors->Delete();
       }
@@ -227,7 +227,7 @@ void vtkWebGLExporter::parseActor2D(vtkActor2D *actor, long actorTime, long rend
     }
   }
 
-void vtkWebGLExporter::parseActor(vtkActor* actor, unsigned long actorTime, long rendererId, int layer, bool isWidget)
+void vtkWebGLExporter::parseActor(vtkActor* actor, vtkRenderer *renderer, unsigned long actorTime, long rendererId, int layer, bool isWidget)
   {
   vtkMapper* mapper = actor->GetMapper();
   if (mapper)
@@ -244,7 +244,7 @@ void vtkWebGLExporter::parseActor(vtkActor* actor, unsigned long actorTime, long
     if(dataMTime != actorTime && actor->GetVisibility())
       {
       double bb[6];
-      actor->GetBounds(bb);
+      actor->ComputeBoundingBox(renderer).GetBounds(bb);
       double m1 = std::max(bb[1]-bb[0], bb[3]-bb[2]); m1 = std::max(m1, bb[5]-bb[4]);
       double m2 = std::max(this->SceneSize[0], this->SceneSize[1]); m2 = std::max(m2, this->SceneSize[2]);
       if (m1 > m2)

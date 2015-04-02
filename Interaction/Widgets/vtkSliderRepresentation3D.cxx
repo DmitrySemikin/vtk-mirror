@@ -430,7 +430,6 @@ void vtkSliderRepresentation3D::Highlight(int highlight)
     }
 }
 
-
 //----------------------------------------------------------------------
 // Description:
 // Override GetMTime to include point coordinates
@@ -630,10 +629,10 @@ void vtkSliderRepresentation3D::GetActors(vtkPropCollection *pc)
 }
 
 //----------------------------------------------------------------------
-double *vtkSliderRepresentation3D::GetBounds()
+vtkBoundingBox vtkSliderRepresentation3D::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
-  return this->WidgetAssembly->GetBounds();
+  return this->WidgetAssembly->ComputeBoundingBox(vp);
 }
 
 //----------------------------------------------------------------------

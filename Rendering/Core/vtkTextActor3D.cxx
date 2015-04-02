@@ -78,20 +78,10 @@ void vtkTextActor3D::ShallowCopy(vtkProp *prop)
 }
 
 // --------------------------------------------------------------------------
-double* vtkTextActor3D::GetBounds()
+vtkBoundingBox vtkTextActor3D::ComputeBoundingBox(vtkViewport *viewport)
 {
-  // the culler could be asking our bounds, in which case it's possible
-  // that we haven't rendered yet, so we have to make sure our bounds
-  // are up to date so that we don't get culled.
   this->UpdateImageActor();
-  double* bounds = this->ImageActor->GetBounds();
-  this->Bounds[0] = bounds[0];
-  this->Bounds[1] = bounds[1];
-  this->Bounds[2] = bounds[2];
-  this->Bounds[3] = bounds[3];
-  this->Bounds[4] = bounds[4];
-  this->Bounds[5] = bounds[5];
-  return bounds;
+  return this->ImageActor->ComputeBoundingBox(viewport);
 }
 
 // --------------------------------------------------------------------------

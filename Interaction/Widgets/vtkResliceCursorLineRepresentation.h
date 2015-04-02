@@ -71,7 +71,7 @@ public:
   // Description:
   // Get the bounds of this prop. This simply returns the bounds of the
   // reslice cursor object.
-  virtual double * GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // Get the reslice cursor actor. You must set the reslice cursor on this

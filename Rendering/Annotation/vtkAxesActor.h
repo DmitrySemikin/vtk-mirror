@@ -93,10 +93,8 @@ public:
   void ReleaseGraphicsResources(vtkWindow *);
 
   // Description:
-  // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
-  // method GetBounds(double bounds[6]) is available from the superclass.)
-  void GetBounds(double bounds[6]);
-  double *GetBounds();
+  // Get the bounding box for this Actor.
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Get the actors mtime plus consider its properties and texture if set.

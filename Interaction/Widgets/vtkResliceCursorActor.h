@@ -65,7 +65,7 @@ public:
 
   // Description:
   // Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // Get the actors mtime plus consider its algorithm.

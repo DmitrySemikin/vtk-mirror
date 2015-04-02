@@ -373,7 +373,7 @@ int vtkPicker::Pick(double selectionX, double selectionY, double selectionZ,
         //  bounding box are picked correctly.
         if ( mapper != NULL )
           {
-          mapper->GetBounds(bounds);
+          mapper->ComputeBoundingBox(renderer).GetBounds(bounds);
           }
 
         bounds[0] -= tol; bounds[1] += tol;
@@ -384,7 +384,7 @@ int vtkPicker::Pick(double selectionX, double selectionY, double selectionZ,
           {
           t = this->IntersectWithLine(
             p1Mapper, p2Mapper, tol*0.333*(scale[0]+scale[1]+scale[2]),
-            path, static_cast<vtkProp3D *>(propCandidate), mapper);
+            path, static_cast<vtkProp3D *>(propCandidate), mapper, renderer);
 
           if ( t < VTK_DOUBLE_MAX )
             {
@@ -447,7 +447,8 @@ double vtkPicker::IntersectWithLine(double p1[3], double p2[3],
                                    double vtkNotUsed(tol),
                                    vtkAssemblyPath *path,
                                    vtkProp3D *prop3D,
-                                   vtkAbstractMapper3D *mapper)
+                                   vtkAbstractMapper3D *mapper,
+                                   vtkRenderer *renderer)
 {
   int i;
   double center[3], t, ray[3], rayFactor;
@@ -455,7 +456,7 @@ double vtkPicker::IntersectWithLine(double p1[3], double p2[3],
   // Get the data from the modeler
   if ( mapper != NULL )
     {
-    mapper->GetCenter(center);
+    mapper->GetCenter(renderer, center);
     }
   else
     {

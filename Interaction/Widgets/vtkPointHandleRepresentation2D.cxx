@@ -128,12 +128,6 @@ vtkPolyData *vtkPointHandleRepresentation2D::GetCursorShape()
 }
 
 //-------------------------------------------------------------------------
-double* vtkPointHandleRepresentation2D::GetBounds()
-{
-  return NULL;
-}
-
-//-------------------------------------------------------------------------
 void vtkPointHandleRepresentation2D::SetDisplayPosition(double p[3])
 {
   this->Superclass::SetDisplayPosition(p);
@@ -337,6 +331,13 @@ void vtkPointHandleRepresentation2D::BuildRepresentation()
     this->FocalPoint->Modified();
     this->BuildTime.Modified();
     }
+}
+
+//----------------------------------------------------------------------
+vtkBoundingBox
+vtkPointHandleRepresentation2D::ComputeBoundingBox(vtkViewport *)
+{
+  return vtkBoundingBox();
 }
 
 //----------------------------------------------------------------------

@@ -173,7 +173,7 @@ public:
   virtual void StartWidgetInteraction(double e[2]);
   virtual void WidgetInteraction(double e[2]);
   virtual void EndWidgetInteraction(double e[2]);
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Methods supporting, and required by, the rendering process.
@@ -194,7 +194,6 @@ protected:
   ~vtkCurveRepresentation();
 
   double LastEventPosition[3];
-  double Bounds[6];
 
   // Controlling vars
   int             ProjectionNormal;

@@ -902,20 +902,21 @@ void vtkCurveRepresentation::EndWidgetInteraction(double[2])
 }
 
 //----------------------------------------------------------------------------
-double* vtkCurveRepresentation::GetBounds()
+vtkBoundingBox vtkCurveRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
 
   vtkBoundingBox bbox;
-  bbox.AddBounds(this->LineActor->GetBounds());
+  double bounds[6];
+  bbox.AddBox(this->LineActor->ComputeBoundingBox(vp));
   for (int cc=0; cc < this->NumberOfHandles; cc++)
     {
-    bbox.AddBounds(this->HandleGeometry[cc]->GetOutput()->GetBounds());
+    this->HandleGeometry[cc]->GetOutput()->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
-  bbox.GetBounds(this->Bounds);
-  return this->Bounds;
-}
 
+  return bbox;
+}
 
 //----------------------------------------------------------------------------
 void vtkCurveRepresentation::SetLineColor(double r, double g, double b)

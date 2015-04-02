@@ -1638,16 +1638,14 @@ void vtkFixedPointVolumeRayCastMapper::CreateCanonicalView( vtkVolume *vol,
   // The size of the window is the size of the image
   renWin->SetSize( dim[0], dim[1] );
 
-  double *center =  vol->GetCenter();
+  double center[3];
+  vol->GetCenter(ren, center);
 
-  double bnds[6];
-  vol->GetBounds(bnds);
-  double d = sqrt((bnds[1]-bnds[0])*(bnds[1]-bnds[0]) +
-                  (bnds[3]-bnds[2])*(bnds[3]-bnds[2]) +
-                  (bnds[5]-bnds[4])*(bnds[5]-bnds[4]));
+  vtkBoundingBox bbox = vol->ComputeBoundingBox(ren);
+  double d = bbox.GetDiagonalLength();
 
   // For now use x distance - need to change this
-  d = bnds[1]-bnds[0];
+  d = bbox.GetLength(0);
 
   // Set up the camera in parallel
   cam->SetFocalPoint( center );

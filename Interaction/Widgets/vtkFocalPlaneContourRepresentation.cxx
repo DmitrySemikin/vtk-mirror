@@ -197,7 +197,7 @@ void vtkFocalPlaneContourRepresentation
 //---------------------------------------------------------------------
 int vtkFocalPlaneContourRepresentation::UpdateContour()
 {
-  this->PointPlacer->UpdateInternalState();
+  this->PointPlacer->UpdateInternalState(this->Renderer);
 
   if ( this->ContourBuildTime > this->Renderer->GetMTime() &&
        this->ContourBuildTime > this->PointPlacer->GetMTime() )

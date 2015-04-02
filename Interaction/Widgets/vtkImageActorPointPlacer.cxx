@@ -54,7 +54,7 @@ int vtkImageActorPointPlacer::ComputeWorldPosition( vtkRenderer *ren,
                                                     double  worldPos[3],
                                                     double  worldOrient[9] )
 {
-  if ( !this->UpdateInternalState() )
+  if ( !this->UpdateInternalState(ren) )
     {
     return 0;
     }
@@ -70,7 +70,7 @@ int vtkImageActorPointPlacer::ComputeWorldPosition( vtkRenderer *ren,
                                                     double worldPos[3],
                                                     double worldOrient[9] )
 {
-  if ( !this->UpdateInternalState() )
+  if ( !this->UpdateInternalState(ren) )
     {
     return 0;
     }
@@ -79,26 +79,28 @@ int vtkImageActorPointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkImageActorPointPlacer::ValidateWorldPosition( double worldPos[3],
+int vtkImageActorPointPlacer::ValidateWorldPosition( vtkRenderer *ren,
+                                                     double worldPos[3],
                                                      double *worldOrient )
 {
-  if ( !this->UpdateInternalState() )
+  if ( !this->UpdateInternalState(ren) )
     {
     return 0;
     }
 
-  return this->Placer->ValidateWorldPosition( worldPos, worldOrient );
+  return this->Placer->ValidateWorldPosition( ren, worldPos, worldOrient );
 }
 
 //----------------------------------------------------------------------
-int vtkImageActorPointPlacer::ValidateWorldPosition( double worldPos[3] )
+int vtkImageActorPointPlacer::ValidateWorldPosition(vtkRenderer *ren,
+                                                    double worldPos[3] )
 {
-  if ( !this->UpdateInternalState() )
+  if ( !this->UpdateInternalState(ren) )
     {
     return 0;
     }
 
-  return this->Placer->ValidateWorldPosition( worldPos );
+  return this->Placer->ValidateWorldPosition( ren, worldPos );
 }
 
 //----------------------------------------------------------------------
@@ -106,7 +108,7 @@ int vtkImageActorPointPlacer::UpdateWorldPosition( vtkRenderer *ren,
                                                    double worldPos[3],
                                                    double worldOrient[9] )
 {
-  if ( !this->UpdateInternalState() )
+  if ( !this->UpdateInternalState(ren) )
     {
     return 0;
     }
@@ -117,7 +119,7 @@ int vtkImageActorPointPlacer::UpdateWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkImageActorPointPlacer::UpdateInternalState()
+int vtkImageActorPointPlacer::UpdateInternalState(vtkRenderer *ren)
 {
   if ( !this->ImageActor )
     {
@@ -137,17 +139,10 @@ int vtkImageActorPointPlacer::UpdateInternalState()
   double origin[3];
   input->GetOrigin(origin);
 
+  vtkBoundingBox bbox = this->ImageActor->ComputeBoundingBox(ren);
+  bbox.AddBounds(this->Bounds);
   double bounds[6];
-  this->ImageActor->GetBounds(bounds);
-  if (this->Bounds[0] != VTK_DOUBLE_MAX)
-    {
-    bounds[0] = (bounds[0] < this->Bounds[0]) ? this->Bounds[0] : bounds[0];
-    bounds[1] = (bounds[1] > this->Bounds[1]) ? this->Bounds[1] : bounds[1];
-    bounds[2] = (bounds[2] < this->Bounds[2]) ? this->Bounds[2] : bounds[2];
-    bounds[3] = (bounds[3] > this->Bounds[3]) ? this->Bounds[3] : bounds[3];
-    bounds[4] = (bounds[4] < this->Bounds[4]) ? this->Bounds[4] : bounds[4];
-    bounds[5] = (bounds[5] > this->Bounds[5]) ? this->Bounds[5] : bounds[5];
-    }
+  bbox.GetBounds(bounds);
 
   int displayExtent[6];
   this->ImageActor->GetDisplayExtent(displayExtent);

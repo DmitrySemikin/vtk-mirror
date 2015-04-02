@@ -14,6 +14,8 @@
 =========================================================================*/
 
 #include "vtkImageStack.h"
+
+#include "vtkBoundingBox.h"
 #include "vtkImageSliceCollection.h"
 #include "vtkImageProperty.h"
 #include "vtkImageMapper3D.h"
@@ -180,20 +182,12 @@ vtkImageMapper3D *vtkImageStack::GetMapper()
   return NULL;
 }
 
+
 //----------------------------------------------------------------------------
-double *vtkImageStack::GetBounds()
+vtkBoundingBox vtkImageStack::ComputeBoundingBox(vtkViewport *vp)
 {
+  vtkBoundingBox bbox;
   this->UpdatePaths();
-
-  double bounds[6];
-  bool nobounds = true;
-
-  bounds[0] = VTK_DOUBLE_MAX;
-  bounds[1] = VTK_DOUBLE_MIN;
-  bounds[2] = VTK_DOUBLE_MAX;
-  bounds[3] = VTK_DOUBLE_MIN;
-  bounds[4] = VTK_DOUBLE_MAX;
-  bounds[5] = VTK_DOUBLE_MIN;
 
   if (!this->IsIdentity)
     {
@@ -205,16 +199,9 @@ double *vtkImageStack::GetBounds()
   vtkImageSlice *image = 0;
   while ( (image = this->Images->GetNextImage(pit)) != 0)
     {
-    double *b = image->GetBounds();
-    if (b)
+    if (image->GetUseBounds())
       {
-      nobounds = false;
-      bounds[0] = (bounds[0] < b[0] ? bounds[0] : b[0]);
-      bounds[1] = (bounds[1] > b[1] ? bounds[1] : b[1]);
-      bounds[2] = (bounds[2] < b[2] ? bounds[2] : b[2]);
-      bounds[3] = (bounds[3] > b[3] ? bounds[3] : b[3]);
-      bounds[4] = (bounds[4] < b[4] ? bounds[4] : b[4]);
-      bounds[5] = (bounds[5] > b[5] ? bounds[5] : b[5]);
+      bbox.AddBox(image->ComputeBoundingBox(vp));
       }
     }
 
@@ -223,19 +210,7 @@ double *vtkImageStack::GetBounds()
     this->PokeMatrices(NULL);
     }
 
-  if (nobounds)
-    {
-    return 0;
-    }
-
-  this->Bounds[0] = bounds[0];
-  this->Bounds[1] = bounds[1];
-  this->Bounds[2] = bounds[2];
-  this->Bounds[3] = bounds[3];
-  this->Bounds[4] = bounds[4];
-  this->Bounds[5] = bounds[5];
-
-  return this->Bounds;
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

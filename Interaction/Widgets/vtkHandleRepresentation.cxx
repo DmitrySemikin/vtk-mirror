@@ -104,7 +104,7 @@ void vtkHandleRepresentation::SetWorldPosition(double pos[3])
 {
   if (this->Renderer && this->PointPlacer)
     {
-    if (this->PointPlacer->ValidateWorldPosition( pos ))
+    if (this->PointPlacer->ValidateWorldPosition(this->Renderer, pos))
       {
       this->WorldPosition->SetValue(pos);
       this->WorldPositionTime.Modified();

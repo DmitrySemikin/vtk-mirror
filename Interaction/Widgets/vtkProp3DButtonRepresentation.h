@@ -88,7 +88,7 @@ public:
   // Description:
   // Provide the necessary methods to satisfy the rendering API.
   virtual void ShallowCopy(vtkProp *prop);
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
   virtual void GetActors(vtkPropCollection *pc);
   virtual void ReleaseGraphicsResources(vtkWindow*);
   virtual int RenderOpaqueGeometry(vtkViewport*);

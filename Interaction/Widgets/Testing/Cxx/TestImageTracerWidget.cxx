@@ -408,6 +408,8 @@ int TestImageTracerWidget( int argc, char *argv[] )
   imageActor1->VisibilityOn();
   imageActor1->SetDisplayExtent(31, 31, 0, 63, 0, 92);
   imageActor1->InterpolateOff();
+  double imageActor1Bounds[6];
+  imageActor1->ComputeBoundingBox(ren1).GetBounds(imageActor1Bounds);
 
   vtkSmartPointer<vtkExtractVOI> extract =
     vtkSmartPointer<vtkExtractVOI>::New();
@@ -423,6 +425,8 @@ int TestImageTracerWidget( int argc, char *argv[] )
   imageActor2->VisibilityOn();
   imageActor2->SetDisplayExtent(extract->GetVOI());
   imageActor2->InterpolateOff();
+  double imageActor2Bounds[6];
+  imageActor2->ComputeBoundingBox(ren2).GetBounds(imageActor2Bounds);
 
 // Set up the image tracer widget
 //
@@ -436,7 +440,7 @@ int TestImageTracerWidget( int argc, char *argv[] )
   imageTracerWidget->GetGlyphSource()->Modified();
   imageTracerWidget->ProjectToPlaneOn();
   imageTracerWidget->SetProjectionNormalToXAxes();
-  imageTracerWidget->SetProjectionPosition(imageActor1->GetBounds()[0]);
+  imageTracerWidget->SetProjectionPosition(imageActor1Bounds[0]);
   imageTracerWidget->SetViewProp(imageActor1);
   imageTracerWidget->SetInputConnection(shifter->GetOutputPort());
   imageTracerWidget->SetInteractor(iren);
@@ -453,10 +457,10 @@ int TestImageTracerWidget( int argc, char *argv[] )
   splineWidget->SetDefaultRenderer(ren2);
   splineWidget->SetInputConnection(extract->GetOutputPort());
   splineWidget->SetInteractor(iren);
-  splineWidget->PlaceWidget(imageActor2->GetBounds());
+  splineWidget->PlaceWidget(imageActor2Bounds);
   splineWidget->ProjectToPlaneOn();
   splineWidget->SetProjectionNormalToXAxes();
-  splineWidget->SetProjectionPosition(imageActor2->GetBounds()[0]);
+  splineWidget->SetProjectionPosition(imageActor2Bounds[0]);
 
   vtkSmartPointer<vtkPolyData> pathPoly =
     vtkSmartPointer<vtkPolyData>::New();

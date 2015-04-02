@@ -189,10 +189,26 @@ void output_temp(FILE *fp, int i, unsigned int aType,
 void use_hints(FILE *fp)
 {
   int  i;
-
+  int  isBoundingBox = 0;
 #define INDENT "    "
 
-  fprintf(fp,INDENT "if(temp%i)\n",MAX_ARGS);
+  /* Need special handling for vtkBoundingBox */
+  if (((currentFunction->ReturnType & VTK_PARSE_UNQUALIFIED_TYPE )
+       == VTK_PARSE_OBJECT) &&
+      strcmp(currentFunction->ReturnClass, "vtkBoundingBox") == 0)
+    {
+    isBoundingBox = 1;
+    }
+
+  if (isBoundingBox)
+    {
+    fprintf(fp,INDENT "if(temp%i.IsValid())\n",MAX_ARGS);
+    }
+  else
+    {
+    fprintf(fp,INDENT "if(temp%i)\n",MAX_ARGS);
+    }
+
   fprintf(fp,INDENT "  {\n");
   fprintf(fp,INDENT "  char tempResult[1024];\n");
   fprintf(fp,INDENT "  *tempResult = '\\0';\n");
@@ -201,7 +217,8 @@ void use_hints(FILE *fp)
   if (((currentFunction->ReturnType & VTK_PARSE_UNQUALIFIED_TYPE)
        != VTK_PARSE_FLOAT_PTR) &&
       ((currentFunction->ReturnType & VTK_PARSE_UNQUALIFIED_TYPE)
-       != VTK_PARSE_DOUBLE_PTR))
+       != VTK_PARSE_DOUBLE_PTR) &&
+      !isBoundingBox)
     {
     fprintf(fp,INDENT "  sprintf(tempResult,\"");
     }
@@ -319,12 +336,28 @@ void use_hints(FILE *fp)
         fprintf(fp,"%%I64u ");
         }
       break;
+
+    case VTK_PARSE_OBJECT:
+      if (isBoundingBox)
+        {
+        fprintf(fp,INDENT "  char converted[1024];\n");
+        fprintf(fp,INDENT "  *converted = '\\0';\n");
+        for (i = 0; i < 6; i++)
+          {
+          fprintf(fp,INDENT "  Tcl_PrintDouble(interp,temp%i.GetBound(%i), converted);\n",
+                  MAX_ARGS,i);
+          fprintf(fp,INDENT "  strcat(tempResult, \" \");\n");
+          fprintf(fp,INDENT "  strcat(tempResult, converted);\n");
+          }
+        }
+      break;
     }
 
   if (((currentFunction->ReturnType & VTK_PARSE_UNQUALIFIED_TYPE)
        != VTK_PARSE_FLOAT_PTR) &&
       ((currentFunction->ReturnType & VTK_PARSE_UNQUALIFIED_TYPE)
-       != VTK_PARSE_DOUBLE_PTR))
+       != VTK_PARSE_DOUBLE_PTR) &&
+      !isBoundingBox)
     {
     fprintf(fp,"\"");
     for (i = 0; i < currentFunction->HintSize; i++)
@@ -517,6 +550,15 @@ void return_result(FILE *fp)
     case VTK_PARSE_UNSIGNED___INT64_PTR:
       use_hints(fp);
       break;
+    /* Also handle special case objects. */
+    case VTK_PARSE_OBJECT:
+      if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") == 0)
+        {
+        /* Convert vtkBoundingBox into a double[6]. */
+        use_hints(fp);
+        break;
+        }
+    /* Fall through to default for other VTK_PARSE_OBJECT returns. */
     default:
       fprintf(fp,"    Tcl_SetResult(interp, const_cast<char *>(\"unable to return result.\"), TCL_VOLATILE);\n");
       break;
@@ -889,7 +931,11 @@ int checkFunctionSignature(ClassInfo *data)
     {
     if ((returnType & VTK_PARSE_INDIRECT) != VTK_PARSE_POINTER)
       {
-      args_ok = 0;
+      /* Special case handled explicitly (converted to 6 doubles): */
+      if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") != 0)
+        {
+        args_ok = 0;
+        }
       }
     else if (!isClassWrapped(currentFunction->ReturnClass))
       {

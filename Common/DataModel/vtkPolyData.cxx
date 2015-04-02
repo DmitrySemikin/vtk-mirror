@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkPolyData.h"
 
+#include "vtkBoundingBox.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkCriticalSection.h"
@@ -605,9 +606,7 @@ void vtkPolyData::ComputeBounds()
     cella[3] = this->GetStrips();
 
     // carefully compute the bounds
-    int doneOne = 0;
-    this->Bounds[0] = this->Bounds[2] = this->Bounds[4] =  VTK_DOUBLE_MAX;
-    this->Bounds[1] = this->Bounds[3] = this->Bounds[5] = -VTK_DOUBLE_MAX;
+    vtkBoundingBox bbox;
 
     // Iterate over cells's points
     for (t = 0; t < 4; t++)
@@ -617,20 +616,11 @@ void vtkPolyData::ComputeBounds()
         for (i = 0;  i < npts; i++)
           {
           this->Points->GetPoint( pts[i], x );
-          this->Bounds[0] = (x[0] < this->Bounds[0] ? x[0] : this->Bounds[0]);
-          this->Bounds[1] = (x[0] > this->Bounds[1] ? x[0] : this->Bounds[1]);
-          this->Bounds[2] = (x[1] < this->Bounds[2] ? x[1] : this->Bounds[2]);
-          this->Bounds[3] = (x[1] > this->Bounds[3] ? x[1] : this->Bounds[3]);
-          this->Bounds[4] = (x[2] < this->Bounds[4] ? x[2] : this->Bounds[4]);
-          this->Bounds[5] = (x[2] > this->Bounds[5] ? x[2] : this->Bounds[5]);
-          doneOne = 1;
+          bbox.AddPoint(x);
           }
         }
       }
-    if (!doneOne)
-      {
-      vtkMath::UninitializeBounds(this->Bounds);
-      }
+    bbox.GetBounds(this->Bounds);
     this->ComputeTime.Modified();
     }
 }

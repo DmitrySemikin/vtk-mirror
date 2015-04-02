@@ -130,18 +130,14 @@ int vtkPolyDataMapper::ProcessRequest(vtkInformation* request,
   return 1;
 }
 
+
 //----------------------------------------------------------------------------
-// Get the bounds for the input of this mapper as
-// (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkPolyDataMapper::GetBounds()
+vtkBoundingBox vtkPolyDataMapper::ComputeBoundingBox(vtkViewport *)
 {
+  vtkBoundingBox bbox;
+
   // do we have an input
-  if ( !this->GetNumberOfInputConnections(0))
-    {
-      vtkMath::UninitializeBounds(this->Bounds);
-      return this->Bounds;
-    }
-  else
+  if (this->GetNumberOfInputConnections(0))
     {
     if (!this->Static)
       {
@@ -158,23 +154,18 @@ double *vtkPolyDataMapper::GetBounds()
         this->GetInputAlgorithm()->Update();
         }
       }
-    this->ComputeBounds();
-
-    // if the bounds indicate NAN and subpieces are being used then
-    // return NULL
-    if (!vtkMath::AreBoundsInitialized(this->Bounds)
-        && this->NumberOfSubPieces > 1)
-      {
-      return NULL;
-      }
-    return this->Bounds;
+    double bounds[6];
+    this->ComputeBounds(bounds);
+    bbox.AddBounds(bounds);
     }
+
+  return bbox;
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyDataMapper::ComputeBounds()
+void vtkPolyDataMapper::ComputeBounds(double bounds[6])
 {
-  this->GetInput()->GetBounds(this->Bounds);
+  this->GetInput()->GetBounds(bounds);
 }
 
 //----------------------------------------------------------------------------

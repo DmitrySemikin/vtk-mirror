@@ -94,16 +94,12 @@ protected:
 
   // Description:
   // Need to loop over the hierarchy to compute bounds
-  virtual void ComputeBounds();
+  virtual void ComputeBounds(double bounds[6]);
 
   // Description:
   // Called when the PainterInformation becomes obsolete. Overridden to pass
   // CompositeDataDisplayAttributes to the painters.
   virtual void UpdatePainterInformation();
-
-  // Description:
-  // Time stamp for computation of bounds.
-  vtkTimeStamp BoundsMTime;
 
   // Description:
   // Composite data set attributes.

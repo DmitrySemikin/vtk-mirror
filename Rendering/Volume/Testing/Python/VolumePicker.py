@@ -137,7 +137,8 @@ class VolumePicker(vtk.test.Testing.vtkTest):
         bone.SetUserTransform(transform)
         imageActor.SetUserTransform(transform)
 
-        c = volume.GetCenter()
+        c = [0, 0, 0]
+        volume.GetCenter(ren, c)
 
         volumeClip = vtk.vtkPlane()
         volumeClip.SetNormal(0, 1, 0)

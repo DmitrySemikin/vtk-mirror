@@ -181,11 +181,8 @@ void vtkTexturedButtonRepresentation::
 PlaceWidget(double scale, double xyz[3], double normal[3])
 {
   // Translate the center
-  double bds[6], center[3];
-  this->Actor->GetBounds(bds);
-  center[0] = (bds[0]+bds[1]) / 2.0;
-  center[1] = (bds[2]+bds[3]) / 2.0;;
-  center[2] = (bds[4]+bds[5]) / 2.0;;
+  double center[3];
+  this->Actor->GetCenter(this->Renderer, center);
 
   this->Actor->AddPosition(center[0]-xyz[0],
                            center[1]-xyz[1],
@@ -215,7 +212,7 @@ PlaceWidget(double scale, double xyz[3], double normal[3])
 //-------------------------------------------------------------------------
 void vtkTexturedButtonRepresentation::PlaceWidget(double bds[6])
 {
-  double bounds[6], center[3], aBds[6], aCenter[3];
+  double bounds[6], center[3], aCenter[3];
 
   this->AdjustBounds(bds, bounds, center);
   for (int i=0; i<6; i++)
@@ -227,10 +224,8 @@ void vtkTexturedButtonRepresentation::PlaceWidget(double bds[6])
                              (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
 
   // Get the bounds of the actor
-  this->Actor->GetBounds(aBds);
-  aCenter[0] = (aBds[0]+aBds[1]) / 2.0;
-  aCenter[1] = (aBds[2]+aBds[3]) / 2.0;;
-  aCenter[2] = (aBds[4]+aBds[5]) / 2.0;;
+  vtkBoundingBox aBBox = this->Actor->ComputeBoundingBox(this->Renderer);
+  aBBox.GetCenter(aCenter);
 
   // Now fit the actor bounds in the place bounds by tampering with its
   // transform.
@@ -244,13 +239,13 @@ void vtkTexturedButtonRepresentation::PlaceWidget(double bds[6])
   double s[3], sMin;
   for (int i=0; i < 3; ++i)
     {
-    if ( (bounds[2*i+1]-bounds[2*i]) <= 0.0 || (aBds[2*i+1]-aBds[2*i]) <= 0.0 )
+    if ( (bounds[2*i+1]-bounds[2*i]) <= 0.0 || aBBox.GetLength(i) <= 0.0 )
       {
       s[i] = VTK_FLOAT_MAX;
       }
     else
       {
-      s[i] = (bounds[2*i+1]-bounds[2*i]) / (aBds[2*i+1]-aBds[2*i]);
+      s[i] = (bounds[2*i+1]-bounds[2*i]) / aBBox.GetLength(i);
       }
     }
   sMin = (s[0]<s[1] ? (s[0]<s[2] ? s[0] : s[2]) : (s[1]<s[2] ? s[1] : s[2]) );
@@ -443,9 +438,10 @@ HasTranslucentPolygonalGeometry()
 
 
 //----------------------------------------------------------------------
-double *vtkTexturedButtonRepresentation::GetBounds()
+vtkBoundingBox
+vtkTexturedButtonRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
-  return this->Actor->GetBounds();
+  return this->Actor->ComputeBoundingBox(vp);
 }
 
 //----------------------------------------------------------------------

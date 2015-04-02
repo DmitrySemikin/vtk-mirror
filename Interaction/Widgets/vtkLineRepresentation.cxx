@@ -15,13 +15,14 @@
 #include "vtkLineRepresentation.h"
 #include "vtkPointHandleRepresentation3D.h"
 #include "vtkActor.h"
+#include "vtkBox.h"
+#include "vtkBoundingBox.h"
 #include "vtkCamera.h"
 #include "vtkLineSource.h"
 #include "vtkSphereSource.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkPolyData.h"
 #include "vtkCallbackCommand.h"
-#include "vtkBox.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
 #include "vtkRenderWindowInteractor.h"
@@ -126,9 +127,6 @@ vtkLineRepresentation::vtkLineRepresentation()
 
   this->ClampToBounds = 0;
 
-  // The bounding box
-  this->BoundingBox = vtkBox::New();
-
   this->LinePicker = vtkCellPicker::New();
   this->LinePicker->SetTolerance(0.005); //need some fluff
   this->LinePicker->AddPickList( this->LineActor );
@@ -184,8 +182,6 @@ vtkLineRepresentation::~vtkLineRepresentation()
   this->SelectedEndPoint2Property->Delete();
   this->LineProperty->Delete();
   this->SelectedLineProperty->Delete();
-
-  this->BoundingBox->Delete();
 
   delete [] this->DistanceAnnotationFormat;
   this->DistanceAnnotationFormat = NULL;
@@ -625,15 +621,17 @@ void vtkLineRepresentation::SetRepresentationState(int state)
     }
 }
 
-//----------------------------------------------------------------------
-double *vtkLineRepresentation::GetBounds()
+//----------------------------------------------------------------------------
+vtkBoundingBox vtkLineRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
-  this->BoundingBox->SetBounds(this->LineActor->GetBounds());
-  this->BoundingBox->AddBounds(this->Handle[0]->GetBounds());
-  this->BoundingBox->AddBounds(this->Handle[1]->GetBounds());
 
-  return this->BoundingBox->GetBounds();
+  vtkBoundingBox bbox;
+  bbox.AddBox(this->LineActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->Handle[0]->ComputeBoundingBox(vp));
+  bbox.AddBox(this->Handle[1]->ComputeBoundingBox(vp));
+
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

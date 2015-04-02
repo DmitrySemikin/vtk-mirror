@@ -686,29 +686,28 @@ void vtkMoleculeMapper::ReleaseGraphicsResources(vtkWindow *w)
   this->BondGlyphMapper->ReleaseGraphicsResources(w);
 }
 
-double *vtkMoleculeMapper::GetBounds()
+//----------------------------------------------------------------------------
+vtkBoundingBox vtkMoleculeMapper::ComputeBoundingBox(vtkViewport *)
 {
-  vtkMolecule *input = this->GetInput();
-  if (!input)
-    {
-    vtkMath::UninitializeBounds(this->Bounds);
-    }
-  else
+  vtkBoundingBox bbox;
+  if (vtkMolecule *input = this->GetInput())
     {
     if (!this->Static)
       {
       this->Update();
       }
-    input->GetBounds(this->Bounds);
+    double bounds[6];
+    input->GetBounds(bounds);
     // Pad bounds by 3 Angstrom to contain spheres, etc
-    this->Bounds[0] -= 3.0;
-    this->Bounds[1] += 3.0;
-    this->Bounds[2] -= 3.0;
-    this->Bounds[3] += 3.0;
-    this->Bounds[4] -= 3.0;
-    this->Bounds[5] += 3.0;
+    bounds[0] -= 3.0;
+    bounds[1] += 3.0;
+    bounds[2] -= 3.0;
+    bounds[3] += 3.0;
+    bounds[4] -= 3.0;
+    bounds[5] += 3.0;
+    bbox.SetBounds(bounds);
     }
-  return this->Bounds;
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

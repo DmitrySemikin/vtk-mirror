@@ -174,7 +174,8 @@ int vtkFocalPlanePointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkFocalPlanePointPlacer::ValidateWorldPosition( double* worldPos )
+int vtkFocalPlanePointPlacer::ValidateWorldPosition(vtkRenderer *,
+                                                    double* worldPos )
 {
   double tolerance[3] = { 1e-12, 1e-12, 1e-12 };
   if ( this->PointBounds[0] < this->PointBounds[1] &&
@@ -187,8 +188,9 @@ int vtkFocalPlanePointPlacer::ValidateWorldPosition( double* worldPos )
 }
 
 //----------------------------------------------------------------------
-int vtkFocalPlanePointPlacer::ValidateWorldPosition( double* worldPos,
-                                                     double* vtkNotUsed(worldOrient) )
+int vtkFocalPlanePointPlacer::ValidateWorldPosition(vtkRenderer *,
+                                                    double* worldPos,
+                                                    double* vtkNotUsed(worldOrient) )
 {
   double tolerance[3] = { 1e-12, 1e-12, 1e-12 };
   if ( this->PointBounds[0] < this->PointBounds[1] &&

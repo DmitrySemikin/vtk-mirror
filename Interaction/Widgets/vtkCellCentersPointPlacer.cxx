@@ -175,14 +175,14 @@ int vtkCellCentersPointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkCellCentersPointPlacer::ValidateWorldPosition( double worldPos[3],
-                                           double *vtkNotUsed(worldOrient) )
+int vtkCellCentersPointPlacer::ValidateWorldPosition(
+    vtkRenderer *ren,  double worldPos[3], double *vtkNotUsed(worldOrient) )
 {
-  return this->ValidateWorldPosition( worldPos );
+  return this->ValidateWorldPosition( ren, worldPos );
 }
 
 //----------------------------------------------------------------------
-int vtkCellCentersPointPlacer::ValidateWorldPosition(
+int vtkCellCentersPointPlacer::ValidateWorldPosition(vtkRenderer *,
                      double vtkNotUsed(worldPos)[3] )
 {
   return 1;

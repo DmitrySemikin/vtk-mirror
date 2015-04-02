@@ -47,10 +47,7 @@ public:
   // called by the actor.
   void Render(vtkRenderer *ren, vtkActor *a);
 
-  // Description:
-  // Standard vtkProp method to get 3D bounds of a 3D prop
-  double *GetBounds();
-  void GetBounds(double bounds[6]) { this->Superclass::GetBounds( bounds ); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Release the underlying resources associated with this mapper
@@ -82,6 +79,7 @@ protected:
   // Description:
   // Need to loop over the hierarchy to compute bounds
   void ComputeBounds();
+  double LegacyBounds[6];
 
   // Description:
   // Time stamp for computation of bounds.

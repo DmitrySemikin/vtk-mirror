@@ -1596,9 +1596,12 @@ void vtkParallelopipedRepresentation::GetPolyData(vtkPolyData *pd)
 }
 
 //----------------------------------------------------------------------------
-double *vtkParallelopipedRepresentation::GetBounds()
+vtkBoundingBox
+vtkParallelopipedRepresentation::ComputeBoundingBox(vtkViewport *)
 {
-  return this->Points->GetBounds();
+  double bounds[6];
+  this->Points->GetBounds(bounds);
+  return vtkBoundingBox(bounds);
 }
 
 //----------------------------------------------------------------------------

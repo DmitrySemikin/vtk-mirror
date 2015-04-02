@@ -508,36 +508,19 @@ void vtkShadowMapBakerPass::Render(const vtkRenderState *s)
       r->SetAutomaticLightCreation(false);
 
       r->UpdateLightsGeometryToFollowCamera();
-      double bb[6];
-      vtkMath::UninitializeBounds(bb);
+
       vtkPropCollection* props = r->GetViewProps();
       vtkCollectionSimpleIterator cookie;
       props->InitTraversal(cookie);
       vtkProp* prop;
-      bool first = true;
+      vtkBoundingBox bbox;
       while((prop = props->GetNextProp(cookie)) != NULL)
         {
-        double* bounds = prop->GetBounds();
-        if(first)
-          {
-          bb[0] = bounds[0];
-          bb[1] = bounds[1];
-          bb[2] = bounds[2];
-          bb[3] = bounds[3];
-          bb[4] = bounds[4];
-          bb[5] = bounds[5];
-          }
-        else
-          {
-          bb[0] = (bb[0] < bounds[0] ? bb[0] : bounds[0]);
-          bb[1] = (bb[1] > bounds[1] ? bb[1] : bounds[1]);
-          bb[2] = (bb[2] < bounds[2] ? bb[2] : bounds[2]);
-          bb[3] = (bb[3] > bounds[3] ? bb[3] : bounds[3]);
-          bb[4] = (bb[4] < bounds[4] ? bb[4] : bounds[4]);
-          bb[5] = (bb[5] > bounds[5] ? bb[5] : bounds[5]);
-          }
-        first = false;
+        bbox.AddBox(prop->ComputeBoundingBox(r));
         }
+
+      double bb[6];
+      bbox.GetBounds(bb);
 
       lights->InitTraversal();
       l=lights->GetNextItem();

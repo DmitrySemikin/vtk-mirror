@@ -90,7 +90,7 @@ public:
   // Description:
   // Given a world position check the validity of this
   // position according to the constraints of the placer
-  virtual int ValidateWorldPosition( double worldPos[3] );
+  virtual int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3] );
 
   // Description:
   // Given a display position, check the validity of this position.
@@ -99,7 +99,7 @@ public:
   // Description:
   // Given a world position and a world orientation,
   // validate it according to the constraints of the placer.
-  virtual int ValidateWorldPosition( double worldPos[3],
+  virtual int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3],
                                      double worldOrient[9] );
 
   // Description:

@@ -61,7 +61,6 @@ vtkAMRVolumeMapper::vtkAMRVolumeMapper()
   this->ResamplerUpdateTolerance = 10e-8;
   this->GridNeedsToBeUpdated = true;
   this->UseDefaultThreading = false;
-  vtkMath::UninitializeBounds(this->Bounds);
 }
 
 //----------------------------------------------------------------------------
@@ -112,22 +111,19 @@ void vtkAMRVolumeMapper::SetInputConnection (int port, vtkAlgorithmOutput *input
     this->Grid = NULL;
     }
 }
+
 //----------------------------------------------------------------------------
-double *vtkAMRVolumeMapper::GetBounds()
+vtkBoundingBox vtkAMRVolumeMapper::ComputeBoundingBox(vtkViewport *)
 {
-  vtkOverlappingAMR*hdata;
-  hdata =
-    vtkOverlappingAMR::SafeDownCast
-    (this->Resampler->GetInputDataObject(0,0));
-  if (!hdata)
+  vtkBoundingBox bbox;
+  if (vtkOverlappingAMR *hdata =
+      vtkOverlappingAMR::SafeDownCast(this->Resampler->GetInputDataObject(0,0)))
     {
-    vtkMath::UninitializeBounds(this->Bounds);
+    double bounds[6];
+    hdata->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
-  else
-    {
-    hdata->GetBounds(this->Bounds);
-    }
-  return this->Bounds;
+  return bbox;
 }
 //----------------------------------------------------------------------------
 int vtkAMRVolumeMapper::FillInputPortInformation(
@@ -398,8 +394,7 @@ void vtkAMRVolumeMapper::UpdateResamplerFrustrumMethod(vtkRenderer *ren,
     }
   else
     {
-    // Make sure the bounds are up to date
-    this->GetBounds(bounds);
+    this->ComputeBoundingBox(ren).GetBounds(bounds);
     }
 
   double computed_bounds[6];

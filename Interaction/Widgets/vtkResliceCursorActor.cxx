@@ -138,42 +138,26 @@ void vtkResliceCursorActor::ReleaseGraphicsResources(vtkWindow *window)
 }
 
 //-------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkResliceCursorActor::GetBounds()
+vtkBoundingBox vtkResliceCursorActor::ComputeBoundingBox(vtkViewport *vp)
 {
-  // we cannot initialize the Bounds the same way vtkBoundingBox does because
-  // vtkProp3D::GetLength() does not check if the Bounds are initialized or
-  // not and makes a call to sqrt(). This call to sqrt with invalid values
-  // would raise a floating-point overflow exception (notably on BCC).
-  // As vtkMath::UninitializeBounds initialized finite unvalid bounds, it
-  // passes silently and GetLength() returns 0.
-  vtkMath::UninitializeBounds(this->Bounds);
-
   this->UpdateViewProps();
 
-  vtkBoundingBox *bb = new vtkBoundingBox();
-
-  double bounds[6];
+  vtkBoundingBox bb;
   for (int i = 0; i < 3; i++)
     {
     if (this->CursorCenterlineActor[i]->GetVisibility()
         && this->CursorCenterlineActor[i]->GetUseBounds())
       {
-      this->CursorCenterlineActor[i]->GetBounds(bounds);
-      bb->AddBounds(bounds);
+      bb.AddBox(this->CursorCenterlineActor[i]->ComputeBoundingBox(vp));
       }
     if (this->CursorThickSlabActor[i]->GetVisibility()
         && this->CursorThickSlabActor[i]->GetUseBounds())
       {
-      this->CursorThickSlabActor[i]->GetBounds(bounds);
-      bb->AddBounds(bounds);
+      bb.AddBox(this->CursorThickSlabActor[i]->ComputeBoundingBox(vp));
       }
     }
 
-  bb->GetBounds(this->Bounds);
-
-  delete bb;
-  return this->Bounds;
+  return bb;
 }
 
 //-------------------------------------------------------------------------

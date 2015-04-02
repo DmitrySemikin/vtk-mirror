@@ -30,6 +30,7 @@
 class vtkBoundedPlanePointPlacer;
 class vtkImageActor;
 class vtkRenderer;
+class vtkViewport;
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkImageActorPointPlacer : public vtkPointPlacer
 {
@@ -70,12 +71,13 @@ public:
   // if the world position is valid according to the constraints
   // of the internal placer (essentially - is this world position
   // on the image?)
-  int ValidateWorldPosition( double worldPos[3] );
+  int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3] );
 
   // Description:
   // This method is identical to the one above since the bounded
   // plane point placer ignores orientation
-  int ValidateWorldPosition( double worldPos[3],
+  int ValidateWorldPosition( vtkRenderer *ren,
+                             double worldPos[3],
                              double worldOrient[9]);
 
 
@@ -95,7 +97,7 @@ public:
   // to update itself, which may cause the MTime to change,
   // which would then cause the representation to update
   // all of its points
-  int UpdateInternalState();
+  int UpdateInternalState(vtkRenderer *ren);
 
   // Description:
   // Set / get the reference vtkImageActor used to place the points.

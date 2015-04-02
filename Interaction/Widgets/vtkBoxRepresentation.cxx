@@ -150,7 +150,6 @@ vtkBoxRepresentation::vtkBoxRepresentation()
   bounds[4] = -0.5;
   bounds[5] = 0.5;
   // Points 8-14 are down by PositionHandles();
-  this->BoundingBox = vtkBox::New();
   this->PlaceWidget(bounds);
 
   //Manage the picking stuff
@@ -209,7 +208,6 @@ vtkBoxRepresentation::~vtkBoxRepresentation()
   this->HexPicker->Delete();
 
   this->Transform->Delete();
-  this->BoundingBox->Delete();
   this->PlanePoints->Delete();
   this->PlaneNormals->Delete();
   this->Matrix->Delete();
@@ -1057,12 +1055,11 @@ void vtkBoxRepresentation::SetInteractionState(int state)
     }
 }
 
-//----------------------------------------------------------------------
-double *vtkBoxRepresentation::GetBounds()
+//----------------------------------------------------------------------------
+vtkBoundingBox vtkBoxRepresentation::ComputeBoundingBox(vtkViewport *viewport)
 {
   this->BuildRepresentation();
-  this->BoundingBox->SetBounds(this->HexActor->GetBounds());
-  return this->BoundingBox->GetBounds();
+  return this->HexActor->ComputeBoundingBox(viewport);
 }
 
 //----------------------------------------------------------------------------

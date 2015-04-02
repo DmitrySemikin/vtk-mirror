@@ -32,6 +32,8 @@
 
 #include <vtksys/ios/sstream>
 
+#include <algorithm>
+
 #define VTK_POLAR_AXES_ACTOR_RTOL ( 1. - 10. * VTK_DBL_EPSILON )
 
 vtkStandardNewMacro(vtkPolarAxesActor);
@@ -504,6 +506,12 @@ void vtkPolarAxesActor::GetBounds( double& xmin, double& xmax,
 double *vtkPolarAxesActor::GetBounds()
 {
   return this->Bounds;
+}
+
+//-----------------------------------------------------------------------------
+vtkBoundingBox vtkPolarAxesActor::ComputeBoundingBox(vtkViewport *)
+{
+  return vtkBoundingBox(this->Bounds);
 }
 
 //-----------------------------------------------------------------------------

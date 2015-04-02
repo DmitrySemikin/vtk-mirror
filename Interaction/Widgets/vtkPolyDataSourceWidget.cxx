@@ -17,8 +17,7 @@
 
 #include "vtkDataSet.h"
 #include "vtkProp3D.h"
-
-
+#include "vtkRenderer.h"
 
 vtkPolyDataSourceWidget::vtkPolyDataSourceWidget() : vtk3DWidget()
 {
@@ -32,7 +31,7 @@ void vtkPolyDataSourceWidget::PlaceWidget()
 
   if ( this->Prop3D )
     {
-    this->Prop3D->GetBounds(bounds);
+    this->Prop3D->ComputeBoundingBox(this->CurrentRenderer).GetBounds(bounds);
     }
   else if ( this->GetInput() )
     {

@@ -91,7 +91,7 @@ protected:
   // Called in GetBounds(). When this method is called, the consider the input
   // to be updated depending on whether this->Static is set or not. This method
   // simply obtains the bounds from the data-object and returns it.
-  virtual void ComputeBounds();
+  virtual void ComputeBounds(double bounds[6]);
 
   // Description:
   // Make sure an appropriate shader is defined, compiled and bound.  This method

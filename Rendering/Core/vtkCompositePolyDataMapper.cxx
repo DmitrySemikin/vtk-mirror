@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkCompositePolyDataMapper.h"
 
+#include "vtkBoundingBox.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkCompositeDataPipeline.h"
 #include "vtkCompositeDataSet.h"
@@ -202,6 +203,7 @@ void vtkCompositePolyDataMapper::Render(vtkRenderer *ren, vtkActor *a)
     this->TimeToDraw += this->Internal->Mappers[i]->GetTimeToDraw();
     }
 }
+
 vtkExecutive* vtkCompositePolyDataMapper::CreateDefaultExecutive()
 {
   return vtkCompositeDataPipeline::New();
@@ -210,7 +212,7 @@ vtkExecutive* vtkCompositePolyDataMapper::CreateDefaultExecutive()
 //Looks at each DataSet and finds the union of all the bounds
 void vtkCompositePolyDataMapper::ComputeBounds()
 {
-  vtkMath::UninitializeBounds(this->Bounds);
+  vtkMath::UninitializeBounds(this->LegacyBounds);
 
   vtkInformation* inInfo = this->GetExecutive()->GetInputInformation(0,0);
   vtkCompositeDataSet *input = vtkCompositeDataSet::SafeDownCast(
@@ -225,7 +227,7 @@ void vtkCompositePolyDataMapper::ComputeBounds()
       this->GetExecutive()->GetInputData(0, 0));
     if ( pd )
       {
-      pd->GetBounds( this->Bounds );
+      pd->GetBounds( this->LegacyBounds );
       }
     return;
     }
@@ -235,50 +237,27 @@ void vtkCompositePolyDataMapper::ComputeBounds()
   vtkCompositeDataIterator* iter = input->NewIterator();
   iter->GoToFirstItem();
   double bounds[6];
-  int i;
+  vtkBoundingBox bbox;
 
   while (!iter->IsDoneWithTraversal())
     {
     vtkPolyData *pd = vtkPolyData::SafeDownCast(iter->GetCurrentDataObject());
     if (pd)
       {
-      // If this isn't the first time through, expand bounds
-      // we've compute so far based on the bounds of this
-      // block
-      if ( vtkMath::AreBoundsInitialized(this->Bounds) )
-        {
-        pd->GetBounds(bounds);
-        for(i=0; i<3; i++)
-          {
-          this->Bounds[i*2] =
-            (bounds[i*2]<this->Bounds[i*2])?
-            (bounds[i*2]):(this->Bounds[i*2]);
-          this->Bounds[i*2+1] =
-            (bounds[i*2+1]>this->Bounds[i*2+1])?
-            (bounds[i*2+1]):(this->Bounds[i*2+1]);
-          }
-        }
-      // If this is our first time through, just get the bounds
-      // of the data as the initial bounds
-      else
-        {
-        pd->GetBounds(this->Bounds);
-        }
+      pd->GetBounds(bounds);
+      bbox.AddBounds(bounds);
       }
     iter->GoToNextItem();
     }
   iter->Delete();
+  bbox.GetBounds(this->LegacyBounds);
   this->BoundsMTime.Modified();
 }
 
-double *vtkCompositePolyDataMapper::GetBounds()
+vtkBoundingBox vtkCompositePolyDataMapper::ComputeBoundingBox(vtkViewport *)
 {
-  if ( ! this->GetExecutive()->GetInputData(0, 0) )
-    {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
-    }
-  else
+  vtkBoundingBox bbox;
+  if (this->GetExecutive()->GetInputData(0, 0))
     {
     this->Update();
 
@@ -289,8 +268,9 @@ double *vtkCompositePolyDataMapper::GetBounds()
       this->ComputeBounds();
       }
 
-    return this->Bounds;
+    bbox.AddBounds(this->LegacyBounds);
     }
+  return bbox;
 }
 
 void vtkCompositePolyDataMapper::ReleaseGraphicsResources( vtkWindow *win )

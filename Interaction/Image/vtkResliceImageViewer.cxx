@@ -377,9 +377,6 @@ void vtkResliceImageViewer::UpdatePointPlacer()
     double origin[3];
     input->GetOrigin(origin);
 
-    double bounds[6];
-    this->ImageActor->GetBounds(bounds);
-
     int displayExtent[6];
     this->ImageActor->GetDisplayExtent(displayExtent);
 

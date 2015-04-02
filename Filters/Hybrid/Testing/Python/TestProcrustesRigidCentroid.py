@@ -153,9 +153,5 @@ ren3.GetActiveCamera().SetPosition(1, -1, 0)
 ren3.ResetCamera()
 
 renWin.Render()
-print Actor1b.GetCenter()
-print Actor2b.GetCenter()
-print Actor3b.GetCenter()
-
 iren.Initialize()
 #iren.Start()

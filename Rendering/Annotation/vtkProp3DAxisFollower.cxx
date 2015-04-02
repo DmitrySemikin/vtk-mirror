@@ -291,7 +291,8 @@ void vtkProp3DAxisFollower::ComputeMatrix()
       // Don't apply the user matrix when retrieving the center.
       this->Device->SetUserMatrix(NULL);
 
-      double* center = this->Device->GetCenter();
+      double center[3];
+      this->Device->GetCenter(this->Viewport.GetPointer(), center);
       pivotPoint[0] = center[0];
       pivotPoint[1] = center[1];
       pivotPoint[2] = center[2];
@@ -431,10 +432,10 @@ void vtkProp3DAxisFollower::ComputerAutoCenterTranslation(
     return;
     }
 
-  double *bounds = this->GetProp3D()->GetBounds();
+  vtkBoundingBox bbox = this->GetProp3D()->ComputeBoundingBox(this->Viewport);
 
   // Offset by half of width.
-  double halfWidth  = (bounds[1] - bounds[0]) * 0.5 * this->Scale[0];
+  double halfWidth  = bbox.GetLength(0) * 0.5 * this->Scale[0];
 
   if(this->TextUpsideDown == 1)
     {
@@ -480,9 +481,11 @@ int vtkProp3DAxisFollower::TestDistanceVisibility()
     if(dist > maxVisibleDistanceFromCamera)
       {
       // Need to make sure we are not looking at a flat axis and therefore should enable it anyway
-      if(this->Axis)
+      vtkBoundingBox bbox = this->Axis
+          ? this->Axis->ComputeBoundingBox(this->Viewport)
+          : vtkBoundingBox();
+      if(bbox.IsValid())
         {
-        vtkBoundingBox bbox(this->Axis->GetBounds());
         return (bbox.GetDiagonalLength() > (cameraClippingRange[1] - cameraClippingRange[0])) ? 1 : 0;
         }
       return 0;

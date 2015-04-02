@@ -125,11 +125,7 @@ public:
   vtkAssemblyPath *GetNextPath();
   int GetNumberOfPaths();
 
-  // Description:
-  // Get the bounds for the assembly as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  void GetBounds(double bounds[6])
-    { this->vtkProp3D::GetBounds( bounds ); }
-  double *GetBounds();
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Override default GetMTime method to also consider all of the

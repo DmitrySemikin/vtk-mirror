@@ -177,6 +177,15 @@ void use_hints(FILE *fp)
     case VTK_PARSE_UNSIGNED_LONG_LONG_PTR:
     case VTK_PARSE_UNSIGNED___INT64_PTR:
       break;
+
+    case VTK_PARSE_OBJECT:
+      if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") == 0)
+        {
+        fprintf(fp,"  double temp%iBounds[6];\n", MAX_ARGS);
+        fprintf(fp,"  temp%i.GetBounds(temp%iBounds);\n", MAX_ARGS, MAX_ARGS);
+        fprintf(fp,"  return vtkJavaMakeJArrayOfDoubleFromDouble(env,temp%iBounds,6);\n", MAX_ARGS);
+        }
+      break;
     }
 }
 
@@ -242,6 +251,13 @@ void return_result(FILE *fp)
     case VTK_PARSE_UNSIGNED_LONG_LONG_PTR:
     case VTK_PARSE_UNSIGNED___INT64_PTR:
       fprintf(fp,"jarray ");
+      break;
+    /* vtkBoundingBox gets converted into a double[6]. */
+    case VTK_PARSE_OBJECT:
+      if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") == 0)
+        {
+        fprintf(fp,"jarray ");
+        }
       break;
     }
 }
@@ -509,6 +525,15 @@ void do_return(FILE *fp)
     case VTK_PARSE_BOOL_PTR:
       use_hints(fp);
       break;
+      /* Also handle special case objects. */
+      case VTK_PARSE_OBJECT:
+        if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") == 0)
+          {
+          /* Convert vtkBoundingBox into a double[6]. */
+          use_hints(fp);
+          break;
+          }
+      /* Fall through to default for other VTK_PARSE_OBJECT returns. */
     default: fprintf(fp,"  return temp%i;\n", MAX_ARGS); break;
     }
 }
@@ -953,7 +978,11 @@ int checkFunctionSignature(ClassInfo *data)
     {
     if ((rType & VTK_PARSE_INDIRECT) != VTK_PARSE_POINTER)
       {
-      args_ok = 0;
+      /* Special case handled explicitly (converted to 6 doubles): */
+      if (strcmp(currentFunction->ReturnClass, "vtkBoundingBox") != 0)
+        {
+        args_ok = 0;
+        }
       }
     else if (!isClassWrapped(currentFunction->ReturnClass))
       {

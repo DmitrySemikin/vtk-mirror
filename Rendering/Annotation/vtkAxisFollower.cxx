@@ -261,7 +261,7 @@ void vtkAxisFollower::ComputeTransformMatrix(vtkRenderer *ren)
 
     if(this->AutoCenter)
       {
-      this->GetMapper()->GetCenter(pivotPoint);
+      this->GetMapper()->GetCenter(ren, pivotPoint);
       }
 
     // Move pivot point to origin
@@ -386,7 +386,7 @@ void vtkAxisFollower::ComputeRotationAndTranlation(vtkRenderer *ren, double tran
 }
 
 //----------------------------------------------------------------------
-void vtkAxisFollower::ComputerAutoCenterTranslation(
+void vtkAxisFollower::ComputerAutoCenterTranslation(vtkViewport *vp,
   const double& vtkNotUsed(autoScaleFactor), double translation[3])
 {
   if(!translation)
@@ -395,10 +395,10 @@ void vtkAxisFollower::ComputerAutoCenterTranslation(
     return;
     }
 
-  double *bounds = this->GetMapper()->GetBounds();
+  vtkBoundingBox bbox = this->GetMapper()->ComputeBoundingBox(vp);
 
   // Offset by half of width.
-  double halfWidth  = (bounds[1] - bounds[0]) * 0.5 * this->Scale[0];
+  double halfWidth  = bbox.GetLength(0) * 0.5 * this->Scale[0];
 
   if(this->TextUpsideDown == 1)
     {
@@ -426,7 +426,7 @@ void vtkAxisFollower::ComputerAutoCenterTranslation(
 }
 
 //----------------------------------------------------------------------
-int vtkAxisFollower::TestDistanceVisibility()
+int vtkAxisFollower::TestDistanceVisibility(vtkRenderer *ren)
 {
   if(!this->Camera->GetParallelProjection())
     {
@@ -446,8 +446,12 @@ int vtkAxisFollower::TestDistanceVisibility()
       // Need to make sure we are not looking at a flat axis and therefore should enable it anyway
       if(this->Axis)
         {
-        vtkBoundingBox bbox(this->Axis->GetBounds());
-        return (bbox.GetDiagonalLength() > (cameraClippingRange[1] - cameraClippingRange[0])) ? 1 : 0;
+        vtkBoundingBox bbox = this->Axis->ComputeBoundingBox(ren);
+        if (bbox.IsValid())
+          {
+          double cameraRange = cameraClippingRange[1] - cameraClippingRange[0];
+          return (bbox.GetDiagonalLength() > cameraRange) ? 1 : 0;
+          }
         }
       return 0;
       }
@@ -558,7 +562,7 @@ int vtkAxisFollower::RenderTranslucentPolygonalGeometry(vtkViewport *vp)
 //-----------------------------------------------------------------------------
 void vtkAxisFollower::Render(vtkRenderer *ren)
 {
-  if(this->EnableDistanceLOD && !this->TestDistanceVisibility())
+  if(this->EnableDistanceLOD && !this->TestDistanceVisibility(ren))
     {
     this->SetVisibility(0);
     return;

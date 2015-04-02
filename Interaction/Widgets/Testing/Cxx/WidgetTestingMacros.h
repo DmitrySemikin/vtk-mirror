@@ -521,15 +521,9 @@
                                                                         \
     double bounds[6] = {-1.0, 0.0, -10.0, 10.0, -5.0, 2.0};              \
     object->PlaceWidget(bounds);                                        \
-    double *bounds2 = object->GetBounds();                              \
-    if (bounds2 == NULL)                                                \
-      {                                                                 \
-      std::cout << "GetBounds is null." << std::endl;                   \
-      }                                                                 \
-    else                                                                \
-      {                                                                 \
-      std::cout << "Bounds = " << bounds[0] << "," << bounds[1] << "," << bounds[2] << "," << bounds[3] << "," << bounds[4] << "," << bounds[5] << std::endl; \
-      }                                                                 \
+    double bounds2[6];                                                  \
+    object->ComputeBoundingBox(ren1).GetBounds(bounds2);                \
+    std::cout << "Bounds = " << bounds[0] << "," << bounds[1] << "," << bounds[2] << "," << bounds[3] << "," << bounds[4] << "," << bounds[5] << std::endl; \
                                                                         \
     double eventPos[2] = {10.0, 10.0};                                  \
     object->StartWidgetInteraction(eventPos);                           \

@@ -94,9 +94,7 @@ public:
   // The parallelopiped polydata.
   void GetPolyData(vtkPolyData *pd);
 
-  // Description:
-  // The parallelopiped polydata.
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
   // Description:
   // Set/Get the handle properties.

@@ -15,6 +15,7 @@
 #include "vtkLODProp3D.h"
 
 #include "vtkActor.h"
+#include "vtkBoundingBox.h"
 #include "vtkCommand.h"
 #include "vtkMapper.h"
 #include "vtkMatrix4x4.h"
@@ -172,12 +173,9 @@ int vtkLODProp3D::GetNextEntryIndex()
   return index;
 }
 
-// Get the bounds of this prop. This is just the max bounds of all LODs
-double *vtkLODProp3D::GetBounds()
+vtkBoundingBox vtkLODProp3D::ComputeBoundingBox(vtkViewport *viewport)
 {
-  double newBounds[6];
-  int first = 1;
-
+  vtkBoundingBox bbox;
   // Loop through all valid entries
   for (int i = 0; i < this->NumberOfEntries; i++)
     {
@@ -190,35 +188,11 @@ double *vtkLODProp3D::GetBounds()
         }
 
       // Get the bounds of this entry
-      p->GetBounds(newBounds);
-
-      // If this is the first entry, this is the current bounds
-      if (first)
-        {
-        memcpy(this->Bounds, newBounds, 6*sizeof(double));
-        first = 0;
-        }
-      // If this is not the first entry, compare these bounds with the
-      // current bounds expanding the current ones as necessary
-      else
-        {
-        this->Bounds[0] =
-          (newBounds[0] < this->Bounds[0])?(newBounds[0]):(this->Bounds[0]);
-        this->Bounds[1] =
-          (newBounds[1] > this->Bounds[1])?(newBounds[1]):(this->Bounds[1]);
-        this->Bounds[2] =
-          (newBounds[2] < this->Bounds[2])?(newBounds[2]):(this->Bounds[2]);
-        this->Bounds[3] =
-          (newBounds[3] > this->Bounds[3])?(newBounds[3]):(this->Bounds[3]);
-        this->Bounds[4] =
-          (newBounds[4] < this->Bounds[4])?(newBounds[4]):(this->Bounds[4]);
-        this->Bounds[5] =
-          (newBounds[5] > this->Bounds[5])?(newBounds[5]):(this->Bounds[5]);
-        }
+      bbox.AddBox(p->ComputeBoundingBox(viewport));
       }
     }
 
-  return this->Bounds;
+  return bbox;
 }
 
 // Method to remove a LOD based on an ID

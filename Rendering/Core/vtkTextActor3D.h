@@ -59,10 +59,7 @@ public:
   // vtkProp method.
   void ShallowCopy(vtkProp *prop);
 
-  // Description:
-  // Get the bounds for this Prop3D as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  virtual double *GetBounds();
-  void GetBounds(double bounds[6]) {this->vtkProp3D::GetBounds( bounds );}
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Get the Freetype-derived real bounding box for the given vtkTextProperty

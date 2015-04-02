@@ -394,16 +394,23 @@ void vtkImageViewer2::UpdateDisplayExtent()
       vtkCamera *cam = this->Renderer->GetActiveCamera();
       if (cam)
         {
-        double bounds[6];
-        this->ImageActor->GetBounds(bounds);
-        double spos = bounds[this->SliceOrientation * 2];
-        double cpos = cam->GetPosition()[this->SliceOrientation];
-        double range = fabs(spos - cpos);
-        double *spacing = outInfo->Get(vtkDataObject::SPACING());
-        double avg_spacing =
-          (spacing[0] + spacing[1] + spacing[2]) / 3.0;
-        cam->SetClippingRange(
-          range - avg_spacing * 3.0, range + avg_spacing * 3.0);
+        vtkBoundingBox bbox =
+            this->ImageActor->ComputeBoundingBox(this->Renderer);
+        if (bbox.IsValid())
+          {
+          double spos = bbox.GetBound(this->SliceOrientation * 2);
+          double cpos = cam->GetPosition()[this->SliceOrientation];
+          double range = fabs(spos - cpos);
+          double *spacing = outInfo->Get(vtkDataObject::SPACING());
+          double avg_spacing =
+              (spacing[0] + spacing[1] + spacing[2]) / 3.0;
+          cam->SetClippingRange(
+                range - avg_spacing * 3.0, range + avg_spacing * 3.0);
+          }
+        else
+          {
+          vtkWarningMacro(<<"Couldn't determine image bounding box.");
+          }
         }
       }
     }

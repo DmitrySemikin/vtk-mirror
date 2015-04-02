@@ -68,7 +68,8 @@ transform.RotateWXYZ(-20, 0.0, -0.7, 0.7)
 
 volume.SetUserTransform(transform)
 
-c = volume.GetCenter()
+c = [0, 0, 0]
+volume.GetCenter(ren, c)
 
 volumeClip = vtk.vtkPlane()
 volumeClip.SetNormal(0, 1, 0)

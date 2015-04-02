@@ -119,7 +119,7 @@ public:
 
   // Description:
   // Return the bounds of the representation
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
 
 protected:
   vtkOrientedGlyphContourRepresentation();

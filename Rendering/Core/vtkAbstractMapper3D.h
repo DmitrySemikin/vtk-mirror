@@ -30,11 +30,13 @@
 #define vtkAbstractMapper3D_h
 
 #include "vtkRenderingCoreModule.h" // For export macro
+#include "vtkBoundingBox.h"// For ComputeBoundingBox
 #include "vtkAbstractMapper.h"
 
 class vtkWindow;
 class vtkDataSet;
 class vtkMatrix4x4;
+class vtkViewport;
 
 class VTKRENDERINGCORE_EXPORT vtkAbstractMapper3D : public vtkAbstractMapper
 {
@@ -43,27 +45,30 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  // Update this->Bounds as a side effect.
-  virtual double *GetBounds() = 0;
+  // Get the bounds for this Prop as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
+  // in world coordinates. NULL means that the bounds are not defined.
+  // This method has been deprecated and may not be implemented in all props.
+  // Use the overload that takes a viewport instead. This method will call the
+  // new signature with a NULL viewport.
+  VTK_LEGACY(virtual double *GetBounds());
+  VTK_LEGACY(virtual void GetBounds(double bounds[6]));
 
   // Description:
-  // Get the bounds for this mapper as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-  virtual void GetBounds(double bounds[6]);
+  // Get the bounds for this prop in world coordinates. Overrides should handle
+  // the case where @a viewport is NULL, but may fail if there not sufficient
+  // information in that case.
+  // Returns a valid (vtkBoundingBox::IsValid()) object when successful.
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Return the Center of this mapper's data.
-  double *GetCenter();
-  void GetCenter(double center[3])
-    {
-      double *rc = this->GetCenter();
-      center[0] = rc[0]; center[1] = rc[1]; center[2] = rc[2];
-    }
+  VTK_LEGACY(double* GetCenter());
+  bool GetCenter(vtkViewport *vp, double center[3]);
 
   // Description:
   // Return the diagonal length of this mappers bounding box.
-  double GetLength();
+  VTK_LEGACY(double GetLength());
+  double GetLength(vtkViewport *vp);
 
   // Description:
   // Is this a ray cast mapper? A subclass would return 1 if the
@@ -91,12 +96,16 @@ protected:
    vtkAbstractMapper3D();
    ~vtkAbstractMapper3D() {}
 
-  double Bounds[6];
-  double Center[3];
-
 private:
   vtkAbstractMapper3D(const vtkAbstractMapper3D&);  // Not implemented.
   void operator=(const vtkAbstractMapper3D&);  // Not implemented.
+
+  // No longer needed once legacy GetBounds()/GetCenter() is removed
+#ifndef VTK_LEGACY_REMOVE
+  bool InGetBounds;
+  double LegacyBounds[6];
+  double LegacyCenter[3];
+#endif
 };
 
 #endif

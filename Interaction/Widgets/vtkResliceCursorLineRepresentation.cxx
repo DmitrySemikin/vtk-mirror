@@ -102,9 +102,8 @@ ComputeInteractionState(int X, int Y, int modify)
 
   // Ensure that the axis is initialized..
   const int axis1 = this->ResliceCursorActor->GetCursorAlgorithm()->GetAxis1();
-  double bounds[6];
-  this->ResliceCursorActor->GetCenterlineActor(axis1)->GetBounds(bounds);
-  if (bounds[1] < bounds[0])
+  vtkActor *testActor = this->ResliceCursorActor->GetCenterlineActor(axis1);
+  if (!testActor->ComputeBoundingBox(this->Renderer).IsValid())
     {
     return this->InteractionState;
     }
@@ -540,23 +539,17 @@ int vtkResliceCursorLineRepresentation
 }
 
 //-------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkResliceCursorLineRepresentation::GetBounds()
+vtkBoundingBox
+vtkResliceCursorLineRepresentation::ComputeBoundingBox(vtkViewport *)
 {
-  vtkMath::UninitializeBounds(this->InitialBounds);
-
+  vtkBoundingBox bbox;
   if (vtkResliceCursor *r = this->GetResliceCursor())
     {
-    r->GetImage()->GetBounds(this->InitialBounds);
+    double bounds[6];
+    r->GetImage()->GetBounds(bounds);
+    bbox.AddBounds(bounds);
     }
-
-  //vtkBoundingBox *bb = new vtkBoundingBox();
-  //bb->AddBounds(this->ResliceCursorActor->GetBounds());
-  //bb->AddBounds(this->TexturePlaneActor->GetBounds());
-  //bb->GetBounds(bounds);
-  //delete bb;
-
-  return this->InitialBounds;
+  return bbox;
 }
 
 //-----------------------------------------------------------------------------
@@ -589,7 +582,7 @@ int vtkResliceCursorLineRepresentation::HasTranslucentPolygonalGeometry()
     (this->ImageActor->HasTranslucentPolygonalGeometry()
             && this->UseImageActor) ||
     (this->TexturePlaneActor->HasTranslucentPolygonalGeometry()
-                              && !this->UseImageActor)) ? 1 : 0;
+     && !this->UseImageActor)) ? 1 : 0;
 }
 
 //----------------------------------------------------------------------

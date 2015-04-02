@@ -142,15 +142,15 @@ int vtkPolyDataPointPlacer::ComputeWorldPosition( vtkRenderer *ren,
 }
 
 //----------------------------------------------------------------------
-int vtkPolyDataPointPlacer::ValidateWorldPosition( double worldPos[3],
-                                           double *vtkNotUsed(worldOrient) )
+int vtkPolyDataPointPlacer::ValidateWorldPosition(
+    vtkRenderer *ren, double worldPos[3], double *vtkNotUsed(worldOrient))
 {
-  return this->ValidateWorldPosition( worldPos );
+  return this->ValidateWorldPosition(ren, worldPos);
 }
 
 //----------------------------------------------------------------------
 int vtkPolyDataPointPlacer::ValidateWorldPosition(
-                     double vtkNotUsed(worldPos)[3] )
+    vtkRenderer *, double vtkNotUsed(worldPos)[3])
 {
   return 1;
 }

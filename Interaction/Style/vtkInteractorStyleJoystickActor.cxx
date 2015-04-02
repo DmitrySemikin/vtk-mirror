@@ -204,10 +204,12 @@ void vtkInteractorStyleJoystickActor::Rotate()
   vtkCamera *cam = this->CurrentRenderer->GetActiveCamera();
 
   // First get the origin of the assembly
-  double *obj_center = this->InteractionProp->GetCenter();
+  double obj_center[3];
+  this->InteractionProp->GetCenter(this->CurrentRenderer, obj_center);
 
   // GetLength gets the length of the diagonal of the bounding box
-  double boundRadius = this->InteractionProp->GetLength() * 0.5;
+  double boundRadius =
+      this->InteractionProp->GetLength(this->CurrentRenderer) * 0.5;
 
   // Get the view up and view right vectors
   double view_up[3], view_look[3], view_right[3];
@@ -317,7 +319,8 @@ void vtkInteractorStyleJoystickActor::Spin()
   vtkCamera *cam = this->CurrentRenderer->GetActiveCamera();
 
   // Get the axis to rotate around = vector from eye to origin
-  double *obj_center = this->InteractionProp->GetCenter();
+  double obj_center[3];
+  this->InteractionProp->GetCenter(this->CurrentRenderer, obj_center);
 
   double motion_vector[3];
   double view_point[3];
@@ -398,7 +401,8 @@ void vtkInteractorStyleJoystickActor::Pan()
   vtkRenderWindowInteractor *rwi = this->Interactor;
 
   // Use initial center as the origin from which to pan
-  double *obj_center = this->InteractionProp->GetCenter();
+  double obj_center[3];
+  this->InteractionProp->GetCenter(this->CurrentRenderer, obj_center);
 
   double disp_obj_center[3], new_pick_point[4], motion_vector[3];
 
@@ -455,7 +459,8 @@ void vtkInteractorStyleJoystickActor::Dolly()
   cam->GetFocalPoint(view_focus);
 
   // Use initial center as the origin from which to pan
-  double *obj_center = this->InteractionProp->GetCenter();
+  double obj_center[3];
+  this->InteractionProp->GetCenter(this->CurrentRenderer, obj_center);
 
   double disp_obj_center[3];
 
@@ -509,7 +514,8 @@ void vtkInteractorStyleJoystickActor::UniformScale()
   // Uniform scale is based on distance from center of screen,
   // and the upper half is positive, lower half is negative
   // use bounding box center as the origin from which to pan
-  double *obj_center = this->InteractionProp->GetCenter();
+  double obj_center[3];
+  this->InteractionProp->GetCenter(this->CurrentRenderer, obj_center);
 
   double disp_obj_center[3];
 

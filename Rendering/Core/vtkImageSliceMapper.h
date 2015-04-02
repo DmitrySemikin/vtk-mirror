@@ -93,12 +93,7 @@ public:
   // Get the mtime for the mapper.
   unsigned long GetMTime();
 
-  // Description:
-  // The bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  double *GetBounds();
-  void GetBounds(double bounds[6]) {
-    this->vtkAbstractMapper3D::GetBounds(bounds); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Get the plane as a homogeneous 4-vector that gives the plane

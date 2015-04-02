@@ -228,10 +228,10 @@ void vtkOpenGLRayCastImageDisplayHelper::RenderTextureInternal( vtkVolume *vol,
     // of the renderer to get the z view coordinate to use for the
     // view to world transformation of the image bounds. This way we
     // will draw the image at the depth of the center of the volume
-    ren->SetWorldPoint( vol->GetCenter()[0],
-                        vol->GetCenter()[1],
-                        vol->GetCenter()[2],
-                        1.0 );
+    double center[4];
+    vol->GetCenter(ren, center);
+    center[3] = 1.0;
+    ren->SetWorldPoint(center);
     ren->WorldToView();
     depth = ren->GetViewPoint()[2];
     }

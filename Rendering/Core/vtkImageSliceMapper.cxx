@@ -339,12 +339,12 @@ int vtkImageSliceMapper::GetSliceNumberMaxValue()
 }
 
 //----------------------------------------------------------------------------
-double *vtkImageSliceMapper::GetBounds()
+vtkBoundingBox vtkImageSliceMapper::ComputeBoundingBox(vtkViewport *)
 {
+  vtkBoundingBox bbox;
   if (!this->GetInput())
     {
-    vtkMath::UninitializeBounds(this->Bounds);
-    return this->Bounds;
+    return bbox;
     }
 
   this->UpdateInformation();
@@ -375,15 +375,17 @@ double *vtkImageSliceMapper::GetBounds()
   int swapY = (spacing[1] < 0);
   int swapZ = (spacing[2] < 0);
 
-  this->Bounds[0+swapX] = origin[0] + (extent[0] - borderX) * spacing[0];
-  this->Bounds[2+swapY] = origin[1] + (extent[2] - borderY) * spacing[1];
-  this->Bounds[4+swapZ] = origin[2] + (extent[4] - borderZ) * spacing[2];
+  double bounds[6];
+  bounds[0+swapX] = origin[0] + (extent[0] - borderX) * spacing[0];
+  bounds[2+swapY] = origin[1] + (extent[2] - borderY) * spacing[1];
+  bounds[4+swapZ] = origin[2] + (extent[4] - borderZ) * spacing[2];
 
-  this->Bounds[1-swapX] = origin[0] + (extent[1] + borderX) * spacing[0];
-  this->Bounds[3-swapY] = origin[1] + (extent[3] + borderY) * spacing[1];
-  this->Bounds[5-swapZ] = origin[2] + (extent[5] + borderZ) * spacing[2];
+  bounds[1-swapX] = origin[0] + (extent[1] + borderX) * spacing[0];
+  bounds[3-swapY] = origin[1] + (extent[3] + borderY) * spacing[1];
+  bounds[5-swapZ] = origin[2] + (extent[5] + borderZ) * spacing[2];
 
-  return this->Bounds;
+  bbox.AddBounds(bounds);
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

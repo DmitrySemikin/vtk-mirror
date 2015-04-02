@@ -314,16 +314,9 @@ void vtkAnnotatedCubeActor::ReleaseGraphicsResources(vtkWindow *win)
 }
 
 //-------------------------------------------------------------------------
-void vtkAnnotatedCubeActor::GetBounds(double bounds[6])
+vtkBoundingBox vtkAnnotatedCubeActor::ComputeBoundingBox(vtkViewport *vp)
 {
-  this->Assembly->GetBounds( bounds );
-}
-
-//-------------------------------------------------------------------------
-// Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-double *vtkAnnotatedCubeActor::GetBounds()
-{
-  return this->Assembly->GetBounds( );
+  return this->Assembly->ComputeBoundingBox(vp);
 }
 
 //-------------------------------------------------------------------------

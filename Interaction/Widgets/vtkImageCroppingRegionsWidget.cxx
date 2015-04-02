@@ -1261,7 +1261,9 @@ void vtkImageCroppingRegionsWidget::UpdateAccordingToInput()
   vtkVolumeMapper *mapper = this->GetVolumeMapper();
   if (mapper)
     {
-    this->PlaceWidget(mapper->GetBounds());
+    double bounds[6];
+    mapper->ComputeBoundingBox(this->CurrentRenderer).GetBounds(bounds);
+    this->PlaceWidget(bounds);
     this->SetPlanePositions(mapper->GetCroppingRegionPlanes());
     this->SetCroppingRegionFlags(mapper->GetCroppingRegionFlags());
     }

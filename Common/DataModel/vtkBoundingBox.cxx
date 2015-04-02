@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkBoundingBox.h"
 #include "vtkMath.h"
+#include "vtkMatrix4x4.h"
 #include "vtkPlane.h"
 #include <cassert>
 #include <math.h>
@@ -278,6 +279,32 @@ int vtkBoundingBox::Intersects(const vtkBoundingBox &bbox) const
     return 0;
     }
   return 1;
+}
+
+// ---------------------------------------------------------------------------
+void vtkBoundingBox::Transform(vtkMatrix4x4 *mat)
+{
+  double corners[8][4] = {
+    { this->MinPnt[0], this->MinPnt[1], this->MinPnt[2], 1. },
+    { this->MinPnt[0], this->MinPnt[1], this->MaxPnt[2], 1. },
+    { this->MinPnt[0], this->MaxPnt[1], this->MinPnt[2], 1. },
+    { this->MinPnt[0], this->MaxPnt[1], this->MaxPnt[2], 1. },
+    { this->MaxPnt[0], this->MinPnt[1], this->MinPnt[2], 1. },
+    { this->MaxPnt[0], this->MinPnt[1], this->MaxPnt[2], 1. },
+    { this->MaxPnt[0], this->MaxPnt[1], this->MinPnt[2], 1. },
+    { this->MaxPnt[0], this->MaxPnt[1], this->MaxPnt[2], 1. }
+  };
+
+  this->Reset();
+  for (double *pt = corners[0]; pt < corners[0] + 4 * 8; pt += 4)
+    {
+    mat->MultiplyPoint(pt, pt);
+    double invW = 1. / pt[3];
+    pt[0] *= invW;
+    pt[1] *= invW;
+    pt[2] *= invW;
+    this->AddPoint(pt);
+    }
 }
 
 // ---------------------------------------------------------------------------

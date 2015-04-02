@@ -185,12 +185,7 @@ public:
   void SetInputData(vtkGraph *input);
   vtkGraph *GetInput();
 
-  // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double* bounds)
-    { Superclass::GetBounds(bounds); }
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Access to the lookup tables used by the vertex and edge mappers.

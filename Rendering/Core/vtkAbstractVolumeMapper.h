@@ -43,12 +43,7 @@ public:
   vtkDataSet *GetDataSetInput();
   vtkDataObject *GetDataObjectInput();
 
-  // Description:
-  // Return bounding box (array of six doubles) of data expressed as
-  // (xmin,xmax, ymin,ymax, zmin,zmax).
-  virtual double *GetBounds();
-  virtual void GetBounds(double bounds[6])
-    { this->vtkAbstractMapper3D::GetBounds(bounds); };
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Control how the mapper works with scalar point data and cell attribute

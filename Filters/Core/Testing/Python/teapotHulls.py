@@ -47,7 +47,7 @@ while i < 9:
 
 byuReader.Update()
 
-diagonal = byuActor0.GetLength()
+diagonal = byuActor0.GetLength(ren1)
 i = 0
 j = -1
 while j < 2:

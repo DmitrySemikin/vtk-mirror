@@ -133,12 +133,13 @@ public:
   // Give a world position check if it is valid - does
   // it lie on the plane and within the bounds? Returns
   // 1 if it is valid, 0 otherwise.
-  int ValidateWorldPosition( double worldPos[3] );
+  int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3] );
 
   // Descrption:
   // Orientationation is ignored, and the above method
   // is called instead.
-  int ValidateWorldPosition( double worldPos[3],
+  int ValidateWorldPosition( vtkRenderer *ren,
+                             double worldPos[3],
                              double worldOrient[9]);
 
   // Description:

@@ -207,8 +207,7 @@ public:
   // Reimplemented from base class
   virtual void Render(vtkRenderer *, vtkActor *);
   virtual void ReleaseGraphicsResources(vtkWindow *);
-  double * GetBounds();
-  void GetBounds(double bounds[6]) { vtkAbstractMapper3D::GetBounds(bounds); }
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *vp);
   virtual int FillInputPortInformation(int port, vtkInformation* info);
   virtual bool GetSupportsSelection() {return true;}
 

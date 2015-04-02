@@ -146,7 +146,7 @@ void vtkProp3DButtonRepresentation::RegisterPickers()
 //-------------------------------------------------------------------------
 void vtkProp3DButtonRepresentation::PlaceWidget(double bds[6])
 {
-  double bounds[6], center[3], aBds[6], aCenter[3];
+  double bounds[6], center[3], aCenter[3];
 
   this->AdjustBounds(bds, bounds, center);
   for (int i=0; i<6; i++)
@@ -165,10 +165,8 @@ void vtkProp3DButtonRepresentation::PlaceWidget(double bds[6])
     {
     prop = (*iter).second.Prop;
 
-    prop->GetBounds(aBds);
-    aCenter[0] = (aBds[0]+aBds[1]) / 2.0;
-    aCenter[1] = (aBds[2]+aBds[3]) / 2.0;;
-    aCenter[2] = (aBds[4]+aBds[5]) / 2.0;;
+    vtkBoundingBox aBBox = prop->ComputeBoundingBox(this->Renderer);
+    aBBox.GetCenter(aCenter);
 
     // Now fit the actor bounds in the place bounds by tampering with its
     // transform.
@@ -183,13 +181,13 @@ void vtkProp3DButtonRepresentation::PlaceWidget(double bds[6])
     double s[3], sMin;
     for (int i=0; i < 3; ++i)
       {
-      if ( (bounds[2*i+1]-bounds[2*i]) <= 0.0 || (aBds[2*i+1]-aBds[2*i]) <= 0.0 )
+      if ( (bounds[2*i+1]-bounds[2*i]) <= 0.0 || aBBox.GetLength(i) <= 0.0 )
         {
         s[i] = VTK_FLOAT_MAX;
         }
       else
         {
-        s[i] = (bounds[2*i+1]-bounds[2*i]) / (aBds[2*i+1]-aBds[2*i]);
+        s[i] = (bounds[2*i+1]-bounds[2*i]) / aBBox.GetLength(i);
         }
       }
     sMin = (s[0]<s[1] ? (s[0]<s[2] ? s[0] : s[2]) : (s[1]<s[2] ? s[1] : s[2]) );
@@ -360,23 +358,23 @@ HasTranslucentPolygonalGeometry()
     }
 }
 
-
 //----------------------------------------------------------------------
-double *vtkProp3DButtonRepresentation::GetBounds()
+vtkBoundingBox
+vtkProp3DButtonRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
-  if ( !this->CurrentProp )
+  if (this->CurrentProp )
     {
-    return NULL;
+    if ( this->FollowCamera )
+      {
+      return this->Follower->ComputeBoundingBox(vp);
+      }
+    else
+      {
+      return this->CurrentProp->ComputeBoundingBox(vp);
+      }
     }
 
-  if ( this->FollowCamera )
-    {
-    return this->Follower->GetBounds();
-    }
-  else
-    {
-    return this->CurrentProp->GetBounds();
-    }
+  return vtkBoundingBox();
 }
 
 //----------------------------------------------------------------------

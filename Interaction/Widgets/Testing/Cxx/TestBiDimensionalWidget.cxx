@@ -1132,9 +1132,6 @@ int TestBiDimensionalWidget( int argc, char *argv[] )
   imageActor->SetDisplayExtent(0, 63, 0, 63, 46, 46);
   imageActor->InterpolateOn();
 
-  double bounds[6];
-  imageActor->GetBounds(bounds);
-
   // Create the RenderWindow, Renderer and both Actors
   //
   vtkSmartPointer<vtkRenderer> ren1 =

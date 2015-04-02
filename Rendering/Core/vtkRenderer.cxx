@@ -822,17 +822,13 @@ void vtkRenderer::CreateLight(void)
 // Compute the bounds of the visible props
 void vtkRenderer::ComputeVisiblePropBounds( double allBounds[6] )
 {
-  vtkProp    *prop;
-  double      *bounds;
-  int        nothingVisible=1;
-
   this->InvokeEvent(vtkCommand::ComputeVisiblePropBoundsEvent, this);
 
-  allBounds[0] = allBounds[2] = allBounds[4] = VTK_DOUBLE_MAX;
-  allBounds[1] = allBounds[3] = allBounds[5] = -VTK_DOUBLE_MAX;
-
   // loop through all props
+  vtkBoundingBox bbox;
+  vtkBoundingBox propBbox;
   vtkCollectionSimpleIterator pit;
+  vtkProp *prop = NULL;
   for (this->Props->InitTraversal(pit);
        (prop = this->Props->GetNextProp(pit)); )
     {
@@ -840,46 +836,16 @@ void vtkRenderer::ComputeVisiblePropBounds( double allBounds[6] )
     // or has no geometry, we can skip the rest
     if ( prop->GetVisibility() && prop->GetUseBounds())
       {
-      bounds = prop->GetBounds();
-      // make sure we haven't got bogus bounds
-      if ( bounds != NULL && vtkMath::AreBoundsInitialized(bounds))
+      propBbox = prop->ComputeBoundingBox(this);
+      // make sure we ain't got no bogus bounds
+      if (propBbox.IsValid())
         {
-        nothingVisible = 0;
-
-        if (bounds[0] < allBounds[0])
-          {
-          allBounds[0] = bounds[0];
-          }
-        if (bounds[1] > allBounds[1])
-          {
-          allBounds[1] = bounds[1];
-          }
-        if (bounds[2] < allBounds[2])
-          {
-          allBounds[2] = bounds[2];
-          }
-        if (bounds[3] > allBounds[3])
-          {
-          allBounds[3] = bounds[3];
-          }
-        if (bounds[4] < allBounds[4])
-          {
-          allBounds[4] = bounds[4];
-          }
-        if (bounds[5] > allBounds[5])
-          {
-          allBounds[5] = bounds[5];
-          }
+        bbox.AddBox(propBbox);
         }//not bogus
       }
     }
 
-  if ( nothingVisible )
-    {
-    vtkMath::UninitializeBounds(allBounds);
-    vtkDebugMacro(<< "Can't compute bounds, no 3D props are visible");
-    return;
-    }
+  bbox.GetBounds(allBounds);
 }
 
 double *vtkRenderer::ComputeVisiblePropBounds()

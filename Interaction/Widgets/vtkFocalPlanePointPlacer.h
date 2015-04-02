@@ -69,8 +69,8 @@ public:
   // Description:
   // Validate a world position. All world positions
   // are valid so these methods always return 1.
-  int ValidateWorldPosition( double worldPos[3] );
-  int ValidateWorldPosition( double worldPos[3],
+  int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3] );
+  int ValidateWorldPosition( vtkRenderer *ren, double worldPos[3],
                              double worldOrient[9]);
 
   // Description:

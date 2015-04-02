@@ -86,9 +86,7 @@ class VTKRENDERINGCORE_EXPORT vtkProp3DFollower : public vtkProp3D
   // Shallow copy of a follower. Overloads the virtual vtkProp method.
   void ShallowCopy(vtkProp *prop);
 
-  // Description:
-  // Return the bounds of this vtkProp3D.
-  virtual double *GetBounds();
+  vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Overload vtkProp's method for setting up assembly paths. See

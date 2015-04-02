@@ -36,7 +36,6 @@ class vtkPolyDataMapper;
 class vtkActor;
 class vtkVectorText;
 class vtkFollower;
-class vtkBox;
 class vtkCylinderSource;
 class vtkGlyph3D;
 class vtkDoubleArray;
@@ -111,7 +110,7 @@ public:
   // Description:
   // Method to satisfy superclasses' API.
   virtual void BuildRepresentation();
-  virtual double *GetBounds();
+  virtual vtkBoundingBox ComputeBoundingBox(vtkViewport *viewport);
 
   // Description:
   // Methods required by vtkProp superclass.
@@ -171,9 +170,6 @@ protected:
 
   // The distance between the two points
   double Distance;
-
-  // Support GetBounds() method
-  vtkBox *BoundingBox;
 
   // Maximum number of ticks on the 3d ruler
   int MaximumNumberOfRulerTicks;

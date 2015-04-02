@@ -628,10 +628,12 @@ void vtkSphereRepresentation::SetInteractionState(int state)
 }
 
 //----------------------------------------------------------------------
-double *vtkSphereRepresentation::GetBounds()
+vtkBoundingBox vtkSphereRepresentation::ComputeBoundingBox(vtkViewport*)
 {
   this->BuildRepresentation();
-  return this->SphereSource->GetOutput()->GetBounds();
+  double bounds[6];
+  this->SphereSource->GetOutput()->GetBounds(bounds);
+  return vtkBoundingBox(bounds);
 }
 
 //----------------------------------------------------------------------------

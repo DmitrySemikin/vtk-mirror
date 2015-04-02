@@ -17,6 +17,7 @@
 #include "vtkActor.h"
 #include "vtkAssemblyNode.h"
 #include "vtkAssemblyPath.h"
+#include "vtkBoundingBox.h"
 #include "vtkCallbackCommand.h"
 #include "vtkCamera.h"
 #include "vtkCellPicker.h"
@@ -42,7 +43,6 @@
 #include "vtkTransform.h"
 #include "vtkTubeFilter.h"
 #include "vtkInteractorObserver.h"
-#include "vtkBox.h"
 #include "vtkCommand.h"
 #include "vtkWindow.h"
 
@@ -192,9 +192,6 @@ vtkImplicitPlaneRepresentation::vtkImplicitPlaneRepresentation()
   this->CutActor->SetProperty(this->PlaneProperty);
   this->OutlineActor->SetProperty(this->OutlineProperty);
 
-  // The bounding box
-  this->BoundingBox = vtkBox::New();
-
   this->RepresentationState = vtkImplicitPlaneRepresentation::Outside;
 }
 
@@ -247,7 +244,6 @@ vtkImplicitPlaneRepresentation::~vtkImplicitPlaneRepresentation()
   this->OutlineProperty->Delete();
   this->SelectedOutlineProperty->Delete();
   this->EdgesProperty->Delete();
-  this->BoundingBox->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -480,19 +476,22 @@ void vtkImplicitPlaneRepresentation::EndWidgetInteraction(double vtkNotUsed(e)[2
 }
 
 //----------------------------------------------------------------------
-double *vtkImplicitPlaneRepresentation::GetBounds()
+vtkBoundingBox
+vtkImplicitPlaneRepresentation::ComputeBoundingBox(vtkViewport *vp)
 {
   this->BuildRepresentation();
-  this->BoundingBox->SetBounds(this->OutlineActor->GetBounds());
-  this->BoundingBox->AddBounds(this->CutActor->GetBounds());
-  this->BoundingBox->AddBounds(this->EdgesActor->GetBounds());
-  this->BoundingBox->AddBounds(this->ConeActor->GetBounds());
-  this->BoundingBox->AddBounds(this->LineActor->GetBounds());
-  this->BoundingBox->AddBounds(this->ConeActor2->GetBounds());
-  this->BoundingBox->AddBounds(this->LineActor2->GetBounds());
-  this->BoundingBox->AddBounds(this->SphereActor->GetBounds());
 
-  return this->BoundingBox->GetBounds();
+  vtkBoundingBox bbox;
+  bbox.AddBox(this->OutlineActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->CutActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->EdgesActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->ConeActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->LineActor->ComputeBoundingBox(vp));
+  bbox.AddBox(this->ConeActor2->ComputeBoundingBox(vp));
+  bbox.AddBox(this->LineActor2->ComputeBoundingBox(vp));
+  bbox.AddBox(this->SphereActor->ComputeBoundingBox(vp));
+
+  return bbox;
 }
 
 //----------------------------------------------------------------------------

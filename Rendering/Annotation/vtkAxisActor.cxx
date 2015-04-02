@@ -739,7 +739,7 @@ void vtkAxisActor::BuildAxis(vtkViewport *viewport, bool force)
   // Generate the axis and tick marks.
   //
   bool ticksRebuilt;
-  ticksRebuilt = this->BuildTickPoints(p1, p2, force);
+  ticksRebuilt = this->BuildTickPoints(viewport, p1, p2, force);
 
   bool tickVisChanged = this->TickVisibilityChanged();
 
@@ -759,7 +759,7 @@ void vtkAxisActor::BuildAxis(vtkViewport *viewport, bool force)
 
   if (this->Title != NULL && this->Title[0] != 0)
     {
-    this->BuildTitle(force || ticksRebuilt);
+    this->BuildTitle(viewport, force || ticksRebuilt);
     if( this->Use2DMode == 1 )
       {
       this->BuildTitle2D(viewport, force || ticksRebuilt);
@@ -797,9 +797,9 @@ vtkAxisActor::BuildLabels(vtkViewport *viewport, bool force)
       {
       this->LabelActors3D[i]->GetTextProperty()->ShallowCopy(this->LabelTextProperty);
 
-      double labelActorsBounds[6];
-      this->LabelActors[i]->GetMapper()->GetBounds(labelActorsBounds);
-      const double labelActorsWidth = (labelActorsBounds[1] - labelActorsBounds[0]);
+      vtkBoundingBox bbox =
+          this->LabelActors[i]->GetMapper()->ComputeBoundingBox(viewport);
+      const double labelActorsWidth = bbox.GetLength(0);
 
       int labelActors3DBounds[4];
       this->LabelActors3D[i]->GetBoundingBox(labelActors3DBounds);
@@ -837,7 +837,7 @@ void vtkAxisActor::SetLabelPositions(vtkViewport *viewport, bool force)
     return;
     }
 
-  double bounds[6], center[3], tick[3], pos[3];
+  double center[3], tick[3], pos[3];
   int i = 0;
   int xmult = 0;
   int ymult = 0;
@@ -879,12 +879,13 @@ void vtkAxisActor::SetLabelPositions(vtkViewport *viewport, bool force)
     ptIdx = 4*i + 1;
     this->MajorTickPts->GetPoint(ptIdx, tick);
 
-    this->LabelActors[i]->GetMapper()->GetBounds(bounds);
+    vtkBoundingBox bbox =
+        this->LabelActors[i]->GetMapper()->ComputeBoundingBox(viewport);
 
     if(this->CalculateLabelOffset)
       {
-      double halfWidth  = 0.5 * ((bounds[1] - bounds[0]) * labelCos + (bounds[3] - bounds[2]) * labelSin);
-      double halfHeight = 0.5 * ((bounds[1] - bounds[0]) * labelSin + (bounds[3] - bounds[2]) * labelCos);
+      double halfWidth  = 0.5 * (bbox.GetLength(0) * labelCos + bbox.GetLength(1) * labelSin);
+      double halfHeight = 0.5 * (bbox.GetLength(0) * labelSin + bbox.GetLength(1) * labelCos);
 
       center[0] = tick[0] + xmult * (halfWidth  + this->MinorTickSize);
       center[1] = tick[1] + ymult * (halfHeight + this->MinorTickSize);
@@ -900,7 +901,7 @@ void vtkAxisActor::SetLabelPositions(vtkViewport *viewport, bool force)
       pos[1] = tick[1];
       pos[2] = tick[2];
 
-      double delta  = 0.5 * ((bounds[1] - bounds[0]) * labelSin + (bounds[3] - bounds[2]) * labelCos);
+      double delta  = 0.5 * (bbox.GetLength(0) * labelSin + bbox.GetLength(1) * labelCos);
       this->LabelActors[i]->SetScreenOffset(this->LabelOffset + (delta) * this->ScreenSize);
       this->LabelProps3D[i]->SetScreenOffset(this->LabelOffset + (delta) * this->ScreenSize);
       }
@@ -1023,14 +1024,14 @@ vtkAxisActor::SetLabelPositions2D(vtkViewport *viewport, bool force)
 //  Determines scale and position for the Title.  Currently,
 //  title can only be centered with respect to its axis.
 // **********************************************************************
-void vtkAxisActor::BuildTitle(bool force)
+void vtkAxisActor::BuildTitle(vtkViewport *vp, bool force)
 {
   this->NeedBuild2D = false;
   if (!force && !this->TitleVisibility)
     {
     return;
     }
-  double labBounds[6], titleBounds[6], center[3], pos[3];
+  double center[3], pos[3];
   double labHeight, maxHeight = 0, labWidth, maxWidth = 0;
   double halfTitleWidth, halfTitleHeight;
   double labelAngle = vtkMath::RadiansFromDegrees(this->LabelTextProperty->GetOrientation());
@@ -1072,10 +1073,11 @@ void vtkAxisActor::BuildTitle(bool force)
   //
   for (int i = 0; i < this->NumberOfLabelsBuilt; i++)
     {
-    this->LabelActors[i]->GetMapper()->GetBounds(labBounds);
-    labWidth = (labBounds[1] - labBounds[0]) * labelCos + (labBounds[3] - labBounds[2]) * labelSin;
+    vtkBoundingBox bbox =
+        this->LabelActors[i]->GetMapper()->ComputeBoundingBox(vp);
+    labWidth = bbox.GetLength(0) * labelCos + bbox.GetLength(1) * labelSin;
     maxWidth = (labWidth > maxWidth ? labWidth : maxWidth);
-    labHeight = (labBounds[1] - labBounds[0]) * labelSin + (labBounds[3] - labBounds[2]) * labelCos;
+    labHeight = bbox.GetLength(0) * labelSin + bbox.GetLength(1) * labelCos;
     maxHeight = (labHeight > maxHeight ? labHeight : maxHeight);
     }
 
@@ -1085,7 +1087,8 @@ void vtkAxisActor::BuildTitle(bool force)
   this->TitleActor->GetProperty()->SetColor(this->TitleTextProperty->GetColor());
   this->TitleActor->SetCamera(this->Camera);
   this->TitleProp3D->SetCamera(this->Camera);
-  this->TitleActor->GetMapper()->GetBounds(titleBounds);
+  vtkBoundingBox titleBbox =
+      this->TitleActor->GetMapper()->ComputeBoundingBox(vp);
 
   if(!this->GetCalculateTitleOffset())
     {
@@ -1095,9 +1098,9 @@ void vtkAxisActor::BuildTitle(bool force)
 
   if (this->UseTextActor3D)
     {
-    double titleActorBounds[6];
-    this->TitleActor->GetMapper()->GetBounds(titleActorBounds);
-    const double titleActorWidth = (titleActorBounds[1] - titleActorBounds[0]);
+    vtkBoundingBox titleActorBbox =
+        this->TitleActor->GetMapper()->ComputeBoundingBox(vp);
+    const double titleActorWidth = titleActorBbox.GetLength(0);
 
     int titleActor3DBounds[4];
     this->TitleActor3D->GetBoundingBox(titleActor3DBounds);
@@ -1113,10 +1116,10 @@ void vtkAxisActor::BuildTitle(bool force)
   center[1] = p1[1] + (p2[1] - p1[1]) / 2.0;
   center[2] = p1[2] + (p2[2] - p1[2]) / 2.0;
 
-  halfTitleHeight = (titleBounds[3] - titleBounds[2]) * 0.5;
+  halfTitleHeight = titleBbox.GetLength(1) * 0.5;
   if(this->CalculateTitleOffset)
     {
-    halfTitleWidth  = (titleBounds[1] - titleBounds[0]) * 0.5;
+    halfTitleWidth = titleBbox.GetLength(0) * 0.5;
     center[0] += xmult * (halfTitleWidth + maxWidth);
     center[1] += ymult * (halfTitleHeight + 2*maxHeight);
     }
@@ -1631,14 +1634,13 @@ SetBounds(double xmin, double xmax, double ymin, double ymax, double zmin, doubl
 // Retrieves the bounds of this actor.
 // *********************************************************************
 double* vtkAxisActor::GetBounds()
-{
+ {
   return this->Bounds;
 }
 
 // *********************************************************************
 // Retrieves the bounds of this actor.
 // *********************************************************************
-
 void vtkAxisActor::GetBounds(double b[6])
 {
   for (int i = 0; i < 6; i++)
@@ -1647,12 +1649,18 @@ void vtkAxisActor::GetBounds(double b[6])
     }
 }
 
+vtkBoundingBox vtkAxisActor::ComputeBoundingBox(vtkViewport *)
+{
+  return vtkBoundingBox(this->Bounds);
+}
+
 // *********************************************************************
 // Method:  vtkAxisActor::ComputeMaxLabelLength
 // *********************************************************************
-double vtkAxisActor::ComputeMaxLabelLength(const double vtkNotUsed(center)[3])
+double vtkAxisActor::ComputeMaxLabelLength(vtkViewport *vp,
+                                           const double vtkNotUsed(center)[3])
 {
-  double bounds[6];
+  vtkBoundingBox bbox;
   double xsize, ysize;
   vtkProperty *newProp = this->NewLabelProperty();
   double maxXSize = 0;
@@ -1662,16 +1670,16 @@ double vtkAxisActor::ComputeMaxLabelLength(const double vtkNotUsed(center)[3])
     if (this->UseTextActor3D)
       {
       this->LabelProps3D[i]->SetCamera(this->Camera);
-      this->LabelActors3D[i]->GetBounds(bounds);
+      bbox = this->LabelActors3D[i]->ComputeBoundingBox(vp);
       }
     else
       {
       this->LabelActors[i]->SetCamera(this->Camera);
       this->LabelActors[i]->SetProperty(newProp);
-      this->LabelActors[i]->GetMapper()->GetBounds(bounds);
+      bbox = this->LabelActors[i]->GetMapper()->ComputeBoundingBox(vp);
       }
-    xsize = bounds[1] - bounds[0];
-    ysize = bounds[3] - bounds[2];
+    xsize = bbox.GetLength(0);
+    ysize = bbox.GetLength(1);
     maxXSize = (xsize > maxXSize ? xsize : maxXSize);
     maxYSize = (ysize > maxYSize ? ysize : maxYSize);
     }
@@ -1682,9 +1690,10 @@ double vtkAxisActor::ComputeMaxLabelLength(const double vtkNotUsed(center)[3])
 // *********************************************************************
 // Method:  vtkAxisActor::ComputeTitleLength
 // *********************************************************************
-double vtkAxisActor::ComputeTitleLength(const double vtkNotUsed(center)[3])
+double vtkAxisActor::ComputeTitleLength(vtkViewport *vp,
+                                        const double vtkNotUsed(center)[3])
 {
-  double bounds[6];
+  vtkBoundingBox bbox;
   double xsize, ysize;
   double length;
 
@@ -1692,7 +1701,7 @@ double vtkAxisActor::ComputeTitleLength(const double vtkNotUsed(center)[3])
     {
     this->TitleActor3D->SetInput(this->Title);
     this->TitleProp3D->SetCamera(this->Camera);
-    this->TitleActor3D->GetBounds(bounds);
+    bbox = this->TitleActor3D->ComputeBoundingBox(vp);
     }
   else
     {
@@ -1701,10 +1710,10 @@ double vtkAxisActor::ComputeTitleLength(const double vtkNotUsed(center)[3])
     vtkProperty * newProp = this->NewTitleProperty();
     this->TitleActor->SetProperty(newProp);
     newProp->Delete();
-    this->TitleActor->GetMapper()->GetBounds(bounds);
+    bbox = this->TitleActor->GetMapper()->ComputeBoundingBox(vp);
     }
-  xsize = bounds[1] - bounds[0];
-  ysize = bounds[3] - bounds[2];
+  xsize = bbox.GetBound(0);
+  ysize = bbox.GetBound(1);
   length = sqrt(xsize*xsize + ysize*ysize);
 
   return length;
@@ -1941,7 +1950,8 @@ double* vtkAxisActor::GetPoint2()
 // Creates points for ticks (minor, major, gridlines) in correct position
 // for a generic axis.
 // **************************************************************************
-bool vtkAxisActor::BuildTickPoints(double p1[3], double p2[3], bool force)
+bool vtkAxisActor::BuildTickPoints(vtkViewport *vp,
+                                   double p1[3], double p2[3], bool force)
 {
   // Prevent any unwanted computation
   if (!force && (this->AxisPosition == this->LastAxisPosition) &&
@@ -2168,10 +2178,11 @@ bool vtkAxisActor::BuildTickPoints(double p1[3], double p2[3], bool force)
     {
     double axis, u, v;
     axis = this->MajorStart[this->AxisType];
-    innerGridPointClosestU[vIndex] = this->GetBounds()[vIndex*2];
-    innerGridPointFarestU[vIndex] = this->GetBounds()[vIndex*2+1];
-    innerGridPointClosestV[uIndex] = this->GetBounds()[uIndex*2];
-    innerGridPointFarestV[uIndex] = this->GetBounds()[uIndex*2+1];
+    vtkBoundingBox bbox = this->ComputeBoundingBox(vp);
+    innerGridPointClosestU[vIndex] = bbox.GetBound(vIndex * 2);
+    innerGridPointFarestU[vIndex] = bbox.GetBound(vIndex * 2 + 1);
+    innerGridPointClosestV[uIndex] = bbox.GetBound(uIndex * 2);
+    innerGridPointFarestV[uIndex] = bbox.GetBound(uIndex * 2 + 1);
     while (axis <= p2[this->AxisType])
         {
         innerGridPointClosestU[this->AxisType]

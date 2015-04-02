@@ -37,9 +37,9 @@ public:
   vtkTypeMacro(vtkCubeAxesActor2DConnection,vtkAlgorithm);
 
   vtkCubeAxesActor2DConnection()
-    {
-      this->SetNumberOfInputPorts(1);
-    }
+  {
+    this->SetNumberOfInputPorts(1);
+  }
 };
 
 vtkStandardNewMacro(vtkCubeAxesActor2DConnection);
@@ -249,7 +249,7 @@ int vtkCubeAxesActor2D::RenderOpaqueGeometry(vtkViewport *viewport)
   this->RenderSomething = 1;
 
   // determine the bounds to use
-  this->GetBounds(bounds);
+  this->ComputeBoundingBox(viewport).GetBounds(bounds);
 
   // Check for user specified origins. By default, these are placed at a corner of the
   // bounding box of the dataset (corner is based on the fly mode)
@@ -699,36 +699,36 @@ double *vtkCubeAxesActor2D::GetRanges()
 }
 
 //----------------------------------------------------------------------------
-// Compute the bounds
-void vtkCubeAxesActor2D::GetBounds(double bounds[6])
+vtkBoundingBox vtkCubeAxesActor2D::ComputeBoundingBox(vtkViewport *vp)
 {
-  double *propBounds;
-  int i;
+  vtkBoundingBox bbox;
 
-  if ( this->GetInput() )
+  if (this->GetInput())
     {
+    double bounds[6];
     this->ConnectionHolder->GetInputAlgorithm()->Update();
     this->GetInput()->GetBounds(bounds);
-    for (i=0; i< 6; i++)
-      {
-      this->Bounds[i] = bounds[i];
-      }
+    bbox.AddBounds(bounds);
+    this->SetBounds(bounds);
     }
-  else if ( this->ViewProp &&
-            ((propBounds = this->ViewProp->GetBounds()) && propBounds != NULL) )
+  else if (this->ViewProp)
     {
-    for (i=0; i< 6; i++)
+    bbox = this->ViewProp->ComputeBoundingBox(vp);
+    if (bbox.IsValid())
       {
-      bounds[i] = this->Bounds[i] = propBounds[i];
+      bbox.GetBounds(this->Bounds);
+      }
+    else
+      {
+      bbox.AddBounds(this->Bounds);
       }
     }
   else
     {
-    for (i=0; i< 6; i++)
-      {
-      bounds[i] = this->Bounds[i];
-      }
+    bbox.AddBounds(this->Bounds);
     }
+
+  return bbox;
 }
 
 //----------------------------------------------------------------------------
@@ -737,21 +737,26 @@ void vtkCubeAxesActor2D::GetBounds(double& xmin, double& xmax,
                                    double& ymin, double& ymax,
                                    double& zmin, double& zmax)
 {
-  double bounds[6];
-  this->GetBounds(bounds);
-  xmin = bounds[0];
-  xmax = bounds[1];
-  ymin = bounds[2];
-  ymax = bounds[3];
-  zmin = bounds[4];
-  zmax = bounds[5];
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  xmin = bbox.GetBound(0);
+  xmax = bbox.GetBound(1);
+  ymin = bbox.GetBound(2);
+  ymax = bbox.GetBound(3);
+  zmin = bbox.GetBound(4);
+  zmax = bbox.GetBound(5);
+}
+
+//----------------------------------------------------------------------------
+void vtkCubeAxesActor2D::GetBounds(double bounds[6])
+{
+  this->ComputeBoundingBox(NULL).GetBounds(bounds);
 }
 
 //----------------------------------------------------------------------------
 // Compute the bounds
 double *vtkCubeAxesActor2D::GetBounds()
 {
-  this->GetBounds(this->Bounds);
+  this->ComputeBoundingBox(NULL); // updates this->Bounds
   return this->Bounds;
 }
 

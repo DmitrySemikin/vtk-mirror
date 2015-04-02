@@ -5011,7 +5011,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::GPURender(vtkRenderer *ren,
 
   // Get the bounds of this data
   double bounds[6];
-  this->GetBounds(bounds);
+  this->ComputeBoundingBox(ren).GetBounds(bounds);
 
   // Get the scalar range. First we have to get the scalars.
   double range[2];

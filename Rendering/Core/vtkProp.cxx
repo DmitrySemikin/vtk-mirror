@@ -21,6 +21,8 @@
 #include "vtkInformationKey.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationDoubleVectorKey.h"
+#include "vtkMath.h"
+
 #include <cassert>
 
 vtkCxxSetObjectMacro(vtkProp,PropertyKeys,vtkInformation);
@@ -49,6 +51,11 @@ vtkProp::vtkProp()
   this->Consumers = 0;
 
   this->PropertyKeys=0;
+
+#ifndef VTK_LEGACY_REMOVE
+  vtkMath::UninitializeBounds(this->LegacyBounds);
+  this->InGetBounds = false;
+#endif // VTK_LEGACY_REMOVE
 }
 
 //----------------------------------------------------------------------------
@@ -72,6 +79,64 @@ vtkProp::~vtkProp()
 void vtkProp::Pick()
 {
   this->InvokeEvent(vtkCommand::PickEvent,NULL);
+}
+
+#ifndef VTK_LEGACY_REMOVE
+//----------------------------------------------------------------------------
+double* vtkProp::GetBounds()
+{
+  VTK_LEGACY_REPLACED_BODY(
+        double* vtkProp::GetBounds(), "VTK 6.3",
+        bool vtkProp::GetBounds(vtkViewport*, double[6]))
+
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  bbox.GetBounds(this->LegacyBounds);
+  return bbox.IsValid() ? this->LegacyBounds : NULL;
+}
+
+//----------------------------------------------------------------------------
+void vtkProp::GetBounds(double bounds[6])
+{
+  VTK_LEGACY_REPLACED_BODY(
+        void vtkProp::GetBounds(double[6]), "VTK 6.3",
+        bool vtkProp::GetBounds(vtkViewport*, double[6]))
+
+  this->ComputeBoundingBox(NULL).GetBounds(bounds);
+}
+#endif // VTK_LEGACY_REMOVE
+
+//----------------------------------------------------------------------------
+vtkBoundingBox vtkProp::ComputeBoundingBox(vtkViewport *)
+{
+  vtkBoundingBox result;
+
+#ifndef VTK_LEGACY_REMOVE
+  // According to a comment in vtkFrustrumCoverageCuller::Cull, 2D props should
+  // not override GetBounds. For subclasses of vtkProp3D, we'll fall back to
+  // calling the deprecated virtual for legacy code that may not have updated
+  // yet.
+  if (this->IsA("vtkProp3D"))
+    {
+    if (this->InGetBounds)
+      {
+      vtkErrorMacro(<<"Missing ComputeBoundingBox override.");
+      return result;
+      }
+
+    this->InGetBounds = true;
+    // This will cause a compile time deprecation warning. This is needed to
+    // support external subclasses that still use the deprecated virtual.
+    double *b = this->GetBounds();
+    this->InGetBounds = false;
+
+    if (b)
+      {
+      result.AddBounds(b);
+      }
+    }
+#endif // VTK_LEGACY_REMOVE
+
+  return result;
 }
 
 //----------------------------------------------------------------------------

@@ -18,47 +18,107 @@
 #include "vtkMatrix4x4.h"
 #include "vtkPlaneCollection.h"
 
+#include <algorithm>
 
 // Construct with initial range (0,1).
 vtkAbstractMapper3D::vtkAbstractMapper3D()
 {
-  vtkMath::UninitializeBounds(this->Bounds);
-  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+#ifndef VTK_LEGACY_REMOVE
+  vtkMath::UninitializeBounds(this->LegacyBounds);
+  this->LegacyCenter[0] = this->LegacyCenter[1] = this->LegacyCenter[2] = 0.0;
+  this->InGetBounds = false;
+#endif // VTK_LEGACY_REMOVE
 }
 
 // Get the bounds for this Prop as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax).
-void vtkAbstractMapper3D::GetBounds(double bounds[6])
+#ifndef VTK_LEGACY_REMOVE
+double* vtkAbstractMapper3D::GetBounds()
 {
-  this->GetBounds();
-  for (int i=0; i<6; i++)
-    {
-    bounds[i] = this->Bounds[i];
-    }
+  VTK_LEGACY_REPLACED_BODY(
+        double *vtkAbstractMapper3D::GetBounds(), "VTK 6.3",
+        bool vtkAbstractMapper3D::GetBounds(vtkViewport*, double[6]))
+
+  vtkBoundingBox bbox = this->ComputeBoundingBox(NULL);
+  bbox.GetBounds(this->LegacyBounds);
+  return bbox.IsValid() ? this->LegacyBounds : NULL;
 }
 
-double *vtkAbstractMapper3D::GetCenter()
+void vtkAbstractMapper3D::GetBounds(double bounds[6])
 {
-  this->GetBounds();
-  for (int i=0; i<3; i++)
-    {
-    this->Center[i] = (this->Bounds[2*i+1] + this->Bounds[2*i]) / 2.0;
-    }
-  return this->Center;
+  VTK_LEGACY_REPLACED_BODY(
+        void vtkAbstractMapper3D::GetBounds(double[6]), "VTK 6.3",
+        bool vtkAbstractMapper3D::GetBounds(vtkViewport*, double[6]))
+
+  this->ComputeBoundingBox(NULL).GetBounds(bounds);
+}
+
+double* vtkAbstractMapper3D::GetCenter()
+{
+  VTK_LEGACY_REPLACED_BODY(
+        double* vtkAbstractMapper3D::GetCenter(), "VTK 6.3",
+        bool vtkAbstractMapper3D::GetCenter(vtkViewport*, double[3]))
+
+  this->GetCenter(NULL, this->LegacyCenter);
+  return this->LegacyCenter;
 }
 
 double vtkAbstractMapper3D::GetLength()
 {
-  double diff, l=0.0;
-  int i;
+  VTK_LEGACY_REPLACED_BODY(
+        double vtkAbstractMapper3D::GetLength(), "VTK 6.3",
+        double vtkAbstractMapper3D::GetLength(vtkViewport*))
 
-  this->GetBounds();
-  for (i=0; i<3; i++)
+  return this->GetLength(NULL);
+}
+#endif // VTK_LEGACY_REMOVE
+
+
+vtkBoundingBox vtkAbstractMapper3D::ComputeBoundingBox(vtkViewport *)
+{
+  vtkBoundingBox result;
+
+#ifndef VTK_LEGACY_REMOVE
+  if (this->InGetBounds)
     {
-    diff = this->Bounds[2*i+1] - this->Bounds[2*i];
-    l += diff * diff;
+    vtkErrorMacro(<<"Missing ComputeBoundingBox override.");
+    return result;
     }
 
-  return sqrt(l);
+  this->InGetBounds = true;
+  // This will cause a compile time deprecation warning. This is needed to
+  // support external subclasses that still use the deprecated virtual.
+  double *b = this->GetBounds();
+  this->InGetBounds = false;
+
+  if (b)
+    {
+    result.AddBounds(b);
+    }
+  // If b is NULL, fall back to the new base implementation:
+#endif // VTK_LEGACY_REMOVE
+
+  return result;
+}
+
+bool vtkAbstractMapper3D::GetCenter(vtkViewport *vp, double center[3])
+{
+  vtkBoundingBox bounds = this->ComputeBoundingBox(vp);
+  if (bounds.IsValid())
+    {
+    bounds.GetCenter(center);
+    return true;
+    }
+  else
+    {
+    std::fill(center, center + 3, 0.);
+    return false;
+    }
+}
+
+double vtkAbstractMapper3D::GetLength(vtkViewport *vp)
+{
+  vtkBoundingBox bounds = this->ComputeBoundingBox(vp);
+  return bounds.IsValid() ? bounds.GetDiagonalLength() : 0.;
 }
 
 void vtkAbstractMapper3D::GetClippingPlaneInDataCoords(

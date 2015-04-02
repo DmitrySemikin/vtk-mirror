@@ -147,10 +147,6 @@ ren3 ResetCamera
 
 renWin Render
 
-puts [Actor1b GetCenter]
-puts [Actor2b GetCenter]
-puts [Actor3b GetCenter]
-
 catch {
     iren AddObserver UserEvent {wm deiconify .vtkInteract}
 }

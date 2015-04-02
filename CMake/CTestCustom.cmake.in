@@ -283,6 +283,10 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
 
   #ignore clangs documentation warnings from libxml, which uses gtk-doc natively, not doxygen
   "vtklibxml2.*warning: unknown command tag name"
+
+  # The deprecated (VTK6.3) GetBounds() method is still called from vtkProp and
+  # vtkAbstractMapper3D to support legacy code that overrides the old virtual.
+  "[vtkAbstractMapper3D.cxx|vtkProp.cxx].*GetBounds.*deprecated"
   )
 
 IF(APPLE)
