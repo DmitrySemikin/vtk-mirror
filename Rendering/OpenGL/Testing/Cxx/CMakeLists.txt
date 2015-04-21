@@ -42,6 +42,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 vtk_add_test_cxx(${vtk-module}CxxTests ogl_tests
   TestScenePicker.cxx,NO_VALID
   TestMultiblockDisplayProperties.cxx
+  TestMultiblockPartialArrayColoring.cxx
   TestMultiTexturing.cxx
   TestMultiTexturingTransform.cxx)
 

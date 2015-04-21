@@ -94,18 +94,26 @@ protected:
     vtkColor3d RenderedSpecularColor;
     };
 
-  void RenderBlock(vtkRenderer *renderer,
-                   vtkActor *actor,
-                   unsigned long typeflags,
-                   bool forceCompileOnly,
-                   vtkDataObject *dobj,
-                   unsigned int &flat_index,
-                   RenderBlockState &state);
+  virtual void RenderBlock(vtkRenderer *renderer,
+                           vtkActor *actor,
+                           unsigned long typeflags,
+                           bool forceCompileOnly,
+                           vtkDataObject *dobj,
+                           unsigned int &flat_index,
+                           RenderBlockState &state);
 
   // Description:
   // Overridden in vtkOpenGLCompositePainter to pass attributes to OpenGL.
   virtual void UpdateRenderingState(
     vtkRenderWindow*, vtkProperty*, RenderBlockState&) {}
+
+  // Description:
+  // Push rendering attributes onto a stack.
+  virtual void PushRenderingAttributes() {}
+
+  // Description:
+  // Pop rendering attributes from a stack.
+  virtual void PopRenderingAttributes() {}
 
   vtkDataObject* OutputData;
   vtkCompositeDataDisplayAttributes *CompositeDataDisplayAttributes;

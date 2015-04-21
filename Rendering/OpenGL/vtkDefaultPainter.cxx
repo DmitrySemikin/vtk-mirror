@@ -102,17 +102,6 @@ void vtkDefaultPainter::BuildPainterChain()
   vtkPainter* prevPainter = 0;
   vtkPainter* painter = 0;
 
-  painter = this->GetScalarsToColorsPainter();
-  if (painter)
-    {
-    if (prevPainter)
-      {
-      prevPainter->SetDelegatePainter(painter);
-      }
-    prevPainter = painter;
-    headPainter = (headPainter)? headPainter : painter;
-    }
-
   painter = this->GetClipPlanesPainter();
   if (painter)
     {
@@ -138,6 +127,17 @@ void vtkDefaultPainter::BuildPainterChain()
   // We are always putting in the composite painter since it does not have any
   // significant overhead for non-composite datasets.
   painter = this->GetCompositePainter();
+  if (painter)
+    {
+    if (prevPainter)
+      {
+      prevPainter->SetDelegatePainter(painter);
+      }
+    prevPainter = painter;
+    headPainter = (headPainter)? headPainter : painter;
+    }
+
+  painter = this->GetScalarsToColorsPainter();
   if (painter)
     {
     if (prevPainter)

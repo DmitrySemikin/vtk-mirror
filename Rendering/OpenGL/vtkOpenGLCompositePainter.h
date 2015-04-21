@@ -37,6 +37,14 @@ protected:
   virtual void UpdateRenderingState(
     vtkRenderWindow* window, vtkProperty* property, RenderBlockState& state);
 
+  // Description:
+  // Push rendering attributes onto the GL attribute stack.
+  virtual void PushRenderingAttributes();
+
+  // Description:
+  // Pop rendering attributes off the GL attribute stack.
+  virtual void PopRenderingAttributes();
+
 private:
   vtkOpenGLCompositePainter(const vtkOpenGLCompositePainter&); // Not implemented.
   void operator=(const vtkOpenGLCompositePainter&); // Not implemented.

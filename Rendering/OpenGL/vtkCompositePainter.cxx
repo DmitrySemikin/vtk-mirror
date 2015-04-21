@@ -125,8 +125,10 @@ void vtkCompositePainter::RenderInternal(vtkRenderer* renderer,
 
         this->DelegatePainter->SetInput(dobj);
         this->OutputData = dobj;
+        this->PushRenderingAttributes();
         this->Superclass::RenderInternal(renderer, actor, typeflags,
                                          forceCompileOnly);
+        this->PopRenderingAttributes();
         this->OutputData = 0;
 
         if (selector)
@@ -224,7 +226,9 @@ void vtkCompositePainter::RenderBlock(vtkRenderer *renderer,
 
     this->DelegatePainter->SetInput(dobj);
     this->OutputData = dobj;
+    this->PushRenderingAttributes();
     this->Superclass::RenderInternal(renderer, actor, typeflags, forceCompileOnly);
+    this->PopRenderingAttributes();
     this->OutputData = 0;
     if (selector)
       {

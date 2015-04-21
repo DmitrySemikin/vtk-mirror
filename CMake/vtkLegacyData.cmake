@@ -13,6 +13,8 @@ foreach(d
     GIS
     many_blocks
     many_blocks/many_blocks
+    partial_array_blocks
+    partial_array_blocks/partial_array_blocks
     Quadratic
     Dave_Karelitz_Small
     MetaIO

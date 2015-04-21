@@ -118,6 +118,18 @@ void vtkOpenGLCompositePainter::UpdateRenderingState(
 }
 
 //-----------------------------------------------------------------------------
+void vtkOpenGLCompositePainter::PushRenderingAttributes()
+{
+  glPushAttrib(GL_ENABLE_BIT);
+}
+
+//-----------------------------------------------------------------------------
+void vtkOpenGLCompositePainter::PopRenderingAttributes()
+{
+  glPopAttrib();
+}
+
+//-----------------------------------------------------------------------------
 void vtkOpenGLCompositePainter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
