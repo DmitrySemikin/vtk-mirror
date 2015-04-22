@@ -612,41 +612,42 @@ INCLUDE_DIRECTORIES (${CMAKE_BINARY_DIR})
 #inherit EXE_EXT     from parent HDF5 cmake project
 #inherit CFG_INIT    from parent HDF5 cmake project
 
+set( HDF5_EXTERNAL_LIB_PREFIX "VTK_bld_internal_" )
 #-----------------------------------------------------------------------------
 # Setup the H5Detect utility which generates H5Tinit with platform
 # specific type checks inside
 #-----------------------------------------------------------------------------
-SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5detect${EXE_EXT})
+SET (CMD ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/${HDF5_EXTERNAL_LIB_PREFIX}H5detect${EXE_EXT})
 IF (XCODE)
-  SET (CMD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/H5detect")
+  SET (CMD "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/${HDF5_EXTERNAL_LIB_PREFIX}H5detect")
 ENDIF ()
-ADD_EXECUTABLE (H5detect ${HDF5_SRC_DIR}/H5detect.c)
+ADD_EXECUTABLE (${HDF5_EXTERNAL_LIB_PREFIX}H5detect ${HDF5_SRC_DIR}/H5detect.c)
 IF (WIN32)
-  TARGET_LINK_LIBRARIES (H5detect "ws2_32.lib")
+  TARGET_LINK_LIBRARIES (${HDF5_EXTERNAL_LIB_PREFIX}H5detect "ws2_32.lib")
 ENDIF ()
 
 ADD_CUSTOM_COMMAND (
     OUTPUT ${HDF5_BINARY_DIR}/H5Tinit.c
     COMMAND ${CMD}
     ARGS > ${HDF5_BINARY_DIR}/H5Tinit.c
-    DEPENDS H5detect
+    DEPENDS ${HDF5_EXTERNAL_LIB_PREFIX}H5detect
 )
 
-SET (CMDL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/H5make_libsettings${EXE_EXT})
+SET (CMDL ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}${CFG_INIT}/${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings${EXE_EXT})
 IF (XCODE)
-  SET (CMDL "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/H5make_libsettings")
+  SET (CMDL "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/\${CONFIGURATION}/${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings")
 ENDIF ()
-ADD_EXECUTABLE (H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
+ADD_EXECUTABLE (${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings ${HDF5_SRC_DIR}/H5make_libsettings.c)
 IF (WIN32)
-  TARGET_LINK_LIBRARIES (H5make_libsettings "ws2_32.lib")
+  TARGET_LINK_LIBRARIES (${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings "ws2_32.lib")
 ENDIF ()
 
-set (CMD $<TARGET_FILE:H5make_libsettings>)
+set (CMD $<TARGET_FILE:${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings>)
 add_custom_command (
     OUTPUT ${HDF5_BINARY_DIR}/H5lib_settings.c
     COMMAND ${CMD}
     ARGS > ${HDF5_BINARY_DIR}/H5lib_settings.c
-    DEPENDS H5make_libsettings
+    DEPENDS ${HDF5_EXTERNAL_LIB_PREFIX}H5make_libsettings
     WORKING_DIRECTORY ${HDF5_BINARY_DIR}
 )
 
