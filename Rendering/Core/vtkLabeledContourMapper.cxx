@@ -583,7 +583,7 @@ bool vtkLabeledContourMapper::PrepareRender(vtkRenderer *ren, vtkActor *act)
     metric.Text = str.str();
     // The value will be replaced in the next loop:
     labelMap.insert(
-          std::pair<double, vtkTextProperty*>(metric.Value, NULL));
+      std::pair<double, vtkTextProperty*>(metric.Value, (vtkTextProperty*)0));
     }
 
   // Now that all present scalar values are known, assign text properties:
