@@ -661,8 +661,10 @@ void vtkImageBSplineInterpolatorPrecomputeWeights(
       else
         {
         int inId[VTK_BSPLINE_KERNEL_SIZE_MAX];
-
         int l = 0;
+        do { inId[l] = 0; } while (++l < VTK_BSPLINE_KERNEL_SIZE_MAX);
+
+        l = 0;
         switch (weights->BorderMode)
           {
           case VTK_IMAGE_BORDER_REPEAT:
