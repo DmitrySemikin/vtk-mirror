@@ -605,8 +605,10 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderValues(
           }
         substitute(FSSource,
           "//VTK::Normal::Impl",
-          "vec3 normalVC = normalMatrix * normalize(\n"
-          "   texelFetchBuffer(textureN, gl_PrimitiveID + PrimitiveIDOffset).xyz);");
+          "vec3 normalVC = normalize(normalMatrix * \n"
+          "    texelFetchBuffer(textureN, gl_PrimitiveID + PrimitiveIDOffset).xyz);"
+          "  if (gl_FrontFacing == false) { normalVC = -normalVC; }\n"
+          );
         }
       else
         {
