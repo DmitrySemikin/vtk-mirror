@@ -38,7 +38,7 @@
 class CriticalSectionGuard
 {
 public:
-  CriticalSectionGuard(vtkSimpleCriticalSection &cs) : cs(cs)
+  CriticalSectionGuard(vtkSimpleCriticalSection &_cs) : cs(_cs)
   {
     this->cs.Lock();
   }
