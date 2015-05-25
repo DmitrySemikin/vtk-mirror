@@ -458,7 +458,7 @@ extern VTKCOMMONCORE_EXPORT void vtkOutputWindowDisplayDebugText(const char*);
 // vtkWarningMacro(<< "Warning message" << variable);
 //
 #define vtkWarningMacro(x)                      \
-   vtkWarningWithObjectMacro(this,x)
+   vtkErrorWithObjectMacro(this,x)
 
 //
 // This macro is used to print out errors
