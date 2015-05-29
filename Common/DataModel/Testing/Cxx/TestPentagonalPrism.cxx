@@ -27,18 +27,18 @@
 #include <string>
 #include <map>
 
-vtkSmartPointer<vtkPentagonalPrism> MakePentagonalPrism();
-vtkSmartPointer<vtkHexagonalPrism> MakeHexagonalPrism();
+static vtkSmartPointer<vtkPentagonalPrism> MakePentagonalPrism();
+static vtkSmartPointer<vtkHexagonalPrism> MakeHexagonalPrism();
 
-template<typename T> int TestCell(const VTKCellType cellType, vtkSmartPointer<T> cell);
+template<typename T> int TestOneCell(const VTKCellType cellType, vtkSmartPointer<T> cell);
 
 //----------------------------------------------------------------------------
 int TestPentagonalPrism(int, char*[])
 {
   std::map<std::string,int> results;
 
-  results["PentagonalPrism"] = TestCell<vtkPentagonalPrism>(VTK_PENTAGONAL_PRISM, MakePentagonalPrism());
-  results["HexagonalPrism"] = TestCell<vtkHexagonalPrism>(VTK_HEXAGONAL_PRISM, MakeHexagonalPrism());
+  results["PentagonalPrism"] = TestOneCell<vtkPentagonalPrism>(VTK_PENTAGONAL_PRISM, MakePentagonalPrism());
+  results["HexagonalPrism"] = TestOneCell<vtkHexagonalPrism>(VTK_HEXAGONAL_PRISM, MakeHexagonalPrism());
 
   int status = 0;
   std::cout << "----- Unit Test Summary -----" << std::endl;
@@ -123,7 +123,7 @@ vtkSmartPointer<vtkHexagonalPrism> MakeHexagonalPrism()
   return aHexagonalPrism;
 }
 
-template<typename T> int TestCell(const VTKCellType cellType,
+template<typename T> int TestOneCell(const VTKCellType cellType,
                                   vtkSmartPointer<T> aCell)
 {
   int status = 0;;
