@@ -24,6 +24,33 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkSMPTools.h"
+
+static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *arg );
+
+class vtkThreadedImageAlgorithmFunctor
+{
+  vtkMultiThreader::ThreadInfo * ThreadInfo;
+
+public:
+  vtkThreadedImageAlgorithmFunctor(vtkMultiThreader::ThreadInfo * info)
+  {
+    this->ThreadInfo = info;
+  }
+
+  void operator()(vtkIdType begin, vtkIdType end)
+  {
+    vtkMultiThreader::ThreadInfo localThreadInfo;
+    localThreadInfo.NumberOfThreads = this->ThreadInfo->NumberOfThreads;
+    localThreadInfo.UserData = this->ThreadInfo->UserData;
+
+    for (int i =begin;i<end;i++)
+    {
+      localThreadInfo.ThreadID = i;
+      vtkThreadedImageAlgorithmThreadedExecute(&localThreadInfo);
+    }
+  }
+};
 
 
 //----------------------------------------------------------------------------
@@ -31,6 +58,9 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
 {
   this->Threader = vtkMultiThreader::New();
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
+  this->NumberOfSMPBlocks = VTK_MAX_THREADS;
+  this->UseSmp = true; // turn on smp by default
+  this->NumberOfSMPProcessors = this->Threader->GetNumberOfThreads(); // set number of processors to system processor count
 }
 
 //----------------------------------------------------------------------------
@@ -56,6 +86,44 @@ struct vtkImageThreadStruct
   vtkImageData   ***Inputs;
   vtkImageData   **Outputs;
 };
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::EnableSMP(bool state)
+{
+  this->UseSmp = state;
+}
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::SetSMPBlocks(int numberOfBlocks)
+{
+  if (numberOfBlocks<0)
+  {
+    vtkDebugMacro("Number of SMP Blocks cannot be less than 0");
+    return;
+  }
+
+  if(numberOfBlocks > VTK_MAX_THREADS)
+  {
+     this->NumberOfSMPBlocks =VTK_MAX_THREADS;
+  }
+  else
+  {
+    this->NumberOfSMPBlocks =numberOfBlocks;
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::SetSMPProcessorCount(int processorCount)
+{
+  if (processorCount<0)
+  {
+    vtkDebugMacro("Number of SMP processors cannot be less than 0");
+    return;
+  }
+  this->NumberOfSMPProcessors = processorCount;
+
+  vtkSMPTools::Initialize(processorCount);
+}
 
 //----------------------------------------------------------------------------
 // For streaming and threads.  Splits output update extent into num pieces.
@@ -285,14 +353,33 @@ int vtkThreadedImageAlgorithm::RequestData(
     this->CopyAttributeData(str.Inputs[0][0],str.Outputs[0],inputVector);
     }
 
-  this->Threader->SetNumberOfThreads(this->NumberOfThreads);
-  this->Threader->SetSingleMethod(vtkThreadedImageAlgorithmThreadedExecute, &str);
+  if (this->UseSmp)
+  {
 
-  // always shut off debugging to avoid threading problems with GetMacros
-  bool debug = this->Debug;
-  this->Debug = false;
-  this->Threader->SingleMethodExecute();
-  this->Debug = debug;
+    this->NumberOfThreads = this->NumberOfSMPBlocks;
+    bool debug = this->Debug;
+    this->Debug = false;
+
+    vtkMultiThreader::ThreadInfo threadInfo;
+    threadInfo.NumberOfThreads = NumberOfSMPBlocks;
+    threadInfo.UserData = &str;
+    threadInfo.ThreadID = -1;
+
+    vtkThreadedImageAlgorithmFunctor functor(&threadInfo);
+    vtkSMPTools::For(0, NumberOfSMPBlocks, functor);
+
+    this->Debug = debug;
+  }
+  else
+  {
+    this->Threader->SetNumberOfThreads(this->NumberOfThreads);
+    this->Threader->SetSingleMethod(vtkThreadedImageAlgorithmThreadedExecute, &str);
+    // always shut off debugging to avoid threading problems with GetMacros
+    bool debug = this->Debug;
+    this->Debug = false;
+    this->Threader->SingleMethodExecute();
+    this->Debug = debug;
+  }
 
   // free up the arrays
   for (i = 0; i < this->GetNumberOfInputPorts(); ++i)

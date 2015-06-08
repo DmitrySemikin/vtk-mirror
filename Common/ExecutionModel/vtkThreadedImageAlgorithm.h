@@ -64,12 +64,27 @@ public:
   virtual int SplitExtent(int splitExt[6], int startExt[6],
                           int num, int total);
 
+    // Description:
+  // Enable/Disable SMP for threading.
+  void EnableSMP(bool state);
+
+  // Description:
+  // Set the number of processors avaliable for SMP.
+  void SetSMPProcessorCount(int processorCount);
+
+  // Description:
+  // Set the number of blocks the data will be partioned into.
+  void SetSMPBlocks(int numberOfBlocks);
+
 protected:
   vtkThreadedImageAlgorithm();
   ~vtkThreadedImageAlgorithm();
 
   vtkMultiThreader *Threader;
   int NumberOfThreads;
+  bool UseSmp;
+  int NumberOfSMPBlocks;
+  int NumberOfSMPProcessors;
 
   // Description:
   // This is called by the superclass.

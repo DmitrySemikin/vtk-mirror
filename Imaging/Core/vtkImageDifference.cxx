@@ -26,7 +26,7 @@ vtkStandardNewMacro(vtkImageDifference);
 vtkImageDifference::vtkImageDifference()
 {
   int i;
-  for ( i = 0; i < this->NumberOfThreads; i++ )
+  for ( i = 0; i < VTK_MAX_THREADS; i++ )
     {
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
