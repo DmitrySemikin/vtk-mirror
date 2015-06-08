@@ -10,6 +10,7 @@ PROJECT(ImageProcessing)
 
 find_package(VTK COMPONENTS
   vtkIOImage
+  vtkImagingGeneral
   vtkImagingCore
   vtkInteractionStyle
   vtkRendering${VTK_RENDERING_BACKEND}
@@ -18,18 +19,29 @@ find_package(VTK COMPONENTS
 include(${VTK_USE_FILE})
 
 add_executable(ImageSlicing MACOSX_BUNDLE ImageSlicing.cxx)
+add_executable(SMPThreadedImageAlgorithm MACOSX_BUNDLE SMPThreadedImageAlgorithm.cxx)
 target_link_libraries(ImageSlicing ${VTK_LIBRARIES})
+target_link_libraries(SMPThreadedImageAlgorithm ${VTK_LIBRARIES})
 
 if(BUILD_TESTING)
   if(vtkTestingRendering_LOADED)
    ######## Regression Testing ########
    set(vtk-example ImageProcessingExamples)
    set(TestImageSlicing_ARGS ${VTK_TEST_DATA_DIR}/Data/headsq/quarter)
+   set(TestSMPThreadedImageAlgorithm_ARGS 4 500 1 5000 true)
    vtk_add_test_cxx(${vtk-example}CxxTests tests
      TestImageSlicing.cxx
+     TestSMPThreadedImageAlgorithm.cxx
      )
+
    vtk_test_cxx_executable(${vtk-example}CxxTests tests
      RENDERING_FACTORY
      )
+   configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/SMPBenchMarking.sh.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/SMPBenchMarking.sh"
+    COPYONLY
+   )
+
  endif()
 endif()
