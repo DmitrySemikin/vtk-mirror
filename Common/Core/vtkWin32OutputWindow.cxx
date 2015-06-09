@@ -124,6 +124,7 @@ void vtkWin32OutputWindow::DisplayText(const char* someText)
       }
     }
   delete [] buffer;
+  exit(13);
 }
 
 //----------------------------------------------------------------------------
