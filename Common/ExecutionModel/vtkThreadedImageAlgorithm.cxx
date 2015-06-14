@@ -24,6 +24,34 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkSMPTools.h"
+#include "vtkExtentTranslator.h"
+
+static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *arg );
+
+class vtkThreadedImageAlgorithmFunctor
+{
+  vtkMultiThreader::ThreadInfo * ThreadInfo;
+
+public:
+  vtkThreadedImageAlgorithmFunctor(vtkMultiThreader::ThreadInfo * info)
+  {
+    this->ThreadInfo = info;
+  }
+
+  void operator()(vtkIdType begin, vtkIdType end)
+  {
+    vtkMultiThreader::ThreadInfo localThreadInfo;
+    localThreadInfo.NumberOfThreads = this->ThreadInfo->NumberOfThreads;
+    localThreadInfo.UserData = this->ThreadInfo->UserData;
+
+    for (int i =begin;i<end;i++)
+      {
+      localThreadInfo.ThreadID = i;
+      vtkThreadedImageAlgorithmThreadedExecute(&localThreadInfo);
+      }
+  }
+};
 
 
 //----------------------------------------------------------------------------
@@ -31,6 +59,15 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
 {
   this->Threader = vtkMultiThreader::New();
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
+
+#ifdef MAX_SMP_BLOCK_SIZE
+  this->NumberOfSMPBlocks = MAX_SMP_BLOCK_SIZE;
+#else
+  this->NumberOfSMPBlocks = 1000;
+#endif
+
+  this->UseSmp = true; // turn on smp by default
+  this->UseBlockMode = true;
 }
 
 //----------------------------------------------------------------------------
@@ -58,6 +95,42 @@ struct vtkImageThreadStruct
 };
 
 //----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::EnableSMP(bool state)
+{
+  this->UseSmp = state;
+}
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::SetSMPBlocks(int numberOfBlocks)
+{
+  if (numberOfBlocks<0)
+    {
+    vtkDebugMacro("Number of SMP Blocks cannot be less than 0");
+    return;
+    }
+
+#ifdef MAX_SMP_BLOCK_SIZE
+  int maxLimit = MAX_SMP_BLOCK_SIZE;
+#else
+  int maxLimit = 1000;
+#endif
+  if (numberOfBlocks > maxLimit)
+    {
+      this->NumberOfSMPBlocks = maxLimit;
+    }
+  else
+    {
+    this->NumberOfSMPBlocks =numberOfBlocks;
+    }
+}
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::SetSMPBlockMode(bool blockMode)
+{
+  this->UseBlockMode = blockMode;
+}
+
+//----------------------------------------------------------------------------
 // For streaming and threads.  Splits output update extent into num pieces.
 // This method needs to be called num times.  Results must not overlap for
 // consistent starting extent.  Subclass can override this method.
@@ -71,53 +144,78 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
   int splitAxis;
   int min, max;
 
-  vtkDebugMacro("SplitExtent: ( " << startExt[0] << ", " << startExt[1] << ", "
-                << startExt[2] << ", " << startExt[3] << ", "
-                << startExt[4] << ", " << startExt[5] << "), "
-                << num << " of " << total);
-
-  // start with same extent
-  memcpy(splitExt, startExt, 6 * sizeof(int));
-
-  splitAxis = 2;
-  min = startExt[4];
-  max = startExt[5];
-  while (min >= max)
+  if ((startExt[0] == 0 && startExt[1] == -1)
+    || (startExt[2] == 0 && startExt[3] == -1)
+    ||(startExt[4] == 0 && startExt[5] == -1) )
     {
-    // empty extent so cannot split
-    if (min > max)
+    return -1;
+    }
+
+
+  if(this->UseBlockMode && this->UseSmp) // this is block mode splitting
+    {
+    vtkExtentTranslator* translator = vtkExtentTranslator::New();;
+    int ret = translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE,0);
+    translator->Delete();
+    if(ret == 1)//there is a return extent
       {
-      return 1;
+      return num+1;
       }
-    --splitAxis;
-    if (splitAxis < 0)
-      { // cannot split
-      vtkDebugMacro("  Cannot Split");
-      return 1;
+    else // there was no piece returned
+      {
+      return 0;
       }
-    min = startExt[splitAxis*2];
-    max = startExt[splitAxis*2+1];
     }
-
-  // determine the actual number of pieces that will be generated
-  int range = max - min + 1;
-  int valuesPerThread = static_cast<int>(ceil(range/static_cast<double>(total)));
-  int maxThreadIdUsed = static_cast<int>(ceil(range/static_cast<double>(valuesPerThread))) - 1;
-  if (num < maxThreadIdUsed)
+  else
     {
-    splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
-    splitExt[splitAxis*2+1] = splitExt[splitAxis*2] + valuesPerThread - 1;
-    }
-  if (num == maxThreadIdUsed)
-    {
-    splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
-    }
+    vtkDebugMacro("SplitExtent: ( " << startExt[0] << ", " << startExt[1] << ", "
+              << startExt[2] << ", " << startExt[3] << ", "
+              << startExt[4] << ", " << startExt[5] << "), "
+              << num << " of " << total);
 
-  vtkDebugMacro("  Split Piece: ( " <<splitExt[0]<< ", " <<splitExt[1]<< ", "
-                << splitExt[2] << ", " << splitExt[3] << ", "
-                << splitExt[4] << ", " << splitExt[5] << ")");
+    // start with same extent
+    memcpy(splitExt, startExt, 6 * sizeof(int));
 
-  return maxThreadIdUsed + 1;
+    splitAxis = 2;
+    min = startExt[4];
+    max = startExt[5];
+    while (min >= max)
+      {
+      // empty extent so cannot split
+      if (min > max)
+        {
+        return 1;
+        }
+      --splitAxis;
+      if (splitAxis < 0)
+        { // cannot split
+        vtkDebugMacro("  Cannot Split");
+        return 1;
+        }
+      min = startExt[splitAxis*2];
+      max = startExt[splitAxis*2+1];
+      }
+
+    // determine the actual number of pieces that will be generated
+    int range = max - min + 1;
+    int valuesPerThread = static_cast<int>(ceil(range/static_cast<double>(total)));
+    int maxThreadIdUsed = static_cast<int>(ceil(range/static_cast<double>(valuesPerThread))) - 1;
+    if (num < maxThreadIdUsed)
+      {
+      splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
+      splitExt[splitAxis*2+1] = splitExt[splitAxis*2] + valuesPerThread - 1;
+      }
+    if (num == maxThreadIdUsed)
+      {
+      splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
+      }
+
+    vtkDebugMacro("  Split Piece: ( " <<splitExt[0]<< ", " <<splitExt[1]<< ", "
+                  << splitExt[2] << ", " << splitExt[3] << ", "
+                  << splitExt[4] << ", " << splitExt[5] << ")");
+
+    return maxThreadIdUsed + 1;
+    }
 }
 
 
@@ -285,14 +383,33 @@ int vtkThreadedImageAlgorithm::RequestData(
     this->CopyAttributeData(str.Inputs[0][0],str.Outputs[0],inputVector);
     }
 
-  this->Threader->SetNumberOfThreads(this->NumberOfThreads);
-  this->Threader->SetSingleMethod(vtkThreadedImageAlgorithmThreadedExecute, &str);
+  if (this->UseSmp)
+    {
 
-  // always shut off debugging to avoid threading problems with GetMacros
-  bool debug = this->Debug;
-  this->Debug = false;
-  this->Threader->SingleMethodExecute();
-  this->Debug = debug;
+    this->NumberOfThreads = this->NumberOfSMPBlocks;
+    bool debug = this->Debug;
+    this->Debug = false;
+
+    vtkMultiThreader::ThreadInfo threadInfo;
+    threadInfo.NumberOfThreads = NumberOfSMPBlocks;
+    threadInfo.UserData = &str;
+    threadInfo.ThreadID = -1;
+
+    vtkThreadedImageAlgorithmFunctor functor(&threadInfo);
+    vtkSMPTools::For(0, NumberOfSMPBlocks, functor);
+
+    this->Debug = debug;
+    }
+  else
+    {
+    this->Threader->SetNumberOfThreads(this->NumberOfThreads);
+    this->Threader->SetSingleMethod(vtkThreadedImageAlgorithmThreadedExecute, &str);
+    // always shut off debugging to avoid threading problems with GetMacros
+    bool debug = this->Debug;
+    this->Debug = false;
+    this->Threader->SingleMethodExecute();
+    this->Debug = debug;
+    }
 
   // free up the arrays
   for (i = 0; i < this->GetNumberOfInputPorts(); ++i)

@@ -22,6 +22,8 @@
 // .SECTION See also
 // vtkSimpleImageToImageAlgorithm
 
+#define MAX_SMP_BLOCK_SIZE  1000
+
 #ifndef vtkThreadedImageAlgorithm_h
 #define vtkThreadedImageAlgorithm_h
 
@@ -64,12 +66,28 @@ public:
   virtual int SplitExtent(int splitExt[6], int startExt[6],
                           int num, int total);
 
+    // Description:
+  // Enable/Disable SMP for threading.
+  void EnableSMP(bool state);
+
+  // Description:
+  // Set the number of partitions the data will be partioned into.
+  void SetSMPBlocks(int numberOfBlocks);
+
+  // Description:
+  // Set if to partion by blocks in SMP mode.
+  void SetSMPBlockMode(bool blockMode);
+
 protected:
   vtkThreadedImageAlgorithm();
   ~vtkThreadedImageAlgorithm();
 
   vtkMultiThreader *Threader;
   int NumberOfThreads;
+  bool UseSmp;
+  int NumberOfSMPBlocks;
+  int NumberOfSMPProcessors;
+  bool UseBlockMode;
 
   // Description:
   // This is called by the superclass.
