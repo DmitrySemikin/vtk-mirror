@@ -6,16 +6,23 @@
 # Note: on Windows Debug and Release are added, if another build type is
 # used, it would need to be added to the PATH too.
 
-set(VTK_PYTHONPATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
+set(VTK_LIBRARY_PATH "")
 
 if(WIN32)
-  list(APPEND VTK_PYTHONPATH
+  list(APPEND VTK_LIBRARY_PATH
     "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug"
-    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Release")
+    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Release"
+#    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/RelWithDebInfo"
+#    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/RelMinSize"
+  )
+  list(REMOVE_ITEM VTK_LIBRARY_PATH "")
+elseif(UNIX)
+  set(VTK_LIBRARY_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
 endif()
 
-set(VTK_LIBRARY_PATH
-  "${VTK_PYTHONPATH}")
+set(VTK_PYTHONPATH
+  "${VTK_LIBRARY_PATH}")
+list(APPEND VTK_PYTHONPATH "${VTK_BINARY_DIR}/Wrapping/Python")
 
 if(WIN32)
   file(WRITE "${VTK_BINARY_DIR}/windows_path.bat"
