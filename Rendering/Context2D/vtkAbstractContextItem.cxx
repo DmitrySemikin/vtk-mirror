@@ -34,6 +34,8 @@ vtkAbstractContextItem::vtkAbstractContextItem()
 //-----------------------------------------------------------------------------
 vtkAbstractContextItem::~vtkAbstractContextItem()
 {
+  this->SetScene(NULL);
+  this->SetParent(NULL);
   delete this->Children;
 }
 
@@ -261,14 +263,14 @@ void vtkAbstractContextItem::ReleaseGraphicsResources()
 // ----------------------------------------------------------------------------
 void vtkAbstractContextItem::SetScene(vtkContextScene* scene)
 {
-  this->Scene = scene;
+  vtkSetObjectBodyMacro(Scene, vtkContextScene, scene);
   this->Children->SetScene(scene);
 }
 
 // ----------------------------------------------------------------------------
 void vtkAbstractContextItem::SetParent(vtkAbstractContextItem* parent)
 {
-  this->Parent = parent;
+  vtkSetObjectBodyMacro(Parent, vtkAbstractContextItem, parent);
 }
 
 // ----------------------------------------------------------------------------
