@@ -58,6 +58,7 @@ public:
 vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
 {
   this->Threader = vtkMultiThreader::New();
+  this->Translator = vtkExtentTranslator::New();
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
 
 #ifdef MAX_SMP_BLOCK_SIZE
@@ -74,6 +75,7 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
 vtkThreadedImageAlgorithm::~vtkThreadedImageAlgorithm()
 {
   this->Threader->Delete();
+  this->Translator->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -154,9 +156,7 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
 
   if(this->UseBlockMode && this->UseSmp) // this is block mode splitting
     {
-    vtkExtentTranslator* translator = vtkExtentTranslator::New();;
-    int ret = translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE,0);
-    translator->Delete();
+    int ret = this->Translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE,0);
     if(ret == 1)//there is a return extent
       {
       return num+1;

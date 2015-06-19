@@ -32,6 +32,7 @@
 
 class vtkImageData;
 class vtkMultiThreader;
+class vtkExtentTranslator;
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkThreadedImageAlgorithm : public vtkImageAlgorithm
 {
@@ -83,6 +84,7 @@ protected:
   ~vtkThreadedImageAlgorithm();
 
   vtkMultiThreader *Threader;
+  vtkExtentTranslator* Translator;
   int NumberOfThreads;
   bool UseSmp;
   int NumberOfSMPBlocks;

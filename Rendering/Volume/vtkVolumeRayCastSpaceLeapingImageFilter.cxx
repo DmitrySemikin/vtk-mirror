@@ -59,6 +59,9 @@ vtkVolumeRayCastSpaceLeapingImageFilter::vtkVolumeRayCastSpaceLeapingImageFilter
     this->GradientOpacityTable[i] = NULL;
     }
   this->Cache = NULL;
+
+  // turn off SMP block mode
+  this->UseBlockMode = false;
 }
 
 //----------------------------------------------------------------------------
