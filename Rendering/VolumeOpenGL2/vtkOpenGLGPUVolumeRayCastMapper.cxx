@@ -90,6 +90,7 @@ public:
     this->CubeVBOId = 0;
     this->CubeVAOId = 0;
     this->CubeIndicesId = 0;
+    this->InterpolationType = vtkTextureObject::Linear;
     this->VolumeTextureObject = 0;
     this->NoiseTextureObject = 0;
     this->DepthTextureObject = 0;
@@ -174,6 +175,7 @@ public:
                   int noOfComponents, int independentComponents);
 
   bool LoadVolume(vtkRenderer* ren, vtkImageData* imageData,
+                  vtkVolumeProperty* volumeProperty,
                   vtkDataArray* scalars, int independentComponents);
 
   bool LoadMask(vtkRenderer* ren, vtkImageData* input,
@@ -183,6 +185,12 @@ public:
   void DeleteTransferFunctions();
 
   void ComputeBounds(vtkImageData* input);
+
+  // Update OpenGL volume information
+  int UpdateVolume(vtkVolumeProperty* volumeProperty);
+
+  // Update interpolation to be used for 3D volume
+  int UpdateInterpolationType(vtkVolumeProperty* volumeProperty);
 
   // Update transfer color function based on the incoming inputs
   // and number of scalar components.
@@ -252,6 +260,8 @@ public:
   GLuint CubeVAOId;
   GLuint CubeIndicesId;
 
+  int InterpolationType;
+
   vtkTextureObject* VolumeTextureObject;
   vtkTextureObject* NoiseTextureObject;
   vtkTextureObject* DepthTextureObject;
@@ -314,6 +324,7 @@ public:
 
   vtkTimeStamp InitializationTime;
   vtkTimeStamp InputUpdateTime;
+  vtkTimeStamp VolumeUpdateTime;
   vtkTimeStamp ReleaseResourcesTime;
 
   bool NeedToInitializeResources;
@@ -487,7 +498,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::Initialize(
 
 //----------------------------------------------------------------------------
 bool vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::LoadVolume(vtkRenderer* ren,
-  vtkImageData* imageData, vtkDataArray* scalars,
+  vtkImageData* imageData, vtkVolumeProperty* volumeProperty, vtkDataArray* scalars,
   int vtkNotUsed(independentComponents))
 {
   // Allocate data with internal format and foramt as (GL_RED)
@@ -497,7 +508,6 @@ bool vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::LoadVolume(vtkRenderer* ren,
 
   this->HandleLargeDataTypes = false;
   int noOfComponents = scalars->GetNumberOfComponents();
-
 
   // scale and bias
   // NP = P*scale + bias
@@ -753,6 +763,8 @@ bool vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::LoadVolume(vtkRenderer* ren,
   this->VolumeTextureObject->SetFormat(format);
   this->VolumeTextureObject->SetInternalFormat(internalFormat);
 
+  this->UpdateInterpolationType(volumeProperty);
+
   if (!this->HandleLargeDataTypes)
     {
     void* dataPtr = scalars->GetVoidPointer(0);
@@ -768,8 +780,8 @@ bool vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::LoadVolume(vtkRenderer* ren,
     this->VolumeTextureObject->SetWrapS(vtkTextureObject::ClampToEdge);
     this->VolumeTextureObject->SetWrapT(vtkTextureObject::ClampToEdge);
     this->VolumeTextureObject->SetWrapR(vtkTextureObject::ClampToEdge);
-    this->VolumeTextureObject->SetMagnificationFilter(vtkTextureObject::Linear);
-    this->VolumeTextureObject->SetMinificationFilter(vtkTextureObject::Linear);
+    this->VolumeTextureObject->SetMagnificationFilter(this->InterpolationType);
+    this->VolumeTextureObject->SetMinificationFilter(this->InterpolationType);
     this->VolumeTextureObject->SetBorderColor(0.0f, 0.0f, 0.0f, 0.0f);
     }
   else
@@ -789,8 +801,8 @@ bool vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::LoadVolume(vtkRenderer* ren,
     this->VolumeTextureObject->SetWrapS(vtkTextureObject::ClampToEdge);
     this->VolumeTextureObject->SetWrapT(vtkTextureObject::ClampToEdge);
     this->VolumeTextureObject->SetWrapR(vtkTextureObject::ClampToEdge);
-    this->VolumeTextureObject->SetMagnificationFilter(vtkTextureObject::Linear);
-    this->VolumeTextureObject->SetMinificationFilter(vtkTextureObject::Linear);
+    this->VolumeTextureObject->SetMagnificationFilter(this->InterpolationType);
+    this->VolumeTextureObject->SetMinificationFilter(this->InterpolationType);
     this->VolumeTextureObject->SetBorderColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     // Send the slices one by one to the GPU. We are not sending all of them
@@ -1011,9 +1023,70 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::ComputeBounds(
 }
 
 //----------------------------------------------------------------------------
-int vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateColorTransferFunction(
-  vtkRenderer* ren, vtkVolume* vol, int vtkNotUsed(noOfComponents),
-  unsigned int component)
+int vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateVolume(
+  vtkVolumeProperty* volumeProperty)
+{
+  if (volumeProperty->GetMTime() > this->VolumeUpdateTime.GetMTime())
+    {
+    int interpolationType = this->InterpolationType;
+
+    this->UpdateInterpolationType(volumeProperty);
+
+    if (interpolationType != this->InterpolationType)
+      {
+      this->VolumeTextureObject->Activate();
+      this->VolumeTextureObject->SetMagnificationFilter(this->InterpolationType);
+      this->VolumeTextureObject->SetMinificationFilter(this->InterpolationType);
+      }
+    }
+  this->VolumeUpdateTime.Modified();
+
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+int vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateInterpolationType(
+  vtkVolumeProperty* volumeProperty)
+{
+    if (volumeProperty != NULL)
+      {
+      if (volumeProperty->GetInterpolationType() ==
+          VTK_LINEAR_INTERPOLATION &&
+          this->InterpolationType != vtkTextureObject::Linear)
+        {
+        this->InterpolationType = vtkTextureObject::Linear;
+        return 0;
+        }
+      else if(volumeProperty->GetInterpolationType() ==
+              VTK_NEAREST_INTERPOLATION &&
+              this->InterpolationType != vtkTextureObject::Nearest)
+        {
+        this->InterpolationType = vtkTextureObject::Nearest;
+        return 0;
+        }
+      else if (volumeProperty->GetInterpolationType() !=
+               VTK_LINEAR_INTERPOLATION &&
+               volumeProperty->GetInterpolationType() !=
+               VTK_NEAREST_INTERPOLATION)
+        {
+        std::cerr << "Invalid interpolation type for volume texture"
+                  << std::endl;
+        return 1;
+        }
+      else
+        {
+        // Do nothing
+        return 0;
+        }
+      }
+
+    return 0;
+  }
+
+  //----------------------------------------------------------------------------
+  int vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateColorTransferFunction(
+    vtkRenderer* ren, vtkVolume* vol, int vtkNotUsed(noOfComponents),
+    unsigned int component)
 {
   // Volume property cannot be null.
   vtkVolumeProperty* volumeProperty = vol->GetProperty();
@@ -1300,9 +1373,14 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateDepthTexture(
 
 //----------------------------------------------------------------------------
 void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateLightingParameters(
-  vtkRenderer* ren, vtkVolume* vtkNotUsed(vol))
+  vtkRenderer* ren, vtkVolume* vol)
 {
   if (!this->ShaderProgram)
+    {
+    return;
+    }
+
+  if (vol && !vol->GetProperty()->GetShade())
     {
     return;
     }
@@ -1574,18 +1652,19 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateVolumeGeometry(
       // We add an offset to the near plane to avoid hardware clipping of the
       // near plane due to floating-point precision.
       // camPlaneNormal is a unit vector, if the offset is larger than the
-      // distance between near and far point, it will not work, in this case we
-      // pick a fraction of the near-far distance.
-      // 100.0 and 1000.0 are chosen based on the typical epsilon values on
-      // x86 systems.
-      double offset =  static_cast<double>(
-                         std::numeric_limits<float>::epsilon()) * 100.0;
-      if(offset > 0.001)
-        {
-        double newOffset = sqrt(vtkMath::Distance2BetweenPoints(
-                             camNearPoint, camFarPoint)) / 1000.0;
-        offset = offset > newOffset ? newOffset : offset;
-        }
+      // distance between near and far point, it will not work. Hence, we choose
+      // a fraction of the near-far distance. However, care should be taken
+      // to avoid hardware clipping in volumes with very small spacing where the
+      // distance between near and far plane is also very small. In that case,
+      // a minimum offset is chosen. This is chosen based on the typical
+      // epsilon values on x86 systems.
+      double offset = sqrt(vtkMath::Distance2BetweenPoints(
+                           camNearPoint, camFarPoint)) / 1000.0;
+      // Minimum offset to avoid floating point precision issues for volumes
+      // with very small spacing
+      double minOffset =  static_cast<double>(
+                         std::numeric_limits<float>::epsilon()) * 1000.0;
+      offset = offset < minOffset ? minOffset : offset;
 
       camNearPoint[0] += camPlaneNormal[0]*offset;
       camNearPoint[1] += camPlaneNormal[1]*offset;
@@ -2046,6 +2125,8 @@ void vtkOpenGLGPUVolumeRayCastMapper::BuildShader(vtkRenderer* ren,
     {
     vtkLightCollection* lc = ren->GetLights();
     vtkLight* light;
+    this->Impl->NumberOfLights = 0;
+
     // Compute light complexity.
     vtkCollectionSimpleIterator sit;
     for (lc->InitTraversal(sit); (light = lc->GetNextLight(sit)); )
@@ -2108,7 +2189,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::BuildShader(vtkRenderer* ren,
   fragmentShader = vtkvolume::replace(
     fragmentShader,
     "//VTK::Base::Init",
-    vtkvolume::BaseInit(ren, this, vol),
+    vtkvolume::BaseInit(ren, this, vol, this->Impl->LightComplexity),
     true);
 
   fragmentShader = vtkvolume::replace(
@@ -2335,7 +2416,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::BuildShader(vtkRenderer* ren,
 
   // Now compile the shader
   //--------------------------------------------------------------------------
-  this->Impl->ShaderProgram = this->Impl->ShaderCache->ReadyShader(
+  this->Impl->ShaderProgram = this->Impl->ShaderCache->ReadyShaderProgram(
     vertexShader.c_str(), fragmentShader.c_str(), "");
 
   if (!this->Impl->ShaderProgram->GetCompiled())
@@ -2503,9 +2584,13 @@ void vtkOpenGLGPUVolumeRayCastMapper::GPURender(vtkRenderer* ren,
 
     // Update bounds, data, and geometry
     this->Impl->ComputeBounds(input);
-    this->Impl->LoadVolume(ren, input, scalars, independentComponents);
+    this->Impl->LoadVolume(ren, input, volumeProperty, scalars, independentComponents);
     this->Impl->LoadMask(ren, input, this->MaskInput,
                          this->Impl->Extents, vol);
+    }
+  else
+    {
+    this->Impl->UpdateVolume(volumeProperty);
     }
 
   // Mask
@@ -2549,7 +2634,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::GPURender(vtkRenderer* ren,
     }
 
   // Bind the shader
-  this->Impl->ShaderCache->ReadyShader(
+  this->Impl->ShaderCache->ReadyShaderProgram(
     this->Impl->ShaderProgram);
 
   // And now update the geometry that will be used

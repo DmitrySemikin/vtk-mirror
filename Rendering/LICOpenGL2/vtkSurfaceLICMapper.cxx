@@ -37,26 +37,22 @@
 #include "vtkOpenGLActor.h"
 #include "vtkOpenGLCamera.h"
 #include "vtkOpenGLError.h"
-#include "vtkOpenGLShaderCache.h"
 #include "vtkOpenGLRenderWindow.h"
+#include "vtkOpenGLShaderCache.h"
 #include "vtkPainterCommunicator.h"
 #include "vtkPixelBufferObject.h"
 #include "vtkPixelExtent.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
-// #include "vtkRenderbuffer.h"
 #include "vtkRenderer.h"
 #include "vtkScalarsToColors.h"
 #include "vtkShaderProgram.h"
-// #include "vtkSmartPointer.h"
 #include "vtkSurfaceLICComposite.h"
 #include "vtkTextureObject.h"
 #include "vtkTextureObjectVS.h"
-// #include "vtkUnsignedCharArray.h"
-// #include "vtkWeakPointer.h"
 
-using vtkgl::substitute;
+
 
 #include <cassert>
 #include <cstring>
@@ -856,9 +852,9 @@ public:
 
   vtkSmartPointer<vtkFrameBufferObject2> FBO;
 
-  vtkgl::CellBO *ColorPass;
-  vtkgl::CellBO *ColorEnhancePass;
-  vtkgl::CellBO *CopyPass;
+  vtkOpenGLHelper *ColorPass;
+  vtkOpenGLHelper *ColorEnhancePass;
+  vtkOpenGLHelper *CopyPass;
 
   vtkSmartPointer<vtkSurfaceLICComposite> Compositor;
   vtkSmartPointer<vtkLineIntegralConvolution2D> LICer;
@@ -907,6 +903,23 @@ public:
     {
     this->ClearGraphicsResources();
 
+    if (this->ColorPass)
+      {
+      delete this->ColorPass;
+      }
+    if (this->ColorEnhancePass)
+      {
+      delete this->ColorEnhancePass;
+      }
+    if (this->CopyPass)
+      {
+      delete this->CopyPass;
+      }
+    this->ColorPass = NULL;
+    this->ColorEnhancePass = NULL;
+    this->CopyPass = NULL;
+
+
     delete this->Communicator;
     }
 
@@ -950,10 +963,6 @@ public:
   void ClearGraphicsResources()
     {
     this->ClearTextures();
-
-    this->ColorPass = NULL;
-    this->ColorEnhancePass = NULL;
-    this->CopyPass = NULL;
 
     this->Compositor = NULL;
     this->LICer = NULL;
@@ -1142,7 +1151,7 @@ public:
   void RenderQuad(
         const vtkPixelExtent &viewExt,
         const vtkPixelExtent &viewportExt,
-        vtkgl::CellBO *cbo)
+        vtkOpenGLHelper *cbo)
     {
     // cell to node
     vtkPixelExtent next(viewportExt);
@@ -1167,7 +1176,7 @@ public:
       quadTCoords[0]*2.0-1.0, quadTCoords[3]*2.0-1.0, 0.0f};
 
     vtkOpenGLRenderWindow::RenderQuad(verts, tcoords,
-      cbo->Program, &cbo->vao);
+      cbo->Program, cbo->VAO);
     vtkOpenGLStaticCheckErrorMacro("failed at RenderQuad");
   }
 
@@ -2071,21 +2080,21 @@ bool vtkSurfaceLICMapper::CanRenderSurfaceLIC(vtkActor *actor)
 
 namespace {
   void BuildAShader(vtkOpenGLRenderWindow *renWin,
-    vtkgl::CellBO **cbor, const char * vert,
+    vtkOpenGLHelper **cbor, const char * vert,
     const char *frag)
   {
   if (*cbor == NULL)
     {
-    *cbor = new vtkgl::CellBO;
+    *cbor = new vtkOpenGLHelper;
     std::string GSSource;
     (*cbor)->Program =
-        renWin->GetShaderCache()->ReadyShader(vert,
+        renWin->GetShaderCache()->ReadyShaderProgram(vert,
                                               frag,
                                               GSSource.c_str());
     }
   else
     {
-    renWin->GetShaderCache()->ReadyShader((*cbor)->Program);
+    renWin->GetShaderCache()->ReadyShaderProgram((*cbor)->Program);
     }
   }
 }
@@ -2451,25 +2460,25 @@ void vtkSurfaceLICMapper::SetUpdateAll()
   this->Internals->UpdateAll();
 }
 
-void vtkSurfaceLICMapper::ReplaceShaderValues(std::string &VSSource,
-                                              std::string &FSSource,
-                                              std::string &GSSource,
-                                              int lightComplexity,
-                                              vtkRenderer* ren,
-                                              vtkActor *actor)
+void vtkSurfaceLICMapper::ReplaceShaderValues(
+    std::map<vtkShader::Type, vtkShader *> shaders,
+    vtkRenderer *ren, vtkActor *actor)
 {
+  std::string VSSource = shaders[vtkShader::Vertex]->GetSource();
+  std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
+
   // add some code to handle the LIC vectors and mask
-  substitute(VSSource,
+  vtkShaderProgram::Substitute(VSSource,
     "//VTK::TCoord::Dec",
     "attribute vec3 tcoordMC;\n"
     "varying vec3 tcoordVC;\n"
     );
 
-  substitute(VSSource, "//VTK::TCoord::Impl",
+  vtkShaderProgram::Substitute(VSSource, "//VTK::TCoord::Impl",
     "tcoordVC = tcoordMC;"
     );
 
-  substitute(FSSource,
+  vtkShaderProgram::Substitute(FSSource,
     "//VTK::TCoord::Dec",
     // 0/1, when 1 V is projected to surface for |V| computation.
     "uniform int uMaskOnSurface;\n"
@@ -2477,7 +2486,7 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(std::string &VSSource,
     "varying vec3 tcoordVC;"
     );
 
-  substitute(FSSource,
+  vtkShaderProgram::Substitute(FSSource,
     "//VTK::TCoord::Impl",
     // projected vectors
     "  vec3 tcoordLIC = normalMatrix * tcoordVC;\n"
@@ -2500,12 +2509,14 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(std::string &VSSource,
 
   this->ShaderVariablesUsed.push_back("normalMatrix");
 
-  this->Superclass::ReplaceShaderValues(VSSource,FSSource,GSSource,
-    lightComplexity, ren, actor);
+  shaders[vtkShader::Vertex]->SetSource(VSSource);
+  shaders[vtkShader::Fragment]->SetSource(FSSource);
+
+  this->Superclass::ReplaceShaderValues(shaders,ren,actor);
 }
 
 void vtkSurfaceLICMapper::SetMapperShaderParameters(
-  vtkgl::CellBO &cellBO,
+  vtkOpenGLHelper &cellBO,
   vtkRenderer* ren, vtkActor *actor)
 {
   this->Superclass::SetMapperShaderParameters(cellBO, ren, actor);
@@ -2960,7 +2971,7 @@ void vtkSurfaceLICMapper::RenderPiece(
     this->Internals->LICImage->Activate();
 
     vtkShaderProgram *colorPass = this->Internals->ColorPass->Program;
-    renWin->GetShaderCache()->ReadyShader(colorPass);
+    renWin->GetShaderCache()->ReadyShaderProgram(colorPass);
     colorPass->SetUniformi("texVectors",
       this->Internals->VectorImage->GetTextureUnit());
     colorPass->SetUniformi("texGeomColors",
@@ -3056,7 +3067,7 @@ void vtkSurfaceLICMapper::RenderPiece(
 
       vtkShaderProgram *colorEnhancePass =
         this->Internals->ColorEnhancePass->Program;
-      renWin->GetShaderCache()->ReadyShader(colorEnhancePass);
+      renWin->GetShaderCache()->ReadyShaderProgram(colorEnhancePass);
       colorEnhancePass->SetUniformi("texGeomColors",
         this->Internals->GeometryImage->GetTextureUnit());
       colorEnhancePass->SetUniformi("texHSLColors",
@@ -3116,7 +3127,7 @@ void vtkSurfaceLICMapper::RenderPiece(
 
   vtkShaderProgram *copyPass =
     this->Internals->CopyPass->Program;
-  renWin->GetShaderCache()->ReadyShader(copyPass);
+  renWin->GetShaderCache()->ReadyShaderProgram(copyPass);
   copyPass->SetUniformi("texDepth",
     this->Internals->DepthImage->GetTextureUnit());
   copyPass->SetUniformi("texRGBColors",

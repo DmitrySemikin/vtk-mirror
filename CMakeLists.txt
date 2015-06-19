@@ -194,6 +194,9 @@ else()
   option(BUILD_SHARED_LIBS "Build VTK with shared libraries." ON)
 endif()
 
+# default to not using the system GLEW as ours has fixes in it right now
+set(VTK_USE_SYSTEM_GLEW OFF CACHE BOOL "do not use a system glew" FORCE)
+
 set(VTK_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
 
 #-----------------------------------------------------------------------------
@@ -294,8 +297,8 @@ CHECK_CXX_SOURCE_RUNS("${VTK_REQUIRE_LARGE_FILE_SUPPORT_FILE}"
 SET(VTK_REQUIRE_LARGE_FILE_SUPPORT ${CMAKE_REQUIRE_LARGE_FILE_SUPPORT})
 
 #-----------------------------------------------------------------------------
-# Does the const_reverse_iterator have the comparison operators? Before GCC
-# 4.1 they were not present.
+# Does the const_reverse_iterator have the comparison operators? They were not
+# present in older versions of gcc (ex: Apple fork of gcc 4.2).
 include(CheckCXXSourceCompiles)
 set(VTK_CONST_REVERSE_ITERATOR_COMPARISON_FILE
 "#include <vector>

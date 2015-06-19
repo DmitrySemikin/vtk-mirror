@@ -48,6 +48,7 @@ vtk_add_test_python(
   multipleComponentContour.py
   multipleIso.py
   polyConn.py
+  probe.py
   probeComb.py
   reverseNormals.py
   smoothMeshOnMesh.py

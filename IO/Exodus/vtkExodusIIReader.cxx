@@ -1015,7 +1015,8 @@ int vtkExodusIIReaderPrivate::AssembleOutputGlobalArrays(
     dataIndexArray->SetName("mode_shape");
     dataIndexArray->SetNumberOfComponents(1);
     dataIndexArray->SetNumberOfTuples(1);
-    dataIndexArray->SetValue(0, timeStep);
+    // mode-shape == (timestep + 1). See vtkExodusIIReader::SetModeShape().
+    dataIndexArray->SetValue(0, (timeStep + 1));
     ofieldData->AddArray(dataIndexArray.GetPointer());
     }
 
@@ -3060,6 +3061,8 @@ void vtkExodusIIReaderPrivate::DetermineVtkCellType( BlockInfoType& binfo )
     { binfo.CellType=VTK_QUADRATIC_EDGE;           binfo.PointsPerCell = 3; }
   else if ((elemType.substr(0,3) == "EDG") &&      (binfo.BdsPerEntry[0] == 3))
     { binfo.CellType=VTK_QUADRATIC_EDGE;           binfo.PointsPerCell = 3; }
+  else if ((elemType.substr(0,3) == "PYR") &&      (binfo.BdsPerEntry[0] == 13))
+    { binfo.CellType=VTK_QUADRATIC_PYRAMID;        binfo.PointsPerCell = 13; }
 
   // Check for regular elements
   else if (elemType.substr(0,3) == "CIR") { binfo.CellType = VTK_VERTEX;     binfo.PointsPerCell = 1; }

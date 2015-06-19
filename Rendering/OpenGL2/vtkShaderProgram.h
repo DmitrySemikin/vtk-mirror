@@ -46,14 +46,17 @@ public:
   // Description:
   // Get the vertex shader for this program
   vtkGetObjectMacro(VertexShader, vtkShader);
+  void SetVertexShader(vtkShader*);
 
   // Description:
   // Get the fragment shader for this program
   vtkGetObjectMacro(FragmentShader, vtkShader);
+  void SetFragmentShader(vtkShader*);
 
   // Description:
   // Get the geometry shader for this program
   vtkGetObjectMacro(GeometryShader, vtkShader);
+  void SetGeometryShader(vtkShader*);
 
   // Description:
   // Set/Get flag for if this program is compiled
@@ -176,6 +179,19 @@ public:
   // only valid for OpenGL 3.2 or later
   vtkSetMacro(NumberOfOutputs,unsigned int);
 
+//BTX
+  // Description:
+  // perform in place string substitutions, indicate if a substitution was done
+  // this is useful for building up shader strings which typically involve
+  // lots of string substitutions. Return true if a substitution was done.
+  static bool Substitute(
+    std::string &source,
+    const std::string &search,
+    const std::string replace,
+    bool all = true);
+
+
+
 protected:
   vtkShaderProgram();
   ~vtkShaderProgram();
@@ -238,6 +254,7 @@ protected:
   int Handle;
   int VertexShaderHandle;
   int FragmentShaderHandle;
+  int GeometryShaderHandle;
 
   bool Linked;
   bool Bound;
@@ -261,6 +278,7 @@ private:
 
   vtkShaderProgram(const vtkShaderProgram&);  // Not implemented.
   void operator=(const vtkShaderProgram&);  // Not implemented.
+//ETX
 };
 
 

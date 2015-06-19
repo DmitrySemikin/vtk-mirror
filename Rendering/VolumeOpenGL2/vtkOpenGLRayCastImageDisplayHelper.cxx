@@ -24,9 +24,10 @@
 #include "vtkTextureObject.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLShaderCache.h"
+#include "vtkOpenGLVertexArrayObject.h"
 #include "vtkShaderProgram.h"
 
-#include "vtkglVBOHelper.h"
+#include "vtkOpenGLHelper.h"
 
 #include "vtkOpenGLError.h"
 
@@ -52,6 +53,11 @@ vtkOpenGLRayCastImageDisplayHelper::~vtkOpenGLRayCastImageDisplayHelper()
     {
     this->TextureObject->Delete();
     this->TextureObject = 0;
+    }
+  if (this->ShaderProgram)
+    {
+    delete this->ShaderProgram;
+    this->ShaderProgram = 0;
     }
 }
 
@@ -197,7 +203,7 @@ void vtkOpenGLRayCastImageDisplayHelper::RenderTextureInternal( vtkVolume *vol,
 
   if (!this->ShaderProgram)
     {
-    this->ShaderProgram = new vtkgl::CellBO;
+    this->ShaderProgram = new vtkOpenGLHelper;
 
     // build the shader source code
     std::string VSSource = vtkTextureObjectVS;
@@ -215,7 +221,7 @@ void vtkOpenGLRayCastImageDisplayHelper::RenderTextureInternal( vtkVolume *vol,
 
     // compile and bind it if needed
     vtkShaderProgram *newShader =
-      ctx->GetShaderCache()->ReadyShader(VSSource.c_str(),
+      ctx->GetShaderCache()->ReadyShaderProgram(VSSource.c_str(),
                                          FSSource.c_str(),
                                          GSSource.c_str());
 
@@ -223,14 +229,14 @@ void vtkOpenGLRayCastImageDisplayHelper::RenderTextureInternal( vtkVolume *vol,
     if (newShader != this->ShaderProgram->Program)
       {
       this->ShaderProgram->Program = newShader;
-      this->ShaderProgram->vao.ShaderProgramChanged(); // reset the VAO as the shader has changed
+      this->ShaderProgram->VAO->ShaderProgramChanged(); // reset the VAO as the shader has changed
       }
 
     this->ShaderProgram->ShaderSourceTime.Modified();
     }
   else
     {
-    ctx->GetShaderCache()->ReadyShader(this->ShaderProgram->Program);
+    ctx->GetShaderCache()->ReadyShaderProgram(this->ShaderProgram->Program);
     }
 
   glEnable(GL_BLEND);
@@ -246,7 +252,7 @@ void vtkOpenGLRayCastImageDisplayHelper::RenderTextureInternal( vtkVolume *vol,
   this->ShaderProgram->Program->SetUniformi("source",sourceId);
   this->ShaderProgram->Program->SetUniformf("scale",this->PixelScale);
   vtkOpenGLRenderWindow::RenderQuad(verts, tcoords, this->ShaderProgram->Program,
-    &this->ShaderProgram->vao);
+    this->ShaderProgram->VAO);
   this->TextureObject->Deactivate();
 
   vtkOpenGLCheckErrorMacro("failed after RenderTextureInternal");
