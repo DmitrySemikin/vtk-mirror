@@ -29,6 +29,7 @@ vtkStandardNewMacro(vtkImageSkeleton2D);
 vtkImageSkeleton2D::vtkImageSkeleton2D()
 {
   this->Prune = 0;
+  this->UseBlockMode = false;
 }
 
 //----------------------------------------------------------------------------
