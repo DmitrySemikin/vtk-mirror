@@ -12,6 +12,7 @@ find_package(VTK COMPONENTS
   vtkIOImage
   vtkImagingGeneral
   vtkImagingCore
+  vtkImagingMath
   vtkInteractionStyle
   vtkRendering${VTK_RENDERING_BACKEND}
   vtkTestingRendering
@@ -40,6 +41,11 @@ if(BUILD_TESTING)
    configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/SMPBenchMarking.sh.in"
     "${CMAKE_CURRENT_BINARY_DIR}/SMPBenchMarking.sh"
+    COPYONLY
+   )
+   configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/SMPBenchMarkingRunAllTests.sh.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/SMPBenchMarkingRunAllTests.sh"
     COPYONLY
    )
 

@@ -1,0 +1,108 @@
+#!/bin/bash
+
+#TEST_PROGRAM_NUMBER=$1
+#ENABLESMP=$2
+#ENABLE_SMP_BLOCK_MODE=$3
+#THREAD_NUMBER=$4
+#SPLIT_SMP_BLOCKS=$5
+#WORK_LOAD=$6
+#O_PERF_EVENTS=$7
+#ROOT_FOLDER=$8
+#ADDITIONAL_DATA = $9 -- this is optional
+
+#./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 true true 4 1000 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+# (Enable/Disable oprof)  (test#) (smpEnable) (blockSplitting Enable) (#ofProcessors)  (#of smp blocks) (worksize)
+
+#MAXIUM NUMBER OF PROCESSORS
+MAX_PROCESSORS=4
+
+#Enable/Disable Oprofile
+O_PROFILE_ENABLE=0
+
+#Set Oprofile Events
+O_PERF_EVENTS=" "
+
+#make results directory
+RESULTS_DIRECTORY="results"
+mkdir "$RESULTS_DIRECTORY"
+
+# Set Rootfolder to current date
+if [ $O_PROFILE_ENABLE -eq 1 ]; then
+	dt=Test_$(date '+%d-%m-%Y_%H-%M-%S');
+	mkdir "$RESULTS_DIRECTORY/$dt"
+fi
+#---------------------TEST CASE 1-------------------------
+# Test SMP overhead versus old multi-threader
+# This test does a very numerical operation filter imagecast
+
+LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase1"
+if [ $O_PROFILE_ENABLE -eq 1 ]; then
+	mkdir $LOCAL_DIRECTORY
+fi
+# Run test base class
+
+for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
+do
+	for (( i = 1000; i <= 2000; i+=100 ))
+	do
+	    ./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+	done
+done
+
+# Run Test
+
+for (( i = 1000; i <= 2000; i+=100 ))
+do
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+done
+
+#---------------------TEST CASE 2-------------------------
+# Test image dot product
+# This test checks to see if blocking/non blocking has any effect
+# On the speed since good data-access is key in dot product
+
+LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase2"
+if [ $O_PROFILE_ENABLE -eq 1 ]; then
+	mkdir $LOCAL_DIRECTORY
+fi
+# Run test base class
+
+for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
+do
+	for (( i = 1000; i <= 2000; i+=100 ))
+	do
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE 2 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+	done
+done
+
+# Run Test
+for (( i = 1000; i <= 2000; i+=100 ))
+do
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE 2 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+done
+
+
+#---------------------TEST CASE 3-------------------------
+# Test Imagereslice 90 degree image rotation
+# This test among other things mainly tests for
+# Data Access pattern again by doing a 90 degree rotation
+LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"
+if [ $O_PROFILE_ENABLE -eq 1 ]; then
+	mkdir $LOCAL_DIRECTORY
+fi
+
+ADDITIONAL_DATA="testCaseThreeData.jpg"
+# Run test base class
+
+for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
+do
+	for (( i = 1000; i <= 2000; i+=100 ))
+	do
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE 3 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$ADDITIONAL_DATA"
+	done
+done
+# Run Test
+for (( i = 1000; i <= 2000; i+=100 ))
+do
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE 3 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$ADDITIONAL_DATA"
+done
