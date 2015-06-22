@@ -20,10 +20,9 @@
 #include <vtkImageConvolve.h>
 #include <vtkImageMandelbrotSource.h>
 
-#define CSV_RESULT_FILE "executionResult.csv"
-
 struct TestParms
 {
+  int numberOfIterationsToRun;
   int testCase;
   bool enableSMP;
   bool enableSMPBlockMode;
@@ -31,12 +30,14 @@ struct TestParms
   int numberOfSMPBlocks;
   int workSize;
   char * additionalData;
+  char * outputCSVFile;
 };
 
 int WriteResultToCSV(double executionTime,TestParms *parm)
 {
   char writeOutput[100];
-  sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%f,%s\n"
+  sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%d,%f,%s\n"
+  ,parm->numberOfIterationsToRun
   ,parm->testCase
   ,parm->enableSMP
   ,parm->enableSMPBlockMode
@@ -46,7 +47,7 @@ int WriteResultToCSV(double executionTime,TestParms *parm)
   ,executionTime
   ,parm->additionalData);
 
-  FILE *f = fopen(CSV_RESULT_FILE, "a+");
+  FILE *f = fopen(parm->outputCSVFile, "a+");
   if (f == NULL)
   {
     return -1;
@@ -59,26 +60,30 @@ int WriteResultToCSV(double executionTime,TestParms *parm)
 
 int main(int argc, char *argv[])
 {
-  if(argc <7)
+  if(argc <9)
     {
     printf ("Not all parms have being passed in\n"
-        "parm#1: Test Number.\n"
-        "parm#2: Enable/Disabl SMP, use true/false\n"
-        "parm#3: Enable block mode splitting, this is only valid if SMP is true. \n"
-        "parm#4: Number Of threads to run ~4, this is only valid if SMP is true. \n"
-        "parm#5: Number of split SMP blocks ~500.\n"
-        "parm#6: The size of the work load ~5000\n"
+        "parm#1: NumberOfIterationsToRun.\n"
+        "parm#2: Test Number.\n"
+        "parm#3: Enable/Disabl SMP, use true/false\n"
+        "parm#4: Enable block mode splitting, this is only valid if SMP is true. \n"
+        "parm#5: Number Of threads to run ~4, this is only valid if SMP is true. \n"
+        "parm#6: Number of split SMP blocks ~500.\n"
+        "parm#7: The size of the work load ~5000\n"
+        "parm#8: Output csv file\n"
         );
     return -1;
     }
 
   TestParms parms;
   parms.additionalData = " ";
+  parms.outputCSVFile = "";
 
-  parms.testCase = atoi(argv[1]);
+  parms.numberOfIterationsToRun =  atoi(argv[1]);
+  parms.testCase = atoi(argv[2]);
 
 
-  if(strcmp(argv[2],"true")==0)
+  if(strcmp(argv[3],"true")==0)
     {
     parms.enableSMP =true;
     }
@@ -86,7 +91,7 @@ int main(int argc, char *argv[])
     {
     parms.enableSMP =false;
     }
-  if(strcmp(argv[3],"true")==0)
+  if(strcmp(argv[4],"true")==0)
     {
     parms.enableSMPBlockMode = true;
     }
@@ -95,19 +100,20 @@ int main(int argc, char *argv[])
     parms.enableSMPBlockMode = false;
     }
 
-  parms.numberOfThreadsToRun = atoi(argv[4]);
-  parms.numberOfSMPBlocks = atoi(argv[5]);
-  parms.workSize = atoi(argv[6]);
+  parms.numberOfThreadsToRun = atoi(argv[5]);
+  parms.numberOfSMPBlocks = atoi(argv[6]);
+  parms.workSize = atoi(argv[7]);
+  parms.outputCSVFile = argv[8];
 
   // Initilize with passed in number of threads
   vtkTimerLog *tl = vtkTimerLog::New();
   vtkSMPTools::Initialize(parms.numberOfThreadsToRun);
 
-  printf("Running test case %d, with smp %d, blockmode %d, numberOfThreads %d\n"
-    ,parms.testCase
-    ,parms.enableSMP
-    ,parms.enableSMPBlockMode
-    ,parms.numberOfThreadsToRun);
+  // printf("Running test case %d, with smp %d, blockmode %d, numberOfThreads %d\n"
+  //   ,parms.testCase
+  //   ,parms.enableSMP
+  //   ,parms.enableSMPBlockMode
+  //   ,parms.numberOfThreadsToRun);
 
   //---------------------------------------------------------------------
   //----Test Case 1: SMP overhead compared with old multi-threader
@@ -115,28 +121,30 @@ int main(int argc, char *argv[])
    {
     case 1:
     {
-      int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
+      float totalTime =0.0;
+      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+        {
+          int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
+          vtkSmartPointer<vtkImageMandelbrotSource> source =
+          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+          source->SetWholeExtent(workExtent);
+          source->Update();
 
-      vtkSmartPointer<vtkImageMandelbrotSource> source =
-      vtkSmartPointer<vtkImageMandelbrotSource>::New();
-      source->SetWholeExtent(workExtent);
-      source->Update();
+          vtkSmartPointer<vtkImageCast> castFilter =
+          vtkSmartPointer<vtkImageCast>::New();
+          castFilter->SetInputConnection(source->GetOutputPort());
+          castFilter->EnableSMP(parms.enableSMP);
+          castFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+          castFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
+          castFilter->SetOutputScalarTypeToUnsignedChar();
 
-      vtkSmartPointer<vtkImageCast> castFilter =
-      vtkSmartPointer<vtkImageCast>::New();
-      castFilter->SetInputConnection(source->GetOutputPort());
-      castFilter->EnableSMP(parms.enableSMP);
-      castFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-      castFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
-      castFilter->SetOutputScalarTypeToUnsignedChar();
+          tl->StartTimer();
+          castFilter->Update();
+          tl->StopTimer();
+          totalTime +=tl->GetElapsedTime();
+        }
 
-      tl->StartTimer();
-      castFilter->Update();
-      tl->StopTimer();
-
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-
-      WriteResultToCSV(tl->GetElapsedTime(),&parms);
+      WriteResultToCSV(totalTime/static_cast<float>(parms.numberOfIterationsToRun),&parms);
       break;
 
     }
@@ -215,12 +223,12 @@ int main(int argc, char *argv[])
   case 3:
     {
       // read in additional parm for the image slice data
-      if(argc <8)
+      if(argc <10)
       {
-        cerr << "Additional Data not inputed into argument 7\n";
+        cerr << "Additional Data not inputed into argument 8\n";
         break;
       }
-      parms.additionalData = argv[7];
+      parms.additionalData = argv[9];
       double angle = 90;
 
       // Read file
@@ -277,6 +285,11 @@ int main(int argc, char *argv[])
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
       WriteResultToCSV(tl->GetElapsedTime(),&parms);
       break;
+    }
+  case 4:
+    {
+
+
     }
   default:
    {

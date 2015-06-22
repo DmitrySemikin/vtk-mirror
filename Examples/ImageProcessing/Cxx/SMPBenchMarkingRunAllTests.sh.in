@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #TEST_PROGRAM_NUMBER=$1
 #ENABLESMP=$2
 #ENABLE_SMP_BLOCK_MODE=$3
@@ -13,6 +12,12 @@
 #./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 true true 4 1000 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
 # (Enable/Disable oprof)  (test#) (smpEnable) (blockSplitting Enable) (#ofProcessors)  (#of smp blocks) (worksize)
 
+#AVERAGE NUMBER OF ITERATIONS
+NUMBER_OF_TIMES_TEST_RUN=4
+
+#NUMBER OF WORKSIZE SAMPLES TAKEN
+NUMBER_OF_SAMPLES=30
+
 #MAXIUM NUMBER OF PROCESSORS
 MAX_PROCESSORS=4
 
@@ -22,39 +27,59 @@ O_PROFILE_ENABLE=0
 #Set Oprofile Events
 O_PERF_EVENTS=" "
 
+
+
 #make results directory
 RESULTS_DIRECTORY="results"
 mkdir "$RESULTS_DIRECTORY"
+
+#set output csv file
+OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/timings.csv"
 
 # Set Rootfolder to current date
 if [ $O_PROFILE_ENABLE -eq 1 ]; then
 	dt=Test_$(date '+%d-%m-%Y_%H-%M-%S');
 	mkdir "$RESULTS_DIRECTORY/$dt"
 fi
+
+#PUT DateTime into csv
+echo "$(date '+%d-%m-%Y_%H-%M-%S')" >> "$OUTPUT_CSV_FILE"
 #---------------------TEST CASE 1-------------------------
 # Test SMP overhead versus old multi-threader
 # This test does a very numerical operation filter imagecast
+
+echo "Number of Iterations Run,TestCase Number,NumberOfProcessors,SMP-ON/OFF,BLOCKING-ON/OFF,# blocks,WorkSize,ExecutionTime" >> "$OUTPUT_CSV_FILE"
+
+echo "TestCase1" >> "$OUTPUT_CSV_FILE"
 
 LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase1"
 if [ $O_PROFILE_ENABLE -eq 1 ]; then
 	mkdir $LOCAL_DIRECTORY
 fi
+
 # Run test base class
+
+echo "---,SMP-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 
 for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
 do
-	for (( i = 1000; i <= 2000; i+=100 ))
+	echo " ,$j PROCESSORS" >> "$OUTPUT_CSV_FILE"
+	for (( i = 10; i <= 4000; i+=((4000-10)/$NUMBER_OF_SAMPLES) ))
 	do
-	    ./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+	    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 true false $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
 	done
 done
 
 # Run Test
 
-for (( i = 1000; i <= 2000; i+=100 ))
+echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+for (( i = 10; i <= 4000; i+=((4000-10)/$NUMBER_OF_SAMPLES) ))
 do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 false false 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
 done
+
+exit 0
 
 #---------------------TEST CASE 2-------------------------
 # Test image dot product
