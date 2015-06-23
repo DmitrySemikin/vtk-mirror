@@ -13,6 +13,7 @@ find_package(VTK COMPONENTS
   vtkImagingGeneral
   vtkImagingCore
   vtkImagingMath
+  vtkFiltersHybrid
   vtkInteractionStyle
   vtkRendering${VTK_RENDERING_BACKEND}
   vtkTestingRendering

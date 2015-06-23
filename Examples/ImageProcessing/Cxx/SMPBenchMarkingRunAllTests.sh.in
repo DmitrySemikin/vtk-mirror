@@ -12,11 +12,16 @@
 #./SMPBenchMarking.sh $O_PROFILE_ENABLE 1 true true 4 1000 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
 # (Enable/Disable oprof)  (test#) (smpEnable) (blockSplitting Enable) (#ofProcessors)  (#of smp blocks) (worksize)
 
+
+#-------------------------------------------------------CONFIGURE SETTINGS HERE ------------------------------------------------
+#SPECIFY WHICH TEST TO RUN
+TESTS_TO_RUN="4"
+
 #AVERAGE NUMBER OF ITERATIONS
 NUMBER_OF_TIMES_TEST_RUN=4
 
 #NUMBER OF WORKSIZE SAMPLES TAKEN
-NUMBER_OF_SAMPLES=30
+NUMBER_OF_SAMPLES=10
 
 #MAXIUM NUMBER OF PROCESSORS
 MAX_PROCESSORS=4
@@ -27,7 +32,7 @@ O_PROFILE_ENABLE=0
 #Set Oprofile Events
 O_PERF_EVENTS=" "
 
-
+#-------------------------------------------------------CONFIGURE SETTINGS HERE END------------------------------------------------
 
 #make results directory
 RESULTS_DIRECTORY="results"
@@ -44,90 +49,157 @@ fi
 
 #PUT DateTime into csv
 echo "$(date '+%d-%m-%Y_%H-%M-%S')" >> "$OUTPUT_CSV_FILE"
+
+echo "Number of Iterations Run,TestCase Number,NumberOfProcessors,SMP-ON/OFF,BLOCKING-ON/OFF,# blocks,WorkSize,ExecutionTime" >> "$OUTPUT_CSV_FILE"
 #---------------------TEST CASE 1-------------------------
 # Test SMP overhead versus old multi-threader
 # This test does a very numerical operation filter imagecast
+if [[ ${TESTS_TO_RUN[*]} =~ 1 ]]; then
 
-echo "Number of Iterations Run,TestCase Number,NumberOfProcessors,SMP-ON/OFF,BLOCKING-ON/OFF,# blocks,WorkSize,ExecutionTime" >> "$OUTPUT_CSV_FILE"
+	echo "TestCase1" >> "$OUTPUT_CSV_FILE"
 
-echo "TestCase1" >> "$OUTPUT_CSV_FILE"
+	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase1"
+	if [ $O_PROFILE_ENABLE -eq 1 ]; then
+		mkdir $LOCAL_DIRECTORY
+	fi
 
-LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase1"
-if [ $O_PROFILE_ENABLE -eq 1 ]; then
-	mkdir $LOCAL_DIRECTORY
+	# Run test base class
+
+	echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+	for (( k = 10; k <= 100; k+=10 ))
+	do
+		for (( j = 4; j <= $MAX_PROCESSORS; j++ ))
+		do
+			echo " ,$j PROCESSORS" >> "$OUTPUT_CSV_FILE"
+			for (( i = 10; i <= 8000; i+=((8000-10)/$NUMBER_OF_SAMPLES) ))
+			do
+			    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 true false $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
+			done
+		done
+
+
+	# echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+	# for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
+	# do
+	# 	echo " ,$j PROCESSORS" >> "$OUTPUT_CSV_FILE"
+	# 	for (( i = 10; i <= 8000; i+=((8000-10)/$NUMBER_OF_SAMPLES) ))
+	# 	do
+	# 	    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 true true $j $i 1000 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
+	# 	done
+	# done
+
+	# Run Test
+
+	echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+
+	./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 false false 4 $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+
+	done
+
 fi
 
-# Run test base class
-
-echo "---,SMP-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-
-for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
-do
-	echo " ,$j PROCESSORS" >> "$OUTPUT_CSV_FILE"
-	for (( i = 10; i <= 4000; i+=((4000-10)/$NUMBER_OF_SAMPLES) ))
-	do
-	    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 true false $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
-	done
-done
-
-# Run Test
-
-echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
-
-for (( i = 10; i <= 4000; i+=((4000-10)/$NUMBER_OF_SAMPLES) ))
-do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 1 false false 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
-done
-
-exit 0
 
 #---------------------TEST CASE 2-------------------------
 # Test image dot product
 # This test checks to see if blocking/non blocking has any effect
 # On the speed since good data-access is key in dot product
 
-LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase2"
-if [ $O_PROFILE_ENABLE -eq 1 ]; then
-	mkdir $LOCAL_DIRECTORY
-fi
-# Run test base class
+if [[ ${TESTS_TO_RUN[*]} =~ 2 ]]; then
 
-for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
-do
-	for (( i = 1000; i <= 2000; i+=100 ))
+	echo "TestCase2" >> "$OUTPUT_CSV_FILE"
+
+	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase2"
+	if [ $O_PROFILE_ENABLE -eq 1 ]; then
+		mkdir $LOCAL_DIRECTORY
+	fi
+	# Run test base class
+
+	for (( k = 10; k <= 100; k+=10 ))
 	do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE 2 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
-	done
-done
+		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 
-# Run Test
-for (( i = 1000; i <= 2000; i+=100 ))
-do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE 2 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"
-done
+		for (( j = 4; j <= $MAX_PROCESSORS; j++ ))
+		do
+			for (( i = 10; i <= 8000; i+=((8000-10)/$NUMBER_OF_SAMPLES) ))
+			do
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 2 true true $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+		done
+
+		echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+	# Run Test
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 2 false false 4 $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+	done
+fi
 
 
 #---------------------TEST CASE 3-------------------------
 # Test Imagereslice 90 degree image rotation
 # This test among other things mainly tests for
 # Data Access pattern again by doing a 90 degree rotation
-LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"
-if [ $O_PROFILE_ENABLE -eq 1 ]; then
-	mkdir $LOCAL_DIRECTORY
+
+if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
+	echo "TestCase 3" >> "$OUTPUT_CSV_FILE"
+
+	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"
+	if [ $O_PROFILE_ENABLE -eq 1 ]; then
+		mkdir $LOCAL_DIRECTORY
+	fi
+
+	ADDITIONAL_DATA="testCaseThreeDataHigh.jpg"
+	# Run test base class
+
+	for (( k = 100; k <= 100; k+=10 ))
+	do
+		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+		for (( j = 4; j <= $MAX_PROCESSORS; j++ ))
+		do
+			for (( i = 10; i <= 10000; i+=((10000-10)/$NUMBER_OF_SAMPLES) ))
+			do
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 3 true false $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			done
+		done
+		# Run Test
+		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 3 false false 4 $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+	done
+
 fi
 
-ADDITIONAL_DATA="testCaseThreeData.jpg"
-# Run test base class
 
-for (( j = 1; j <= $MAX_PROCESSORS; j++ ))
-do
-	for (( i = 1000; i <= 2000; i+=100 ))
+#---------------------TEST CASE 4-------------------------
+# Test Imagereslice 90 degree image rotation
+# This test among other things mainly tests for
+# Data Access pattern again by doing a 90 degree rotation
+
+TEST_CASE=4
+
+if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
+	echo "TestCase 4" >> "$OUTPUT_CSV_FILE"
+
+	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"
+	if [ $O_PROFILE_ENABLE -eq 1 ]; then
+		mkdir $LOCAL_DIRECTORY
+	fi
+
+	# Run test base class
+
+	for (( k = 100; k <= 100; k+=10 ))
 	do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE 3 true true $j $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$ADDITIONAL_DATA"
+		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+		for (( j = 4; j <= $MAX_PROCESSORS; j++ ))
+		do
+			for (( i = 10; i <= 10000; i+=((10000-10)/$NUMBER_OF_SAMPLES) ))
+			do
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_CASE true false $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+		done
+		#Run Test
+		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_CASE false false 4 100 $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
 	done
-done
-# Run Test
-for (( i = 1000; i <= 2000; i+=100 ))
-do
-	./SMPBenchMarking.sh $O_PROFILE_ENABLE 3 false true 4 $i 100 "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$ADDITIONAL_DATA"
-done
+
+fi
