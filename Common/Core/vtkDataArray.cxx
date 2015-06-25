@@ -1259,6 +1259,15 @@ double vtkDataArray::GetDataTypeMax(int type)
 }
 
 //----------------------------------------------------------------------------
+void vtkDataArray::RemoveLastTuple()
+{
+  if (this->GetNumberOfTuples() > 0)
+    {
+    this->Resize(this->GetNumberOfTuples() - 1);
+    }
+}
+
+//----------------------------------------------------------------------------
 void vtkDataArray::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
