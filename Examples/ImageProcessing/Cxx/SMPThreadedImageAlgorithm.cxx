@@ -6,8 +6,8 @@
 //Test 1
 #include <vtkImageCast.h>
 //Test 2
-#include <vtkImageDotProduct.h>
 #include <vtkImageData.h>
+#include <vtkImageMedian3D.h>
 //Test 3
 #include <vtkImageReader2Factory.h>
 #include <vtkImageReader2.h>
@@ -45,10 +45,27 @@ struct TestParms
   char * outputCSVFile;
 };
 
-int WriteResultToCSV(double executionTime,TestParms *parm)
+int WriteResultToCSV(float* executionTime,TestParms *parm)
 {
+  // calculate average
+
+  float total =0.0;
+  for(int i =2;i<parm->numberOfIterationsToRun;i++)
+  {
+    total +=executionTime[i];
+  }
+  float average = total/static_cast<float>(parm->numberOfIterationsToRun);
+
+  float std =0.0;
+  for(int i =2;i<parm->numberOfIterationsToRun;i++)
+  {
+    std+=pow((executionTime[i]-average),2);
+  }
+  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun));
+
+
   char writeOutput[100];
-  sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%d,%f,%s\n"
+  sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%d,%f,%f,%s\n"
   ,parm->numberOfIterationsToRun
   ,parm->testCase
   ,parm->enableSMP
@@ -56,7 +73,8 @@ int WriteResultToCSV(double executionTime,TestParms *parm)
   ,parm->numberOfThreadsToRun
   ,parm->numberOfSMPBlocks
   ,parm->workSize
-  ,executionTime
+  ,average
+  ,std
   ,parm->additionalData);
 
   FILE *f = fopen(parm->outputCSVFile, "a+");
@@ -133,7 +151,7 @@ int main(int argc, char *argv[])
    {
     case 1:
     {
-      float totalTime =0.0;
+      float * executionTimes = new float[parms.numberOfIterationsToRun];
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
           int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
@@ -153,153 +171,147 @@ int main(int argc, char *argv[])
           tl->StartTimer();
           castFilter->Update();
           tl->StopTimer();
-          totalTime +=tl->GetElapsedTime();
+
+          executionTimes[i] = tl->GetElapsedTime();
+          cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
         }
 
-      WriteResultToCSV(totalTime/static_cast<float>(parms.numberOfIterationsToRun),&parms);
+      WriteResultToCSV(executionTimes,&parms);
+      delete [] executionTimes;
       break;
-
     }
   //----Test Case 2: SMP overhead compared with old multi-threader
   case 2:
     {
-      // Create an image data
-      vtkSmartPointer<vtkImageData> imageData =
-      vtkSmartPointer<vtkImageData>::New();
 
-      // Specify the size of the image data
-      imageData->SetDimensions(parms.workSize,parms.workSize,parms.workSize);
-      imageData->AllocateScalars(VTK_DOUBLE,1);
+      // read in kernel size
+      if(argc <10)
+      {
+        cerr << "Additional Data not inputed into argument 8\n";
+        break;
+      }
 
-      int* dims = imageData->GetDimensions();
-      // int dims[3]; // can't do this
+      int kernelSize = atoi(argv[9]);
 
-      // Fill every entry of the image data with "2.0"
-      for (int z = 0; z < dims[2]; z++)
-        {
-        for (int y = 0; y < dims[1]; y++)
-          {
-          for (int x = 0; x < dims[0]; x++)
-            {
-            double* pixel = static_cast<double*>(imageData->GetScalarPointer(x,y,z));
-            pixel[0] = 2.0;
-            }
-          }
-        }
+      parms.additionalData =argv[9];
 
-      // Create an image data 2
-      vtkSmartPointer<vtkImageData> imageData2 =
-      vtkSmartPointer<vtkImageData>::New();
+      float * executionTimes = new float[parms.numberOfIterationsToRun];
+      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+       {
+        // Create an image
+        vtkSmartPointer<vtkImageMandelbrotSource> source =
+          vtkSmartPointer<vtkImageMandelbrotSource>::New();
 
-      // Specify the size of the image data
-      imageData2->SetDimensions(parms.workSize,parms.workSize,parms.workSize);
-      imageData2->AllocateScalars(VTK_DOUBLE,1);
+        int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
+        source->SetWholeExtent(workExtent);
+        source->Update();
 
-      dims = imageData2->GetDimensions();
-      // int dims[3]; // can't do this
+        vtkSmartPointer<vtkImageCast> originalCastFilter =
+          vtkSmartPointer<vtkImageCast>::New();
+        originalCastFilter->SetInputConnection(source->GetOutputPort());
+        originalCastFilter->SetOutputScalarTypeToUnsignedChar();
+        originalCastFilter->Update();
 
-      // Fill every entry of the image data with "2.0"
-      for (int z = 0; z < dims[2]; z++)
-        {
-        for (int y = 0; y < dims[1]; y++)
-          {
-          for (int x = 0; x < dims[0]; x++)
-            {
-            double* pixel = static_cast<double*>(imageData2->GetScalarPointer(x,y,z));
-            pixel[0] = 2.0;
-            }
-          }
-        }
+        vtkSmartPointer<vtkImageMedian3D> medianFilter =
+          vtkSmartPointer<vtkImageMedian3D>::New();
+        medianFilter->SetInputConnection(source->GetOutputPort());
 
+        medianFilter->SetKernelSize(kernelSize,kernelSize,kernelSize);
+        medianFilter->EnableSMP(parms.enableSMP);
+        medianFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+        medianFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
 
-      vtkSmartPointer<vtkImageDotProduct> dotProductFilter =
-      vtkSmartPointer<vtkImageDotProduct>::New();
+        tl->StartTimer();
+        medianFilter->Update();
+        tl->StopTimer();
 
-      dotProductFilter->SetInput1Data(imageData);
-      dotProductFilter->SetInput2Data(imageData2);
-
-      dotProductFilter->EnableSMP(parms.enableSMP);
-      dotProductFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-      dotProductFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
-
-      tl->StartTimer();
-      dotProductFilter->Update();
-      tl->StopTimer();
-
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-      WriteResultToCSV(tl->GetElapsedTime(),&parms);
-
+        executionTimes[i] = tl->GetElapsedTime();
+        cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+       }
+      WriteResultToCSV(executionTimes,&parms);
+      delete [] executionTimes;
       break;
     }
   //----Test Case 3: SMP overhead compared with old multi-threader
   case 3:
     {
+
       // read in additional parm for the image slice data
       if(argc <10)
       {
         cerr << "Additional Data not inputed into argument 8\n";
         break;
       }
+
       parms.additionalData = argv[9];
       double angle = 45;
 
-      // Read file
-      vtkSmartPointer<vtkImageReader2Factory> readerFactory =
-        vtkSmartPointer<vtkImageReader2Factory>::New();
+      float * executionTimes = new float[parms.numberOfIterationsToRun];
+      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+       {
+        // Read file
+        vtkSmartPointer<vtkImageReader2Factory> readerFactory =
+          vtkSmartPointer<vtkImageReader2Factory>::New();
 
-      vtkImageReader2 *reader =
-        readerFactory->CreateImageReader2(parms.additionalData);
-      reader->SetFileName(parms.additionalData);
-      reader->Update();
-      double bounds[6];
-      reader->GetOutput()->GetBounds(bounds);
+        vtkImageReader2 *reader =
+          readerFactory->CreateImageReader2(parms.additionalData);
+        reader->SetFileName(parms.additionalData);
+        reader->Update();
+        double bounds[6];
+        reader->GetOutput()->GetBounds(bounds);
 
-      // Rotate about the center of the image
-      vtkSmartPointer<vtkTransform> transform =
-        vtkSmartPointer<vtkTransform>::New();
+        // Rotate about the center of the image
+        vtkSmartPointer<vtkTransform> transform =
+          vtkSmartPointer<vtkTransform>::New();
 
-      // Compute the center of the image
-      double center[3];
-      center[0] = (bounds[1] + bounds[0]) / 2.0;
-      center[1] = (bounds[3] + bounds[2]) / 2.0;
-      center[2] = (bounds[5] + bounds[3]) / 2.0;
+        // Compute the center of the image
+        double center[3];
+        center[0] = (bounds[1] + bounds[0]) / 2.0;
+        center[1] = (bounds[3] + bounds[2]) / 2.0;
+        center[2] = (bounds[5] + bounds[3]) / 2.0;
 
-      // Rotate about the center
-      transform->Translate(center[0], center[1], center[2]);
-      transform->RotateWXYZ(angle, 0, 0, 1);
-      transform->Translate(-center[0], -center[1], -center[2]);
+        // Rotate about the center
+        transform->Translate(center[0], center[1], center[2]);
+        transform->RotateWXYZ(angle, 0, 0, 1);
+        transform->Translate(-center[0], -center[1], -center[2]);
 
-      // Reslice does all of the work
-      vtkSmartPointer<vtkImageReslice> reslice =
-      vtkSmartPointer<vtkImageReslice>::New();
-      reslice->SetInputConnection(reader->GetOutputPort());
-      reslice->SetResliceTransform(transform);
-      reslice->SetInterpolationModeToCubic();
-      reslice->SetOutputSpacing(
-      reader->GetOutput()->GetSpacing()[0],
-      reader->GetOutput()->GetSpacing()[1],
-      reader->GetOutput()->GetSpacing()[2]);
-      reslice->SetOutputOrigin(
-      reader->GetOutput()->GetOrigin()[0],
-      reader->GetOutput()->GetOrigin()[1],
-      reader->GetOutput()->GetOrigin()[2]);
-      reslice->SetOutputExtent(
-      reader->GetOutput()->GetExtent());
+        // Reslice does all of the work
+        vtkSmartPointer<vtkImageReslice> reslice =
+        vtkSmartPointer<vtkImageReslice>::New();
+        reslice->SetInputConnection(reader->GetOutputPort());
+        reslice->SetResliceTransform(transform);
+        reslice->SetInterpolationModeToCubic();
+        reslice->SetOutputSpacing(
+        reader->GetOutput()->GetSpacing()[0],
+        reader->GetOutput()->GetSpacing()[1],
+        reader->GetOutput()->GetSpacing()[2]);
+        reslice->SetOutputOrigin(
+        reader->GetOutput()->GetOrigin()[0],
+        reader->GetOutput()->GetOrigin()[1],
+        reader->GetOutput()->GetOrigin()[2]);
+        reslice->SetOutputExtent(
+        reader->GetOutput()->GetExtent());
 
-      reslice->EnableSMP(parms.enableSMP);
-      reslice->SetSMPBlocks(parms.numberOfSMPBlocks);
-      reslice->SetSMPBlockMode(parms.enableSMPBlockMode);
+        reslice->EnableSMP(parms.enableSMP);
+        reslice->SetSMPBlocks(parms.numberOfSMPBlocks);
+        reslice->SetSMPBlockMode(parms.enableSMPBlockMode);
 
-      tl->StartTimer();
-      reslice->Update();
-      tl->StopTimer();
+        tl->StartTimer();
+        reslice->Update();
+        tl->StopTimer();
 
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-      WriteResultToCSV(tl->GetElapsedTime(),&parms);
-      break;
+        executionTimes[i] = tl->GetElapsedTime();
+        cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+        }
+        WriteResultToCSV(executionTimes,&parms);
+        delete [] executionTimes;
+        break;
     }
   case 4:
     {
+      float * executionTimes = new float[parms.numberOfIterationsToRun];
+      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+       {
       // first, create an image that looks like
       // graph paper by combining two image grid
       // sources via vtkImageBlend
@@ -307,14 +319,14 @@ int main(int argc, char *argv[])
         vtkSmartPointer<vtkImageGridSource>::New();
       imageGrid1->SetGridSpacing(4,4,0);
       imageGrid1->SetGridOrigin(0,0,0);
-      imageGrid1->SetDataExtent(0,255,0,255,0,0);
+      imageGrid1->SetDataExtent(0,1023,0,1023,0,0);
       imageGrid1->SetDataScalarTypeToUnsignedChar();
 
       vtkSmartPointer<vtkImageGridSource> imageGrid2 =
         vtkSmartPointer<vtkImageGridSource>::New();
       imageGrid2->SetGridSpacing(16,16,0);
       imageGrid2->SetGridOrigin(0,0,0);
-      imageGrid2->SetDataExtent(0,255,0,255,0,0);
+      imageGrid2->SetDataExtent(0,1023,0,1023,0,0);
       imageGrid2->SetDataScalarTypeToUnsignedChar();
 
       vtkSmartPointer<vtkLookupTable> table1 =
@@ -388,9 +400,9 @@ int main(int argc, char *argv[])
       vtkSmartPointer<vtkTransformToGrid> transformToGrid =
         vtkSmartPointer<vtkTransformToGrid>::New();
       transformToGrid->SetInput(thinPlate);
-      transformToGrid->SetGridSpacing(16.0, 16.0, 1.0);
+      transformToGrid->SetGridSpacing(64.0, 64.0, 1.0);
       transformToGrid->SetGridOrigin(0.0, 0.0, 0.0);
-      transformToGrid->SetGridExtent(0,16, 0,16, 0,0);
+      transformToGrid->SetGridExtent(0,64, 0,64, 0,0);
 
       vtkSmartPointer<vtkImageBSplineCoefficients> grid =
         vtkSmartPointer<vtkImageBSplineCoefficients>::New();
@@ -429,15 +441,20 @@ int main(int argc, char *argv[])
       reslice->SetInterpolator(interpolator);
       reslice->SetOutputSpacing(1.0, 1.0, 1.0);
       reslice->SetOutputOrigin(-32.0, -32.0, 0.0);
-      reslice->SetOutputExtent(0, 319, 0, 319, 0, 0);
+      reslice->SetOutputExtent(0, 1023, 0, 1023, 0, 0);
 
 
       tl->StartTimer();
       reslice->Update();
       tl->StopTimer();
-
+      executionTimes[i] = tl->GetElapsedTime();
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-      WriteResultToCSV(tl->GetElapsedTime(),&parms);
+
+
+    }
+
+    WriteResultToCSV(executionTimes,&parms);
+      delete [] executionTimes;
       break;
 
     }

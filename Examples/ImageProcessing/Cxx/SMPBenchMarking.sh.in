@@ -1,9 +1,4 @@
 #!/bin/bash
-# check if oprofile and oreport is installed
-hash operf 2>/dev/null || { echo >&2 "I require operf but it's not installed.  Aborting."; exit 1; }
-hash opreport 2>/dev/null || { echo >&2 "I require opreport but it's not installed.  Aborting."; exit 1; }
-
-
 BIN_PATH=../../../bin/
 TEST_PROGRAM_NAME="SMPThreadedImageAlgorithm"
 
@@ -15,22 +10,22 @@ ENABLE_SMP_BLOCK_MODE=$5
 THREAD_NUMBER=$6
 SPLIT_SMP_BLOCKS=$7
 WORK_LOAD=$8
-O_PERF_EVENTS="$6"
+O_PERF_EVENTS="$9"
 ROOT_FOLDER="${10}"
 OUTPUT_CSV_FILE="${11}"
 ADDITIONAL_DATA="${12}"
 
+if [ $O_PROFILE_ENABLE -eq 1 ]; then
+	# check if oprofile and oreport is installed if OPERF IS ENABLED
+	hash operf 2>/dev/null || { echo >&2 "I require operf but it's not installed.  Aborting."; exit 1; }
+	hash opreport 2>/dev/null || { echo >&2 "I require opreport but it's not installed.  Aborting."; exit 1; }
+fi
 
-NUMBER_OF_ITERATIONS=1 #this is hardcoded in the forloop below
-
-#O_PERF_EVENTS="CPU_CLK_UNHALTED:100000,L2_LINES_IN:100000:0xf0" #This depends on the cpu configuration
-
-REPORT_NAME=Run:${TEST_PROGRAM_NAME}-${TEST_PROGRAM_NUMBER}-${SPLIT_SMP_BLOCKS}-${THREAD_NUMBER}-${WORK_LOAD}-${NUMBER_OF_ITERATIONS}
-
+REPORT_NAME=Run:${TEST_PROGRAM_NAME}-${TEST_PROGRAM_NUMBER}-${SPLIT_SMP_BLOCKS}-${THREAD_NUMBER}-${WORK_LOAD}-${NUMBER_OF_TIMES_TEST}
 
 if [ $O_PROFILE_ENABLE -eq 0 ]; then
   $BIN_PATH$TEST_PROGRAM_NAME $NUMBER_OF_TIMES_TEST $TEST_PROGRAM_NUMBER $ENABLESMP $ENABLE_SMP_BLOCK_MODE $THREAD_NUMBER $SPLIT_SMP_BLOCKS $WORK_LOAD $OUTPUT_CSV_FILE $ADDITIONAL_DATA
 else
  operf $O_PERF_EVENTS $BIN_PATH$TEST_PROGRAM_NAME $NUMBER_OF_TIMES_TEST $TEST_PROGRAM_NUMBER $ENABLESMP $ENABLE_SMP_BLOCK_MODE $THREAD_NUMBER $SPLIT_SMP_BLOCKS $WORK_LOAD $OUTPUT_CSV_FILE $ADDITIONAL_DATA
- opreport --callgraph -o $ROOT_FOLDER/$i${REPORT_NAME}.txt
+  opreport --callgraph -o $ROOT_FOLDER/$i${REPORT_NAME}.txt
 fi
