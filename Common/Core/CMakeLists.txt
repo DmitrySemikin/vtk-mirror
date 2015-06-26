@@ -259,6 +259,7 @@ set(${vtk-module}_HDRS
   vtkABI.h
   vtkAgnosticArray.h
   vtkAgnosticArray.txx
+  vtkAgnosticArrayTupleIterator.h
   vtkAngularPeriodicDataArray.h
   vtkArrayInterpolate.h
   vtkArrayInterpolate.txx
