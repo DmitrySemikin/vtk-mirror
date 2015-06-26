@@ -54,14 +54,14 @@ int WriteResultToCSV(float* executionTime,TestParms *parm)
   {
     total +=executionTime[i];
   }
-  float average = total/static_cast<float>(parm->numberOfIterationsToRun);
+  float average = total/static_cast<float>(parm->numberOfIterationsToRun-2);
 
   float std =0.0;
   for(int i =2;i<parm->numberOfIterationsToRun;i++)
   {
     std+=pow((executionTime[i]-average),2);
   }
-  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun));
+  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun-2));
 
 
   char writeOutput[100];
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
       float * executionTimes = new float[parms.numberOfIterationsToRun];
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
-          int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
+          int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
           vtkSmartPointer<vtkImageMandelbrotSource> source =
           vtkSmartPointer<vtkImageMandelbrotSource>::New();
           source->SetWholeExtent(workExtent);
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
         vtkSmartPointer<vtkImageMandelbrotSource> source =
           vtkSmartPointer<vtkImageMandelbrotSource>::New();
 
-        int workExtent[6] = {0,parms.workSize,0,parms.workSize,0,0};
+        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
         source->SetWholeExtent(workExtent);
         source->Update();
 
@@ -235,7 +235,6 @@ int main(int argc, char *argv[])
   //----Test Case 3: SMP overhead compared with old multi-threader
   case 3:
     {
-
       // read in additional parm for the image slice data
       if(argc <10)
       {
@@ -446,6 +445,57 @@ int main(int argc, char *argv[])
 
       tl->StartTimer();
       reslice->Update();
+      tl->StopTimer();
+      executionTimes[i] = tl->GetElapsedTime();
+      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+
+
+    }
+
+    WriteResultToCSV(executionTimes,&parms);
+      delete [] executionTimes;
+      break;
+
+    }
+
+    case 5:
+    {
+
+      float * executionTimes = new float[parms.numberOfIterationsToRun];
+      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+       {
+        // Create an image
+        vtkSmartPointer<vtkImageMandelbrotSource> source =
+          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+
+        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+        source->SetWholeExtent(workExtent);
+        source->Update();
+
+        vtkSmartPointer<vtkImageCast> originalCastFilter =
+          vtkSmartPointer<vtkImageCast>::New();
+        originalCastFilter->SetInputConnection(source->GetOutputPort());
+        originalCastFilter->SetOutputScalarTypeToUnsignedChar();
+        originalCastFilter->Update();
+
+        vtkSmartPointer<vtkImageConvolve> convolveFilter =
+          vtkSmartPointer<vtkImageConvolve>::New();
+        convolveFilter->SetInputConnection(source->GetOutputPort());
+
+        convolveFilter->EnableSMP(parms.enableSMP);
+        convolveFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+        convolveFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
+
+        double kernel[343];
+        for(int i =0;i<243;i++)
+        {
+          kernel[i]= 1.0;
+        }
+        convolveFilter->SetKernel7x7x7(kernel);
+
+
+      tl->StartTimer();
+      convolveFilter->Update();
       tl->StopTimer();
       executionTimes[i] = tl->GetElapsedTime();
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";

@@ -8,47 +8,46 @@
 
 #AVERAGE NUMBER OF ITERATIONS
 #NUMBER OF ITERATIONS should be greater than at least 2.  The first two are thrown out.
-NUMBER_OF_TIMES_TEST_RUN=12
-
+NUMBER_OF_TIMES_TEST_RUN=7
 
 
 #Enable/Disable Oprofile
 O_PROFILE_ENABLE=0
 
 #Set Oprofile Events
-O_PERF_EVENTS="--event=CPU_CLK_UNHALTED:100000,l2_lines_in:100000:0x04"
+O_PERF_EVENTS="--event=CPU_CLK_UNHALTED:100000,l2_rqsts:200000:0x80"
 
 #-------------------------------------------------------TEST SPECIFIC CONFIGURATION SETTINGS------------------------------------------------
 #NUMBER OF WORKSIZE SAMPLES TAKEN
-NUMBER_OF_SAMPLES=30
+NUMBER_OF_SAMPLES=10
 
-WORK_SIZES_TEST1="32 64 256 512 1024"
+WORK_SIZES_TEST1="64 512"
 BLOCK_RANGE_START1=10
 BLOCK_RANGE_END1=1000
 
-WORK_SIZES_TEST2="256 512 1024"
-BLOCK_RANGE_START2=1000
-BLOCK_RANGE_END2=5000000
-KERNEL_SIZE=13
+WORK_SIZES_TEST2="128"
+BLOCK_RANGE_START2=240
+BLOCK_RANGE_END2=1600
+KERNEL_SIZE=5
 
-WORK_SIZES_TEST3="32 64 256 512 1024"
+WORK_SIZES_TEST3="64"
 BLOCK_RANGE_START3=10
 BLOCK_RANGE_END3=1000
 
-WORK_SIZES_TEST4="32 64 256 512 1024"
+WORK_SIZES_TEST4="64 256"
 BLOCK_RANGE_START4=10
 BLOCK_RANGE_END4=1000
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 #SPECIFY WHICH TEST TO RUN
-TESTS_TO_RUN="2"
+TESTS_TO_RUN="3"
 
 #RUN DESCRIPTION
-RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S') Running With Kernel 9"
+RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S') Running With Kernel 9, just enough"
 
 #MAXIUM NUMBER OF PROCESSORS
-MIN_PROCESSORS=4
+MIN_PROCESSORS=1
 MAX_PROCESSORS=4
 
 #------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,7 +57,7 @@ RESULTS_DIRECTORY="results"
 mkdir -p "$RESULTS_DIRECTORY"
 
 #set output csv file
-OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/timings2.csv"
+OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/ImageRotateHuge.csv"
 
 # Set Rootfolder to current date
 if [ $O_PROFILE_ENABLE -eq 1 ]; then
@@ -84,15 +83,27 @@ if [[ ${TESTS_TO_RUN[*]} =~ 1 ]]; then
 		mkdir $LOCAL_DIRECTORY
 	fi
 
-	echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 	for  workSize in `echo $WORK_SIZES_TEST1`
 	do
+		arr=($WORK_SIZES_TEST1)
+		MULITPILIER=$(($workSize/${arr[0]}))
+		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
 		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 			for (( blockSize = $BLOCK_RANGE_START1; blockSize <= $BLOCK_RANGE_END1; blockSize+=(($BLOCK_RANGE_END1-$BLOCK_RANGE_START1)/$NUMBER_OF_SAMPLES) ))
 			do
-			    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
+				ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START1; blockSize <= $BLOCK_RANGE_END1; blockSize+=(($BLOCK_RANGE_END1-$BLOCK_RANGE_START1)/$NUMBER_OF_SAMPLES) ))
+			do
+				ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			    ./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY"  "$OUTPUT_CSV_FILE"
 			done
 		done
 
@@ -121,26 +132,30 @@ if [[ ${TESTS_TO_RUN[*]} =~ 2 ]]; then
 
 	ADDITIONAL_DATA=$KERNEL_SIZE
 
-
 	for  workSize in `echo $WORK_SIZES_TEST2`
 	do
-		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-
+		arr=($WORK_SIZES_TEST1)
+		MULITPILIER=$(($workSize/${arr[0]}))
+		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
 
 		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
+			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+
 			for (( blockSize = $BLOCK_RANGE_START2; blockSize <= $BLOCK_RANGE_END2; blockSize+=(($BLOCK_RANGE_END2-$BLOCK_RANGE_START2)/$NUMBER_OF_SAMPLES) ))
 			do
-			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
-		done
 
-		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
-		do
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
 			for (( blockSize = $BLOCK_RANGE_START2; blockSize <= $BLOCK_RANGE_END2; blockSize+=(($BLOCK_RANGE_END2-$BLOCK_RANGE_START2)/$NUMBER_OF_SAMPLES) ))
 			do
-			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
 		done
 
@@ -156,6 +171,7 @@ fi
 # Data Access pattern again by doing a 90 degree rotation
 
 if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
+	TEST_NUMBER=3
 	echo "TestCase 3" >> "$OUTPUT_CSV_FILE"
 
 	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"
@@ -163,20 +179,34 @@ if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
 		mkdir $LOCAL_DIRECTORY
 	fi
 
-	ADDITIONAL_DATA="testCaseThreeDataHigh.jpg"
+	ADDITIONAL_DATA="huge.png"
 
-	for (( k = 100; k <= 100; k+=10 ))
+	for  workSize in `echo $WORK_SIZES_TEST3`
 	do
-		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-		for (( j = $MIN_PROCESSORS; j <= $MAX_PROCESSORS; j++ ))
+		arr=($WORK_SIZES_TEST1)
+		MULITPILIER=$(($workSize/${arr[0]}))
+		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
+
+		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
+			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 			for (( blockSize = $BLOCK_RANGE_START3; blockSize <= $BLOCK_RANGE_END3; blockSize+=(($BLOCK_RANGE_END3-$BLOCK_RANGE_START3)/$NUMBER_OF_SAMPLES) ))
 			do
-			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 3 true false $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START3; blockSize <= $BLOCK_RANGE_END3; blockSize+=(($BLOCK_RANGE_END3-$BLOCK_RANGE_START3)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
 		done
 		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
-		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN 3 false false 4 $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 	done
 
 fi
@@ -199,19 +229,29 @@ if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
 
 	# Run test base class
 
-	for (( k = 100; k <= 100; k+=10 ))
+	for  workSize in `echo $WORK_SIZES_TEST4`
 	do
 		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-		for (( j = $MIN_PROCESSORS; j <= $MAX_PROCESSORS; j++ ))
+		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
+			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+
 			for (( blockSize = $BLOCK_RANGE_START4; blockSize <= $BLOCK_RANGE_END4; blockSize+=(($BLOCK_RANGE_END4-$BLOCK_RANGE_START4)/$NUMBER_OF_SAMPLES) ))
 			do
-			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_CASE true true $j $i $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+			for (( blockSize = $BLOCK_RANGE_START4; blockSize <= $BLOCK_RANGE_END4; blockSize+=(($BLOCK_RANGE_END4-$BLOCK_RANGE_START4)/$NUMBER_OF_SAMPLES) ))
+			do
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
 		done
 		#Run Test
 		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
-		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_CASE false false 4 100 $k "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 	done
-
 fi
