@@ -276,6 +276,7 @@ set(${vtk-module}_HDRS
   vtkDataArrayTemplateImplicit.txx
   vtkGenericDataArray.h
   vtkGenericDataArrayLookupHelper.h
+  vtkGenericDataArrayMacros.h
   vtkGenericDataArrayTupleIterator.h
   vtkGenericDataArray.txx
   vtkIOStreamFwd.h
