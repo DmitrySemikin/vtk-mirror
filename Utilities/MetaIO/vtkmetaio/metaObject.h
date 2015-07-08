@@ -273,7 +273,7 @@ class METAIO_EXPORT MetaObject
 
       void ClearAdditionalFields(void);
 
-      bool InitializeEssential(int _NDims);
+      bool InitializeEssential(int m_NDims);
 
       //
       //
