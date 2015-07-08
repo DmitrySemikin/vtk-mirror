@@ -22,7 +22,7 @@
 // .SECTION See also
 // vtkSimpleImageToImageAlgorithm
 
-#define MAX_SMP_BLOCK_SIZE  1000
+#define MAX_SMP_BLOCK_SIZE  10000000
 
 #ifndef vtkThreadedImageAlgorithm_h
 #define vtkThreadedImageAlgorithm_h

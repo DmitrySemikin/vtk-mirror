@@ -61,11 +61,7 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
   this->Translator = vtkExtentTranslator::New();
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
 
-#ifdef MAX_SMP_BLOCK_SIZE
-  this->NumberOfSMPBlocks = MAX_SMP_BLOCK_SIZE;
-#else
   this->NumberOfSMPBlocks = 1000;
-#endif
 
   this->UseSmp = true; // turn on smp by default
   this->UseBlockMode = true;
