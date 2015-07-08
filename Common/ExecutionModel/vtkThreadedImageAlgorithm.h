@@ -67,17 +67,29 @@ public:
   virtual int SplitExtent(int splitExt[6], int startExt[6],
                           int num, int total);
 
-    // Description:
-  // Enable/Disable SMP for threading.
-  void EnableSMP(bool state);
-
   // Description:
   // Set the number of partitions the data will be partioned into.
   void SetSMPBlocks(int numberOfBlocks);
 
   // Description:
-  // Set if to partion by blocks in SMP mode.
-  void SetSMPBlockMode(bool blockMode);
+  // Get the number of partitions the data will be partioned into.
+  int GetSMPBlocks();
+
+  // Description:
+  // Enable/Disable SMP for threading.
+  vtkGetMacro(EnableSMP, bool);
+  vtkSetMacro(EnableSMP, bool);
+
+  // Description:
+  // Enable/Disable split by blocks or points
+  // When using SMP block mode.
+  vtkGetMacro(SplitByPoints, bool);
+  vtkSetMacro(SplitByPoints, bool);
+
+  // Description:
+  // Set SMP split mode.
+  vtkGetMacro(SplitMode, int);
+  vtkSetMacro(SplitMode, int);
 
 protected:
   vtkThreadedImageAlgorithm();
@@ -86,10 +98,11 @@ protected:
   vtkMultiThreader *Threader;
   vtkExtentTranslator* Translator;
   int NumberOfThreads;
-  bool UseSmp;
+
   int NumberOfSMPBlocks;
-  int NumberOfSMPProcessors;
-  bool UseBlockMode;
+  int SplitMode;
+  bool EnableSMP;
+  bool SplitByPoints;
 
   // Description:
   // This is called by the superclass.

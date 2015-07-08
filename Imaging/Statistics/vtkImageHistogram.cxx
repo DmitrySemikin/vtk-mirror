@@ -25,8 +25,9 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkMultiThreader.h"
 #include "vtkTemplateAliasMacro.h"
-
+#include "vtkSMPTools.h"
 #include <math.h>
+#include "vtkExtentTranslator.h"
 
 // turn off 64-bit ints when templating over all types
 # undef VTK_USE_INT64
@@ -57,6 +58,9 @@ vtkImageHistogram::vtkImageHistogram()
 
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
+
+  this->SplitMode = vtkExtentTranslator::DEFAULT_MODE;
+  this->NumberOfSMPBlocks = 30;
 }
 
 //----------------------------------------------------------------------------
@@ -67,7 +71,6 @@ vtkImageHistogram::~vtkImageHistogram()
     this->Histogram->Delete();
     }
 }
-
 //----------------------------------------------------------------------------
 void vtkImageHistogram::PrintSelf(ostream& os, vtkIndent indent)
 {
@@ -247,7 +250,6 @@ int vtkImageHistogram::RequestUpdateExtent(
 //----------------------------------------------------------------------------
 // anonymous namespace for internal classes and functions
 namespace {
-
 struct vtkImageHistogramThreadStruct
 {
   vtkImageHistogram *Algorithm;
@@ -306,7 +308,6 @@ VTK_THREAD_RETURN_TYPE vtkImageHistogramThreadedExecute(void *arg)
         splitExt, ti->ThreadID);
       }
     }
-
   return VTK_THREAD_RETURN_VALUE;
 }
 
@@ -410,9 +411,7 @@ void vtkImageHistogramExecute(
           x = (x < xmax ? x : xmax);
 
           int xi = static_cast<int>(x + 0.5);
-
           outPtr[xi]++;
-
           inPtr += nc;
           }
         while (--n);
@@ -569,8 +568,99 @@ void vtkImageHistogramGenerateImage(
     outPtr += incX;
     }
 }
-
 } // end anonymous namespace
+
+typedef struct ThreadLocalSum
+{
+  vtkIdType * ThreadLocalHistogram;
+  int * ThreadLocalRange;
+};
+
+class HistogramSumFunctor {
+  vtkMultiThreader::ThreadInfo * ThreadInfo;
+public:
+  int Total;
+  vtkIdTypeArray *Histogram;
+
+  vtkSMPThreadLocal<ThreadLocalSum> ThreadLocalHistogram;
+  vtkSMPThreadLocal<int >ThreadLocalTotal;
+
+  HistogramSumFunctor(vtkMultiThreader::ThreadInfo *threadInfo)
+  {
+    this->ThreadInfo = threadInfo;
+    vtkImageHistogramThreadStruct *ts =
+      static_cast<vtkImageHistogramThreadStruct *>(ThreadInfo->UserData);
+
+    Total = 0;
+  }
+
+  void operator()(vtkIdType begin, vtkIdType end)
+  {
+    vtkMultiThreader::ThreadInfo *localThreadInfo = new vtkMultiThreader::ThreadInfo;
+    localThreadInfo->NumberOfThreads = this->ThreadInfo->NumberOfThreads;
+    localThreadInfo->UserData = this->ThreadInfo->UserData;
+
+    for (int a = begin; a != end; ++a)
+      {
+      localThreadInfo->ThreadID = a;
+      vtkImageHistogramThreadedExecute(localThreadInfo);
+      }
+  }
+
+  void Initialize()
+  {
+    ThreadLocalTotal.Local() = 0;
+    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->UserData);
+
+    int numberOfBins = ts->Algorithm->NumberOfBins;
+    ThreadLocalHistogram.Local().ThreadLocalHistogram = new vtkIdType[numberOfBins];
+
+    ThreadLocalHistogram.Local().ThreadLocalRange = new int[2];
+
+    ThreadLocalHistogram.Local().ThreadLocalRange[0] = VTK_INT_MAX;
+    ThreadLocalHistogram.Local().ThreadLocalRange[1] = VTK_INT_MIN;
+
+    vtkIdType *tmpPtr = ThreadLocalHistogram.Local().ThreadLocalHistogram;
+    do { *tmpPtr++ = 0; } while (--numberOfBins);
+  }
+
+  void Reduce()
+  {
+    this->Total = 0;
+
+    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->UserData);
+
+    int numberOfBins = ts->Algorithm->NumberOfBins;
+
+    this->Histogram = vtkIdTypeArray::New();
+    this->Histogram->SetNumberOfComponents(1);
+    this->Histogram->SetNumberOfTuples(numberOfBins);
+    vtkIdType *histogram = this->Histogram->GetPointer(0);
+
+    // clear histogram to zero
+    int nx = numberOfBins;
+    int ix;
+    for (ix = 0; ix < nx; ++ix)
+      {
+      histogram[ix] = 0;
+      }
+    vtkSMPThreadLocal<ThreadLocalSum>::iterator itr2 = ThreadLocalHistogram.begin();
+    while (itr2 != ThreadLocalHistogram.end())
+      {
+      int min = (*itr2).ThreadLocalRange[0];
+      int max = (*itr2).ThreadLocalRange[1];
+      for (int i = min; i <= max; i++)
+        {
+        int num = (*itr2).ThreadLocalHistogram[i];
+        histogram[i] +=num;
+        this->Total +=num;
+        }
+      delete[] (*itr2).ThreadLocalHistogram;
+      delete[](*itr2).ThreadLocalRange;
+      ++itr2;
+      }
+  }
+};
 
 //----------------------------------------------------------------------------
 // override from vtkThreadedImageAlgorithm to customize the multithreading
@@ -579,13 +669,6 @@ int vtkImageHistogram::RequestData(
   vtkInformationVector** inputVector,
   vtkInformationVector* outputVector)
 {
-  // clear the thread output pointers
-  int n = this->GetNumberOfThreads();
-  for (int k = 0; k < n; k++)
-    {
-    this->ThreadOutput[k] = 0;
-    }
-
   vtkInformation* info = inputVector[0]->GetInformationObject(0);
   vtkImageData *image = vtkImageData::SafeDownCast(
     info->Get(vtkDataObject::DATA_OBJECT()));
@@ -703,56 +786,82 @@ int vtkImageHistogram::RequestData(
       }
     }
 
-  this->Threader->SetNumberOfThreads(this->NumberOfThreads);
-  this->Threader->SetSingleMethod(vtkImageHistogramThreadedExecute, &ts);
+  if (this->EnableSMP)
+    {
+    vtkMultiThreader::ThreadInfo threadInfo;
+    threadInfo.NumberOfThreads = this->NumberOfSMPBlocks;
+    threadInfo.UserData = &ts;
+    threadInfo.ThreadID = -1;
 
-  // always shut off debugging to avoid threading problems with GetMacros
-  bool debug = this->Debug;
-  this->Debug = false;
-  this->Threader->SingleMethodExecute();
-  this->Debug = debug;
+    bool debug = this->Debug;
+    this->Debug = false;
+    HistogramSumFunctor sum(&threadInfo);
+    this->functor = &sum;
+    vtkSMPTools::For(0, NumberOfSMPBlocks, sum);
+    this->Debug = debug;
+
+    this->Histogram = sum.Histogram;
+    this->Total = sum.Total;
+    }
+  else
+    {
+      int n = this->NumberOfThreads;
+      for (int k = 0; k < n; k++)
+        {
+        this->ThreadOutput[k] = 0;
+        }
+      this->Threader->SetNumberOfThreads(this->NumberOfThreads);
+      this->Threader->SetSingleMethod(vtkImageHistogramThreadedExecute, &ts);
+
+      // always shut off debugging to avoid threading problems with GetMacros
+      bool debug = this->Debug;
+      this->Debug = false;
+      this->Threader->SingleMethodExecute();
+      this->Debug = debug;
+      // create the histogram array
+      this->Histogram->SetNumberOfComponents(1);
+      this->Histogram->SetNumberOfTuples(this->NumberOfBins);
+      vtkIdType *histogram = this->Histogram->GetPointer(0);
+
+      // clear histogram to zero
+      int nx = this->NumberOfBins;
+      int ix;
+      for (ix = 0; ix < nx; ++ix)
+        {
+        histogram[ix] = 0;
+        }
+
+      // piece together the histogram results from each thread
+      vtkIdType total = 0;
+      for (int j = 0; j < n; j++)
+        {
+        vtkIdType *outPtr2 = this->ThreadOutput[j];
+        if (outPtr2)
+          {
+            int xmin = this->ThreadBinRange[j][0];
+            int xmax = this->ThreadBinRange[j][1];
+            for (ix = xmin; ix <= xmax; ++ix)
+              {
+              vtkIdType c = *outPtr2++;
+              histogram[ix] += c;
+              total += c;
+              }
+          }
+        }
+
+      // set the total
+      this->Total = total;
+
+      // delete the temporary memory
+      for (int j = 0; j < n; j++)
+        {
+          delete[] this->ThreadOutput[j];
+        }
+    }
+
 
   // end of code copied from vtkThreadedImageAlgorithm
 
-  // create the histogram array
-  this->Histogram->SetNumberOfComponents(1);
-  this->Histogram->SetNumberOfTuples(this->NumberOfBins);
-  vtkIdType *histogram = this->Histogram->GetPointer(0);
-
-  // clear histogram to zero
-  int nx = this->NumberOfBins;
-  int ix;
-  for (ix = 0; ix < nx; ++ix)
-    {
-    histogram[ix] = 0;
-    }
-
-  // piece together the histogram results from each thread
-  vtkIdType total = 0;
-  for (int j = 0; j < n; j++)
-    {
-    vtkIdType *outPtr2 = this->ThreadOutput[j];
-    if (outPtr2)
-      {
-      int xmin = this->ThreadBinRange[j][0];
-      int xmax = this->ThreadBinRange[j][1];
-      for (ix = xmin; ix <= xmax; ++ix)
-        {
-        vtkIdType c = *outPtr2++;
-        histogram[ix] += c;
-        total += c;
-        }
-      }
-    }
-
-  // set the total
-  this->Total = total;
-
-  // delete the temporary memory
-  for (int j = 0; j < n; j++)
-    {
-    delete [] this->ThreadOutput[j];
-    }
 
   // generate the output image
   if (this->GetNumberOfOutputPorts() > 0 &&
@@ -801,7 +910,16 @@ void vtkImageHistogram::ThreadedRequestData(
     scalarType != VTK_FLOAT && scalarType != VTK_DOUBLE);
 
   double scalarRange[2];
-  int *binRange = this->ThreadBinRange[threadId];
+
+  int *binRange;
+  if (this->EnableSMP)
+    {
+    binRange = this->functor->ThreadLocalHistogram.Local().ThreadLocalRange;
+    }
+  else
+    {
+    binRange = this->ThreadBinRange[threadId];
+    }
 
   // compute the scalar range of the data unless it is byte data,
   // this allows us to allocate less memory for the histogram
@@ -844,21 +962,43 @@ void vtkImageHistogram::ThreadedRequestData(
     maxBinRange = maxBin;
     useFastExecute = false;
     }
-  binRange[0] = vtkMath::Floor(minBinRange + 0.5);
-  binRange[1] = vtkMath::Floor(maxBinRange + 0.5);
 
-  // allocate the histogram
-  int n = binRange[1] - binRange[0] + 1;
-  vtkIdType *histogram = new vtkIdType[n];
-  this->ThreadOutput[threadId] = histogram;
-  vtkIdType *tmpPtr = histogram;
-  do { *tmpPtr++ = 0; } while (--n);
+  vtkIdType *histogram;
+  if (!this->EnableSMP)
+    {
+    binRange[0] = vtkMath::Floor(minBinRange + 0.5);
+    binRange[1] = vtkMath::Floor(maxBinRange + 0.5);
+    // allocate the histogram
+    int n = binRange[1] - binRange[0] + 1;
+    histogram = new vtkIdType[n];
+    this->ThreadOutput[threadId] = histogram;
+    vtkIdType *tmpPtr = histogram;
+    do { *tmpPtr++ = 0; } while (--n);
+    }
+  else
+    {
+    int a = vtkMath::Floor(minBinRange + 0.5);
+    int b = vtkMath::Floor(maxBinRange + 0.5);
+    if (a < binRange[0])
+      {
+      binRange[0] = a;
+      }
+    if (b > binRange[1])
+      {
+      binRange[1] = b;
+      }
+    histogram = this->functor->ThreadLocalHistogram.Local().ThreadLocalHistogram;
+    }
 
   // generate the histogram
   if (useFastExecute)
     {
     // adjust the pointer to allow direct indexing
-    histogram -= binRange[0] + vtkMath::Floor(binOrigin + 0.5);
+    if (!this->EnableSMP)
+      {
+      histogram -= binRange[0];
+      }
+    histogram -= vtkMath::Floor(binOrigin + 0.5);
 
     // fast path for integer data
     switch(scalarType)
@@ -874,7 +1014,10 @@ void vtkImageHistogram::ThreadedRequestData(
   else
     {
     // adjust the pointer to allow direct indexing
-    histogram -= binRange[0];
+    if (!this->EnableSMP)
+      {
+      histogram -= binRange[0];
+      }
 
     // bin via floating point shift/scale
     switch (scalarType)

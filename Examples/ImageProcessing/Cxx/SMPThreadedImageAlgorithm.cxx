@@ -31,13 +31,14 @@
 #include <vtkTransform.h>
 #include <vtkImageConvolve.h>
 #include <vtkImageMandelbrotSource.h>
+#include <vtkExtentTranslator.h>
 
 struct TestParms
 {
   int numberOfIterationsToRun;
   int testCase;
   bool enableSMP;
-  bool enableSMPBlockMode;
+  int SMPSplitMode;
   int numberOfThreadsToRun;
   int numberOfSMPBlocks;
   int workSize;
@@ -51,25 +52,24 @@ int WriteResultToCSV(float* executionTime,TestParms *parm)
 
   float total =0.0;
   for(int i =2;i<parm->numberOfIterationsToRun;i++)
-  {
+    {
     total +=executionTime[i];
-  }
+    }
   float average = total/static_cast<float>(parm->numberOfIterationsToRun-2);
 
   float std =0.0;
   for(int i =2;i<parm->numberOfIterationsToRun;i++)
-  {
+    {
     std+=pow((executionTime[i]-average),2);
-  }
+    }
   std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun-2));
-
 
   char writeOutput[100];
   sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%d,%f,%f,%s\n"
   ,parm->numberOfIterationsToRun
   ,parm->testCase
   ,parm->enableSMP
-  ,parm->enableSMPBlockMode
+  ,parm->SMPSplitMode
   ,parm->numberOfThreadsToRun
   ,parm->numberOfSMPBlocks
   ,parm->workSize
@@ -79,9 +79,9 @@ int WriteResultToCSV(float* executionTime,TestParms *parm)
 
   FILE *f = fopen(parm->outputCSVFile, "a+");
   if (f == NULL)
-  {
+    {
     return -1;
-  }
+    }
   fprintf(f, "%s", writeOutput);
   fclose(f);
   return 0;
@@ -93,15 +93,15 @@ int main(int argc, char *argv[])
   if(argc <9)
     {
     printf ("Not all parms have being passed in\n"
-        "parm#1: NumberOfIterationsToRun.\n"
-        "parm#2: Test Number.\n"
-        "parm#3: Enable/Disabl SMP, use true/false\n"
-        "parm#4: Enable block mode splitting, this is only valid if SMP is true. \n"
-        "parm#5: Number Of threads to run ~4, this is only valid if SMP is true. \n"
-        "parm#6: Number of split SMP blocks ~500.\n"
-        "parm#7: The size of the work load ~5000\n"
-        "parm#8: Output csv file\n"
-        );
+      "parm#1: NumberOfIterationsToRun.\n"
+      "parm#2: Test Number.\n"
+      "parm#3: Enable/Disabl SMP, use true/false\n"
+      "parm#4: Enable block mode splitting, this is only valid if SMP is true. \n"
+      "parm#5: Number Of threads to run ~4, this is only valid if SMP is true. \n"
+      "parm#6: Number of split SMP blocks ~500.\n"
+      "parm#7: The size of the work load ~5000\n"
+      "parm#8: Output csv file\n"
+      );
     return -1;
     }
 
@@ -123,11 +123,11 @@ int main(int argc, char *argv[])
     }
   if(strcmp(argv[4],"true")==0)
     {
-    parms.enableSMPBlockMode = true;
+    parms.SMPSplitMode = vtkExtentTranslator::BLOCK_MODE;
     }
   else
     {
-    parms.enableSMPBlockMode = false;
+    parms.SMPSplitMode = vtkExtentTranslator::DEFAULT_MODE;
     }
 
   parms.numberOfThreadsToRun = atoi(argv[5]);
@@ -139,115 +139,110 @@ int main(int argc, char *argv[])
   vtkTimerLog *tl = vtkTimerLog::New();
   vtkSMPTools::Initialize(parms.numberOfThreadsToRun);
 
-  // printf("Running test case %d, with smp %d, blockmode %d, numberOfThreads %d\n"
-  //   ,parms.testCase
-  //   ,parms.enableSMP
-  //   ,parms.enableSMPBlockMode
-  //   ,parms.numberOfThreadsToRun);
 
-  //---------------------------------------------------------------------
-  //----Test Case 1: SMP overhead compared with old multi-threader
+//---------------------------------------------------------------------
+//----Test Case 1: SMP overhead compared with old multi-threader
   switch(parms.testCase)
-   {
-    case 1:
+  {
+  case 1:
     {
-      float * executionTimes = new float[parms.numberOfIterationsToRun];
-      for(int i=0;i<parms.numberOfIterationsToRun;i++)
-        {
-          int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-          vtkSmartPointer<vtkImageMandelbrotSource> source =
-          vtkSmartPointer<vtkImageMandelbrotSource>::New();
-          source->SetWholeExtent(workExtent);
-          source->Update();
+    float * executionTimes = new float[parms.numberOfIterationsToRun];
+    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+      {
+      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      vtkSmartPointer<vtkImageMandelbrotSource> source =
+      vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      source->SetWholeExtent(workExtent);
+      source->Update();
 
-          vtkSmartPointer<vtkImageCast> castFilter =
-          vtkSmartPointer<vtkImageCast>::New();
-          castFilter->SetInputConnection(source->GetOutputPort());
-          castFilter->EnableSMP(parms.enableSMP);
-          castFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-          castFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
-          castFilter->SetOutputScalarTypeToUnsignedChar();
+      vtkSmartPointer<vtkImageCast> castFilter =
+      vtkSmartPointer<vtkImageCast>::New();
+      castFilter->SetInputConnection(source->GetOutputPort());
+      castFilter->SetEnableSMP(parms.enableSMP);
+      castFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+      castFilter->SetSplitMode(parms.SMPSplitMode);
+      castFilter->SetOutputScalarTypeToUnsignedChar();
 
-          tl->StartTimer();
-          castFilter->Update();
-          tl->StopTimer();
+      tl->StartTimer();
+      castFilter->Update();
+      tl->StopTimer();
 
-          executionTimes[i] = tl->GetElapsedTime();
-          cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-        }
+      executionTimes[i] = tl->GetElapsedTime();
+      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      }
 
-      WriteResultToCSV(executionTimes,&parms);
-      delete [] executionTimes;
-      break;
+    WriteResultToCSV(executionTimes,&parms);
+    delete [] executionTimes;
+    break;
     }
-  //----Test Case 2: SMP overhead compared with old multi-threader
+//----Test Case 2: SMP overhead compared with old multi-threader
   case 2:
     {
 
-      // read in kernel size
-      if(argc <10)
+    // read in kernel size
+    if(argc <10)
       {
-        cerr << "Additional Data not inputed into argument 8\n";
-        break;
+      cerr << "Additional Data not inputed into argument 8\n";
+      break;
       }
 
-      int kernelSize = atoi(argv[9]);
+    int kernelSize = atoi(argv[9]);
 
-      parms.additionalData =argv[9];
+    parms.additionalData =argv[9];
 
-      float * executionTimes = new float[parms.numberOfIterationsToRun];
-      for(int i=0;i<parms.numberOfIterationsToRun;i++)
-       {
-        // Create an image
-        vtkSmartPointer<vtkImageMandelbrotSource> source =
-          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+    float * executionTimes = new float[parms.numberOfIterationsToRun];
+    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+      {
+      // Create an image
+      vtkSmartPointer<vtkImageMandelbrotSource> source =
+        vtkSmartPointer<vtkImageMandelbrotSource>::New();
 
-        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-        source->SetWholeExtent(workExtent);
-        source->Update();
+      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      source->SetWholeExtent(workExtent);
+      source->Update();
 
-        vtkSmartPointer<vtkImageCast> originalCastFilter =
-          vtkSmartPointer<vtkImageCast>::New();
-        originalCastFilter->SetInputConnection(source->GetOutputPort());
-        originalCastFilter->SetOutputScalarTypeToUnsignedChar();
-        originalCastFilter->Update();
+      vtkSmartPointer<vtkImageCast> originalCastFilter =
+        vtkSmartPointer<vtkImageCast>::New();
+      originalCastFilter->SetInputConnection(source->GetOutputPort());
+      originalCastFilter->SetOutputScalarTypeToUnsignedChar();
+      originalCastFilter->Update();
 
-        vtkSmartPointer<vtkImageMedian3D> medianFilter =
-          vtkSmartPointer<vtkImageMedian3D>::New();
-        medianFilter->SetInputConnection(source->GetOutputPort());
+      vtkSmartPointer<vtkImageMedian3D> medianFilter =
+        vtkSmartPointer<vtkImageMedian3D>::New();
+      medianFilter->SetInputConnection(source->GetOutputPort());
 
-        medianFilter->SetKernelSize(kernelSize,kernelSize,kernelSize);
-        medianFilter->EnableSMP(parms.enableSMP);
-        medianFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-        medianFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
+      medianFilter->SetKernelSize(kernelSize,kernelSize,kernelSize);
+      medianFilter->SetEnableSMP(parms.enableSMP);
+      medianFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+      medianFilter->SetSplitMode(parms.SMPSplitMode);
 
-        tl->StartTimer();
-        medianFilter->Update();
-        tl->StopTimer();
+      tl->StartTimer();
+      medianFilter->Update();
+      tl->StopTimer();
 
-        executionTimes[i] = tl->GetElapsedTime();
-        cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-       }
-      WriteResultToCSV(executionTimes,&parms);
-      delete [] executionTimes;
-      break;
+      executionTimes[i] = tl->GetElapsedTime();
+      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      }
+    WriteResultToCSV(executionTimes,&parms);
+    delete [] executionTimes;
+    break;
     }
-  //----Test Case 3: SMP overhead compared with old multi-threader
+//----Test Case 3: SMP overhead compared with old multi-threader
   case 3:
     {
       // read in additional parm for the image slice data
       if(argc <10)
-      {
+        {
         cerr << "Additional Data not inputed into argument 8\n";
         break;
-      }
+        }
 
       parms.additionalData = argv[9];
       double angle = 45;
 
       float * executionTimes = new float[parms.numberOfIterationsToRun];
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
-       {
+        {
         // Read file
         vtkSmartPointer<vtkImageReader2Factory> readerFactory =
           vtkSmartPointer<vtkImageReader2Factory>::New();
@@ -291,9 +286,9 @@ int main(int argc, char *argv[])
         reslice->SetOutputExtent(
         reader->GetOutput()->GetExtent());
 
-        reslice->EnableSMP(parms.enableSMP);
+        reslice->SetEnableSMP(parms.enableSMP);
         reslice->SetSMPBlocks(parms.numberOfSMPBlocks);
-        reslice->SetSMPBlockMode(parms.enableSMPBlockMode);
+        reslice->SetSplitMode(vtkExtentTranslator::BLOCK_MODE);
 
         tl->StartTimer();
         reslice->Update();
@@ -302,15 +297,15 @@ int main(int argc, char *argv[])
         executionTimes[i] = tl->GetElapsedTime();
         cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
         }
-        WriteResultToCSV(executionTimes,&parms);
-        delete [] executionTimes;
-        break;
+      WriteResultToCSV(executionTimes,&parms);
+      delete [] executionTimes;
+      break;
     }
   case 4:
     {
-      float * executionTimes = new float[parms.numberOfIterationsToRun];
-      for(int i=0;i<parms.numberOfIterationsToRun;i++)
-       {
+    float * executionTimes = new float[parms.numberOfIterationsToRun];
+    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+      {
       // first, create an image that looks like
       // graph paper by combining two image grid
       // sources via vtkImageBlend
@@ -433,8 +428,8 @@ int main(int argc, char *argv[])
       interpolator->SetSplineDegree(3);
 
       vtkSmartPointer<vtkImageReslice> reslice =
-        vtkSmartPointer<vtkImageReslice>::New();
-      reslice->SetInputConnection(prefilter->GetOutputPort());
+      vtkSmartPointer<vtkImageReslice>::New();
+        reslice->SetInputConnection(prefilter->GetOutputPort());
       reslice->SetResliceTransform(transform);
       reslice->WrapOn();
       reslice->SetInterpolator(interpolator);
@@ -448,72 +443,63 @@ int main(int argc, char *argv[])
       tl->StopTimer();
       executionTimes[i] = tl->GetElapsedTime();
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-
-
-    }
-
+      }
     WriteResultToCSV(executionTimes,&parms);
-      delete [] executionTimes;
-      break;
-
+    delete [] executionTimes;
+    break;
     }
 
-    case 5:
+  case 5:
     {
+    float * executionTimes = new float[parms.numberOfIterationsToRun];
+    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+      {
+      // Create an image
+      vtkSmartPointer<vtkImageMandelbrotSource> source =
+        vtkSmartPointer<vtkImageMandelbrotSource>::New();
 
-      float * executionTimes = new float[parms.numberOfIterationsToRun];
-      for(int i=0;i<parms.numberOfIterationsToRun;i++)
-       {
-        // Create an image
-        vtkSmartPointer<vtkImageMandelbrotSource> source =
-          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      source->SetWholeExtent(workExtent);
+      source->Update();
 
-        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-        source->SetWholeExtent(workExtent);
-        source->Update();
+      vtkSmartPointer<vtkImageCast> originalCastFilter =
+        vtkSmartPointer<vtkImageCast>::New();
+      originalCastFilter->SetInputConnection(source->GetOutputPort());
+      originalCastFilter->SetOutputScalarTypeToUnsignedChar();
+      originalCastFilter->Update();
 
-        vtkSmartPointer<vtkImageCast> originalCastFilter =
-          vtkSmartPointer<vtkImageCast>::New();
-        originalCastFilter->SetInputConnection(source->GetOutputPort());
-        originalCastFilter->SetOutputScalarTypeToUnsignedChar();
-        originalCastFilter->Update();
+      vtkSmartPointer<vtkImageConvolve> convolveFilter =
+        vtkSmartPointer<vtkImageConvolve>::New();
+      convolveFilter->SetInputConnection(source->GetOutputPort());
 
-        vtkSmartPointer<vtkImageConvolve> convolveFilter =
-          vtkSmartPointer<vtkImageConvolve>::New();
-        convolveFilter->SetInputConnection(source->GetOutputPort());
+      convolveFilter->SetEnableSMP(parms.enableSMP);
+      convolveFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+      convolveFilter->SetSplitMode(parms.SMPSplitMode);
 
-        convolveFilter->EnableSMP(parms.enableSMP);
-        convolveFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-        convolveFilter->SetSMPBlockMode(parms.enableSMPBlockMode);
-
-        double kernel[343];
-        for(int i =0;i<243;i++)
+      double kernel[343];
+      for(int i =0;i<243;i++)
         {
-          kernel[i]= 1.0;
+        kernel[i]= 1.0;
         }
-        convolveFilter->SetKernel7x7x7(kernel);
-
+      convolveFilter->SetKernel7x7x7(kernel);
 
       tl->StartTimer();
       convolveFilter->Update();
       tl->StopTimer();
       executionTimes[i] = tl->GetElapsedTime();
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-
-
-    }
+      }
 
     WriteResultToCSV(executionTimes,&parms);
-      delete [] executionTimes;
-      break;
+    delete [] executionTimes;
+    break;
 
     }
   default:
-   {
-     cerr << "No test case specified\n";
-   }
-   }
-
+    {
+    cerr << "No test case specified\n";
+    }
+  }
 
   tl->Delete();
   return EXIT_SUCCESS;

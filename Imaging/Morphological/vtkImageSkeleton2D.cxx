@@ -21,6 +21,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkExtentTranslator.h"
 
 vtkStandardNewMacro(vtkImageSkeleton2D);
 
@@ -29,7 +30,8 @@ vtkStandardNewMacro(vtkImageSkeleton2D);
 vtkImageSkeleton2D::vtkImageSkeleton2D()
 {
   this->Prune = 0;
-  this->UseBlockMode = false;
+  this->SplitMode = vtkExtentTranslator::DEFAULT_MODE;
+  this->NumberOfSMPBlocks = 30;
 }
 
 //----------------------------------------------------------------------------

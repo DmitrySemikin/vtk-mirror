@@ -61,8 +61,8 @@ OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/ImageRotateHuge.csv"
 
 # Set Rootfolder to current date
 if [ $O_PROFILE_ENABLE -eq 1 ]; then
-	dt=Test_$(date '+%d-%m-%Y_%H-%M-%S');
-	mkdir "$RESULTS_DIRECTORY/$dt"
+  dt=Test_$(date '+%d-%m-%Y_%H-%M-%S');
+  mkdir "$RESULTS_DIRECTORY/$dt"
 fi
 
 #PUT DateTime into csv
@@ -74,7 +74,7 @@ echo "Number of Iterations Run,TestCase Number,SMP-ON/OFF,BLOCKING-ON/OFF,Number
 # Test SMP overhead versus old multi-threader
 # This test does a very numerical operation filter imagecast
 if [[ ${TESTS_TO_RUN[*]} =~ 1 ]]; then
-	TEST_NUMBER=1
+  TEST_NUMBER=1
 
 	echo "TestCase1" >> "$OUTPUT_CSV_FILE"
 
@@ -216,10 +216,8 @@ fi
 # Test Imagereslice 90 degree image rotation
 # This test among other things mainly tests for
 # Data Access pattern again by doing a 90 degree rotation
-
-TEST_CASE=4
-
 if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
+	TEST_NUMBER=4
 	echo "TestCase 4" >> "$OUTPUT_CSV_FILE"
 
 	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase3"

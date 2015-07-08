@@ -30,6 +30,7 @@
 #endif
 
 #include <math.h>
+#include "vtkExtentTranslator.h"
 
 // Space leaping block size
 #define VTK_SL_BLK 4
@@ -61,7 +62,7 @@ vtkVolumeRayCastSpaceLeapingImageFilter::vtkVolumeRayCastSpaceLeapingImageFilter
   this->Cache = NULL;
 
   // turn off SMP block mode
-  this->UseBlockMode = false;
+  this->SplitMode = vtkExtentTranslator::DEFAULT_MODE;
 }
 
 //----------------------------------------------------------------------------

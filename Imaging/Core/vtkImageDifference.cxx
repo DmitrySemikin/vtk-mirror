@@ -31,7 +31,7 @@ vtkImageDifference::vtkImageDifference()
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
     }
-  this->UseSmp = false;
+  this->EnableSMP = false;
   this->Threshold = 16;
   this->AllowShift = 1;
   this->Averaging = 1;

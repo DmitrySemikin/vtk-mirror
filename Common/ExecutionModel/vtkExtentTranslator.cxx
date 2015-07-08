@@ -80,7 +80,7 @@ int vtkExtentTranslator::PieceToExtent()
   return
     this->PieceToExtentThreadSafe(this->Piece, this->NumberOfPieces,
                                   this->GhostLevel, this->WholeExtent,
-                                  this->Extent, this->SplitMode, 0);
+                                  this->Extent, this->SplitMode, 1);
 }
 
 //----------------------------------------------------------------------------

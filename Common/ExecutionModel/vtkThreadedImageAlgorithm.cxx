@@ -61,10 +61,11 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
   this->Translator = vtkExtentTranslator::New();
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
 
+  //SMP default settings
+  this->EnableSMP = true; // turn on smp by default
+  this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
   this->NumberOfSMPBlocks = 1000;
-
-  this->UseSmp = true; // turn on smp by default
-  this->UseBlockMode = true;
+  this->SplitByPoints = true;
 }
 
 //----------------------------------------------------------------------------
@@ -93,12 +94,6 @@ struct vtkImageThreadStruct
 };
 
 //----------------------------------------------------------------------------
-void vtkThreadedImageAlgorithm::EnableSMP(bool state)
-{
-  this->UseSmp = state;
-}
-
-//----------------------------------------------------------------------------
 void vtkThreadedImageAlgorithm::SetSMPBlocks(int numberOfBlocks)
 {
   if (numberOfBlocks<0)
@@ -121,11 +116,10 @@ void vtkThreadedImageAlgorithm::SetSMPBlocks(int numberOfBlocks)
     this->NumberOfSMPBlocks =numberOfBlocks;
     }
 }
-
 //----------------------------------------------------------------------------
-void vtkThreadedImageAlgorithm::SetSMPBlockMode(bool blockMode)
+int vtkThreadedImageAlgorithm::GetSMPBlocks()
 {
-  this->UseBlockMode = blockMode;
+  return this->NumberOfSMPBlocks;
 }
 
 //----------------------------------------------------------------------------
@@ -149,10 +143,9 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
     return -1;
     }
 
-
-  if(this->UseBlockMode && this->UseSmp) // this is block mode splitting
+  if (this->SplitMode == vtkExtentTranslator::BLOCK_MODE && this->EnableSMP) // this is block mode splitting
     {
-    int ret = this->Translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE,0);
+    int ret = this->Translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE,this->SplitByPoints);
     if(ret == 1)//there is a return extent
       {
       return num+1;
@@ -379,9 +372,8 @@ int vtkThreadedImageAlgorithm::RequestData(
     this->CopyAttributeData(str.Inputs[0][0],str.Outputs[0],inputVector);
     }
 
-  if (this->UseSmp)
+  if (this->EnableSMP)
     {
-
     this->NumberOfThreads = this->NumberOfSMPBlocks;
     bool debug = this->Debug;
     this->Debug = false;

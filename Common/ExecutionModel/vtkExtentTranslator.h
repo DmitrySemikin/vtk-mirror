@@ -97,7 +97,8 @@ public:
     X_SLAB_MODE=0,
     Y_SLAB_MODE=1,
     Z_SLAB_MODE=2,
-    BLOCK_MODE= 3
+    BLOCK_MODE= 3,
+    DEFAULT_MODE=4
   };
 
   // Description:

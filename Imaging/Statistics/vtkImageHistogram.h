@@ -33,6 +33,7 @@
 
 class vtkImageStencilData;
 class vtkIdTypeArray;
+class HistogramSumFunctor;
 
 class VTKIMAGINGSTATISTICS_EXPORT vtkImageHistogram : public vtkThreadedImageAlgorithm
 {
@@ -154,6 +155,9 @@ public:
                                    vtkInformationVector *outputVector,
                                    vtkImageData ***inData,
                                    vtkImageData **outData, int ext[6], int id);
+
+  int NumberOfBins;
+  HistogramSumFunctor * functor;
 protected:
   vtkImageHistogram();
   ~vtkImageHistogram();
@@ -185,7 +189,6 @@ protected:
   int HistogramImageScale;
   int GenerateHistogramImage;
 
-  int NumberOfBins;
   double BinOrigin;
   double BinSpacing;
 

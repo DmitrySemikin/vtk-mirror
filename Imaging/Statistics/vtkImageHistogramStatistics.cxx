@@ -41,8 +41,6 @@ vtkImageHistogramStatistics::vtkImageHistogramStatistics()
   this->AutoRangeExpansionFactors[0] = 0.1;
   this->AutoRangeExpansionFactors[1] = 0.1;
 
-  // don't use smp
-  this->UseSmp = false;
 }
 
 //----------------------------------------------------------------------------
