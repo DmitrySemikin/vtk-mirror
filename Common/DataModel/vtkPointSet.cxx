@@ -191,9 +191,9 @@ static vtkIdType FindCellWalk(vtkPointSet *self, double x[3], vtkCell *cell,
     // Check to see if the cell contains the point.
     double closestPoint[3];
     double dist2;
-    if (   (cell->EvaluatePosition(x, closestPoint, subId,
-                                   pcoords, dist2, weights) == 1)
-        && (dist2 <= tol2) )
+    int ret = cell->EvaluatePosition(x, closestPoint, subId,
+                                     pcoords, dist2, weights);
+    if (ret == 1 || ( ret == 0 && dist2 <= tol2))
       {
       return cellId;
       }
