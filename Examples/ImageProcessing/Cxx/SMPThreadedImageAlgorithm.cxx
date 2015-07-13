@@ -14,6 +14,7 @@
 
 #include <vtkImageActor.h>
 #include <vtkImageReslice.h>
+#include <vtkROIStencilSource.h>
 //Test 4
 
 #include "vtkImageBSplineInterpolator.h"
@@ -27,6 +28,9 @@
 #include "vtkImageMapToColors.h"
 #include "vtkLookupTable.h"
 #include "vtkPoints.h"
+//Test 5
+#include "vtkImageHistogramStatistics.h"
+
 // Other
 #include <vtkTransform.h>
 #include <vtkImageConvolve.h>
@@ -230,39 +234,29 @@ int main(int argc, char *argv[])
 //----Test Case 3: SMP overhead compared with old multi-threader
   case 3:
     {
-      // read in additional parm for the image slice data
-      if(argc <10)
-        {
-        cerr << "Additional Data not inputed into argument 8\n";
-        break;
-        }
-
-      parms.additionalData = argv[9];
       double angle = 45;
 
       float * executionTimes = new float[parms.numberOfIterationsToRun];
+
+      // Create an image
+        vtkSmartPointer<vtkImageMandelbrotSource> source =
+          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+
+        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+        source->SetWholeExtent(workExtent);
+        source->Update();
+
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
-        // Read file
-        vtkSmartPointer<vtkImageReader2Factory> readerFactory =
-          vtkSmartPointer<vtkImageReader2Factory>::New();
-
-        vtkImageReader2 *reader =
-          readerFactory->CreateImageReader2(parms.additionalData);
-        reader->SetFileName(parms.additionalData);
-        reader->Update();
-        double bounds[6];
-        reader->GetOutput()->GetBounds(bounds);
-
         // Rotate about the center of the image
         vtkSmartPointer<vtkTransform> transform =
           vtkSmartPointer<vtkTransform>::New();
 
         // Compute the center of the image
         double center[3];
-        center[0] = (bounds[1] + bounds[0]) / 2.0;
-        center[1] = (bounds[3] + bounds[2]) / 2.0;
-        center[2] = (bounds[5] + bounds[3]) / 2.0;
+        center[0] = (workExtent[1] + workExtent[0]) / 2.0;
+        center[1] = (workExtent[3] + workExtent[2]) / 2.0;
+        center[2] = (workExtent[5] + workExtent[3]) / 2.0;
 
         // Rotate about the center
         transform->Translate(center[0], center[1], center[2]);
@@ -272,31 +266,37 @@ int main(int argc, char *argv[])
         // Reslice does all of the work
         vtkSmartPointer<vtkImageReslice> reslice =
         vtkSmartPointer<vtkImageReslice>::New();
-        reslice->SetInputConnection(reader->GetOutputPort());
+        reslice->SetInputConnection(source->GetOutputPort());
         reslice->SetResliceTransform(transform);
         reslice->SetInterpolationModeToCubic();
-        reslice->SetOutputSpacing(
-        reader->GetOutput()->GetSpacing()[0],
-        reader->GetOutput()->GetSpacing()[1],
-        reader->GetOutput()->GetSpacing()[2]);
-        reslice->SetOutputOrigin(
-        reader->GetOutput()->GetOrigin()[0],
-        reader->GetOutput()->GetOrigin()[1],
-        reader->GetOutput()->GetOrigin()[2]);
-        reslice->SetOutputExtent(
-        reader->GetOutput()->GetExtent());
 
         reslice->SetEnableSMP(parms.enableSMP);
         reslice->SetSMPBlocks(parms.numberOfSMPBlocks);
-        reslice->SetSplitMode(vtkExtentTranslator::BLOCK_MODE);
+        reslice->SetSplitMode(parms.SMPSplitMode);
 
-        tl->StartTimer();
-        reslice->Update();
-        tl->StopTimer();
+        // read in size for stencil window
+        if(argc ==10)
+          {
+          parms.additionalData = argv[9];
+          vtkROIStencilSource * stencilSource = vtkROIStencilSource::New();
+          stencilSource->SetShapeToBox();
+          double radius = atoi(argv[9]);;
+          double boundss[6] = { center[0] - radius, center[0] + radius, center[1] - radius, center[1] + radius, center[2] - radius, center[2] + radius };
+          stencilSource->SetBounds(boundss);
 
-        executionTimes[i] = tl->GetElapsedTime();
-        cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
-        }
+          stencilSource->SetInformationInput(source->GetOutput());
+          stencilSource->Update();
+          reslice->SetStencilData(stencilSource->GetOutput());
+          }
+
+
+          tl->StartTimer();
+          reslice->Update();
+          tl->StopTimer();
+
+          executionTimes[i] = tl->GetElapsedTime();
+          cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+          }
       WriteResultToCSV(executionTimes,&parms);
       delete [] executionTimes;
       break;
@@ -451,6 +451,7 @@ int main(int argc, char *argv[])
 
   case 5:
     {
+    printf("here\n");
     float * executionTimes = new float[parms.numberOfIterationsToRun];
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
@@ -462,29 +463,41 @@ int main(int argc, char *argv[])
       source->SetWholeExtent(workExtent);
       source->Update();
 
-      vtkSmartPointer<vtkImageCast> originalCastFilter =
+      vtkSmartPointer<vtkImageCast> imageCast =
         vtkSmartPointer<vtkImageCast>::New();
-      originalCastFilter->SetInputConnection(source->GetOutputPort());
-      originalCastFilter->SetOutputScalarTypeToUnsignedChar();
-      originalCastFilter->Update();
+      imageCast->SetInputConnection(source->GetOutputPort());
+      imageCast->SetOutputScalarTypeToUnsignedChar();
+      imageCast->Update();
 
-      vtkSmartPointer<vtkImageConvolve> convolveFilter =
-        vtkSmartPointer<vtkImageConvolve>::New();
-      convolveFilter->SetInputConnection(source->GetOutputPort());
+      vtkSmartPointer<vtkImageHistogramStatistics > statistics =
+        vtkSmartPointer<vtkImageHistogramStatistics >::New();
+      statistics->SetInputConnection(imageCast->GetOutputPort());
+      statistics->GenerateHistogramImageOff();
+      statistics->SetSMPBlocks(parms.numberOfSMPBlocks);
+      statistics->SetSplitMode(parms.SMPSplitMode);
 
-      convolveFilter->SetEnableSMP(parms.enableSMP);
-      convolveFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
-      convolveFilter->SetSplitMode(parms.SMPSplitMode);
-
-      double kernel[343];
-      for(int i =0;i<243;i++)
+      // read in size for stencil window
+      if(argc ==10)
         {
-        kernel[i]= 1.0;
+        double center[3];
+        center[0] = (workExtent[1] + workExtent[0]) / 2.0;
+        center[1] = (workExtent[3] + workExtent[2]) / 2.0;
+        center[2] = (workExtent[5] + workExtent[3]) / 2.0;
+
+        parms.additionalData = argv[9];
+        vtkROIStencilSource * stencilSource = vtkROIStencilSource::New();
+        stencilSource->SetShapeToBox();
+        double radius = atoi(argv[9]);;
+        double boundss[6] = { center[0] - radius, center[0] + radius, center[1] - radius, center[1] + radius, center[2] - radius, center[2] + radius };
+        stencilSource->SetBounds(boundss);
+
+        stencilSource->SetInformationInput(source->GetOutput());
+        stencilSource->Update();
+        statistics->SetStencilData(stencilSource->GetOutput());
         }
-      convolveFilter->SetKernel7x7x7(kernel);
 
       tl->StartTimer();
-      convolveFilter->Update();
+      statistics->Update();
       tl->StopTimer();
       executionTimes[i] = tl->GetElapsedTime();
       cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";

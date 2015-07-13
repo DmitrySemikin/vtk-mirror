@@ -17,6 +17,8 @@ find_package(VTK COMPONENTS
   vtkInteractionStyle
   vtkRendering${VTK_RENDERING_BACKEND}
   vtkTestingRendering
+  vtkImagingStencil
+  vtkImagingStatistics
 )
 include(${VTK_USE_FILE})
 

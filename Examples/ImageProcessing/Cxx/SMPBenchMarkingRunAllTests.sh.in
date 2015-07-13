@@ -26,28 +26,35 @@ BLOCK_RANGE_START1=10
 BLOCK_RANGE_END1=1000
 
 WORK_SIZES_TEST2="128"
-BLOCK_RANGE_START2=240
-BLOCK_RANGE_END2=1600
+BLOCK_RANGE_START2=0
+BLOCK_RANGE_END2=100
 KERNEL_SIZE=5
 
-WORK_SIZES_TEST3="64"
+WORK_SIZES_TEST3="700"
 BLOCK_RANGE_START3=10
-BLOCK_RANGE_END3=1000
+BLOCK_RANGE_END3=100
+STENCIL_RADIUS=100
 
 WORK_SIZES_TEST4="64 256"
 BLOCK_RANGE_START4=10
 BLOCK_RANGE_END4=1000
 
+WORK_SIZES_TEST5="800"
+BLOCK_RANGE_START5=10
+BLOCK_RANGE_END5=3000
+STENCIL_RADIUS=100
+
+
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 #SPECIFY WHICH TEST TO RUN
-TESTS_TO_RUN="3"
+TESTS_TO_RUN="5"
 
 #RUN DESCRIPTION
 RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S') Running With Kernel 9, just enough"
 
 #MAXIUM NUMBER OF PROCESSORS
-MIN_PROCESSORS=1
+MIN_PROCESSORS=4
 MAX_PROCESSORS=4
 
 #------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,7 +64,7 @@ RESULTS_DIRECTORY="results"
 mkdir -p "$RESULTS_DIRECTORY"
 
 #set output csv file
-OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/ImageRotateHuge.csv"
+OUTPUT_CSV_FILE="$RESULTS_DIRECTORY/MedianSmallBlocks.csv"
 
 # Set Rootfolder to current date
 if [ $O_PROFILE_ENABLE -eq 1 ]; then
@@ -116,9 +123,7 @@ fi
 
 
 #---------------------TEST CASE 2-------------------------
-# Test image convolve
-# This test checks to see if blocking/non blocking has any effect
-# On the speed since good data-access is key in dot product
+# Test median filter.
 
 if [[ ${TESTS_TO_RUN[*]} =~ 2 ]]; then
 	TEST_NUMBER=2
@@ -134,7 +139,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 2 ]]; then
 
 	for  workSize in `echo $WORK_SIZES_TEST2`
 	do
-		arr=($WORK_SIZES_TEST1)
+		arr=($WORK_SIZES_TEST2)
 		MULITPILIER=$(($workSize/${arr[0]}))
 		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
 
@@ -179,17 +184,35 @@ if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
 		mkdir $LOCAL_DIRECTORY
 	fi
 
-	ADDITIONAL_DATA="huge.png"
+	ADDITIONAL_DATA="$STENCIL_RADIUS"
 
 	for  workSize in `echo $WORK_SIZES_TEST3`
 	do
-		arr=($WORK_SIZES_TEST1)
+		arr=($WORK_SIZES_TEST3)
 		MULITPILIER=$(($workSize/${arr[0]}))
 		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
 
 		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,Stencil OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START3; blockSize <= $BLOCK_RANGE_END3; blockSize+=(($BLOCK_RANGE_END3-$BLOCK_RANGE_START3)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START3; blockSize <= $BLOCK_RANGE_END3; blockSize+=(($BLOCK_RANGE_END3-$BLOCK_RANGE_START3)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+
+			echo "---,Stencil ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 
 			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 			for (( blockSize = $BLOCK_RANGE_START3; blockSize <= $BLOCK_RANGE_END3; blockSize+=(($BLOCK_RANGE_END3-$BLOCK_RANGE_START3)/$NUMBER_OF_SAMPLES) ))
@@ -204,11 +227,12 @@ if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
 			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
 			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
+
+
 		done
 		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 	done
-
 fi
 
 
@@ -229,6 +253,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
 
 	for  workSize in `echo $WORK_SIZES_TEST4`
 	do
+	  arr=($WORK_SIZES_TEST4)
 		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
 		do
@@ -249,6 +274,69 @@ if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
 			done
 		done
 		#Run Test
+		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+	done
+fi
+
+#---------------------TEST CASE 5-------------------------
+# Test vtkImagingStatistics
+
+if [[ ${TESTS_TO_RUN[*]} =~ 5 ]]; then
+	TEST_NUMBER=5
+	echo "TestCase 5" >> "$OUTPUT_CSV_FILE"
+
+	LOCAL_DIRECTORY="$RESULTS_DIRECTORY/$dt/TestCase5"
+	if [ $O_PROFILE_ENABLE -eq 1 ]; then
+		mkdir $LOCAL_DIRECTORY
+	fi
+
+	ADDITIONAL_DATA="$STENCIL_RADIUS"
+
+	for  workSize in `echo $WORK_SIZES_TEST5`
+	do
+		arr=($WORK_SIZES_TEST5)
+		MULITPILIER=$(($workSize/${arr[0]}))
+		CUBED_MULTIPLIER=$(($MULITPILIER *$MULITPILIER*$MULITPILIER))
+
+		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		do
+			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,Stencil OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
+
+			echo "---,Stencil ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			done
+
+			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
+			do
+			ADJUSTED_BLOCK_SIZE=$(($blockSize *$CUBED_MULTIPLIER))
+			./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $ADJUSTED_BLOCK_SIZE $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			done
+
+
+		done
 		echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 	done
