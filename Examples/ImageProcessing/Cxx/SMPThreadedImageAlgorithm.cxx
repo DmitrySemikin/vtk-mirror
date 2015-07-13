@@ -239,12 +239,12 @@ int main(int argc, char *argv[])
       float * executionTimes = new float[parms.numberOfIterationsToRun];
 
       // Create an image
-        vtkSmartPointer<vtkImageMandelbrotSource> source =
-          vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      vtkSmartPointer<vtkImageMandelbrotSource> source =
+        vtkSmartPointer<vtkImageMandelbrotSource>::New();
 
-        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-        source->SetWholeExtent(workExtent);
-        source->Update();
+      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      source->SetWholeExtent(workExtent);
+      source->Update();
 
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
@@ -277,15 +277,17 @@ int main(int argc, char *argv[])
         // read in size for stencil window
         if(argc ==10)
           {
+
           parms.additionalData = argv[9];
-          vtkROIStencilSource * stencilSource = vtkROIStencilSource::New();
+          vtkSmartPointer<vtkROIStencilSource> stencilSource = vtkSmartPointer<vtkROIStencilSource>::New();
           stencilSource->SetShapeToBox();
-          double radius = atoi(argv[9]);;
+          double radius = atof(argv[9]);
           double boundss[6] = { center[0] - radius, center[0] + radius, center[1] - radius, center[1] + radius, center[2] - radius, center[2] + radius };
           stencilSource->SetBounds(boundss);
 
           stencilSource->SetInformationInput(source->GetOutput());
           stencilSource->Update();
+
           reslice->SetStencilData(stencilSource->GetOutput());
           }
 
@@ -451,7 +453,6 @@ int main(int argc, char *argv[])
 
   case 5:
     {
-    printf("here\n");
     float * executionTimes = new float[parms.numberOfIterationsToRun];
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
