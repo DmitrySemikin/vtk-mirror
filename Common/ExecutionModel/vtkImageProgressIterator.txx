@@ -40,13 +40,13 @@ vtkImageProgressIterator<DType>::vtkImageProgressIterator(vtkImageData *imgd,
 template <class DType>
 void vtkImageProgressIterator<DType>::NextSpan()
 {
-  this->Pointer += this->Increments[1];
-  this->SpanEndPointer += this->Increments[1];
-  if (this->Pointer >= this->SliceEndPointer)
+  this->Pointers[0] += this->Increments[1];
+  this->Pointers[1] += this->Increments[1];
+  if (this->Pointers[0] >= this->Pointers[2])
     {
-    this->Pointer += this->ContinuousIncrements[2];
-    this->SpanEndPointer += this->ContinuousIncrements[2];
-    this->SliceEndPointer += this->Increments[2];
+    this->Pointers[0] += this->ContinuousIncrements[2];
+    this->Pointers[1] += this->ContinuousIncrements[2];
+    this->Pointers[2] += this->Increments[2];
     }
   if (!this->ID)
     {

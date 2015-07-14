@@ -25,36 +25,36 @@
 template <class DType>
 vtkImageIterator<DType>::vtkImageIterator()
 {
-  this->Pointer = 0;
-  this->EndPointer = 0;
-  this->SpanEndPointer = 0;
-  this->SliceEndPointer = 0;
+  this->Pointers[0] = 0;
+  this->Pointers[1] = 0;
+  this->Pointers[2] = 0;
+  this->Pointers[3] = 0;
 }
 
 //----------------------------------------------------------------------------
 template <class DType>
 void vtkImageIterator<DType>::Initialize(vtkImageData *id, int *ext)
 {
-  this->Pointer = static_cast<DType *>(id->GetScalarPointerForExtent(ext));
+  this->Pointers[0] = static_cast<DType *>(id->GetScalarPointerForExtent(ext));
   id->GetIncrements(this->Increments[0], this->Increments[1],
                     this->Increments[2]);
   id->GetContinuousIncrements(ext,this->ContinuousIncrements[0],
                               this->ContinuousIncrements[1],
                               this->ContinuousIncrements[2]);
-  this->EndPointer =
+  this->Pointers[3] =
     static_cast<DType *>(id->GetScalarPointer(ext[1],ext[3],ext[5]))
     +this->Increments[0];
 
   // if the extent is empty then the end pointer should equal the beg pointer
   if (ext[1] < ext[0] || ext[3] < ext[2] || ext[5] < ext[4])
     {
-    this->EndPointer = this->Pointer;
+    this->Pointers[3] = this->Pointers[0];
     }
 
-  this->SpanEndPointer =
-    this->Pointer + this->Increments[0]*(ext[1] - ext[0] + 1);
-  this->SliceEndPointer =
-    this->Pointer + this->Increments[1]*(ext[3] - ext[2] + 1);
+  this->Pointers[1] =
+    this->Pointers[0] + this->Increments[0]*(ext[1] - ext[0] + 1);
+  this->Pointers[2] =
+    this->Pointers[0] + this->Increments[1]*(ext[3] - ext[2] + 1);
 }
 
 //----------------------------------------------------------------------------
@@ -69,13 +69,13 @@ vtkImageIterator<DType>::vtkImageIterator(vtkImageData *id, int *ext)
 template <class DType>
 void vtkImageIterator<DType>::NextSpan()
 {
-  this->Pointer += this->Increments[1];
-  this->SpanEndPointer += this->Increments[1];
-  if (this->Pointer >= this->SliceEndPointer)
+  this->Pointers[0] += this->Increments[1];
+  this->Pointers[1] += this->Increments[1];
+  if (this->Pointers[0] >= this->Pointers[2])
     {
-    this->Pointer += this->ContinuousIncrements[2];
-    this->SpanEndPointer += this->ContinuousIncrements[2];
-    this->SliceEndPointer += this->Increments[2];
+    this->Pointers[0] += this->ContinuousIncrements[2];
+    this->Pointers[1] += this->ContinuousIncrements[2];
+    this->Pointers[2] += this->Increments[2];
     }
 }
 

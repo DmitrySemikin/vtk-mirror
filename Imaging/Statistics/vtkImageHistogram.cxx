@@ -59,8 +59,7 @@ vtkImageHistogram::vtkImageHistogram()
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
 
-  this->SplitMode = vtkExtentTranslator::DEFAULT_MODE;
-  this->NumberOfSMPBlocks = 30;
+  this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
 }
 
 //----------------------------------------------------------------------------
@@ -289,7 +288,6 @@ VTK_THREAD_RETURN_TYPE vtkImageHistogramThreadedExecute(void *arg)
         }
       }
     }
-
   if (foundConnection)
     {
     // execute the actual method with appropriate extent
@@ -578,6 +576,7 @@ typedef struct ThreadLocalSum
 
 class HistogramSumFunctor {
   vtkMultiThreader::ThreadInfo * ThreadInfo;
+  int Ext[6];
 public:
   int Total;
   vtkIdTypeArray *Histogram;
@@ -585,25 +584,39 @@ public:
   vtkSMPThreadLocal<ThreadLocalSum> ThreadLocalHistogram;
   vtkSMPThreadLocal<int >ThreadLocalTotal;
 
-  HistogramSumFunctor(vtkMultiThreader::ThreadInfo *threadInfo)
+  HistogramSumFunctor(vtkMultiThreader::ThreadInfo *threadInfo, int * ext)
   {
+    memcpy(Ext,ext,sizeof (int)*6);
     this->ThreadInfo = threadInfo;
-    vtkImageHistogramThreadStruct *ts =
-      static_cast<vtkImageHistogramThreadStruct *>(ThreadInfo->UserData);
-
     Total = 0;
+  }
+
+  VTK_THREAD_RETURN_TYPE Execute(int thread)
+  {
+    vtkMultiThreader::ThreadInfo *ti = this->ThreadInfo;
+    vtkImageHistogramThreadStruct *ts =
+      static_cast<vtkImageHistogramThreadStruct *>(ti->UserData);
+
+    int splitExt[6] = {0,-1,0,-1,0,-1};
+
+    int total = ts->Algorithm->SplitExtent(splitExt, this->Ext, thread, ti->NumberOfThreads);
+
+    if (ti->ThreadID < total &&
+        splitExt[1] >= splitExt[0] &&
+        splitExt[3] >= splitExt[2] &&
+        splitExt[5] >= splitExt[4])
+      {
+      ts->Algorithm->ThreadedRequestData(
+        ts->Request, ts->InputsInfo, ts->OutputsInfo, NULL, NULL,
+        splitExt, ti->ThreadID);
+      }
   }
 
   void operator()(vtkIdType begin, vtkIdType end)
   {
-    vtkMultiThreader::ThreadInfo *localThreadInfo = new vtkMultiThreader::ThreadInfo;
-    localThreadInfo->NumberOfThreads = this->ThreadInfo->NumberOfThreads;
-    localThreadInfo->UserData = this->ThreadInfo->UserData;
-
     for (int a = begin; a != end; ++a)
       {
-      localThreadInfo->ThreadID = a;
-      vtkImageHistogramThreadedExecute(localThreadInfo);
+      this->Execute(a);
       }
   }
 
@@ -755,12 +768,12 @@ int vtkImageHistogram::RequestData(
     {
     for (int i = 0; i < numberOfOutputs; ++i)
       {
+      int updateExtent[6];
       vtkInformation* outInfo = outputVector->GetInformationObject(i);
       vtkImageData *outData = vtkImageData::SafeDownCast(
         outInfo->Get(vtkDataObject::DATA_OBJECT()));
       if (outData)
         {
-        int updateExtent[6];
         outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(),
                      updateExtent);
         this->AllocateOutputData(outData, outInfo, updateExtent);
@@ -768,6 +781,7 @@ int vtkImageHistogram::RequestData(
       }
     }
 
+  int inputExt[6];
   // copy arrays from first input to output
   int numberOfInputs = this->GetNumberOfInputPorts();
   if (numberOfInputs > 0)
@@ -779,6 +793,8 @@ int vtkImageHistogram::RequestData(
       vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
       vtkImageData *inData = vtkImageData::SafeDownCast(
         inInfo->Get(vtkDataObject::DATA_OBJECT()));
+      inData->GetExtent(inputExt);
+
       vtkInformation* outInfo = outputVector->GetInformationObject(0);
       vtkImageData *outData = vtkImageData::SafeDownCast(
         outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -788,16 +804,21 @@ int vtkImageHistogram::RequestData(
 
   if (this->EnableSMP)
     {
+    int blocks = this->Translator->SetUpExtent(inputExt,this->SplitMode
+                                          ,this->SMPSplitPercentage
+                                          ,this->MinimumBlockSize[0]
+                                          ,this->MinimumBlockSize[1]
+                                          ,this->MinimumBlockSize[2]);
     vtkMultiThreader::ThreadInfo threadInfo;
-    threadInfo.NumberOfThreads = this->NumberOfSMPBlocks;
+    threadInfo.NumberOfThreads = blocks;
     threadInfo.UserData = &ts;
     threadInfo.ThreadID = -1;
 
     bool debug = this->Debug;
     this->Debug = false;
-    HistogramSumFunctor sum(&threadInfo);
+    HistogramSumFunctor sum(&threadInfo,inputExt);
     this->functor = &sum;
-    vtkSMPTools::For(0, NumberOfSMPBlocks, sum);
+    vtkSMPTools::For(0, blocks, sum);
     this->Debug = debug;
 
     this->Histogram = sum.Histogram;

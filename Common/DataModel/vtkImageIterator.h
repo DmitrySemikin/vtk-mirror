@@ -54,28 +54,30 @@ public:
   // Return an iterator (pointer) for the span
   SpanIterator BeginSpan()
     {
-    return this->Pointer;
+    return this->Pointers[0];
     }
 
   // Description:
   // Return an iterator (pointer) for the end of the span
   SpanIterator EndSpan()
     {
-    return this->SpanEndPointer;
+    return this->Pointers[1];
     }
 
   // Description:
   // Test if the end of the extent has been reached
   int IsAtEnd()
     {
-    return (this->Pointer >= this->EndPointer);
+    return (this->Pointers[0] >= this->Pointers[3]);
     }
 
 protected:
-  DType *Pointer;
-  DType *SpanEndPointer;
-  DType *SliceEndPointer;
-  DType *EndPointer;
+  //Pack points together to ensure 1 read per next span
+  // Pointers[0] is Pointer
+  // Pointers[1] is SpanEndPointer
+  // Pointers[2] is SliceEndPointer
+  // Pointers[3] is EndPointer
+  DType *Pointers[4];
   vtkIdType    Increments[3];
   vtkIdType    ContinuousIncrements[3];
 };

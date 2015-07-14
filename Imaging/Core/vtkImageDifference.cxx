@@ -26,7 +26,7 @@ vtkStandardNewMacro(vtkImageDifference);
 vtkImageDifference::vtkImageDifference()
 {
   int i;
-  for ( i = 0; i < this->NumberOfThreads; i++ )
+  for ( i = 0; i < 100000; i++ )
     {
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
@@ -36,9 +36,8 @@ vtkImageDifference::vtkImageDifference()
   this->AllowShift = 1;
   this->Averaging = 1;
   this->SetNumberOfInputPorts(2);
+  this->SMPSplitPercentage = 40.0;
 }
-
-
 
 // not so simple macro for calculating error
 #define vtkImageDifferenceComputeError(c1,c2) \
@@ -92,9 +91,6 @@ if (this->Averaging && \
   b1 = abs(ab1/9 - ab2); \
   if ((r1+g1+b1) < (tr+tg+tb)) { tr = r1; tg = g1; tb = b1; } \
   }
-
-
-
 
 //----------------------------------------------------------------------------
 // This method computes the input extent necessary to generate the output.

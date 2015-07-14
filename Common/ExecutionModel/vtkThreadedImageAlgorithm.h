@@ -68,14 +68,6 @@ public:
                           int num, int total);
 
   // Description:
-  // Set the number of partitions the data will be partioned into.
-  void SetSMPBlocks(int numberOfBlocks);
-
-  // Description:
-  // Get the number of partitions the data will be partioned into.
-  int GetSMPBlocks();
-
-  // Description:
   // Enable/Disable SMP for threading.
   vtkGetMacro(EnableSMP, bool);
   vtkSetMacro(EnableSMP, bool);
@@ -91,6 +83,15 @@ public:
   vtkGetMacro(SplitMode, int);
   vtkSetMacro(SplitMode, int);
 
+  vtkSetClampMacro( SMPSplitPercentage, float, 0.001, 100.0 );
+  vtkGetMacro(SMPSplitPercentage,float);
+
+  void SetMinimumBlockSize(int * minBlockSizes);
+
+  int * GetMinimumBlockSize();
+
+
+
 protected:
   vtkThreadedImageAlgorithm();
   ~vtkThreadedImageAlgorithm();
@@ -99,10 +100,12 @@ protected:
   vtkExtentTranslator* Translator;
   int NumberOfThreads;
 
-  int NumberOfSMPBlocks;
+  float SMPSplitPercentage;
   int SplitMode;
   bool EnableSMP;
   bool SplitByPoints;
+
+  int MinimumBlockSize[3];
 
   // Description:
   // This is called by the superclass.
@@ -117,10 +120,3 @@ private:
 };
 
 #endif
-
-
-
-
-
-
-

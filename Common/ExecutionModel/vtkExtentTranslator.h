@@ -64,7 +64,7 @@ public:
                                       int *resultExtent, int splitMode,
                                       int byPoints);
 
-
+  virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
 
   // Description:
   // How should the streamer break up extents. Block mode
@@ -94,11 +94,14 @@ public:
   // to indicate array indices.
   enum Modes
   {
-    X_SLAB_MODE=0,
-    Y_SLAB_MODE=1,
-    Z_SLAB_MODE=2,
-    BLOCK_MODE= 3,
-    DEFAULT_MODE=4
+    X_SLAB_MODE =0,
+    Y_SLAB_MODE =1,
+    Z_SLAB_MODE =2,
+    BLOCK_MODE  =3,
+    XZ_MODE     =4,
+    XY_MODE     =5,
+    YZ_MODE     =6,
+    DEFAULT_MODE=7
   };
 
   // Description:
@@ -118,9 +121,7 @@ protected:
   // Returns 0 if no data exist for a piece.
   // The whole extent Should be passed in as the extent.
   // It is modified to return the result.
-  int SplitExtent(int piece, int numPieces, int *extent, int splitMode);
-  int SplitExtentByPoints(int piece, int numPieces, int *extent,
-                          int splitMode);
+  int SplitExtent(int piece, int numPieces, int *extent, int splitMode,bool byPoints );
 
   int Piece;
   int NumberOfPieces;
@@ -131,6 +132,19 @@ protected:
 
   int* SplitPath;
   int SplitLen;
+
+  bool Initialized;
+
+  typedef struct
+  {
+      int SplitMode;
+      int MinSize[3];      // The minimum size for each block
+      int NumMinBlocks[3]; // Number of minimum size blocks
+      int NumPieces[3];    // Number of pieces taking into consideration the split Percentage
+      int TotalPieces;     // Total pieces taking into consideration the split Percentage
+      int PieceToBlocks[3];// Number of blocks per piece
+  }BlockSizeProperties;
+  BlockSizeProperties BlockProperties;
 
 private:
   vtkExtentTranslator(const vtkExtentTranslator&);  // Not implemented.

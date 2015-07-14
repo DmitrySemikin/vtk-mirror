@@ -36,6 +36,16 @@
 #include <vtkImageConvolve.h>
 #include <vtkImageMandelbrotSource.h>
 #include <vtkExtentTranslator.h>
+#include "vtkInformation.h"
+#include "vtkInformationVector.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkObjectFactory.h"
+#include <iostream>
+
+#define TRASH_CACHE_SIZE 500000
+#define MIN_BLOCK_SIZE_X 1
+#define MIN_BLOCK_SIZE_Y 1
+#define MIN_BLOCK_SIZE_Z 1
 
 struct TestParms
 {
@@ -44,11 +54,73 @@ struct TestParms
   bool enableSMP;
   int SMPSplitMode;
   int numberOfThreadsToRun;
-  int numberOfSMPBlocks;
+  float smpSplitPercentage;
   int workSize;
   char * additionalData;
   char * outputCSVFile;
 };
+
+void TrashCache()
+{
+  double start = 0.32;
+  double * trash = new double[TRASH_CACHE_SIZE];
+  for(int i=0;i<TRASH_CACHE_SIZE;i++)
+    {
+    trash[i] = start*1.13;
+    }
+  delete[] trash;
+}
+
+
+class VTKIMAGINGSOURCES_EXPORT TestMandelbrotSource: public vtkImageMandelbrotSource
+{
+protected:
+  TestMandelbrotSource()
+  {
+
+  }
+  ~TestMandelbrotSource()
+  {
+
+  }
+public:
+  void PrintSelf(ostream& os, vtkIndent indent)
+  {
+
+  }
+  static TestMandelbrotSource *New();
+  vtkTypeMacro(TestMandelbrotSource,vtkImageMandelbrotSource);
+
+  int RequestData(vtkInformation *request,
+                          vtkInformationVector** inputVector,
+                          vtkInformationVector* outputVector)
+  {
+    // get the output
+    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    vtkImageData *data = vtkImageData::SafeDownCast(
+      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    // We need to allocate our own scalars since we are overriding
+    // the superclasses "Execute()" method.
+    int *ext = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT());
+    data->SetExtent(ext);
+    data->AllocateScalars(outInfo);
+
+    float *ptr = static_cast<float *>(data->GetScalarPointerForExtent(ext));
+
+    int pieces = (ext[5]-ext[4]+1)*(ext[3]-ext[2]+1)*(ext[1]-ext[0]+1);
+
+    for(int i=0;i<pieces;i++)
+      {
+      *ptr=3.0;
+      ptr++;
+      }
+
+    return 1;
+  }
+};
+
+vtkStandardNewMacro(TestMandelbrotSource);
 
 int WriteResultToCSV(float* executionTime,TestParms *parm)
 {
@@ -69,13 +141,13 @@ int WriteResultToCSV(float* executionTime,TestParms *parm)
   std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun-2));
 
   char writeOutput[100];
-  sprintf(writeOutput, "%d,%d,%d,%d,%d,%d,%d,%f,%f,%s\n"
+  sprintf(writeOutput, "%d,%d,%d,%d,%d,%f,%d,%f,%f,%s\n"
   ,parm->numberOfIterationsToRun
   ,parm->testCase
   ,parm->enableSMP
   ,parm->SMPSplitMode
   ,parm->numberOfThreadsToRun
-  ,parm->numberOfSMPBlocks
+  ,parm->smpSplitPercentage
   ,parm->workSize
   ,average
   ,std
@@ -131,13 +203,15 @@ int main(int argc, char *argv[])
     }
   else
     {
-    parms.SMPSplitMode = vtkExtentTranslator::DEFAULT_MODE;
+    parms.SMPSplitMode = vtkExtentTranslator::Z_SLAB_MODE;
     }
 
   parms.numberOfThreadsToRun = atoi(argv[5]);
-  parms.numberOfSMPBlocks = atoi(argv[6]);
+  parms.smpSplitPercentage = atof(argv[6]);
   parms.workSize = atoi(argv[7]);
   parms.outputCSVFile = argv[8];
+
+
 
   // Initilize with passed in number of threads
   vtkTimerLog *tl = vtkTimerLog::New();
@@ -154,18 +228,23 @@ int main(int argc, char *argv[])
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-      vtkSmartPointer<vtkImageMandelbrotSource> source =
-      vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      vtkSmartPointer<TestMandelbrotSource> source =
+      vtkSmartPointer<TestMandelbrotSource>::New();
       source->SetWholeExtent(workExtent);
       source->Update();
+      // flush out cache
+      TrashCache();
+
+      int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
 
       vtkSmartPointer<vtkImageCast> castFilter =
       vtkSmartPointer<vtkImageCast>::New();
       castFilter->SetInputConnection(source->GetOutputPort());
       castFilter->SetEnableSMP(parms.enableSMP);
-      castFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+      castFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
       castFilter->SetSplitMode(parms.SMPSplitMode);
       castFilter->SetOutputScalarTypeToUnsignedChar();
+      castFilter->SetMinimumBlockSize(minBlockSize);
 
       tl->StartTimer();
       castFilter->Update();
@@ -190,6 +269,8 @@ int main(int argc, char *argv[])
       break;
       }
 
+    int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
+
     int kernelSize = atoi(argv[9]);
 
     parms.additionalData =argv[9];
@@ -198,8 +279,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
       // Create an image
-      vtkSmartPointer<vtkImageMandelbrotSource> source =
-        vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      vtkSmartPointer<TestMandelbrotSource> source =
+        vtkSmartPointer<TestMandelbrotSource>::New();
 
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
       source->SetWholeExtent(workExtent);
@@ -210,6 +291,8 @@ int main(int argc, char *argv[])
       originalCastFilter->SetInputConnection(source->GetOutputPort());
       originalCastFilter->SetOutputScalarTypeToUnsignedChar();
       originalCastFilter->Update();
+      // flush out cache
+      TrashCache();
 
       vtkSmartPointer<vtkImageMedian3D> medianFilter =
         vtkSmartPointer<vtkImageMedian3D>::New();
@@ -217,8 +300,10 @@ int main(int argc, char *argv[])
 
       medianFilter->SetKernelSize(kernelSize,kernelSize,kernelSize);
       medianFilter->SetEnableSMP(parms.enableSMP);
-      medianFilter->SetSMPBlocks(parms.numberOfSMPBlocks);
+      medianFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
       medianFilter->SetSplitMode(parms.SMPSplitMode);
+
+      medianFilter->SetMinimumBlockSize(minBlockSize);
 
       tl->StartTimer();
       medianFilter->Update();
@@ -238,16 +323,15 @@ int main(int argc, char *argv[])
 
       float * executionTimes = new float[parms.numberOfIterationsToRun];
 
-      // Create an image
-      vtkSmartPointer<vtkImageMandelbrotSource> source =
-        vtkSmartPointer<vtkImageMandelbrotSource>::New();
-
-      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-      source->SetWholeExtent(workExtent);
-      source->Update();
-
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
+        // Create an image
+        vtkSmartPointer<TestMandelbrotSource> source =
+        vtkSmartPointer<TestMandelbrotSource>::New();
+
+        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+        source->SetWholeExtent(workExtent);
+        source->Update();
         // Rotate about the center of the image
         vtkSmartPointer<vtkTransform> transform =
           vtkSmartPointer<vtkTransform>::New();
@@ -263,6 +347,9 @@ int main(int argc, char *argv[])
         transform->RotateWXYZ(angle, 0, 0, 1);
         transform->Translate(-center[0], -center[1], -center[2]);
 
+        // flush out cache
+        TrashCache();
+
         // Reslice does all of the work
         vtkSmartPointer<vtkImageReslice> reslice =
         vtkSmartPointer<vtkImageReslice>::New();
@@ -271,8 +358,12 @@ int main(int argc, char *argv[])
         reslice->SetInterpolationModeToCubic();
 
         reslice->SetEnableSMP(parms.enableSMP);
-        reslice->SetSMPBlocks(parms.numberOfSMPBlocks);
-        reslice->SetSplitMode(parms.SMPSplitMode);
+        reslice->SetSMPSplitPercentage(parms.smpSplitPercentage);
+        reslice->SetSplitMode(2);
+
+        int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
+
+        reslice->SetMinimumBlockSize(minBlockSize);
 
         // read in size for stencil window
         if(argc ==10)
@@ -308,6 +399,8 @@ int main(int argc, char *argv[])
     float * executionTimes = new float[parms.numberOfIterationsToRun];
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
+      // flush out cache
+      TrashCache();
       // first, create an image that looks like
       // graph paper by combining two image grid
       // sources via vtkImageBlend
@@ -456,9 +549,8 @@ int main(int argc, char *argv[])
     float * executionTimes = new float[parms.numberOfIterationsToRun];
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
-      // Create an image
-      vtkSmartPointer<vtkImageMandelbrotSource> source =
-        vtkSmartPointer<vtkImageMandelbrotSource>::New();
+      vtkSmartPointer<TestMandelbrotSource> source =
+        vtkSmartPointer<TestMandelbrotSource>::New();
 
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
       source->SetWholeExtent(workExtent);
@@ -470,11 +562,15 @@ int main(int argc, char *argv[])
       imageCast->SetOutputScalarTypeToUnsignedChar();
       imageCast->Update();
 
+      // flush out cache
+      TrashCache();
+      // Create an image
+
       vtkSmartPointer<vtkImageHistogramStatistics > statistics =
         vtkSmartPointer<vtkImageHistogramStatistics >::New();
       statistics->SetInputConnection(imageCast->GetOutputPort());
       statistics->GenerateHistogramImageOff();
-      statistics->SetSMPBlocks(parms.numberOfSMPBlocks);
+      statistics->SetSMPSplitPercentage(parms.smpSplitPercentage);
       statistics->SetSplitMode(parms.SMPSplitMode);
 
       // read in size for stencil window
