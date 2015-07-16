@@ -36,6 +36,108 @@
 #include "vtkPNGWriter.h"
 #endif
 
+
+int TestFindTriangle( int argc, char* argv[] )
+{
+  vtkPoints *newPts = vtkPoints::New();
+  newPts->InsertNextPoint(0.650665, -0.325333, 0);
+  newPts->InsertNextPoint(-0.325333, 0.650665, 0);
+  newPts->InsertNextPoint(-0.325333, -0.325333, 0);
+  newPts->InsertNextPoint(0.283966, 0.0265961, 0);
+  newPts->InsertNextPoint(0.373199, -0.0478668, 0);
+  newPts->InsertNextPoint(-0.325333, 0.535065, 0);
+
+  vtkCellArray* cells = vtkCellArray::New();
+  vtkIdType pts[2];
+  pts[0] = 3;
+  pts[1] = 4;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 5;
+  pts[1] = 3;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 5;
+  pts[1] = 1;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 1;
+  pts[1] = 4;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 4;
+  pts[1] = 0;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 0;
+  pts[1] = 2;
+  cells->InsertNextCell(2, pts);
+  pts[0] = 2;
+  pts[1] = 5;
+  cells->InsertNextCell(2, pts);
+
+  vtkPolyData *poly = vtkPolyData::New();
+  poly->SetPoints(newPts);
+  poly->SetLines(cells);
+  newPts->Delete();
+  cells->Delete();
+
+  vtkDelaunay2D *del2D = vtkDelaunay2D::New();
+  del2D->SetInputData(poly);
+  del2D->SetSourceData(poly);
+  del2D->SetTolerance(0.0);
+  del2D->SetAlpha(0.0);
+  del2D->SetOffset(10);
+  del2D->BoundingTriangulationOff();
+  poly->Delete();
+  del2D->Update();
+
+  vtkShrinkPolyData *shrink = vtkShrinkPolyData::New();
+  shrink->SetInputConnection( del2D->GetOutputPort() );
+
+  vtkPolyDataMapper *mapper = vtkPolyDataMapper::New();
+  mapper->SetInputConnection( shrink->GetOutputPort() );
+
+  vtkActor *actor = vtkActor::New();
+  actor->SetMapper(mapper);
+
+  vtkRenderer *ren = vtkRenderer::New();
+  ren->AddActor(actor);
+
+  vtkRenderWindow *renWin = vtkRenderWindow::New();
+  renWin->AddRenderer(ren);
+
+  vtkRenderWindowInteractor *iren = vtkRenderWindowInteractor::New();
+  iren->SetRenderWindow(renWin);
+
+  iren->Initialize();
+
+  renWin->Render();
+#ifdef WRITE_IMAGE
+  vtkWindowToImageFilter *windowToImage = vtkWindowToImageFilter::New();
+  windowToImage->SetInput( renWin );
+
+  vtkPNGWriter *PNGWriter = vtkPNGWriter::New();
+  PNGWriter->SetInputConnection( windowToImage->GetOutputPort() );
+  windowToImage->Delete();
+  PNGWriter->SetFileName("TestDelaunay2D.png");
+  PNGWriter->Write();
+  PNGWriter->Delete();
+#endif
+  int retVal = vtkRegressionTestImage( renWin );
+  if ( retVal == vtkRegressionTester::DO_INTERACTOR)
+    {
+    iren->Start();
+    }
+
+
+  // Clean up
+  del2D->Delete();
+  shrink->Delete();
+  mapper->Delete();
+  actor->Delete();
+  ren->Delete();
+  renWin->Delete();
+  iren->Delete();
+
+ return retVal;
+}
+
 int TestDelaunay2D( int argc, char* argv[] )
 {
   vtkPoints *newPts = vtkPoints::New();
@@ -194,5 +296,7 @@ int TestDelaunay2D( int argc, char* argv[] )
   renWin->Delete();
   iren->Delete();
 
-  return !retVal;
+  int ret = TestFindTriangle(argc, argv);
+
+  return !(retVal*ret);
 }
