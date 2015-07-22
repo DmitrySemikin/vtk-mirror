@@ -266,7 +266,8 @@ static int parse_check_options(int argc, char *argv[], int multi)
   options.Files = NULL;
   options.InputFileName = NULL;
   options.OutputFileName = NULL;
-  options.HierarchyFileName = 0;
+  options.NumberOfHierarchyFileNames = 0;
+  options.HierarchyFileNames = NULL;
   options.HintFileName = 0;
 
   for (i = 1; i < argc; i++)
@@ -345,7 +346,16 @@ static int parse_check_options(int argc, char *argv[], int multi)
         {
         return -1;
         }
-      options.HierarchyFileName = argv[i];
+      if (options.NumberOfHierarchyFileNames == 0)
+        {
+        options.HierarchyFileNames = (char **)malloc(sizeof(char *));
+        }
+      else if ((options.NumberOfHierarchyFileNames & (options.NumberOfHierarchyFileNames - 1)) == 0)
+        {
+        options.HierarchyFileNames = (char **)realloc(
+          options.HierarchyFileNames, 2*options.NumberOfHierarchyFileNames*sizeof(char *));
+        }
+      options.HierarchyFileNames[options.NumberOfHierarchyFileNames++] = argv[i];
       }
     else if (strcmp(argv[i], "--vtkobject") == 0 ||
              strcmp(argv[i], "--special") == 0 ||
@@ -448,7 +458,7 @@ FileInfo *vtkParse_Main(int argc, char *argv[])
 
   /* if a hierarchy is was given, then BTX/ETX can be ignored */
   vtkParse_SetIgnoreBTX(0);
-  if (options.HierarchyFileName)
+  if (options.HierarchyFileNames)
     {
     vtkParse_SetIgnoreBTX(1);
     }
