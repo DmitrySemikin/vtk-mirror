@@ -733,9 +733,10 @@ MergeInfo *vtkParseMerge_MergeSuperClasses(
 
   oinfo = vtkParse_GetCommandLineOptions();
 
-  if (oinfo->HierarchyFileName)
+  if (oinfo->HierarchyFileNames)
     {
-    hinfo = vtkParseHierarchy_ReadFile(oinfo->HierarchyFileName);
+    hinfo = vtkParseHierarchy_ReadFiles(
+      oinfo->NumberOfHierarchyFileNames, oinfo->HierarchyFileNames);
 
     if (oinfo->HintFileName)
       {

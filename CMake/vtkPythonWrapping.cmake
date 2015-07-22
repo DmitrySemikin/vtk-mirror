@@ -38,23 +38,20 @@ function(vtk_add_python_wrapping module_names sources_var)
   endif()
 
   set(EXTRA_PYTHON_INCLUDE_DIRS)
-  set(KIT_HIERARCHY_FILES)
+  set(KIT_HIERARCHY_FILE)
   set(VTK_WRAP_HINTS_FILES)
 
   foreach(module_name IN LISTS module_names)
     list(APPEND EXTRA_PYTHON_INCLUDE_DIRS ${${module_name}_PYTHON_INCLUDE_DIRS})
 
     if(NOT ${module_name}_EXCLUDE_FROM_WRAP_HIERARCHY)
-      list(APPEND KIT_HIERARCHY_FILES ${${module_name}_WRAP_HIERARCHY_FILE})
+      list(APPEND KIT_HIERARCHY_FILE ${${module_name}_WRAP_HIERARCHY_FILE})
     endif()
 
     if(${module_name}_WRAP_HINTS AND EXISTS "${${module_name}_WRAP_HINTS}")
       list(APPEND VTK_WRAP_HINTS_FILES "${${module_name}_WRAP_HINTS}")
     endif()
   endforeach()
-
-  set(KIT_HIERARCHY_FILE ${CMAKE_CURRENT_BINARY_DIR}/${target}Hierarchy.txt)
-  _concatenate_files("${KIT_HIERARCHY_FILES}" ${KIT_HIERARCHY_FILE})
 
   if(VTK_WRAP_HINTS_FILES)
     set(VTK_WRAP_HINTS ${CMAKE_CURRENT_BINARY_DIR}/${target}_hints)

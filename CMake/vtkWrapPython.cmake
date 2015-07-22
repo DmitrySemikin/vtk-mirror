@@ -270,9 +270,9 @@ macro(vtk_wrap_python TARGET SRC_LIST_NAME)
   if(VTK_WRAP_HINTS)
     set(_common_args "${_common_args}--hints \"${VTK_WRAP_HINTS}\"\n")
   endif()
-  if(KIT_HIERARCHY_FILE)
-    set(_common_args "${_common_args}--types \"${KIT_HIERARCHY_FILE}\"\n")
-  endif()
+  foreach(file IN LISTS KIT_HIERARCHY_FILE)
+    set(_common_args "${_common_args}--types \"${file}\"\n")
+  endforeach()
 
   # write wrapper-tool arguments to a file
   string(STRIP "${_common_args}" CMAKE_CONFIGURABLE_FILE_CONTENT)
