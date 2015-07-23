@@ -145,12 +145,22 @@ swapn2b(void *dst, const void *src, size_t nn)
 static void
 swap4b(void *dst, const void *src)
 {
-	char *op = dst;
-	const char *ip = src;
-	op[0] = ip[3];
-	op[1] = ip[2];
-	op[2] = ip[1];
-	op[3] = ip[0];
+  // Original implementation
+	// char *op = dst;
+	// const char *ip = src;
+	// op[0] = ip[3];
+	// op[1] = ip[2];
+	// op[2] = ip[1];
+	// op[3] = ip[0];
+
+  // Instead of moving bytes, lets move words - and set the bits into
+  // the correct position through shifts.
+  uint32_t* op32 = (uint32_t*)(dst);
+  const uint32_t* ip32 = (const uint32_t*)(src);
+  *op32 = (((*ip32) & 0x000000ffu) << 24) |
+          (((*ip32) & 0x0000ff00u) <<  8) |
+          (((*ip32) & 0x00ff0000u) >>  8) |
+          (((*ip32) & 0xff000000u) >> 24);
 }
 # endif /* !vax */
 
@@ -173,32 +183,45 @@ swapn4b(void *dst, const void *src, size_t nn)
  */
 	while(nn > 3)
 	{
-		op[0] = ip[3];
-		op[1] = ip[2];
-		op[2] = ip[1];
-		op[3] = ip[0];
-		op[4] = ip[7];
-		op[5] = ip[6];
-		op[6] = ip[5];
-		op[7] = ip[4];
-		op[8] = ip[11];
-		op[9] = ip[10];
-		op[10] = ip[9];
-		op[11] = ip[8];
-		op[12] = ip[15];
-		op[13] = ip[14];
-		op[14] = ip[13];
-		op[15] = ip[12];
+    uint32_t* op32 = (uint32_t*)(op);
+    const uint32_t* ip32 = (const uint32_t*)(ip);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
+
+    op32 = (uint32_t*)(op + 4);
+    ip32 = (const uint32_t*)(ip + 4);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
+
+    op32 = (uint32_t*)(op + 8);
+    ip32 = (const uint32_t*)(ip + 8);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
+
+    op32 = (uint32_t*)(op + 12);
+    ip32 = (const uint32_t*)(ip + 12);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
 		op += 16;
 		ip += 16;
 		nn -= 4;
 	}
 	while(nn-- != 0)
 	{
-		op[0] = ip[3];
-		op[1] = ip[2];
-		op[2] = ip[1];
-		op[3] = ip[0];
+    uint32_t* op32 = (uint32_t*)(op);
+    const uint32_t* ip32 = (const uint32_t*)(ip);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
 		op += 4;
 		ip += 4;
 	}
@@ -208,26 +231,34 @@ swapn4b(void *dst, const void *src, size_t nn)
 static void
 swap8b(void *dst, const void *src)
 {
+#  ifndef FLOAT_WORDS_BIGENDIAN
+  uint64_t* op64 = (uint64_t*)(dst);
+  const uint64_t* ip64 = (uint64_t*)(src);
+  *op64 = (((*ip64)                     ) << 56) |
+          (((*ip64) & 0x000000000000ff00) << 40) |
+          (((*ip64) & 0x0000000000ff0000) << 24) |
+          (((*ip64) & 0x00000000ff000000) <<  8) |
+          (((*ip64) & 0x000000ff00000000) >>  8) |
+          (((*ip64) & 0x0000ff0000000000) >> 24) |
+          (((*ip64) & 0x00ff000000000000) >> 40) |
+          (((*ip64)                     ) >> 56);
+#  else
 	char *op = dst;
 	const char *ip = src;
-#  ifndef FLOAT_WORDS_BIGENDIAN
-	op[0] = ip[7];
-	op[1] = ip[6];
-	op[2] = ip[5];
-	op[3] = ip[4];
-	op[4] = ip[3];
-	op[5] = ip[2];
-	op[6] = ip[1];
-	op[7] = ip[0];
-#  else
-	op[0] = ip[3];
-	op[1] = ip[2];
-	op[2] = ip[1];
-	op[3] = ip[0];
-	op[4] = ip[7];
-	op[5] = ip[6];
-	op[6] = ip[5];
-	op[7] = ip[4];
+
+  uint32_t* op32 = (uint32_t*)(op);
+  const uint32_t* ip32 = (const uint32_t*)(ip);
+  *op32 = (((*ip32) & 0x000000ffu) << 24) |
+          (((*ip32) & 0x0000ff00u) <<  8) |
+          (((*ip32) & 0x00ff0000u) >>  8) |
+          (((*ip32) & 0xff000000u) >> 24);
+
+  op32 = (uint32_t*)(op + 4);
+  ip32 = (const uint32_t*)(ip + 4);
+  *op32 = (((*ip32) & 0x000000ffu) << 24) |
+          (((*ip32) & 0x0000ff00u) <<  8) |
+          (((*ip32) & 0x00ff0000u) >>  8) |
+          (((*ip32) & 0xff000000u) >> 24);
 #  endif
 }
 # endif /* !vax */
@@ -257,50 +288,64 @@ swapn8b(void *dst, const void *src, size_t nn)
 #  ifndef FLOAT_WORDS_BIGENDIAN
 	while(nn > 1)
 	{
-		op[0] = ip[7];
-		op[1] = ip[6];
-		op[2] = ip[5];
-		op[3] = ip[4];
-		op[4] = ip[3];
-		op[5] = ip[2];
-		op[6] = ip[1];
-		op[7] = ip[0];
-		op[8] = ip[15];
-		op[9] = ip[14];
-		op[10] = ip[13];
-		op[11] = ip[12];
-		op[12] = ip[11];
-		op[13] = ip[10];
-		op[14] = ip[9];
-		op[15] = ip[8];
+    uint64_t* op64 = (uint64_t*)(op);
+    const uint64_t* ip64 = (uint64_t*)(ip);
+    *op64 = (((*ip64)                     ) << 56) |
+            (((*ip64) & 0x000000000000ff00) << 40) |
+            (((*ip64) & 0x0000000000ff0000) << 24) |
+            (((*ip64) & 0x00000000ff000000) <<  8) |
+            (((*ip64) & 0x000000ff00000000) >>  8) |
+            (((*ip64) & 0x0000ff0000000000) >> 24) |
+            (((*ip64) & 0x00ff000000000000) >> 40) |
+            (((*ip64)                     ) >> 56);
+
+    op64 = (uint64_t*)(op+8);
+    ip64 = (const uint64_t*)(ip+8);
+    *op64 = (((*ip64)                     ) << 56) |
+            (((*ip64) & 0x000000000000ff00) << 40) |
+            (((*ip64) & 0x0000000000ff0000) << 24) |
+            (((*ip64) & 0x00000000ff000000) <<  8) |
+            (((*ip64) & 0x000000ff00000000) >>  8) |
+            (((*ip64) & 0x0000ff0000000000) >> 24) |
+            (((*ip64) & 0x00ff000000000000) >> 40) |
+            (((*ip64)                     ) >> 56);
 		op += 16;
 		ip += 16;
 		nn -= 2;
 	}
 	while(nn-- != 0)
 	{
-		op[0] = ip[7];
-		op[1] = ip[6];
-		op[2] = ip[5];
-		op[3] = ip[4];
-		op[4] = ip[3];
-		op[5] = ip[2];
-		op[6] = ip[1];
-		op[7] = ip[0];
+    uint64_t* op64 = (uint64_t*)(op);
+    const uint64_t* ip64 = (uint64_t*)(ip);
+    *op64 = (((*ip64)                     ) << 56) |
+            (((*ip64) & 0x000000000000ff00) << 40) |
+            (((*ip64) & 0x0000000000ff0000) << 24) |
+            (((*ip64) & 0x00000000ff000000) <<  8) |
+            (((*ip64) & 0x000000ff00000000) >>  8) |
+            (((*ip64) & 0x0000ff0000000000) >> 24) |
+            (((*ip64) & 0x00ff000000000000) >> 40) |
+            (((*ip64)                     ) >> 56);
+
 		op += 8;
 		ip += 8;
 	}
 #  else
 	while(nn-- != 0)
 	{
-		op[0] = ip[3];
-		op[1] = ip[2];
-		op[2] = ip[1];
-		op[3] = ip[0];
-		op[4] = ip[7];
-		op[5] = ip[6];
-		op[6] = ip[5];
-		op[7] = ip[4];
+    uint32_t* op32 = (uint32_t*)(op);
+    const uint32_t* ip32 = (const uint32_t*)(ip);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
+
+    op32 = (uint32_t*)(op + 4);
+    ip32 = (const uint32_t*)(ip + 4);
+    *op32 = (((*ip32) & 0x000000ffu) << 24) |
+            (((*ip32) & 0x0000ff00u) <<  8) |
+            (((*ip32) & 0x00ff0000u) >>  8) |
+            (((*ip32) & 0xff000000u) >> 24);
+
 		op += 8;
 		ip += 8;
 	}
