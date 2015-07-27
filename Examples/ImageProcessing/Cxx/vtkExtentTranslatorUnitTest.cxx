@@ -79,7 +79,7 @@ TEST(TestSlabMode)
     for(int i =0;i< blocks;i++)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::X_SLAB_MODE, static_cast<int>(byPoints));
-      CHECK_EQUAL(splitExt[2] == 0 && splitExt[3] == 214 && splitExt[4] == 0 && splitExt[5] == 323,true);
+      CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5],true);
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -96,7 +96,7 @@ TEST(TestSlabMode)
     for(int i =0;i< blocks;i++)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::Y_SLAB_MODE, static_cast<int>(byPoints));
-      CHECK_EQUAL (splitExt[0] == 0 && splitExt[1] == 255 && splitExt[4] == 0 && splitExt[5] == 323,true);
+      CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5],true);
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -112,7 +112,7 @@ TEST(TestSlabMode)
     for(int i =0;i< blocks;i++)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::Z_SLAB_MODE, static_cast<int>(byPoints));
-      CHECK_EQUAL (splitExt[0] == 0 && splitExt[1] == 255 && splitExt[2] == 0 && splitExt[3] == 214,true);
+      CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3],true);
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -147,7 +147,7 @@ TEST(Test2DSplitMode)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::XZ_MODE, static_cast<int>(byPoints));
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
-      CHECK_EQUAL (splitExt[2] == 33 && splitExt[3] == 235,true);
+      CHECK_EQUAL (splitExt[2] == startExt[2] && splitExt[3] == startExt[3],true);
 
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -163,7 +163,7 @@ TEST(Test2DSplitMode)
     for(int i =0;i< blocks;i++)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::XY_MODE,static_cast<int>(byPoints));
-      CHECK_EQUAL (splitExt[4] == -148 && splitExt[5] == 0,true);
+      CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5],true);
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -179,7 +179,7 @@ TEST(Test2DSplitMode)
     for(int i =0;i< blocks;i++)
       {
       translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::YZ_MODE,static_cast<int>(byPoints));
-      CHECK_EQUAL (splitExt[0] ==-145 && splitExt[1] == 234,true);
+      CHECK_EQUAL (splitExt[0] ==startExt[0] && splitExt[1] == startExt[1],true);
       CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
       totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
       }
@@ -227,6 +227,9 @@ TEST(TestEmptyExtent)
 {
   int blockPercentage = 50;
   bool byPoints = true;
+  bool allowDuplicate = true;
+  bool allowEmptyExtent = false;
+  int minimumBlockSize =1;
   vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
   int startExt[6] = {0, 0, 0, 0, 0, 0};
   int splitExt[6];
@@ -241,10 +244,76 @@ TEST(TestEmptyExtent)
   for(int i =0;i< blocks;i++)
     {
     translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::BLOCK_MODE, static_cast<int>(byPoints));
+    CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
     totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
     }
-  CHECK_EQUAL(totalCalculatedSize,expectedTotalSize && "BLOCKFILLING\n");
+  CHECK_EQUAL(totalCalculatedSize,expectedTotalSize);
+}
 
+TEST(TestDefaultMode)
+{
+  bool allowDuplicate = true;
+  bool allowEmptyExtent = false;
+  int minimumBlockSize =1;
+  int blockPercentage = 50;
+  bool byPoints = true;
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
+  int startExt[6] = {0, 300, 0, 301, 0, 302};
+  int splitExt[6];
+  int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::DEFAULT_MODE
+                                      ,blockPercentage
+                                      ,MinimumBlockSize[0]
+                                      ,MinimumBlockSize[1]
+                                      ,MinimumBlockSize[2]);
+
+  // Check if split along Z direction
+  int expectedTotalSize = (startExt[1]-startExt[0]+1) *(startExt[3]-  startExt[2] +1)*(startExt[5]-  startExt[4] +1);
+  int totalCalculatedSize = 0;
+  for(int i =0;i< blocks;i++)
+    {
+    translator->PieceToExtentThreadSafe(i,blocks,0,startExt,splitExt,vtkExtentTranslator::DEFAULT_MODE, static_cast<int>(byPoints));
+    totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
+    CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
+    CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3],true);
+    }
+  CHECK_EQUAL(totalCalculatedSize,expectedTotalSize);
+
+  // Check if split along Y direction
+  int startExt2[6] = {0, 300, 0, 301, 33, 33};
+  blocks = translator->SetUpExtent(startExt2,vtkExtentTranslator::DEFAULT_MODE
+                                      ,blockPercentage
+                                      ,MinimumBlockSize[0]
+                                      ,MinimumBlockSize[1]
+                                      ,MinimumBlockSize[2]);
+
+  expectedTotalSize = (startExt2[1]-startExt2[0]+1) *(startExt2[3]-  startExt2[2] +1)*(startExt2[5]-  startExt2[4] +1);
+  totalCalculatedSize = 0;
+  for(int i =0;i< blocks;i++)
+    {
+    translator->PieceToExtentThreadSafe(i,blocks,0,startExt2,splitExt,vtkExtentTranslator::DEFAULT_MODE, static_cast<int>(byPoints));
+    totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
+    CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
+    CHECK_EQUAL (splitExt[0] == startExt2[0] && splitExt[1] == startExt2[1] && splitExt[4] == startExt2[4] && splitExt[5] == startExt2[5],true);
+    }
+  CHECK_EQUAL(totalCalculatedSize,expectedTotalSize);
+
+  // Check if split along X direction
+  int startExt3[6] = {0, 300, 22, 22, 33, 33};
+  blocks = translator->SetUpExtent(startExt3,vtkExtentTranslator::DEFAULT_MODE
+                                    ,blockPercentage
+                                    ,MinimumBlockSize[0]
+                                    ,MinimumBlockSize[1]
+                                    ,MinimumBlockSize[2]);
+  expectedTotalSize = (startExt3[1]-startExt3[0]+1) *(startExt3[3]-  startExt3[2] +1)*(startExt3[5]-  startExt3[4] +1);
+  totalCalculatedSize = 0;
+  for(int i =0;i< blocks;i++)
+    {
+    translator->PieceToExtentThreadSafe(i,blocks,0,startExt3,splitExt,vtkExtentTranslator::BLOCK_MODE, static_cast<int>(byPoints));
+    totalCalculatedSize +=(splitExt[1]-splitExt[0]+1) *(splitExt[3]-  splitExt[2] +1)*(splitExt[5]-  splitExt[4] +1);
+    CHECK_EQUAL(verifyValidExtent(splitExt,allowDuplicate,allowEmptyExtent,minimumBlockSize),true);
+    CHECK_EQUAL (splitExt[2] == startExt3[2] && splitExt[3] == startExt3[3] && splitExt[4] == startExt3[4] && splitExt[5] == startExt3[5],true);
+    }
+  CHECK_EQUAL(totalCalculatedSize,expectedTotalSize);
 }
 
 TEST_MAIN();

@@ -100,7 +100,7 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
   //SMP default settings
   this->EnableSMP = true; // turn on smp by default
   this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
-  this->SMPSplitPercentage = 50.0;
+  this->SMPSplitPercentage = 75.0;
   this->SplitByPoints = true;
 
   this->MinimumBlockSize[0]=1;

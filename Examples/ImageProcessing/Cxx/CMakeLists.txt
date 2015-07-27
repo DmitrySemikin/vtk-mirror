@@ -57,6 +57,7 @@ if(BUILD_TESTING)
   Test2DSplitMode
   Test3DSplitMode
   TestEmptyExtent
+  TestDefaultMode
   )
   set(TEST_EXE ExtentTranslatorUnitTest)
   set(TEST_SRCS vtkExtentTranslatorUnitTest.cxx)
