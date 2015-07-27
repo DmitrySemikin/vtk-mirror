@@ -20,7 +20,7 @@ find_package(VTK COMPONENTS
   vtkImagingStencil
   vtkImagingStatistics
 )
-include(${VTK_USE_FILE})
+include(${VTK_USE_FILE} UnitTest.h)
 
 add_executable(ImageSlicing MACOSX_BUNDLE ImageSlicing.cxx)
 add_executable(SMPThreadedImageAlgorithm MACOSX_BUNDLE SMPThreadedImageAlgorithm.cxx)
@@ -51,6 +51,23 @@ if(BUILD_TESTING)
     "${CMAKE_CURRENT_BINARY_DIR}/SMPBenchMarkingRunAllTests.sh"
     COPYONLY
    )
+  # Unit Tests for vtkExtentTranslator
+  set(TESTS
+  TestSlabMode
+  Test2DSplitMode
+  Test3DSplitMode
+  TestEmptyExtent
+  )
+  set(TEST_EXE ExtentTranslatorUnitTest)
+  set(TEST_SRCS vtkExtentTranslatorUnitTest.cxx)
+  set(TEST_LIBS ${VTK_LIBRARIES})
 
- endif()
+  # This block creates the tests
+  add_executable(${TEST_EXE} ${TEST_SRCS})
+  target_link_libraries(${TEST_EXE} ${TEST_LIBS})
+  foreach(TEST_NAME ${TESTS})
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_EXE} ${TEST_NAME})
+  endforeach()
+
+  endif()
 endif()

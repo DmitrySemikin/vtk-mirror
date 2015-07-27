@@ -135,7 +135,7 @@ protected:
 
   bool Initialized;
 
-  typedef struct
+  struct BlockSizeProperties
   {
       int SplitMode;
       int MinSize[3];      // The minimum size for each block
@@ -143,8 +143,8 @@ protected:
       int NumPieces[3];    // Number of pieces taking into consideration the split Percentage
       int TotalPieces;     // Total pieces taking into consideration the split Percentage
       int PieceToBlocks[3];// Number of blocks per piece
-  }BlockSizeProperties;
-  BlockSizeProperties BlockProperties;
+  };
+  struct BlockSizeProperties BlockProperties;
 
 private:
   vtkExtentTranslator(const vtkExtentTranslator&);  // Not implemented.
