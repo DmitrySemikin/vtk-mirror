@@ -476,7 +476,9 @@ void vtkDataArray::InterpolateTuple(vtkIdType i,
       vtkBitArray *to = static_cast<vtkBitArray *>(this);
       for (k=0; k<numComp; k++)
         {
-        c = from1->GetValue(id1) + t * (from2->GetValue(id2) - from1->GetValue(id1));
+        double val1 = from1->GetValue(id1 * numComp + k);
+        double val2 = from2->GetValue(id2 * numComp + k);
+        c = val1 + t * (val2 - val1);
         to->InsertValue(loc + k, static_cast<int>(c));
         }
       }
