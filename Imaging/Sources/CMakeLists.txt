@@ -6,6 +6,7 @@ set(Module_SRCS
   vtkImageMandelbrotSource.cxx
   vtkImageNoiseSource.cxx
   vtkImageSinusoidSource.cxx
+  vtkImageTestMandelbrotSource.cxx
   )
 
 vtk_module_library(${vtk-module} ${Module_SRCS})

@@ -52,8 +52,8 @@ TESTS_TO_RUN="1 2 3 4 5"
 RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S')"
 
 #MAXIUM NUMBER OF PROCESSORS
-MIN_PROCESSORS=1
-MAX_PROCESSORS=24
+MIN_PROCESSORS=4
+MAX_PROCESSORS=4
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 

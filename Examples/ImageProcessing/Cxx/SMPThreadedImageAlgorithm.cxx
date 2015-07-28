@@ -17,30 +17,32 @@
 #include <vtkROIStencilSource.h>
 //Test 4
 
-#include "vtkImageBSplineInterpolator.h"
-#include "vtkImageBSplineCoefficients.h"
-#include "vtkImageReslice.h"
-#include "vtkBSplineTransform.h"
-#include "vtkTransformToGrid.h"
-#include "vtkThinPlateSplineTransform.h"
-#include "vtkImageGridSource.h"
-#include "vtkImageBlend.h"
-#include "vtkImageMapToColors.h"
-#include "vtkLookupTable.h"
-#include "vtkPoints.h"
+#include <vtkImageBSplineInterpolator.h>
+#include <vtkImageBSplineCoefficients.h>
+#include <vtkImageReslice.h>
+#include <vtkBSplineTransform.h>
+#include <vtkTransformToGrid.h>
+#include <vtkThinPlateSplineTransform.h>
+#include <vtkImageGridSource.h>
+#include <vtkImageBlend.h>
+#include <vtkImageMapToColors.h>
+#include <vtkLookupTable.h>
+#include <vtkPoints.h>
 //Test 5
-#include "vtkImageHistogramStatistics.h"
+#include <vtkImageHistogramStatistics.h>
 
 // Other
 #include <vtkTransform.h>
 #include <vtkImageConvolve.h>
 #include <vtkImageMandelbrotSource.h>
 #include <vtkExtentTranslator.h>
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkObjectFactory.h"
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkStreamingDemandDrivenPipeline.h>
+#include <vtkObjectFactory.h>
 #include <iostream>
+
+#include "vtkImageTestMandelbrotSource.h"
 
 #define TRASH_CACHE_SIZE 500000
 #define MIN_BLOCK_SIZE_X 1
@@ -70,57 +72,6 @@ void TrashCache()
     }
   delete[] trash;
 }
-
-
-class VTKIMAGINGSOURCES_EXPORT TestMandelbrotSource: public vtkImageMandelbrotSource
-{
-protected:
-  TestMandelbrotSource()
-  {
-
-  }
-  ~TestMandelbrotSource()
-  {
-
-  }
-public:
-  void PrintSelf(ostream& os, vtkIndent indent)
-  {
-
-  }
-  static TestMandelbrotSource *New();
-  vtkTypeMacro(TestMandelbrotSource,vtkImageMandelbrotSource);
-
-  int RequestData(vtkInformation *request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector)
-  {
-    // get the output
-    vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    vtkImageData *data = vtkImageData::SafeDownCast(
-      outInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-    // We need to allocate our own scalars since we are overriding
-    // the superclasses "Execute()" method.
-    int *ext = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT());
-    data->SetExtent(ext);
-    data->AllocateScalars(outInfo);
-
-    float *ptr = static_cast<float *>(data->GetScalarPointerForExtent(ext));
-
-    int pieces = (ext[5]-ext[4]+1)*(ext[3]-ext[2]+1)*(ext[1]-ext[0]+1);
-
-    for(int i=0;i<pieces;i++)
-      {
-      *ptr=3.0;
-      ptr++;
-      }
-
-    return 1;
-  }
-};
-
-vtkStandardNewMacro(TestMandelbrotSource);
 
 int WriteResultToCSV(float* executionTime,TestParms *parm)
 {
@@ -228,8 +179,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
-      vtkSmartPointer<TestMandelbrotSource> source =
-      vtkSmartPointer<TestMandelbrotSource>::New();
+      vtkImageTestMandelbrotSource * source =
+        vtkImageTestMandelbrotSource::New();
       source->SetWholeExtent(workExtent);
       source->Update();
       // flush out cache
@@ -238,7 +189,7 @@ int main(int argc, char *argv[])
       int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
 
       vtkSmartPointer<vtkImageCast> castFilter =
-      vtkSmartPointer<vtkImageCast>::New();
+        vtkSmartPointer<vtkImageCast>::New();
       castFilter->SetInputConnection(source->GetOutputPort());
       castFilter->SetEnableSMP(parms.enableSMP);
       castFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
@@ -279,8 +230,8 @@ int main(int argc, char *argv[])
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
       // Create an image
-      vtkSmartPointer<TestMandelbrotSource> source =
-        vtkSmartPointer<TestMandelbrotSource>::New();
+      vtkSmartPointer<vtkImageTestMandelbrotSource> source =
+        vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
       source->SetWholeExtent(workExtent);
@@ -326,8 +277,8 @@ int main(int argc, char *argv[])
       for(int i=0;i<parms.numberOfIterationsToRun;i++)
         {
         // Create an image
-        vtkSmartPointer<TestMandelbrotSource> source =
-        vtkSmartPointer<TestMandelbrotSource>::New();
+        vtkSmartPointer<vtkImageTestMandelbrotSource> source =
+          vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
         int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
         source->SetWholeExtent(workExtent);
@@ -352,7 +303,7 @@ int main(int argc, char *argv[])
 
         // Reslice does all of the work
         vtkSmartPointer<vtkImageReslice> reslice =
-        vtkSmartPointer<vtkImageReslice>::New();
+          vtkSmartPointer<vtkImageReslice>::New();
         reslice->SetInputConnection(source->GetOutputPort());
         reslice->SetResliceTransform(transform);
         reslice->SetInterpolationModeToCubic();
@@ -549,8 +500,8 @@ int main(int argc, char *argv[])
     float * executionTimes = new float[parms.numberOfIterationsToRun];
     for(int i=0;i<parms.numberOfIterationsToRun;i++)
       {
-      vtkSmartPointer<TestMandelbrotSource> source =
-        vtkSmartPointer<TestMandelbrotSource>::New();
+      vtkSmartPointer<vtkImageTestMandelbrotSource> source =
+        vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
       int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
       source->SetWholeExtent(workExtent);

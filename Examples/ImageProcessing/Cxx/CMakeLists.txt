@@ -20,7 +20,7 @@ find_package(VTK COMPONENTS
   vtkImagingStencil
   vtkImagingStatistics
 )
-include(${VTK_USE_FILE} UnitTest.h)
+include(${VTK_USE_FILE})
 
 add_executable(ImageSlicing MACOSX_BUNDLE ImageSlicing.cxx)
 add_executable(SMPThreadedImageAlgorithm MACOSX_BUNDLE SMPThreadedImageAlgorithm.cxx)
@@ -52,13 +52,7 @@ if(BUILD_TESTING)
     COPYONLY
    )
   # Unit Tests for vtkExtentTranslator
-  set(TESTS
-  TestSlabMode
-  Test2DSplitMode
-  Test3DSplitMode
-  TestEmptyExtent
-  TestDefaultMode
-  )
+  set(TESTS  TestSlabMode  Test2DSplitMode  Test3DSplitMode  TestEmptyExtent  TestDefaultMode)
   set(TEST_EXE ExtentTranslatorUnitTest)
   set(TEST_SRCS vtkExtentTranslatorUnitTest.cxx)
   set(TEST_LIBS ${VTK_LIBRARIES})
