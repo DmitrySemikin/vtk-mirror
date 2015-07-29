@@ -7,7 +7,6 @@
 
 vtkStandardNewMacro(vtkImageTestMandelbrotSource);
 
-
 int vtkImageTestMandelbrotSource::RequestData(vtkInformation *request,
                         vtkInformationVector** inputVector,
                         vtkInformationVector* outputVector)
@@ -22,14 +21,15 @@ int vtkImageTestMandelbrotSource::RequestData(vtkInformation *request,
   int *ext = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT());
   data->SetExtent(ext);
   data->AllocateScalars(outInfo);
-
+  float seed = 3.3;
   float *ptr = static_cast<float *>(data->GetScalarPointerForExtent(ext));
 
   int pieces = (ext[5]-ext[4]+1)*(ext[3]-ext[2]+1)*(ext[1]-ext[0]+1);
 
   for(int i=0;i<pieces;i++)
     {
-    *ptr=3.0;
+    seed *=1.05;
+    *ptr=seed;
     ptr++;
     }
 

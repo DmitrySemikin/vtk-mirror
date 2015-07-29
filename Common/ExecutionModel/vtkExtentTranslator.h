@@ -64,6 +64,10 @@ public:
                                       int *resultExtent, int splitMode,
                                       int byPoints);
 
+  // Description:
+  // This must be called to before the call to splitExtent.
+  // This function calculates the appropiate number of blocks to split by and
+  // the correct indexing scheme.
   virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
 
   // Description:
@@ -139,10 +143,10 @@ protected:
   {
       int SplitMode;
       int MinSize[3];      // The minimum size for each block
-      int NumMinBlocks[3]; // Number of minimum size blocks
-      int NumPieces[3];    // Number of pieces taking into consideration the split Percentage
-      int TotalPieces;     // Total pieces taking into consideration the split Percentage
-      int PieceToBlocks[3];// Number of blocks per piece
+      int NumMicroBlocks[3]; // Number of minimum size blocks
+      int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
+      int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
+      int MacroToMicro[3];// Number of micro blocks per macro block
   };
   struct BlockSizeProperties BlockProperties;
 

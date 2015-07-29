@@ -49,14 +49,14 @@ vtkExtentTranslator::vtkExtentTranslator()
   this->WholeExtent[1] = this->WholeExtent[3] = this->WholeExtent[5] = -1;
 
   // Set a default split mode to be slabs
-  this->SplitMode   = vtkExtentTranslator::BLOCK_MODE;
+  this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
 
   this->SplitLen = 0;
   this->SplitPath = NULL;
 
-  this->BlockProperties.MinSize[0]=1;
-  this->BlockProperties.MinSize[1]=1;
-  this->BlockProperties.MinSize[2]=1;
+  this->BlockProperties.MinSize[0] = 1;
+  this->BlockProperties.MinSize[1] = 1;
+  this->BlockProperties.MinSize[2] = 1;
 
   this->Initialized = false;
 }
@@ -108,11 +108,11 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
   int ret;
   if (byPoints)
     {
-    ret = this->SplitExtent(piece, numPieces, resultExtent, splitMode,true);
+    ret = this->SplitExtent(piece, numPieces, resultExtent, splitMode, true);
     }
   else
     {
-    ret = this->SplitExtent(piece, numPieces, resultExtent, splitMode,false);
+    ret = this->SplitExtent(piece, numPieces, resultExtent, splitMode, false);
     }
 
   if (ret == 0)
@@ -160,7 +160,8 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
   return 1;
 }
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SetUpExtent(int * ext,int splitMode, float splitPercentage ,int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ)
+int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercentage
+                                    ,int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
 {
   int size[3] = {ext[1] - ext[0] + 1
                 ,ext[3] - ext[2] + 1
@@ -168,53 +169,53 @@ int vtkExtentTranslator::SetUpExtent(int * ext,int splitMode, float splitPercent
 
   BlockSizeProperties * properties = &this->BlockProperties;
 
-  properties->MinSize[0] =minBlockSizeX;
-  properties->MinSize[1] =minBlockSizeY;
-  properties->MinSize[2] =minBlockSizeZ;
+  properties->MinSize[0] = minBlockSizeX;
+  properties->MinSize[1] = minBlockSizeY;
+  properties->MinSize[2] = minBlockSizeZ;
   switch (splitMode)
     {
-    case 0: //X_SLAB_MODE
+    case X_SLAB_MODE:
       {
       properties->MinSize[1] = size[1];
       properties->MinSize[2] = size[2];
       break;
       }
-    case 1: //Y_SLAB_MODE
+    case Y_SLAB_MODE:
       {
       properties->MinSize[0] = size[0];
       properties->MinSize[2] = size[2];
       break;
       }
-    case 2: //Z_SLAB_MODE
+    case Z_SLAB_MODE:
       {
       properties->MinSize[0] = size[0];
       properties->MinSize[1] = size[1];
       break;
       }
-    case 4://XZ_MODE:
+    case XZ_MODE:
       {
       properties->MinSize[1] = size[1];
       break;
       }
-    case 5://XY_MODE:
+    case XY_MODE:
       {
       properties->MinSize[2] = size[2];
       break;
       }
-    case 6://YZ_MODE:
+    case YZ_MODE:
       {
       properties->MinSize[0] = size[0];
       break;
       }
-    case 7: //DEFAULT-MODE
+    case DEFAULT_MODE:
       {
-      if(size[2]!=1) //Z_SLAB_MODE
+      if (size[2] != 1) //Z_SLAB_MODE
         {
         properties->MinSize[0] = size[0];
         properties->MinSize[1] = size[1];
         break;
         }
-      else if(size[1]!=1) //Y_SLAB_MODE
+      else if (size[1] != 1) //Y_SLAB_MODE
         {
         properties->MinSize[0] = size[0];
         properties->MinSize[2] = size[2];
@@ -233,16 +234,16 @@ int vtkExtentTranslator::SetUpExtent(int * ext,int splitMode, float splitPercent
                  ,properties->MinSize[1]
                  ,properties->MinSize[2]};
 
-  int startExt[6]= {ext[0],ext[1],ext[2],ext[3],ext[4],ext[5]};
+  int startExt[6]= {ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]};
 
   int blocks[3];
   float dimensionsToSplit = 0;
-  for(int i=0;i<3;i++)
+  for (int i=0; i < 3; i++)
     {
-    int block = size[i]/minSize[i];
-    if(block ==0)
+    int block = size[i] / minSize[i];
+    if (block == 0)
       {
-      block =1;
+      block = 1;
       }
     else
       {
@@ -250,36 +251,36 @@ int vtkExtentTranslator::SetUpExtent(int * ext,int splitMode, float splitPercent
       }
     blocks[i] = block;
     }
-  if(dimensionsToSplit == 0) // there is only 1 piece
+  if (dimensionsToSplit == 0) // there is only 1 piece
     {
     splitPercentage = 100.0;
     }
   else
     {
-    splitPercentage = pow(splitPercentage,1.0/dimensionsToSplit);
+    splitPercentage = pow(splitPercentage,1.0 / dimensionsToSplit);
     }
 
-  for(int i =0;i<3;i++)
+  for (int i =0; i < 3; i++)
     {
-    properties->NumMinBlocks[i] =blocks[i];
-    int Pieces = ceil(splitPercentage/100.0 * static_cast <float>(blocks[i]));
-    properties->NumPieces[i] = Pieces;
-    properties->PieceToBlocks[i] = blocks[i]/Pieces;
+    properties->NumMicroBlocks[i] = blocks[i];
+    int Pieces = ceil(splitPercentage / 100.0 * static_cast <float>(blocks[i]));
+    properties->NumMacroBlocks[i] = Pieces;
+    properties->MacroToMicro[i] = blocks[i] / Pieces;
     }
 
-  properties->TotalPieces= properties->NumPieces[0]*properties->NumPieces[1]*properties->NumPieces[2];
+  properties->TotalMacroBlocks = properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
 
   this->Initialized = true;
 
-  this->NumberOfPieces =properties->TotalPieces;
-  return properties->TotalPieces;
+  this->NumberOfPieces = properties->TotalMacroBlocks;
+  return properties->TotalMacroBlocks;
 }
 
 //----------------------------------------------------------------------------
 int vtkExtentTranslator::SplitExtent(int piece, int numPieces, int *ext,
                                      int splitMode, bool byPoints)
 {
-  if(!Initialized)
+  if (!Initialized)
     {
     vtkErrorMacro("SplitExtent has not being initialized.");
     return -1;
@@ -298,67 +299,67 @@ int vtkExtentTranslator::SplitExtent(int piece, int numPieces, int *ext,
   int strideAxis;
   int blockAxis;
 
-  if((sX != 1 && sY!=1 && sZ !=1)
-    ||(sX != 1 && sY!=1 && sZ ==1))
+  if ((sX != 1 && sY != 1 && sZ != 1)
+    ||(sX != 1 && sY != 1 && sZ == 1))
     {
-    planeAxis=2;
-    strideAxis=1;
-    blockAxis=0;
+    planeAxis = 2;
+    strideAxis = 1;
+    blockAxis = 0;
     }
-  else if(sX != 1 && sY==1 && sZ !=1)
+  else if (sX != 1 && sY == 1 && sZ != 1)
     {
-    planeAxis=1;
-    strideAxis=2;
-    blockAxis=0;
+    planeAxis = 1;
+    strideAxis = 2;
+    blockAxis = 0;
     }
-  else if(sX != 1 && sY==1 && sZ !=1)
+  else if (sX != 1 && sY == 1 && sZ != 1)
     {
-    planeAxis=1;
-    strideAxis=2;
-    blockAxis=0;
+    planeAxis = 1;
+    strideAxis = 2;
+    blockAxis = 0;
     }
-  else if(sX == 1 && sY!=1 && sZ !=1)
+  else if (sX == 1 && sY != 1 && sZ != 1)
     {
-    planeAxis=0;
-    strideAxis=2;
-    blockAxis=1;
+    planeAxis = 0;
+    strideAxis = 2;
+    blockAxis = 1;
     }
   else // when there is only 1 piece
     {
-    planeAxis=2;
-    strideAxis=1;
-    blockAxis=0;
+    planeAxis = 2;
+    strideAxis = 1;
+    blockAxis = 0;
     }
 
   // Find Appropiate split
-  int size[3]={this->BlockProperties.NumPieces[0]
-              ,this->BlockProperties.NumPieces[1]
-              ,this->BlockProperties.NumPieces[2]};
+  int size[3] = {this->BlockProperties.NumMacroBlocks[0]
+                ,this->BlockProperties.NumMacroBlocks[1]
+                ,this->BlockProperties.NumMacroBlocks[2]};
 
-  int startExt[6]= {ext[0],ext[1],ext[2],ext[3],ext[4],ext[5]};
+  int startExt[6] = {ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]};
   int targetPiece = piece;
 
   //Resize MinBlockSize based on choosen blocks
 
   //Find Plane Axis Index
-  int numberOfBlocksPerPlane = size[strideAxis]*size[blockAxis];
+  int numberOfBlocksPerPlane = size[strideAxis] * size[blockAxis];
   int planeOffset = targetPiece / numberOfBlocksPerPlane;
 
-  int pieceToBlockModifer = this->BlockProperties.PieceToBlocks[planeAxis];
+  int macroToMicroModifer = this->BlockProperties.MacroToMicro[planeAxis];
 
-  ext[planeAxis*2] = startExt[planeAxis*2] + planeOffset * minSize[planeAxis]*pieceToBlockModifer;
-  if(byPoints)
+  ext[planeAxis * 2] = startExt[planeAxis * 2] + planeOffset * minSize[planeAxis] * macroToMicroModifer;
+  if (byPoints)
     {
-    ext[planeAxis*2+1] = ext[planeAxis*2] + minSize[planeAxis]*pieceToBlockModifer - 1;
+    ext[planeAxis * 2 + 1] = ext[planeAxis * 2] + minSize[planeAxis] * macroToMicroModifer - 1;
     }
   else
     {
-    ext[planeAxis*2+1] = ext[planeAxis*2] + minSize[planeAxis]*pieceToBlockModifer;  // shared points between pieces
+    ext[planeAxis * 2 + 1] = ext[planeAxis * 2] + minSize[planeAxis] * macroToMicroModifer;  // shared points between pieces
     }
 
-  if (planeOffset == this->BlockProperties.NumPieces[planeAxis]-1)
+  if (planeOffset == this->BlockProperties.NumMacroBlocks[planeAxis] - 1)
     {
-    ext[planeAxis*2+1] = startExt[planeAxis*2+1];
+    ext[planeAxis * 2 + 1] = startExt[planeAxis * 2 + 1];
     }
 
   targetPiece = targetPiece - numberOfBlocksPerPlane*planeOffset;
@@ -367,19 +368,19 @@ int vtkExtentTranslator::SplitExtent(int piece, int numPieces, int *ext,
   int numberOfBlocksPerStride = size[blockAxis];
   int strideOffset = targetPiece / numberOfBlocksPerStride;
 
-  pieceToBlockModifer = this->BlockProperties.PieceToBlocks[strideAxis];
+  macroToMicroModifer = this->BlockProperties.MacroToMicro[strideAxis];
 
-  ext[strideAxis*2] = startExt[strideAxis*2]+ strideOffset * minSize[strideAxis]*pieceToBlockModifer;
-  if(byPoints)
+  ext[strideAxis * 2] = startExt[strideAxis * 2]+ strideOffset * minSize[strideAxis] * macroToMicroModifer;
+  if (byPoints)
     {
-    ext[strideAxis*2+1] = ext[strideAxis*2] + minSize[strideAxis]*pieceToBlockModifer - 1;
+    ext[strideAxis * 2 + 1] = ext[strideAxis * 2] + minSize[strideAxis] * macroToMicroModifer - 1;
     }
   else
     {
-    ext[strideAxis*2+1] = ext[strideAxis*2] + minSize[strideAxis]*pieceToBlockModifer; // shared points between pieces
+    ext[strideAxis*2+1] = ext[strideAxis*2] + minSize[strideAxis] * macroToMicroModifer; // shared points between pieces
     }
 
-  if (strideOffset == this->BlockProperties.NumPieces[strideAxis]-1)
+  if (strideOffset == this->BlockProperties.NumMacroBlocks[strideAxis] - 1)
   {
     ext[strideAxis*2+1] = startExt[strideAxis*2+1];
   }
@@ -387,19 +388,19 @@ int vtkExtentTranslator::SplitExtent(int piece, int numPieces, int *ext,
   targetPiece = targetPiece - numberOfBlocksPerStride*strideOffset;
 
   // Find BlockOffset
-  pieceToBlockModifer = this->BlockProperties.PieceToBlocks[blockAxis];
-  ext[blockAxis*2] = startExt[blockAxis*2]+ targetPiece * minSize[blockAxis]*pieceToBlockModifer;
+  macroToMicroModifer = this->BlockProperties.MacroToMicro[blockAxis];
+  ext[blockAxis*2] = startExt[blockAxis*2] + targetPiece * minSize[blockAxis] * macroToMicroModifer;
 
-  if(byPoints)
+  if (byPoints)
     {
-    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis]*pieceToBlockModifer - 1;
+    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis] * macroToMicroModifer - 1;
     }
   else
     {
-    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis]*pieceToBlockModifer; // shared points between pieces
+    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis] * macroToMicroModifer; // shared points between pieces
     }
 
-  if (targetPiece == this->BlockProperties.NumPieces[blockAxis]-1)
+  if (targetPiece == this->BlockProperties.NumMacroBlocks[blockAxis] - 1)
     {
     ext[blockAxis*2+1] = startExt[blockAxis*2+1];
     }

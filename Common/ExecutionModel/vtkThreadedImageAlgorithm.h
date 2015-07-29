@@ -83,14 +83,18 @@ public:
   vtkGetMacro(SplitMode, int);
   vtkSetMacro(SplitMode, int);
 
+  // Description:
+  // Set the granularity of SMP split sizes.
   vtkSetClampMacro( SMPSplitPercentage, float, 0.001, 100.0 );
   vtkGetMacro(SMPSplitPercentage,float);
 
-  void SetMinimumBlockSize(int * minBlockSizes);
+  // Description:
+  // Set the smallest block size that SMP will split.
+  void SetSMPMinimumBlockSize(int * minBlockSizes);
 
-  int * GetMinimumBlockSize();
-
-
+  // Description:
+  // Get the smallest block size that SMP will split.
+  int * GetSMPMinimumBlockSize();
 
 protected:
   vtkThreadedImageAlgorithm();

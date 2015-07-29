@@ -82,13 +82,12 @@ public:
 
   void operator()(vtkIdType begin, vtkIdType end)
   {
-    for (int i =begin;i<end;i++)
+    for (int i =begin; i < end; i++)
       {
       this->Execute(i);
       }
   }
 };
-
 
 //----------------------------------------------------------------------------
 vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
@@ -98,33 +97,31 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
   this->NumberOfThreads = this->Threader->GetNumberOfThreads();
 
   //SMP default settings
-  this->EnableSMP = true; // turn on smp by default
+  this->EnableSMP = true;
   this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
   this->SMPSplitPercentage = 75.0;
   this->SplitByPoints = true;
-
-  this->MinimumBlockSize[0]=1;
-  this->MinimumBlockSize[1]=1;
-  this->MinimumBlockSize[2]=1;
+  this->MinimumBlockSize[0] = 1;
+  this->MinimumBlockSize[1] = 1;
+  this->MinimumBlockSize[2] = 1;
 }
 
 //----------------------------------------------------------------------------
-void vtkThreadedImageAlgorithm::SetMinimumBlockSize(int * minBlockSizes)
+void vtkThreadedImageAlgorithm::SetSMPMinimumBlockSize(int * minBlockSizes)
 {
   if(minBlockSizes[0]>0
     &&minBlockSizes[1]>0
     &&minBlockSizes[2]>0)
     {
-    memcpy(this->MinimumBlockSize,minBlockSizes,3*sizeof(int));
+    memcpy(this->MinimumBlockSize, minBlockSizes, 3 * sizeof(int));
     }
 }
 
 //----------------------------------------------------------------------------
-int * vtkThreadedImageAlgorithm::GetMinimumBlockSize()
+int * vtkThreadedImageAlgorithm::GetSMPMinimumBlockSize()
 {
   return this->MinimumBlockSize;
 }
-
 
 //----------------------------------------------------------------------------
 vtkThreadedImageAlgorithm::~vtkThreadedImageAlgorithm()
@@ -417,7 +414,7 @@ int vtkThreadedImageAlgorithm::RequestData(
       updateExtent[3] < updateExtent[2] ||
       updateExtent[5] < updateExtent[4])
       {
-      return VTK_THREAD_RETURN_VALUE;
+      return -1;
       }
 
     int blocks = this->Translator->SetUpExtent(updateExtent,this->SplitMode

@@ -568,7 +568,7 @@ void vtkImageHistogramGenerateImage(
 }
 } // end anonymous namespace
 
-typedef struct ThreadLocalSum
+struct ThreadLocalSum
 {
   vtkIdType * ThreadLocalHistogram;
   int * ThreadLocalRange;
@@ -581,12 +581,12 @@ public:
   int Total;
   vtkIdTypeArray *Histogram;
 
-  vtkSMPThreadLocal<ThreadLocalSum> ThreadLocalHistogram;
-  vtkSMPThreadLocal<int >ThreadLocalTotal;
+  vtkSMPThreadLocal<struct ThreadLocalSum> ThreadLocalHistogram;
+  vtkSMPThreadLocal<int> ThreadLocalTotal;
 
   HistogramSumFunctor(vtkMultiThreader::ThreadInfo *threadInfo, int * ext)
   {
-    memcpy(Ext,ext,sizeof (int)*6);
+    memcpy(Ext, ext, sizeof(int) * 6);
     this->ThreadInfo = threadInfo;
     Total = 0;
   }
@@ -597,7 +597,7 @@ public:
     vtkImageHistogramThreadStruct *ts =
       static_cast<vtkImageHistogramThreadStruct *>(ti->UserData);
 
-    int splitExt[6] = {0,-1,0,-1,0,-1};
+    int splitExt[6] = {0, -1, 0, -1, 0, -1};
 
     int total = ts->Algorithm->SplitExtent(splitExt, this->Ext, thread, ti->NumberOfThreads);
 
@@ -665,10 +665,10 @@ public:
       for (int i = min; i <= max; i++)
         {
         int num = (*itr2).ThreadLocalHistogram[i];
-        histogram[i] +=num;
-        this->Total +=num;
+        histogram[i] += num;
+        this->Total += num;
         }
-      delete[] (*itr2).ThreadLocalHistogram;
+      delete[](*itr2).ThreadLocalHistogram;
       delete[](*itr2).ThreadLocalRange;
       ++itr2;
       }

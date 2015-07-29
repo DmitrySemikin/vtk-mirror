@@ -58,34 +58,34 @@ struct TestParms
   int numberOfThreadsToRun;
   float smpSplitPercentage;
   int workSize;
-  char * additionalData;
-  char * outputCSVFile;
+  const char * additionalData;
+  const char * outputCSVFile;
 };
 
 void TrashCache()
 {
   double start = 0.32;
   double * trash = new double[TRASH_CACHE_SIZE];
-  for(int i=0;i<TRASH_CACHE_SIZE;i++)
+  for (int i=0; i<TRASH_CACHE_SIZE; i++)
     {
     trash[i] = start*1.13;
     }
   delete[] trash;
 }
 
-int WriteResultToCSV(float* executionTime,TestParms *parm)
+int WriteResultToCSV(float* executionTime, TestParms *parm)
 {
   // calculate average
 
   float total =0.0;
-  for(int i =2;i<parm->numberOfIterationsToRun;i++)
+  for (int i =2; i<parm->numberOfIterationsToRun; i++)
     {
     total +=executionTime[i];
     }
   float average = total/static_cast<float>(parm->numberOfIterationsToRun-2);
 
   float std =0.0;
-  for(int i =2;i<parm->numberOfIterationsToRun;i++)
+  for (int i =2; i<parm->numberOfIterationsToRun; i++)
     {
     std+=pow((executionTime[i]-average),2);
     }
@@ -117,7 +117,7 @@ int WriteResultToCSV(float* executionTime,TestParms *parm)
 
 int main(int argc, char *argv[])
 {
-  if(argc <9)
+  if (argc <9)
     {
     printf ("Not all parms have being passed in\n"
       "parm#1: NumberOfIterationsToRun.\n"
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
   parms.testCase = atoi(argv[2]);
 
 
-  if(strcmp(argv[3],"true")==0)
+  if (strcmp(argv[3],"true")==0)
     {
     parms.enableSMP =true;
     }
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
     {
     parms.enableSMP =false;
     }
-  if(strcmp(argv[4],"true")==0)
+  if (strcmp(argv[4],"true")==0)
     {
     parms.SMPSplitMode = vtkExtentTranslator::BLOCK_MODE;
     }
@@ -176,9 +176,9 @@ int main(int argc, char *argv[])
   case 1:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+    for (int i=0; i<parms.numberOfIterationsToRun; i++)
       {
-      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      int workExtent[6] = {0, parms.workSize-1, 0, parms.workSize-1, 0, parms.workSize*2-1};
       vtkImageTestMandelbrotSource * source =
         vtkImageTestMandelbrotSource::New();
       source->SetWholeExtent(workExtent);
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
       castFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
       castFilter->SetSplitMode(parms.SMPSplitMode);
       castFilter->SetOutputScalarTypeToUnsignedChar();
-      castFilter->SetMinimumBlockSize(minBlockSize);
+      castFilter->SetSMPMinimumBlockSize(minBlockSize);
 
       tl->StartTimer();
       castFilter->Update();
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     {
 
     // read in kernel size
-    if(argc <10)
+    if (argc <10)
       {
       cerr << "Additional Data not inputed into argument 8\n";
       break;
@@ -227,13 +227,13 @@ int main(int argc, char *argv[])
     parms.additionalData =argv[9];
 
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+    for(int i=0; i<parms.numberOfIterationsToRun; i++)
       {
       // Create an image
       vtkSmartPointer<vtkImageTestMandelbrotSource> source =
         vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      int workExtent[6] = {0, parms.workSize-1, 0, parms.workSize-1,0, parms.workSize*2-1};
       source->SetWholeExtent(workExtent);
       source->Update();
 
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
       medianFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
       medianFilter->SetSplitMode(parms.SMPSplitMode);
 
-      medianFilter->SetMinimumBlockSize(minBlockSize);
+      medianFilter->SetSMPMinimumBlockSize(minBlockSize);
 
       tl->StartTimer();
       medianFilter->Update();
@@ -274,13 +274,13 @@ int main(int argc, char *argv[])
 
       float * executionTimes = new float[parms.numberOfIterationsToRun];
 
-      for(int i=0;i<parms.numberOfIterationsToRun;i++)
+      for (int i=0; i<parms.numberOfIterationsToRun; i++)
         {
         // Create an image
         vtkSmartPointer<vtkImageTestMandelbrotSource> source =
           vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize*2-1};
         source->SetWholeExtent(workExtent);
         source->Update();
         // Rotate about the center of the image
@@ -312,12 +312,12 @@ int main(int argc, char *argv[])
         reslice->SetSMPSplitPercentage(parms.smpSplitPercentage);
         reslice->SetSplitMode(2);
 
-        int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
+        int minBlockSize[3]= {MIN_BLOCK_SIZE_X, MIN_BLOCK_SIZE_Y, MIN_BLOCK_SIZE_Z};
 
-        reslice->SetMinimumBlockSize(minBlockSize);
+        reslice->SetSMPMinimumBlockSize(minBlockSize);
 
         // read in size for stencil window
-        if(argc ==10)
+        if (argc ==10)
           {
 
           parms.additionalData = argv[9];
@@ -348,7 +348,7 @@ int main(int argc, char *argv[])
   case 4:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+    for (int i=0; i<parms.numberOfIterationsToRun; i++)
       {
       // flush out cache
       TrashCache();
@@ -483,7 +483,6 @@ int main(int argc, char *argv[])
       reslice->SetOutputOrigin(-32.0, -32.0, 0.0);
       reslice->SetOutputExtent(0, 1023, 0, 1023, 0, 0);
 
-
       tl->StartTimer();
       reslice->Update();
       tl->StopTimer();
@@ -498,12 +497,12 @@ int main(int argc, char *argv[])
   case 5:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for(int i=0;i<parms.numberOfIterationsToRun;i++)
+    for (int i=0; i<parms.numberOfIterationsToRun; i++)
       {
       vtkSmartPointer<vtkImageTestMandelbrotSource> source =
         vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-      int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize-1};
+      int workExtent[6] = {0, parms.workSize-1,0, parms.workSize-1, 0, parms.workSize*2-1};
       source->SetWholeExtent(workExtent);
       source->Update();
 
@@ -525,7 +524,7 @@ int main(int argc, char *argv[])
       statistics->SetSplitMode(parms.SMPSplitMode);
 
       // read in size for stencil window
-      if(argc ==10)
+      if (argc ==10)
         {
         double center[3];
         center[0] = (workExtent[1] + workExtent[0]) / 2.0;
