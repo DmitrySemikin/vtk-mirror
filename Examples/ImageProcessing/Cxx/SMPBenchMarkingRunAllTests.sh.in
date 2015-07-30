@@ -7,8 +7,7 @@
 
 
 #AVERAGE NUMBER OF ITERATIONS
-#NUMBER OF ITERATIONS should be greater than at least 2.  The first two are thrown out.
-NUMBER_OF_TIMES_TEST_RUN=7
+NUMBER_OF_TIMES_TEST_RUN=3
 
 
 #Enable/Disable Oprofile
@@ -21,7 +20,7 @@ O_PERF_EVENTS="--event=CPU_CLK_UNHALTED:100000,l2_rqsts:200000:0x80"
 #NUMBER OF WORKSIZE SAMPLES TAKEN
 NUMBER_OF_SAMPLES=9
 
-WORK_SIZES_TEST1="1024"
+WORK_SIZES_TEST1="512"
 BLOCK_RANGE_START1=1
 BLOCK_RANGE_END1=100
 
@@ -52,8 +51,7 @@ TESTS_TO_RUN="1 2 3 4 5"
 RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S')"
 
 #MAXIUM NUMBER OF PROCESSORS
-MIN_PROCESSORS=1
-MAX_PROCESSORS=24
+processorCountSizes="1 2 4 8 12 24"
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -93,7 +91,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 1 ]]; then
 		echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false "999" "-1" $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
 
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		for  processorCount in `echo $processorCountSizes`
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 
@@ -133,7 +131,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 2 ]]; then
 		echo "---,SMP-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false "999" "-1" $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		for  processorCount in `echo $processorCountSizes`
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 
@@ -178,7 +176,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 3 ]]; then
 		echo "---,SMP-OFF Stencil-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false "999" "-1" $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		for  processorCount in `echo $processorCountSizes`
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 
@@ -238,7 +236,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
 
 
 		echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		for  processorCount in `echo $processorCountSizes`
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 
@@ -281,7 +279,7 @@ if [[ ${TESTS_TO_RUN[*]} =~ 5 ]]; then
 		echo "---,SMP-OFF Stencil-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false "999" "-1" $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 
-		for (( processorCount = $MIN_PROCESSORS; processorCount <= $MAX_PROCESSORS; processorCount++ ))
+		for  processorCount in `echo $processorCountSizes`
 		do
 			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 

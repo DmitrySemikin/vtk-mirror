@@ -78,18 +78,18 @@ int WriteResultToCSV(float* executionTime, TestParms *parm)
   // calculate average
 
   float total =0.0;
-  for (int i =2; i<parm->numberOfIterationsToRun; i++)
+  for (int i =0; i<parm->numberOfIterationsToRun; i++)
     {
     total +=executionTime[i];
     }
-  float average = total/static_cast<float>(parm->numberOfIterationsToRun-2);
+  float average = total/static_cast<float>(parm->numberOfIterationsToRun);
 
   float std =0.0;
-  for (int i =2; i<parm->numberOfIterationsToRun; i++)
+  for (int i =0; i<parm->numberOfIterationsToRun; i++)
     {
     std+=pow((executionTime[i]-average),2);
     }
-  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun-2));
+  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun));
 
   char writeOutput[100];
   sprintf(writeOutput, "%d,%d,%d,%d,%d,%f,%d,%f,%f,%s\n"
