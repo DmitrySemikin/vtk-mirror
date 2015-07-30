@@ -139,6 +139,11 @@ public:
   static vtkInformationIntegerKey* DATA_NOT_GENERATED();
 
   // Description:
+  // Key to be used for REQUEST_INFORMATION and REQUEST_DATA_OBJECT
+  // passes when you modification time should not be taken into account.
+  static vtkInformationIntegerKey* REQUEST_REGENERATE_INFORMATION();
+
+  // Description:
   // Create (New) and return a data object of the given type.
   // This is here for backwards compatibility. Use
   // vtkDataObjectTypes::NewDataObject() instead.
