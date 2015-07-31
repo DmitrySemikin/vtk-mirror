@@ -241,7 +241,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
   for (int i=0; i < 3; i++)
     {
     int block = size[i] / minSize[i];
-    if (block == 0)
+    if (block == 0 || block == 1)
       {
       block = 1;
       }
@@ -377,32 +377,32 @@ int vtkExtentTranslator::SplitExtent(int piece, int numPieces, int *ext,
     }
   else
     {
-    ext[strideAxis*2+1] = ext[strideAxis*2] + minSize[strideAxis] * macroToMicroModifer; // shared points between pieces
+    ext[strideAxis * 2 + 1] = ext[strideAxis * 2] + minSize[strideAxis] * macroToMicroModifer; // shared points between pieces
     }
 
   if (strideOffset == this->BlockProperties.NumMacroBlocks[strideAxis] - 1)
-  {
-    ext[strideAxis*2+1] = startExt[strideAxis*2+1];
-  }
+    {
+    ext[strideAxis * 2 + 1] = startExt[strideAxis * 2 + 1];
+    }
 
   targetPiece = targetPiece - numberOfBlocksPerStride*strideOffset;
 
   // Find BlockOffset
   macroToMicroModifer = this->BlockProperties.MacroToMicro[blockAxis];
-  ext[blockAxis*2] = startExt[blockAxis*2] + targetPiece * minSize[blockAxis] * macroToMicroModifer;
+  ext[blockAxis * 2] = startExt[blockAxis * 2] + targetPiece * minSize[blockAxis] * macroToMicroModifer;
 
   if (byPoints)
     {
-    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis] * macroToMicroModifer - 1;
+    ext[blockAxis * 2 + 1] = ext[blockAxis * 2] + minSize[blockAxis] * macroToMicroModifer - 1;
     }
   else
     {
-    ext[blockAxis*2+1] = ext[blockAxis*2] + minSize[blockAxis] * macroToMicroModifer; // shared points between pieces
+    ext[blockAxis * 2 + 1] = ext[blockAxis * 2] + minSize[blockAxis] * macroToMicroModifer; // shared points between pieces
     }
 
   if (targetPiece == this->BlockProperties.NumMacroBlocks[blockAxis] - 1)
     {
-    ext[blockAxis*2+1] = startExt[blockAxis*2+1];
+    ext[blockAxis * 2 + 1] = startExt[blockAxis * 2 + 1];
     }
   return 1;
 }

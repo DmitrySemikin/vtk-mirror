@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
 
         reslice->SetEnableSMP(parms.enableSMP);
         reslice->SetSMPSplitPercentage(parms.smpSplitPercentage);
-        reslice->SetSplitMode(2);
+        reslice->SetSplitMode(parms.SMPSplitMode);
 
         int minBlockSize[3]= {MIN_BLOCK_SIZE_X, MIN_BLOCK_SIZE_Y, MIN_BLOCK_SIZE_Z};
 
@@ -332,7 +332,6 @@ int main(int argc, char *argv[])
 
           reslice->SetStencilData(stencilSource->GetOutput());
           }
-
 
           tl->StartTimer();
           reslice->Update();
