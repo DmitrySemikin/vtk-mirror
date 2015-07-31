@@ -42,7 +42,7 @@
 #include <vtkObjectFactory.h>
 #include <iostream>
 
-#include "vtkImageTestMandelbrotSource.h"
+#include <vtkImageTestMandelbrotSource.h>
 
 #define TRASH_CACHE_SIZE 500000
 #define MIN_BLOCK_SIZE_X 1
@@ -288,10 +288,12 @@ int main(int argc, char *argv[])
           vtkSmartPointer<vtkTransform>::New();
 
         // Compute the center of the image
+        double bounds[6];
+        source->GetOutput()->GetBounds(bounds);
         double center[3];
-        center[0] = (workExtent[1] + workExtent[0]) / 2.0;
-        center[1] = (workExtent[3] + workExtent[2]) / 2.0;
-        center[2] = (workExtent[5] + workExtent[3]) / 2.0;
+        center[0] = (bounds[1] + bounds[0]) / 2.0;
+        center[1] = (bounds[3] + bounds[2]) / 2.0;
+        center[2] = (bounds[5] + bounds[4]) / 2.0;
 
         // Rotate about the center
         transform->Translate(center[0], center[1], center[2]);
