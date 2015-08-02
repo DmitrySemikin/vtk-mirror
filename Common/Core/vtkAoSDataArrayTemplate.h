@@ -64,14 +64,12 @@ public:
   inline void SetValue(vtkIdType valueIdx, ScalarType value)
     {
     this->Buffer.GetBuffer()[valueIdx] = value;
-    this->DataChanged();
     }
   inline void SetTupleValue(vtkIdType tupleIdx, ScalarType* tuple)
     {
     const vtkIdType valueIdx = tupleIdx * this->NumberOfComponents;
     std::copy(tuple, tuple + this->NumberOfComponents,
               this->Buffer.GetBuffer() + valueIdx);
-    this->DataChanged();
     }
   inline void SetComponentValue(vtkIdType tupleIdx, int comp, ScalarType value)
     {
