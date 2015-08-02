@@ -80,7 +80,8 @@ public:
     {
     return static_cast<int>(sizeof(ScalarType));
     }
-
+  // FIXME: Let's do this for testing.
+  virtual bool HasStandardMemoryLayout() { return false; }
   //----------------------------------------------------------------------------
   // Pointer access methods.
   // These are considered legacy and are not implemented. New arrays types keep
