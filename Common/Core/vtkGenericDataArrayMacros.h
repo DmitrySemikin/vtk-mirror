@@ -31,7 +31,7 @@
     call; \
     }
 
-#define vtkWriteableGenericDataArrayMacro(array, call) \
+#define vtkGenericDataArrayMacro(array, call) \
   vtkGenericDataArrayMacroCase(vtkSoADataArrayTemplate, float, array, call) \
   else vtkGenericDataArrayMacroCase(vtkSoADataArrayTemplate, double, array, call) \
   else vtkGenericDataArrayMacroCase(vtkAoSDataArrayTemplate, float, array, call) \
@@ -42,32 +42,15 @@
     abort(); \
     }
 
-#define vtkConstGenericDataArrayMacro(array, call) \
-  vtkGenericDataArrayMacroCase(vtkSoADataArrayTemplate, const float, array, call) \
-  else vtkGenericDataArrayMacroCase(vtkSoADataArrayTemplate, const double, array, call) \
-  else vtkGenericDataArrayMacroCase(vtkAoSDataArrayTemplate, const float, array, call) \
-  else vtkGenericDataArrayMacroCase(vtkAoSDataArrayTemplate, const double, array, call) \
-  else vtkWriteableGenericDataArrayMacro(array, call)
 
-#define vtkWriteableGenericDataArrayMacro2(array1, array2, call) \
-  vtkWriteableGenericDataArrayMacro(array1, \
+#define vtkGenericDataArrayMacro2(array1, array2, call) \
+  vtkGenericDataArrayMacro(array1, \
     typedef ARRAY_TYPE ARRAY_TYPE1; \
     ARRAY_TYPE1* ARRAY1 = ARRAY; \
-    vtkWriteableGenericDataArrayMacro(array2, \
-      typedef ARRAY_TYPE2 ARRAY_TYPE; \
+    vtkGenericDataArrayMacro(array2, \
+      typedef ARRAY_TYPE ARRAY_TYPE2; \
       ARRAY_TYPE2* ARRAY2 = ARRAY; \
       call; \
     )\
-  )
-
-#define vtkGenericDataArrayMacro2(inarray, outarray, call) \
-  vtkConstGenericDataArrayMacro(inarray, \
-    typedef ARRAY_TYPE IN_ARRAY_TYPE; \
-    IN_ARRAY_TYPE* IN_ARRAY = ARRAY; \
-    vtkWriteableGenericDataArrayMacro(outarray, \
-      typedef ARRAY_TYPE OUT_ARRAY_TYPE; \
-      OUT_ARRAY_TYPE* OUT_ARRAY = ARRAY; \
-      call; \
-    ) \
   )
 #endif
