@@ -133,13 +133,11 @@ bool vtkOpenGLPolyDataMapper2D::GetNeedToRebuildShaders(
 //-----------------------------------------------------------------------------
 void vtkOpenGLPolyDataMapper2D::BuildShaders(
   std::string &VSSource, std::string &FSSource, std::string &GSSource,
-  vtkViewport* vtkNotUsed(viewport), vtkActor2D *actor)
+  vtkViewport* viewport, vtkActor2D *actor)
 {
   VSSource = vtkPolyData2DVS;
   FSSource = vtkPolyData2DFS;
-  if (this->LastBoundBO == &this->Lines
-      && actor->GetProperty()->GetLineWidth() > 1.0
-      && vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
+  if (this->HaveWideLines(viewport, actor))
     {
     GSSource = vtkPolyDataWideLineGS;
     }
@@ -316,7 +314,7 @@ void vtkOpenGLPolyDataMapper2D::UpdateShaders(vtkOpenGLHelper &cellBO,
 
 //-----------------------------------------------------------------------------
 void vtkOpenGLPolyDataMapper2D::SetMapperShaderParameters(
-  vtkOpenGLHelper &cellBO, vtkViewport *vtkNotUsed(viewport), vtkActor2D *actor)
+  vtkOpenGLHelper &cellBO, vtkViewport *viewport, vtkActor2D *actor)
 {
   // Now to update the VAO too, if necessary.
   if (this->VBOUpdateTime > cellBO.AttributeUpdateTime ||
@@ -381,9 +379,7 @@ void vtkOpenGLPolyDataMapper2D::SetMapperShaderParameters(
     }
 
   // handle wide lines
-  if (this->LastBoundBO == &this->Lines
-      && actor->GetProperty()->GetLineWidth() > 1.0
-      && vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
+  if (this->HaveWideLines(viewport,actor))
     {
       int vp[4];
       glGetIntegerv(GL_VIEWPORT, vp);
@@ -419,6 +415,12 @@ void vtkOpenGLPolyDataMapper2D::SetCameraShaderParameters(
   vtkOpenGLHelper &cellBO, vtkViewport* viewport, vtkActor2D *actor)
 {
   vtkShaderProgram *program = cellBO.Program;
+
+  if(!program)
+  {
+    vtkErrorWithObjectMacro(this," got null shader program, cannot set parameters.");
+    return;
+  }
 
   // Get the position of the actor
   int size[2];
@@ -678,6 +680,24 @@ void vtkOpenGLPolyDataMapper2D::UpdateVBO(vtkActor2D *act, vtkViewport *viewport
     }
 }
 
+bool vtkOpenGLPolyDataMapper2D::HaveWideLines(
+  vtkViewport *ren,
+  vtkActor2D *actor)
+{
+  if (this->LastBoundBO == &this->Lines
+      && actor->GetProperty()->GetLineWidth() > 1.0
+      && vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
+    {
+    // we have wide lines, but the OpenGL implementation may
+    // actually support them, check the range to see if we
+      // really need have to implement our own wide lines
+    vtkOpenGLRenderWindow *renWin =
+      vtkOpenGLRenderWindow::SafeDownCast(ren->GetVTKWindow());
+    return !(renWin &&
+      renWin->GetMaximumHardwareLineWidth() >= actor->GetProperty()->GetLineWidth());
+    }
+  return false;
+}
 
 void vtkOpenGLPolyDataMapper2D::RenderOverlay(vtkViewport* viewport,
                                               vtkActor2D* actor)
@@ -737,8 +757,11 @@ void vtkOpenGLPolyDataMapper2D::RenderOverlay(vtkViewport* viewport,
   if (this->Points.IBO->IndexCount)
     {
     this->UpdateShaders(this->Points, viewport, actor);
-    this->Points.Program->SetUniformi("PrimitiveIDOffset",
-      this->PrimitiveIDOffset);
+    if(this->Points.Program)
+      {
+      this->Points.Program->SetUniformi("PrimitiveIDOffset",this->PrimitiveIDOffset);
+      }
+
     // Set the PointSize
 #if GL_ES_VERSION_2_0 != 1
     glPointSize(actor->GetProperty()->GetPointSize()); // not on ES2
@@ -757,51 +780,56 @@ void vtkOpenGLPolyDataMapper2D::RenderOverlay(vtkViewport* viewport,
     {
     // Set the LineWidth
     this->UpdateShaders(this->Lines, viewport, actor);
-    this->Lines.Program->SetUniformi("PrimitiveIDOffset",
-      this->PrimitiveIDOffset);
-    if (!vtkOpenGLRenderWindow::GetContextSupportsOpenGL32() ||
-        actor->GetProperty()->GetLineWidth() <= 1.0)
+    if (this->Lines.Program)
       {
-      glLineWidth(actor->GetProperty()->GetLineWidth());
+      this->Lines.Program->SetUniformi("PrimitiveIDOffset",this->PrimitiveIDOffset);
+      if (!this->HaveWideLines(viewport,actor))
+        {
+        glLineWidth(actor->GetProperty()->GetLineWidth());
+        }
+      this->Lines.IBO->Bind();
+      glDrawRangeElements(GL_LINES, 0,
+                          static_cast<GLuint>(this->VBO->VertexCount - 1),
+                          static_cast<GLsizei>(this->Lines.IBO->IndexCount),
+                          GL_UNSIGNED_INT,
+                          reinterpret_cast<const GLvoid *>(NULL));
+      this->Lines.IBO->Release();
       }
-    this->Lines.IBO->Bind();
-    glDrawRangeElements(GL_LINES, 0,
-                        static_cast<GLuint>(this->VBO->VertexCount - 1),
-                        static_cast<GLsizei>(this->Lines.IBO->IndexCount),
-                        GL_UNSIGNED_INT,
-                        reinterpret_cast<const GLvoid *>(NULL));
-    this->Lines.IBO->Release();
     this->PrimitiveIDOffset += (int)this->Lines.IBO->IndexCount/2;
     }
 
-  // now handle lit primatives
+  // now handle lit primitives
   if (this->Tris.IBO->IndexCount)
     {
-    this->UpdateShaders(this->Points, viewport, actor);
-    this->Points.Program->SetUniformi("PrimitiveIDOffset",
-      this->PrimitiveIDOffset);
-    this->Tris.IBO->Bind();
-    glDrawRangeElements(GL_TRIANGLES, 0,
-                        static_cast<GLuint>(this->VBO->VertexCount - 1),
-                        static_cast<GLsizei>(this->Tris.IBO->IndexCount),
-                        GL_UNSIGNED_INT,
-                        reinterpret_cast<const GLvoid *>(NULL));
-    this->Tris.IBO->Release();
-    this->PrimitiveIDOffset += (int)this->Tris.IBO->IndexCount/3;
+    this->UpdateShaders(this->Tris, viewport, actor);
+    if (this->Tris.Program)
+      {
+      this->Tris.Program->SetUniformi("PrimitiveIDOffset",this->PrimitiveIDOffset);
+      this->Tris.IBO->Bind();
+      glDrawRangeElements(GL_TRIANGLES, 0,
+                          static_cast<GLuint>(this->VBO->VertexCount - 1),
+                          static_cast<GLsizei>(this->Tris.IBO->IndexCount),
+                          GL_UNSIGNED_INT,
+                          reinterpret_cast<const GLvoid *>(NULL));
+      this->Tris.IBO->Release();
+      this->PrimitiveIDOffset += (int)this->Tris.IBO->IndexCount/3;
+      }
     }
 
   if (this->TriStrips.IBO->IndexCount)
     {
-    this->UpdateShaders(this->Points, viewport, actor);
-    this->Points.Program->SetUniformi("PrimitiveIDOffset",
-      this->PrimitiveIDOffset);
-    this->TriStrips.IBO->Bind();
-    glDrawRangeElements(GL_TRIANGLES, 0,
-                        static_cast<GLuint>(this->VBO->VertexCount - 1),
-                        static_cast<GLsizei>(this->TriStrips.IBO->IndexCount),
-                        GL_UNSIGNED_INT,
-                        reinterpret_cast<const GLvoid *>(NULL));
-    this->TriStrips.IBO->Release();
+    this->UpdateShaders(this->TriStrips, viewport, actor);
+    if(this->TriStrips.Program)
+      {
+      this->TriStrips.Program->SetUniformi("PrimitiveIDOffset",this->PrimitiveIDOffset);
+      this->TriStrips.IBO->Bind();
+      glDrawRangeElements(GL_TRIANGLES, 0,
+                          static_cast<GLuint>(this->VBO->VertexCount - 1),
+                          static_cast<GLsizei>(this->TriStrips.IBO->IndexCount),
+                          GL_UNSIGNED_INT,
+                          reinterpret_cast<const GLvoid *>(NULL));
+      this->TriStrips.IBO->Release();
+      }
     }
 
   if (this->HaveCellScalars)

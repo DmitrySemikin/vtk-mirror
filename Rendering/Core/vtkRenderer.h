@@ -495,7 +495,7 @@ public:
   // Description:
   // Set/Get the texture to be used for the background. If set
   // and enabled this gets the priority over the gradient background.
-  void SetBackgroundTexture(vtkTexture*);
+  virtual void SetBackgroundTexture(vtkTexture*);
   vtkGetObjectMacro(BackgroundTexture, vtkTexture);
 
   // Description:
@@ -507,6 +507,13 @@ public:
 
   // method to release graphics resources in any derived renderers.
   virtual void ReleaseGraphicsResources(vtkWindow *) { }
+
+  // Description:
+  // Turn on/off rendering of shadows if supported
+  // Initial value is off.
+  vtkSetMacro(UseShadows,int);
+  vtkGetMacro(UseShadows,int);
+  vtkBooleanMacro(UseShadows,int);
 
 //BTX
 protected:
@@ -639,6 +646,11 @@ protected:
   // automatically (see GetActiveCamera).
   // This is only used internally.
   vtkCamera *GetActiveCameraAndResetIfCreated();
+
+  // Description:
+  // If this flag is on and the rendering engine supports it render shadows
+  // Initial value is off.
+  int UseShadows;
 
   // Description:
   // If this flag is on and the GPU supports it, depth peeling is used

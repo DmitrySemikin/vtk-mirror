@@ -6,6 +6,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestAMRBox.cxx
   TestBiQuadraticQuad.cxx
   TestCompositeDataSets.cxx
+  TestComputeBoundingSphere.cxx
   TestDataArrayDispatcher.cxx
   TestDataObject.cxx
   TestDispatchers.cxx
@@ -50,6 +51,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestDataObjectTypes.cxx
   TestPolyDataRemoveDeletedCells.cxx
   UnitTestCells.cxx
+  UnitTestPlanesIntersection.cxx
   )
 vtk_add_test_cxx(${vtk-module}CxxTests data_tests
   TestCellIterators.cxx,NO_VALID,NO_OUTPUT
