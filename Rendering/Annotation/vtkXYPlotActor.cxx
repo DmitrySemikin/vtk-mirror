@@ -2095,9 +2095,6 @@ void vtkXYPlotActor::CreatePlotData( int *pos, int *pos2, double xRange[2],
     		  id = pts->InsertNextPoint( xyz );
     		  lines->InsertCellPoint( id );
     	  }
-
-    	  
-
       }//for all input points
 
       lines->UpdateCellCount( numLinePts );
