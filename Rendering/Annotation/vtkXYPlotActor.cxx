@@ -124,6 +124,7 @@ vtkXYPlotActor::vtkXYPlotActor()
   sprintf( this->YLabelFormat,"%s","%-#6.3g");
 
   this->Logx = 0;
+  this->Logy = 0;
 
   this->XRange[0] = 0.;
   this->XRange[1] = 0.;
@@ -931,6 +932,25 @@ int vtkXYPlotActor::RenderOpaqueGeometry( vtkViewport* viewport )
       yrange[1] = this->YRange[1];
       }
 
+    if (this->GetLogy() == 1){
+
+    	if ( numDS > 0 ) //plotting data sets
+    	{
+    		this->ComputeYRange( yrange );
+    	}
+
+
+    	if (this->YRange[0] > 0){ //clip to user's ymin
+    		yrange[0] = log10(this->YRange[0]);
+    	}
+
+    	if (this->YRange[1] > 0){ //clip to user's ymax
+    		yrange[1] = log10(this->YRange[1]);
+    	}
+
+
+    }
+
     if ( this->AdjustYLabels )
       {
       vtkAxisActor2D::ComputeRange( yrange, yRange, this->NumberOfYLabels,
@@ -1078,6 +1098,7 @@ int vtkXYPlotActor::RenderOpaqueGeometry( vtkViewport* viewport )
             break;
           case AlignVCenter:
             titlePos[1] = pos[1] + .5 * ( pos2[1] - pos[1] );
+            break;
           };
 
         switch ( this->AdjustTitlePositionMode & ( AlignAxisTop | AlignAxisBottom | AlignAxisVCenter ) )
@@ -1526,6 +1547,7 @@ void vtkXYPlotActor::ComputeXRange( double range[2], double *lengths )
           default:
             lengths[dsNum] += sqrt( vtkMath::Distance2BetweenPoints( x,xPrev ) );
             xPrev[0] = x[0]; xPrev[1] = x[1]; xPrev[2] = x[2];
+            break;
           }
         }//for all points
       if ( lengths[dsNum] > maxLength )
@@ -1611,16 +1633,49 @@ void vtkXYPlotActor::ComputeYRange( double range[2] )
       }
 
     scalars->GetRange( sRange, component );
-    if ( sRange[0] < range[0] )
-      {
-      range[0] = sRange[0];
-      }
 
-    if ( sRange[1] > range[1] )
-      {
-      range[1] = sRange[1];
-      }
+    if ( this->GetLogy() == 0 ) {
+    	if ( sRange[0] < range[0] )
+    	{
+    		range[0] = sRange[0];
+    	}
+
+    	if ( sRange[1] > range[1] )
+    	{
+    		range[1] = sRange[1];
+    	}
+    }
+    else{
+    	//ensure range strictly > 0 for log
+    	for(int i=0;i< scalars->GetNumberOfTuples();i++){
+    	if ( scalars->GetTuple1(i) < range[0] && (scalars->GetTuple1(i) > 0))
+    	{
+    		range[0] = scalars->GetTuple1(i);
+    	}
+
+    	if ( scalars->GetTuple1(i) > range[1] && (scalars->GetTuple1(i) > 0) )
+    	{
+    		range[1] = scalars->GetTuple1(i);
+    	}
+    	 }//over all points
+    }
+
+
     }//over all datasets
+
+  if ( this->GetLogy() == 1 )
+  {
+	  if ( range[0] > range[1] )
+	  {
+		  range[0] = 0;
+		  range[1] = 0;
+	  }
+	  else
+	  {
+		  range[0] = log10( range[0] );
+		  range[1] = log10( range[1] );
+	  }
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -1754,6 +1809,7 @@ void vtkXYPlotActor::ComputeDORange( double xrange[2], double yrange[2],
           default:
             lengths[doNum] += fabs( x-xPrev );
             xPrev = x;
+            break;
           }
         }//for all points
       if ( lengths[doNum] > maxLength )
@@ -1792,14 +1848,29 @@ void vtkXYPlotActor::ComputeDORange( double xrange[2], double yrange[2],
         // skip.
         continue;
         }
-      if ( y < yrange[0] )
-        {
-        yrange[0] = y;
-        }
-      if ( y > yrange[1] )
-        {
-        yrange[1] = y;
-        }
+
+      if ( this->GetLogy() == 0 )
+      {
+    	  if ( y < yrange[0] )
+    	  {
+    		  yrange[0] = y;
+    	  }
+    	  if ( y > yrange[1] )
+    	  {
+    		  yrange[1] = y;
+    	  }
+      }
+      else //ensure positive values
+      {
+    	  if ( y < yrange[0] && (y > 0) )
+    	  {
+    		  yrange[0] = y;
+    	  }
+    	  if ( y > yrange[1] && (y > 0) )
+    	  {
+    		  yrange[1] = y;
+    	  }
+      }
       }//over all y values
     }//over all dataobjects
 
@@ -1824,6 +1895,12 @@ void vtkXYPlotActor::ComputeDORange( double xrange[2], double yrange[2],
         xrange[0] = log10( xrange[0] );
         xrange[1] = log10( xrange[1] );
         }
+
+      if ( this->GetLogy() == 1 )
+      {
+    	  yrange[0] = log10( yrange[0] );
+    	  yrange[1] = log10( yrange[1] );
+      }
       break;
     default:
       vtkErrorMacro(<< "Unknown X-Value option");
@@ -1945,70 +2022,83 @@ void vtkXYPlotActor::CreatePlotData( int *pos, int *pos2, double xRange[2],
 
       ds->GetPoint( 0, xPrev );
       for ( numLinePts=0, length=0.0, ptId=0; ptId < numPts; ptId++ )
-        {
-        xyz[1] = scalars->GetComponent( ptId, component );
-        ds->GetPoint( ptId, x );
-        switch ( this->XValues )
-          {
-          case VTK_XYPLOT_NORMALIZED_ARC_LENGTH:
-            length += sqrt( vtkMath::Distance2BetweenPoints( x,xPrev ) );
-            xyz[0] = length / lengths[dsNum];
-            xPrev[0] = x[0]; xPrev[1] = x[1]; xPrev[2] = x[2];
-            break;
-          case VTK_XYPLOT_INDEX:
-            xyz[0] = ( double )ptId;
-            break;
-          case VTK_XYPLOT_ARC_LENGTH:
-            length += sqrt( vtkMath::Distance2BetweenPoints( x,xPrev ) );
-            xyz[0] = length;
-            xPrev[0] = x[0]; xPrev[1] = x[1]; xPrev[2] = x[2];
-            break;
-          case VTK_XYPLOT_VALUE:
-            xyz[0] = x[this->XComponent->GetValue( dsNum )];
-            break;
-          default:
-            vtkErrorMacro(<< "Unknown X-Component option");
-          }
+      {
+    	  xyz[1] = scalars->GetComponent( ptId, component );
+    	  ds->GetPoint( ptId, x );
+    	  switch ( this->XValues )
+    	  {
+    	  case VTK_XYPLOT_NORMALIZED_ARC_LENGTH:
+    		  length += sqrt( vtkMath::Distance2BetweenPoints( x,xPrev ) );
+    		  xyz[0] = length / lengths[dsNum];
+    		  xPrev[0] = x[0]; xPrev[1] = x[1]; xPrev[2] = x[2];
+    		  break;
+    	  case VTK_XYPLOT_INDEX:
+    		  xyz[0] = ( double )ptId;
+    		  break;
+    	  case VTK_XYPLOT_ARC_LENGTH:
+    		  length += sqrt( vtkMath::Distance2BetweenPoints( x,xPrev ) );
+    		  xyz[0] = length;
+    		  xPrev[0] = x[0]; xPrev[1] = x[1]; xPrev[2] = x[2];
+    		  break;
+    	  case VTK_XYPLOT_VALUE:
+    		  xyz[0] = x[this->XComponent->GetValue( dsNum )];
+    		  break;
+    	  default:
+    		  vtkErrorMacro(<< "Unknown X-Component option");
+    	  }
 
-        if ( this->GetLogx() == 1 )
-          {
-          if ( xyz[0] > 0 )
-            {
-            xyz[0] = log10( xyz[0] );
-            // normalize and position
-            if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
-                 xyz[1] < yRange[0] || xyz[1] > yRange[1] )
-              {
-              clippingRequired = 1;
-              }
+    	  if ( this->GetLogy() == 1 )
+    	  {
+    		  if ( xyz[1] > 0 )
+    		  {
+    			  xyz[1] = log10( xyz[1] );
+    		  }
+    	  }
 
-            numLinePts++;
-            xyz[0] = pos[0] +
-              ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
-            xyz[1] = pos[1] +
-              ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
-            id = pts->InsertNextPoint( xyz );
-            lines->InsertCellPoint( id );
-            }
-          }
-        else
-          {
-          // normalize and position
-          if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
-               xyz[1] < yRange[0] || xyz[1] > yRange[1] )
-            {
-            clippingRequired = 1;
-            }
+    	  if ( this->GetLogx() == 1 )
+    	  {
+    		  if ( xyz[0] > 0 )
+    		  {
+    			  xyz[0] = log10( xyz[0] );
 
-          numLinePts++;
-          xyz[0] = pos[0] +
-            ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
-          xyz[1] = pos[1] +
-            ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
-          id = pts->InsertNextPoint( xyz );
-          lines->InsertCellPoint( id );
-          }
-        }//for all input points
+    			  // normalize and position
+    			  if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
+    					  xyz[1] < yRange[0] || xyz[1] > yRange[1] )
+    			  {
+    				  clippingRequired = 1;
+    			  }
+
+    			  xyz[0] = pos[0] +
+    					  ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
+    			  xyz[1] = pos[1] +
+    					  ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
+    			  numLinePts++;
+    			  id = pts->InsertNextPoint( xyz );
+    			  lines->InsertCellPoint( id );
+
+    		  }
+    	  }
+    	  else{
+
+    		  // normalize and position
+    		  if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
+    				  xyz[1] < yRange[0] || xyz[1] > yRange[1] )
+    		  {
+    			  clippingRequired = 1;
+    		  }
+
+    		  xyz[0] = pos[0] +
+    				  ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
+    		  xyz[1] = pos[1] +
+    				  ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
+    		  numLinePts++;
+    		  id = pts->InsertNextPoint( xyz );
+    		  lines->InsertCellPoint( id );
+    	  }
+
+    	  
+
+      }//for all input points
 
       lines->UpdateCellCount( numLinePts );
       if ( clippingRequired )
@@ -2124,43 +2214,53 @@ void vtkXYPlotActor::CreatePlotData( int *pos, int *pos2, double xRange[2],
             vtkErrorMacro(<< "Unknown X-Value option");
           }
 
+        if ( this->GetLogy() == 1 )
+        {
+        	if ( xyz[1] > 0 )
+        	{
+        		xyz[1] = log10( xyz[1] );
+        	}
+        }
+
         if ( this->GetLogx() == 1 )
-          {
-          if ( xyz[0] > 0 )
-            {
-            xyz[0] = log10( xyz[0] );
-            // normalize and position
-            if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
-                 xyz[1] < yRange[0] || xyz[1] > yRange[1] )
-              {
-              clippingRequired = 1;
-              }
-            numLinePts++;
-            xyz[0] = pos[0] +
-              ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
-            xyz[1] = pos[1] +
-              ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
-            id = pts->InsertNextPoint( xyz );
-            lines->InsertCellPoint( id );
-            }
-          }
-        else
-          {
-          // normalize and position
-          if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
-               xyz[1] < yRange[0] || xyz[1] > yRange[1] )
-            {
-            clippingRequired = 1;
-            }
-          numLinePts++;
-          xyz[0] = pos[0] +
-            ( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
-          xyz[1] = pos[1] +
-            ( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
-          id = pts->InsertNextPoint( xyz );
-          lines->InsertCellPoint( id );
-          }
-        }//for all input points
+        {
+        	if ( xyz[0] > 0 )
+        	{
+        		xyz[0] = log10( xyz[0] );
+
+        		// normalize and position
+        		if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
+        				xyz[1] < yRange[0] || xyz[1] > yRange[1] )
+        		{
+        			clippingRequired = 1;
+        		}
+
+        		xyz[0] = pos[0] +
+        				( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
+        		xyz[1] = pos[1] +
+        				( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
+        	}
+        }
+        else{
+        	// normalize and position
+        	if ( xyz[0] < xRange[0] || xyz[0] > xRange[1] ||
+        			xyz[1] < yRange[0] || xyz[1] > yRange[1] )
+        	{
+        		clippingRequired = 1;
+        	}
+        	numLinePts++;
+        	xyz[0] = pos[0] +
+        			( xyz[0]-xRange[0] )/( xRange[1]-xRange[0] )*( pos2[0]-pos[0] );
+        	xyz[1] = pos[1] +
+        			( xyz[1]-yRange[0] )/( yRange[1]-yRange[0] )*( pos2[1]-pos[1] );
+
+        }
+
+        numLinePts++;
+        id = pts->InsertNextPoint( xyz );
+        lines->InsertCellPoint( id );
+
+      }//for all input points
 
       lines->UpdateCellCount( numLinePts );
       if ( clippingRequired )

@@ -340,6 +340,7 @@ public:
   vtkGetVectorMacro(XRange,double,2);
   vtkSetVector2Macro(YRange,double);
   vtkGetVectorMacro(YRange,double,2);
+
   void SetPlotRange(double xmin, double ymin, double xmax, double ymax)
     {this->SetXRange(xmin,xmax); this->SetYRange(ymin,ymax);}
 
@@ -453,6 +454,12 @@ enum Alignment {
   vtkSetMacro(Logx, int);
   vtkGetMacro(Logx, int);
   vtkBooleanMacro(Logx, int);
+
+  // Description:
+  // Enable/Disable plotting of Log of x-values.
+  vtkSetMacro(Logy, int);
+  vtkGetMacro(Logy, int);
+  vtkBooleanMacro(Logy, int);
 
   // Description:
   // Set/Get the format with which to print the labels . This sets both X
@@ -689,6 +696,7 @@ protected:
   int   NumberOfXLabels;
   int   NumberOfYLabels;
   int   Logx;
+  int	Logy;
   char* XLabelFormat;
   char* YLabelFormat;
   double XRange[2];
