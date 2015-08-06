@@ -118,14 +118,14 @@ const char* vtkCellTypes::GetClassNameFromTypeId(vtkIdType type)
 }
 
 //----------------------------------------------------------------------------
-vtkIdType vtkCellTypes::GetTypeIdFromClassName(const char* classname)
+int vtkCellTypes::GetTypeIdFromClassName(const char* classname)
 {
   if (!classname)
     {
     return -1;
     }
 
-  for(vtkIdType idx=0; vtkCellTypesStrings[idx] != NULL; idx++)
+  for(int idx=0; vtkCellTypesStrings[idx] != NULL; idx++)
     {
     if (strcmp(vtkCellTypesStrings[idx], classname) == 0)
       {

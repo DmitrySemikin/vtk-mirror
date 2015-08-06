@@ -117,7 +117,7 @@ public:
   // Description:
   // Given a data object classname, return it's int identified (as
   // defined in vtkCellType.h)
-  static vtkIdType GetTypeIdFromClassName(const char* classname);
+  static int GetTypeIdFromClassName(const char* classname);
 
   // Description:
   // This convenience method is a fast check to determine if a cell type
