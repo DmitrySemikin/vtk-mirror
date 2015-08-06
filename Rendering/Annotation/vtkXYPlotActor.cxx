@@ -58,7 +58,9 @@ class vtkXYPlotActorConnections : public vtkAlgorithm
 {
 public:
   static vtkXYPlotActorConnections *
-  New();vtkTypeMacro(vtkXYPlotActorConnections,vtkAlgorithm)
+  New();
+
+  vtkTypeMacro(vtkXYPlotActorConnections,vtkAlgorithm)
   ;
 
   vtkXYPlotActorConnections()
@@ -1229,7 +1231,7 @@ vtkXYPlotActor::RenderOpaqueGeometry(vtkViewport* viewport)
 
     this->BuildTime.Modified();
 
-    }    //if need to rebuild the plot
+    } //if need to rebuild the plot
 
   vtkDebugMacro(<<"Rendering Box");
   if (this->ChartBox)
@@ -1585,12 +1587,12 @@ vtkXYPlotActor::ComputeXRange(double range[2], double *lengths)
           xPrev[2] = x[2];
           break;
         }
-        }    //for all points
+        } //for all points
       if (lengths[dsNum] > maxLength)
         {
         maxLength = lengths[dsNum];
         }
-      }    //if need to visit all points
+      } //if need to visit all points
 
     else //if ( this->XValues == VTK_XYPLOT_INDEX )
       {
@@ -1773,7 +1775,7 @@ vtkXYPlotActor::ComputeDORange(double xrange[2], double yrange[2],
 
     lengths[doNum] = 0.;
     field = dobj->GetFieldData();
-    numColumns = field->GetNumberOfComponents();  //number of "columns"
+    numColumns = field->GetNumberOfComponents(); //number of "columns"
     // numColumns includes the components for non-numeric arrays as well.
     for (numRows = VTK_ID_MAX, i=0; i<field->GetNumberOfArrays(); i++)
       {
@@ -2322,14 +2324,14 @@ vtkXYPlotActor::CreatePlotData(int *pos, int *pos2, double xRange[2],
         id = pts->InsertNextPoint(xyz);
         lines->InsertCellPoint(id);
 
-        }          //for all input points
+        } //for all input points
 
       lines->UpdateCellCount(numLinePts);
       if (clippingRequired)
         {
         this->ClipPlotData(pos, pos2, this->PlotData[doNum]);
         }
-      }          //loop over all input data sets
+      } //loop over all input data sets
     }
 
   // Remove points/lines as directed by the user
@@ -2799,12 +2801,12 @@ vtkXYPlotActor::ClipPlotData(int *pos, int *pos2, vtkPolyData *pd)
           || (x1[1] < p1[1] && x2[1] < p1[1])
           || (x1[1] > p2[1] && x2[1] > p2[1]))
         {
-        ;  //trivial rejection
+        ; //trivial rejection
         }
       else if (x1[0] >= p1[0] && x2[0] >= p1[0] && x1[0] <= p2[0]
           && x2[0] <= p2[0] && x1[1] >= p1[1] && x2[1] >= p1[1]
           && x1[1] <= p2[1] && x2[1] <= p2[1])
-        {  //trivial acceptance
+        { //trivial acceptance
         newPts[0] = pointMap[pts[i]];
         newPts[1] = pointMap[pts[i + 1]];
         newLines->InsertNextCell(2, newPts);
@@ -2815,12 +2817,12 @@ vtkXYPlotActor::ClipPlotData(int *pos, int *pos2, vtkPolyData *pd)
         newPts[1] = -1;
         if (x1[0] >= p1[0] && x1[0] <= p2[0] && x1[1] >= p1[1]
             && x1[1] <= p2[1])
-          {  //first point in
+          { //first point in
           newPts[0] = pointMap[pts[i]];
           }
         else if (x2[0] >= p1[0] && x2[0] <= p2[0] && x2[1] >= p1[1]
             && x2[1] <= p2[1])
-          {  //second point in
+          { //second point in
           newPts[0] = pointMap[pts[i + 1]];
           }
 
@@ -3220,9 +3222,8 @@ vtkXYPlotActor::RemoveAllActiveCurves()
 void
 vtkXYPlotActor::SetPlotGlyphType(int curve, int i)
 {
-  static const int good_glyph_type[26] =
-    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0, 0, 2, 0, 4, 5, 6, 7, 8, 0,
-        10, 11, 12 };
+  static const int good_glyph_type[26] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      12, 0, 0, 2, 0, 4, 5, 6, 7, 8, 0, 10, 11, 12 };
   vtkSmartPointer<vtkGlyphSource2D> source =
       vtkSmartPointer<vtkGlyphSource2D>::New();
   source->SetGlyphType(good_glyph_type[i]);
