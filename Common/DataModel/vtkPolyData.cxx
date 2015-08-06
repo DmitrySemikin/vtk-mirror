@@ -1238,7 +1238,7 @@ void vtkPolyData::Allocate(vtkPolyData *inPolyData, vtkIdType numCells,
 // Note: will also insert VTK_PIXEL, but converts it to VTK_QUAD.
 vtkIdType vtkPolyData::InsertNextCell(int type, int npts, vtkIdType *pts)
 {
-  int id;
+  vtkIdType id;
 
   if ( !this->Cells )
     {
@@ -1412,7 +1412,7 @@ void vtkPolyData::Reset()
 // Reverse the order of point ids defining the cell.
 void vtkPolyData::ReverseCell(vtkIdType cellId)
 {
-  int loc, type;
+  vtkIdType loc, type;
 
   if ( this->Cells == NULL )
     {
@@ -1510,7 +1510,8 @@ void vtkPolyData::AddReferenceToCell(vtkIdType ptId, vtkIdType cellId)
 // ReplaceLinkedCell() to replace a cell when cell structure has been built.
 void vtkPolyData::ReplaceCell(vtkIdType cellId, int npts, vtkIdType *pts)
 {
-  int loc, type;
+  vtkIdType loc;
+  unsigned char type;
 
   if ( this->Cells == NULL )
     {
@@ -1551,8 +1552,8 @@ void vtkPolyData::ReplaceCell(vtkIdType cellId, int npts, vtkIdType *pts)
 // link list is changing size.
 void vtkPolyData::ReplaceLinkedCell(vtkIdType cellId, int npts, vtkIdType *pts)
 {
-  int loc = this->Cells->GetCellLocation(cellId);
-  int type = this->Cells->GetCellType(cellId);
+  vtkIdType loc = this->Cells->GetCellLocation(cellId);
+  unsigned char type = this->Cells->GetCellType(cellId);
 
   switch (type)
     {
@@ -1649,7 +1650,7 @@ void vtkPolyData::GetCellNeighbors(vtkIdType cellId, vtkIdList *ptIds,
       for (allFound=1, i=1; i < numPts && allFound; i++)
         {
         ptId = ptIds->GetId(i);
-        int numCurrent = this->Links->GetNcells(ptId);
+        unsigned short numCurrent = this->Links->GetNcells(ptId);
         vtkIdType *currentCells = this->Links->GetCells(ptId);
         oneFound = 0;
         for (j = 0; j < numCurrent; j++)
@@ -1887,7 +1888,7 @@ void vtkPolyData::RemoveGhostCells()
 
   vtkIdType numCells = this->GetNumberOfCells();
 
-  vtkIntArray *types = vtkIntArray::New();
+  vtkIdTypeArray *types = vtkIdTypeArray::New();
   types->SetNumberOfValues(numCells);
 
   for (vtkIdType i = 0; i < numCells; i++)
@@ -1940,11 +1941,11 @@ void vtkPolyData::RemoveGhostCells()
 
   vtkIdType *pts, n;
 
-  int cellId;
+  vtkIdType cellId;
 
   for (vtkIdType i = 0; i < numCells; i++)
     {
-    int type = types->GetValue(i);
+    vtkIdType type = types->GetValue(i);
 
     if (type == VTK_VERTEX || type == VTK_POLY_VERTEX)
       {
@@ -2039,7 +2040,7 @@ void vtkPolyData::RemoveDeletedCells()
   vtkCell *cell;
   vtkIdType cellId;
   vtkIdList *pointIds;
-  int type;
+  unsigned char type;
   for (vtkIdType i = 0; i < numCells; i++)
     {
     type = oldData->GetCellType(i);
@@ -2182,7 +2183,7 @@ int vtkPolyData::GetScalarFieldCriticalIndex (vtkIdType pointId,
    * is the vertex really regular?
    * (lower and upper links are BOTH simply connected)
    */
-  int visitedPointNb = 0, stackBottom = 0,
+  vtkIdType visitedPointNb = 0, stackBottom = 0,
       lowerLinkPointNb = lowerLinkPointList->GetNumberOfIds(),
       upperLinkPointNb = upperLinkPointList->GetNumberOfIds();
 
@@ -2195,13 +2196,13 @@ int vtkPolyData::GetScalarFieldCriticalIndex (vtkIdType pointId,
     stackBottom++;
     vtkIdList *triangleList = vtkIdList::New();
     this->GetPointCells(currentPointId, triangleList);
-    int triangleNb = triangleList->GetNumberOfIds();
+    vtkIdType triangleNb = triangleList->GetNumberOfIds();
 
     for(int i = 0; i < triangleNb; i++)
       {
       vtkCell *c = this->GetCell(triangleList->GetId(i));
       pointList = c->GetPointIds();;
-      int pointNb = pointList->GetNumberOfIds();
+      vtkIdType pointNb = pointList->GetNumberOfIds();
 
       if(pointList->IsId(pointId) >= 0)
         {
@@ -2254,18 +2255,18 @@ int vtkPolyData::GetScalarFieldCriticalIndex (vtkIdType pointId,
     stackBottom++;
     vtkIdList *triangleList = vtkIdList::New();
     this->GetPointCells(currentPointId, triangleList);
-    int triangleNb = triangleList->GetNumberOfIds();
+    vtkIdType triangleNb = triangleList->GetNumberOfIds();
 
-    for(int i = 0; i < triangleNb; i++)
+    for(vtkIdType i = 0; i < triangleNb; i++)
       {
       vtkCell *c = this->GetCell(triangleList->GetId(i));
       pointList = c->GetPointIds();
-      int pointNb = pointList->GetNumberOfIds();
+      vtkIdType pointNb = pointList->GetNumberOfIds();
 
       if(pointList->IsId(pointId) >= 0)
         {
         // those two triangles are in the star of pointId
-        int j = 0;
+        vtkIdType j = 0;
         do
           {
           nextPointId = pointList->GetId(j);

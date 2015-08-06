@@ -50,7 +50,7 @@ int vtkInterpolatingSubdivisionFilter::RequestData(
   vtkCellArray *outputPolys;
   vtkPointData *outputPD;
   vtkCellData *outputCD;
-  vtkIntArray *edgeData;
+  vtkIdTypeArray *edgeData;
 
   numPts=input->GetNumberOfPoints();
   numCells=input->GetNumberOfCells();
@@ -121,7 +121,7 @@ int vtkInterpolatingSubdivisionFilter::RequestData(
     outputPolys->Allocate(outputPolys->EstimateSize(4*numCells,3));
 
     // Create an array to hold new location indices
-    edgeData = vtkIntArray::New();
+    edgeData = vtkIdTypeArray::New();
     edgeData->SetNumberOfComponents(3);
     edgeData->SetNumberOfTuples(numCells);
 
@@ -161,7 +161,7 @@ int vtkInterpolatingSubdivisionFilter::RequestData(
 int vtkInterpolatingSubdivisionFilter::FindEdge (vtkPolyData *mesh,
                                                  vtkIdType cellId,
                                                  vtkIdType p1, vtkIdType p2,
-                                                 vtkIntArray *edgeData,
+                                                 vtkIdTypeArray *edgeData,
                                                  vtkIdList *cellIds)
 {
   int edgeId = 0;
@@ -222,7 +222,7 @@ vtkIdType vtkInterpolatingSubdivisionFilter::InterpolatePosition (
 }
 
 
-void vtkInterpolatingSubdivisionFilter::GenerateSubdivisionCells (vtkPolyData *inputDS, vtkIntArray *edgeData, vtkCellArray *outputPolys, vtkCellData *outputCD)
+void vtkInterpolatingSubdivisionFilter::GenerateSubdivisionCells (vtkPolyData *inputDS, vtkIdTypeArray *edgeData, vtkCellArray *outputPolys, vtkCellData *outputCD)
 {
   vtkIdType numCells = inputDS->GetNumberOfCells();
   vtkIdType cellId, newId;

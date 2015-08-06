@@ -15,6 +15,7 @@
 #include "vtkCellLocator.h"
 
 #include "vtkCellArray.h"
+#include "vtkIntArray.h"
 #include "vtkGenericCell.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"

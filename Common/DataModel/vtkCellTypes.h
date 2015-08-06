@@ -36,7 +36,7 @@
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkObject.h"
 
-#include "vtkIntArray.h" // Needed for inline methods
+#include "vtkIdTypeArray.h" // Needed for inline methods
 #include "vtkUnsignedCharArray.h" // Needed for inline methods
 #include "vtkCellType.h" // Needed for VTK_EMPTY_CELL
 
@@ -53,19 +53,19 @@ public:
 
   // Description:
   // Add a cell at specified id.
-  void InsertCell(int id, unsigned char type, int loc);
+  void InsertCell(vtkIdType id, unsigned char type, vtkIdType loc);
 
   // Description:
   // Add a cell to the object in the next available slot.
-  vtkIdType InsertNextCell(unsigned char type, int loc);
+  vtkIdType InsertNextCell(unsigned char type, vtkIdType loc);
 
   // Description:
   // Specify a group of cell types.
-  void SetCellTypes(int ncells, vtkUnsignedCharArray *cellTypes, vtkIntArray *cellLocations);
+  void SetCellTypes(vtkIdType ncells, vtkUnsignedCharArray *cellTypes, vtkIdTypeArray *cellLocations);
 
   // Description:
   // Return the location of the cell in the associated vtkCellArray.
-  vtkIdType GetCellLocation(int cellId) { return this->LocationArray->GetValue(cellId);};
+  vtkIdType GetCellLocation(vtkIdType cellId) { return this->LocationArray->GetValue(cellId);};
 
   // Description:
   // Delete cell by setting to NULL cell type.
@@ -85,7 +85,7 @@ public:
 
   // Description:
   // Return the type of cell.
-  unsigned char GetCellType(int cellId) { return this->TypeArray->GetValue(cellId);};
+  unsigned char GetCellType(vtkIdType cellId) { return this->TypeArray->GetValue(cellId);};
 
   // Description:
   // Reclaim any extra memory.
@@ -112,12 +112,12 @@ public:
   // Description:
   // Given an int (as defined in vtkCellType.h) identifier for a class
   // return it's classname.
-  static const char* GetClassNameFromTypeId(int typeId);
+  static const char* GetClassNameFromTypeId(vtkIdType typeId);
 
   // Description:
   // Given a data object classname, return it's int identified (as
   // defined in vtkCellType.h)
-  static int GetTypeIdFromClassName(const char* classname);
+  static vtkIdType GetTypeIdFromClassName(const char* classname);
 
   // Description:
   // This convenience method is a fast check to determine if a cell type
@@ -131,7 +131,7 @@ protected:
   ~vtkCellTypes();
 
   vtkUnsignedCharArray *TypeArray; // pointer to types array
-  vtkIntArray *LocationArray;   // pointer to array of offsets
+  vtkIdTypeArray *LocationArray;   // pointer to array of offsets
   vtkIdType Size;            // allocated size of data
   vtkIdType MaxId;           // maximum index inserted thus far
   vtkIdType Extend;          // grow array by this point

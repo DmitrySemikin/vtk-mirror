@@ -29,7 +29,7 @@ static double butterflyWeights[8] =
   {.5, .5, .125, .125, -.0625, -.0625, -.0625, -.0625};
 
 int vtkButterflySubdivisionFilter::GenerateSubdivisionPoints(
-  vtkPolyData *inputDS, vtkIntArray *edgeData, vtkPoints *outputPts,
+  vtkPolyData *inputDS, vtkIdTypeArray *edgeData, vtkPoints *outputPts,
   vtkPointData *outputPD)
 {
   double *weights, *weights1, *weights2;

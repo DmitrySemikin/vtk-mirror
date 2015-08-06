@@ -18,6 +18,7 @@
 #include "vtkCellData.h"
 #include "vtkDoubleArray.h"
 #include "vtkGenericInterpolatedVelocityField.h"
+#include "vtkIntArray.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"

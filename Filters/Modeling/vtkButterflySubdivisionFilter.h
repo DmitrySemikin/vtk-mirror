@@ -47,7 +47,7 @@
 
 class vtkCellArray;
 class vtkIdList;
-class vtkIntArray;
+class vtkIdTypeArray;
 
 class VTKFILTERSMODELING_EXPORT vtkButterflySubdivisionFilter : public vtkInterpolatingSubdivisionFilter
 {
@@ -62,7 +62,7 @@ protected:
   ~vtkButterflySubdivisionFilter () {}
 
 private:
-  int GenerateSubdivisionPoints(vtkPolyData *inputDS, vtkIntArray *edgeData,
+  int GenerateSubdivisionPoints(vtkPolyData *inputDS, vtkIdTypeArray *edgeData,
                                 vtkPoints *outputPts, vtkPointData *outputPD);
   void GenerateButterflyStencil(vtkIdType p1, vtkIdType p2, vtkPolyData *polys,
                                 vtkIdList *stencilIds, double *weights);

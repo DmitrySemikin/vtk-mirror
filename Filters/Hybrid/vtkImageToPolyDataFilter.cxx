@@ -21,6 +21,7 @@
 #include "vtkImageData.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkIntArray.h"
 #include "vtkLine.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"

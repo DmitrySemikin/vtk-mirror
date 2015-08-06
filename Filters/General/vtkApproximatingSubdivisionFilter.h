@@ -30,7 +30,7 @@
 class vtkCellArray;
 class vtkCellData;
 class vtkIdList;
-class vtkIntArray;
+class vtkIdTypeArray;
 class vtkPoints;
 class vtkPointData;
 
@@ -51,14 +51,14 @@ protected:
 
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   virtual int GenerateSubdivisionPoints (vtkPolyData *inputDS,
-                                          vtkIntArray *edgeData,
+                                          vtkIdTypeArray *edgeData,
                                           vtkPoints *outputPts,
                                           vtkPointData *outputPD) = 0;
-  void GenerateSubdivisionCells (vtkPolyData *inputDS, vtkIntArray *edgeData,
+  void GenerateSubdivisionCells (vtkPolyData *inputDS, vtkIdTypeArray *edgeData,
                                  vtkCellArray *outputPolys,
                                  vtkCellData *outputCD);
   int FindEdge (vtkPolyData *mesh, vtkIdType cellId, vtkIdType p1,
-                vtkIdType p2, vtkIntArray *edgeData, vtkIdList *cellIds);
+                vtkIdType p2, vtkIdTypeArray *edgeData, vtkIdList *cellIds);
   vtkIdType InterpolatePosition (vtkPoints *inputPts, vtkPoints *outputPts,
                                  vtkIdList *stencil, double *weights);
   int NumberOfSubdivisions;

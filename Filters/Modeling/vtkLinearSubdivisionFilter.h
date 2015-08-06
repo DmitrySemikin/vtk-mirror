@@ -49,7 +49,7 @@ protected:
   ~vtkLinearSubdivisionFilter () {}
 
   int GenerateSubdivisionPoints (vtkPolyData *inputDS,
-                                 vtkIntArray *edgeData,
+                                 vtkIdTypeArray *edgeData,
                                  vtkPoints *outputPts,
                                  vtkPointData *outputPD);
 

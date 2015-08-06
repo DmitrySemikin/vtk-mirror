@@ -20,6 +20,7 @@
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkIntArray.h"
 #include "vtkNew.h"
 #include "vtkOBBDicer.h"
 #include "vtkObjectFactory.h"

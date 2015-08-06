@@ -23,6 +23,7 @@
 #include "vtkRectilinearGrid.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkCellArray.h"
+#include "vtkIntArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkStreamingDemandDrivenPipeline.h"

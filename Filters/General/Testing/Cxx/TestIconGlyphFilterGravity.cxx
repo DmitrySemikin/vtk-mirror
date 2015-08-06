@@ -15,6 +15,7 @@
 #include <vtkTexturedActor2D.h>
 #include <vtkAppendPolyData.h>
 #include <vtkDoubleArray.h>
+#include <vtkIntArray.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkPointSet.h>

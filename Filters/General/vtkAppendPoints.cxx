@@ -155,10 +155,10 @@ int vtkAppendPoints::RequestData(vtkInformation *vtkNotUsed(request),
     }
 
   pts->SetNumberOfPoints(totalPoints);
-  vtkSmartPointer<vtkIntArray> idArr;
+  vtkSmartPointer<vtkIdTypeArray> idArr;
   if (this->InputIdArrayName)
     {
-    idArr = vtkSmartPointer<vtkIntArray>::New();
+    idArr = vtkSmartPointer<vtkIdTypeArray>::New();
     idArr->SetName(this->InputIdArrayName);
     idArr->SetNumberOfTuples(totalPoints);
     }

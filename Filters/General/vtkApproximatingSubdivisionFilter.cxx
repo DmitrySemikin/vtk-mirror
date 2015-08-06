@@ -19,6 +19,7 @@
 #include "vtkCellData.h"
 #include "vtkEdgeTable.h"
 #include "vtkIdList.h"
+#include "vtkIdTypeArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkPointData.h"
@@ -55,7 +56,7 @@ int vtkApproximatingSubdivisionFilter::RequestData(
   vtkCellArray *outputPolys;
   vtkPointData *outputPD;
   vtkCellData *outputCD;
-  vtkIntArray *edgeData;
+  vtkIdTypeArray *edgeData;
 
   vtkDebugMacro(<< "Generating subdivision surface using approximating scheme");
   numPts=input->GetNumberOfPoints();
@@ -107,7 +108,7 @@ int vtkApproximatingSubdivisionFilter::RequestData(
     outputPolys->Allocate(outputPolys->EstimateSize(4*numCells,3));
 
     // Create an array to hold new location indices
-    edgeData = vtkIntArray::New();
+    edgeData = vtkIdTypeArray::New();
     edgeData->SetNumberOfComponents(3);
     edgeData->SetNumberOfTuples(numCells);
 
@@ -147,7 +148,7 @@ int vtkApproximatingSubdivisionFilter::RequestData(
 int vtkApproximatingSubdivisionFilter::FindEdge (vtkPolyData *mesh,
                                                  vtkIdType cellId,
                                                  vtkIdType p1, vtkIdType p2,
-                                                 vtkIntArray *edgeData,
+                                                 vtkIdTypeArray *edgeData,
                                                  vtkIdList *cellIds)
 {
 
@@ -210,7 +211,7 @@ vtkIdType vtkApproximatingSubdivisionFilter::InterpolatePosition (
 
 
 void vtkApproximatingSubdivisionFilter::GenerateSubdivisionCells (
-  vtkPolyData *inputDS, vtkIntArray *edgeData, vtkCellArray *outputPolys,
+  vtkPolyData *inputDS, vtkIdTypeArray *edgeData, vtkCellArray *outputPolys,
   vtkCellData *outputCD)
 {
   vtkIdType numCells = inputDS->GetNumberOfCells();

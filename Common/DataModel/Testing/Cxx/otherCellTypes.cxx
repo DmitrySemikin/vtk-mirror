@@ -32,7 +32,7 @@ void TestOCT()
   ct->InsertNextCell(VTK_PIXEL, 1);
 
   vtkUnsignedCharArray *cellTypes = vtkUnsignedCharArray::New();
-  vtkIntArray *cellLocations = vtkIntArray::New();
+  vtkIdTypeArray *cellLocations = vtkIdTypeArray::New();
 
   cellLocations->InsertNextValue (0);
   cellTypes->InsertNextValue(VTK_QUAD);

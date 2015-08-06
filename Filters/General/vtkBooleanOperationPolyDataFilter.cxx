@@ -21,6 +21,7 @@
 #include "vtkGenericCell.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkIntArray.h"
 #include "vtkIntersectionPolyDataFilter.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"

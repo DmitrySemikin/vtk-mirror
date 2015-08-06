@@ -46,6 +46,7 @@
 #include "vtkClipDataSet.h"
 #include "vtkImplicitFunction.h"
 
+#include "vtkIntArray.h"
 #include "vtkPolyData.h"
 #include "vtkCellData.h"
 #include "vtkPointData.h"

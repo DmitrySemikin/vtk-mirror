@@ -25,6 +25,7 @@
 #include "vtkGenericCell.h"
 #include "vtkIdListCollection.h"
 #include "vtkSmartPointer.h"
+#include "vtkIntArray.h"
 #include "vtkCellArray.h"
 #include "vtkPolyData.h"
 #include "vtkBoundingBox.h"

@@ -93,7 +93,7 @@ static const char* vtkCellTypesStrings[] = {
 };
 
 //----------------------------------------------------------------------------
-const char* vtkCellTypes::GetClassNameFromTypeId(int type)
+const char* vtkCellTypes::GetClassNameFromTypeId(vtkIdType type)
 {
   static int numClasses = 0;
 
@@ -118,14 +118,14 @@ const char* vtkCellTypes::GetClassNameFromTypeId(int type)
 }
 
 //----------------------------------------------------------------------------
-int vtkCellTypes::GetTypeIdFromClassName(const char* classname)
+vtkIdType vtkCellTypes::GetTypeIdFromClassName(const char* classname)
 {
   if (!classname)
     {
     return -1;
     }
 
-  for(int idx=0; vtkCellTypesStrings[idx] != NULL; idx++)
+  for(vtkIdType idx=0; vtkCellTypesStrings[idx] != NULL; idx++)
     {
     if (strcmp(vtkCellTypesStrings[idx], classname) == 0)
       {
@@ -189,7 +189,7 @@ int vtkCellTypes::Allocate(int sz, int ext)
     {
     this->LocationArray->UnRegister(this);
     }
-  this->LocationArray = vtkIntArray::New();
+  this->LocationArray = vtkIdTypeArray::New();
   this->LocationArray->Allocate(sz,ext);
   this->LocationArray->Register(this);
   this->LocationArray->Delete();
@@ -199,7 +199,7 @@ int vtkCellTypes::Allocate(int sz, int ext)
 
 //----------------------------------------------------------------------------
 // Add a cell at specified id.
-void vtkCellTypes::InsertCell(int cellId, unsigned char type, int loc)
+void vtkCellTypes::InsertCell(vtkIdType cellId, unsigned char type, vtkIdType loc)
 {
   vtkDebugMacro(<<"Insert Cell id: " << cellId << " at location " << loc);
   TypeArray->InsertValue(cellId, type);
@@ -215,7 +215,7 @@ void vtkCellTypes::InsertCell(int cellId, unsigned char type, int loc)
 
 //----------------------------------------------------------------------------
 // Add a cell to the object in the next available slot.
-vtkIdType vtkCellTypes::InsertNextCell(unsigned char type, int loc)
+vtkIdType vtkCellTypes::InsertNextCell(unsigned char type, vtkIdType loc)
 {
   vtkDebugMacro(<<"Insert Next Cell " << type << " location " << loc);
   this->InsertCell (++this->MaxId,type,loc);
@@ -224,7 +224,7 @@ vtkIdType vtkCellTypes::InsertNextCell(unsigned char type, int loc)
 
 //----------------------------------------------------------------------------
 // Specify a group of cell types.
-void vtkCellTypes::SetCellTypes(int ncells, vtkUnsignedCharArray *cellTypes, vtkIntArray *cellLocations)
+void vtkCellTypes::SetCellTypes(vtkIdType ncells, vtkUnsignedCharArray *cellTypes, vtkIdTypeArray *cellLocations)
 {
   this->Size = ncells;
 
@@ -304,7 +304,7 @@ void vtkCellTypes::DeepCopy(vtkCellTypes *src)
     }
   if (src->LocationArray)
     {
-      this->LocationArray = vtkIntArray::New();
+      this->LocationArray = vtkIdTypeArray::New();
       this->LocationArray->DeepCopy(src->LocationArray);
       this->LocationArray->Register(this);
       this->LocationArray->Delete();

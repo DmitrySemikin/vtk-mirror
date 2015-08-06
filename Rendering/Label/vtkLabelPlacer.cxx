@@ -27,6 +27,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
+#include "vtkIntArray.h"
 #include "vtkLabelHierarchy.h"
 #include "vtkLabelHierarchyIterator.h"
 #include "vtkMatrix4x4.h"

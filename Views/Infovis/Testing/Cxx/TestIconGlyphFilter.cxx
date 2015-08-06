@@ -16,6 +16,7 @@
 #include <vtkFollower.h>
 #include <vtkGraphLayoutView.h>
 #include <vtkGraphMapper.h>
+#include <vtkIntArray.h>
 #include <vtkMutableUndirectedGraph.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>

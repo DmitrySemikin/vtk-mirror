@@ -32,7 +32,7 @@ vtkStandardNewMacro(vtkLoopSubdivisionFilter);
 static double LoopWeights[4] =
   {.375, .375, .125, .125};
 
-int vtkLoopSubdivisionFilter::GenerateSubdivisionPoints (vtkPolyData *inputDS,vtkIntArray *edgeData, vtkPoints *outputPts, vtkPointData *outputPD)
+int vtkLoopSubdivisionFilter::GenerateSubdivisionPoints (vtkPolyData *inputDS,vtkIdTypeArray *edgeData, vtkPoints *outputPts, vtkPointData *outputPD)
 {
   double *weights;
   vtkIdType *pts = 0;

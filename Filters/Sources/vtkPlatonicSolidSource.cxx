@@ -20,6 +20,7 @@
 #include "vtkPolyData.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
+#include "vtkIntArray.h"
 #include "vtkPoints.h"
 
 vtkStandardNewMacro(vtkPlatonicSolidSource);

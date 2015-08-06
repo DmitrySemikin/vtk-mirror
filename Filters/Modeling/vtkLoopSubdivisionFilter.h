@@ -47,7 +47,7 @@
 #include "vtkApproximatingSubdivisionFilter.h"
 
 class vtkPolyData;
-class vtkIntArray;
+class vtkIdTypeArray;
 class vtkPoints;
 class vtkIdList;
 
@@ -65,7 +65,7 @@ protected:
 
   virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
-  int GenerateSubdivisionPoints (vtkPolyData *inputDS, vtkIntArray *edgeData,
+  int GenerateSubdivisionPoints (vtkPolyData *inputDS, vtkIdTypeArray *edgeData,
                                  vtkPoints *outputPts,
                                  vtkPointData *outputPD);
   void GenerateEvenStencil (vtkIdType p1, vtkPolyData *polys,

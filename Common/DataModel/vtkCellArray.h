@@ -331,7 +331,7 @@ inline void vtkCellArray::GetCell(vtkIdType loc, vtkIdType &npts,
 //----------------------------------------------------------------------------
 inline void vtkCellArray::ReverseCell(vtkIdType loc)
 {
-  int i;
+  vtkIdType i;
   vtkIdType tmp;
   vtkIdType npts=this->Ia->GetValue(loc);
   vtkIdType *pts=this->Ia->GetPointer(loc+1);
