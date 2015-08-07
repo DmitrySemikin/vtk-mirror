@@ -96,6 +96,9 @@ public:
   // Get the smallest block size that SMP will split.
   int * GetSMPMinimumBlockSize();
 
+  virtual void SMPInit ();
+  virtual void SMPReduce ();
+
 protected:
   vtkThreadedImageAlgorithm();
   ~vtkThreadedImageAlgorithm();

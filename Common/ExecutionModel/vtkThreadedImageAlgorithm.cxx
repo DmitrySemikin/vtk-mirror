@@ -45,12 +45,24 @@ class vtkThreadedImageAlgorithmFunctor
   vtkMultiThreader::ThreadInfo * ThreadInfo;
   int Ext[6];
   vtkSMPThreadLocal<vtkImageData * > ThreadLocalImageData;
+  vtkThreadedImageAlgorithm * Algo;
 
 public:
-  vtkThreadedImageAlgorithmFunctor(vtkMultiThreader::ThreadInfo * info, int * ext)
+  vtkThreadedImageAlgorithmFunctor(vtkMultiThreader::ThreadInfo * info, int * ext, vtkThreadedImageAlgorithm *algo)
   {
     memcpy(Ext,ext,sizeof (int)*6);
     this->ThreadInfo = info;
+    this->Algo = algo;
+  }
+
+  void Initialize()
+  {
+    this->Algo->SMPInit();
+  }
+
+  void Reduce()
+  {
+    this->Algo->SMPReduce();
   }
 
   VTK_THREAD_RETURN_TYPE Execute(int thread)
@@ -118,17 +130,31 @@ void vtkThreadedImageAlgorithm::SetSMPMinimumBlockSize(int * minBlockSizes)
 }
 
 //----------------------------------------------------------------------------
+vtkThreadedImageAlgorithm::~vtkThreadedImageAlgorithm()
+{
+  this->Threader->Delete();
+  this->Translator->Delete();
+}
+
+
+//----------------------------------------------------------------------------
 int * vtkThreadedImageAlgorithm::GetSMPMinimumBlockSize()
 {
   return this->MinimumBlockSize;
 }
 
 //----------------------------------------------------------------------------
-vtkThreadedImageAlgorithm::~vtkThreadedImageAlgorithm()
+void vtkThreadedImageAlgorithm::SMPInit()
 {
-  this->Threader->Delete();
-  this->Translator->Delete();
+
 }
+
+//----------------------------------------------------------------------------
+void vtkThreadedImageAlgorithm::SMPReduce()
+{
+
+}
+
 
 //----------------------------------------------------------------------------
 void vtkThreadedImageAlgorithm::PrintSelf(ostream& os, vtkIndent indent)
@@ -432,7 +458,7 @@ int vtkThreadedImageAlgorithm::RequestData(
     threadInfo.UserData = &str;
     threadInfo.ThreadID = -1;
 
-    vtkThreadedImageAlgorithmFunctor functor(&threadInfo,updateExtent);
+    vtkThreadedImageAlgorithmFunctor functor(&threadInfo,updateExtent,this);
     vtkSMPTools::For(0, blocks, functor);
 
     this->Debug = debug;
