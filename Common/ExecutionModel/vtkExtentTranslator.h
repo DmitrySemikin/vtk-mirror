@@ -142,8 +142,8 @@ protected:
   struct BlockSizeProperties
   {
       int SplitMode;
-      int MinSize[3];      // The minimum size for each block
-      int NumMicroBlocks[3]; // Number of minimum size blocks
+      unsigned long MinSize[3];      // The minimum size for each block
+      unsigned long  NumMicroBlocks[3]; // Number of minimum size blocks
       int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
       int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
       int MacroToMicro[3];// Number of micro blocks per macro block

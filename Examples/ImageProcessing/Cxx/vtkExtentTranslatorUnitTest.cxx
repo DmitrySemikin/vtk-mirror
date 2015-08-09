@@ -67,13 +67,13 @@ TEST(TestSlabMode)
   // check that 100 percent split how many blocks there are
   int blockPercentage = 100;
 
-  int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE, true, 100, 1, 1, 1);
+  int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE, 100, true, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[1] - startExt[0] + 1);
 
-  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE, true, 100, 1, 1, 1);
+  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE, 100, true, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[3] - startExt[2] + 1);
 
-  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE, true, 100, 1, 1, 1);
+  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE, 100, true, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[5] - startExt[4] +1);
 
   float blockSizesToTest[4] = {10, 30, 50, 90};
