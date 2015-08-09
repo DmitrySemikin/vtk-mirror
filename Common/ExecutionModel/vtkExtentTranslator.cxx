@@ -164,7 +164,7 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
 int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercentage, bool byPoints
                                     ,int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
 {
-  unsigned long size[3];
+  vtkTypeInt64 size[3];
   if (byPoints)
     {
     size[0] = ext[1] - ext[0] + 1;
@@ -241,17 +241,17 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
       }
     }
 
-  unsigned long minSize[3] = {properties->MinSize[0]
+  vtkTypeInt64 minSize[3] = {properties->MinSize[0]
                  ,properties->MinSize[1]
                  ,properties->MinSize[2]};
 
   int startExt[6]= {ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]};
 
-  unsigned long blocks[3];
+  vtkTypeInt64 blocks[3];
   float dimensionsToSplit = 0;
   for (int i=0; i < 3; i++)
     {
-    unsigned long block = size[i] / minSize[i];
+    vtkTypeInt64 block = size[i] / minSize[i];
     if (block == 0 || block == 1)
       {
       block = 1;
@@ -274,7 +274,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
   for (int i =0; i < 3; i++)
     {
     properties->NumMicroBlocks[i] = blocks[i];
-    unsigned long pieces = ceil(splitPercentage / 100.0 * static_cast <float>(blocks[i]));
+    vtkTypeInt64 pieces = ceil(splitPercentage / 100.0 * static_cast <float>(blocks[i]));
 
     if (pieces > INT_MAX)
       {
@@ -286,7 +286,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
     properties->NumMacroBlocks[i] = Pieces;
     properties->MacroToMicro[i] = blocks[i] / Pieces;
     }
-  unsigned long totalPieces =properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
+  vtkTypeInt64 totalPieces =properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
   if (totalPieces > INT_MAX)
       {
       vtkErrorMacro("There are too many blocks with the current configuration.");

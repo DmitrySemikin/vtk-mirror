@@ -96,6 +96,9 @@ public:
   // Get the smallest block size that SMP will split.
   int * GetSMPMinimumBlockSize();
 
+  // Description:
+  // Override this in an inherited class
+  // to initialize or reduce SMP thread local objects
   virtual void SMPInit ();
   virtual void SMPReduce ();
 

@@ -29,6 +29,37 @@
 class vtkInformationIntegerRequestKey;
 class vtkInformationIntegerKey;
 
+class BlockSizeProperties
+{
+public:
+  BlockSizeProperties()
+  {
+    this -> MinSize[0] = -1;
+    this -> MinSize[1] = -1;
+    this -> MinSize[2] = -1;
+
+    this -> NumMicroBlocks[0] = -1;
+    this -> NumMicroBlocks[1] = -1;
+    this -> NumMicroBlocks[2] = -1;
+
+    this -> NumMacroBlocks[0] = -1;
+    this -> NumMacroBlocks[1] = -1;
+    this -> NumMacroBlocks[2] = -1;
+
+    this -> TotalMacroBlocks = -1;
+
+    this -> MacroToMicro[0] = -1;
+    this -> MacroToMicro[1] = -1;
+    this -> MacroToMicro[2] = -1;
+
+  }
+  vtkTypeInt64 MinSize[3];      // The minimum size for each block
+  vtkTypeInt64  NumMicroBlocks[3]; // Number of minimum size blocks
+  int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
+  int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
+  int MacroToMicro[3];// Number of micro blocks per macro block
+};
+
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkExtentTranslator : public vtkObject
 {
 public:
@@ -138,17 +169,7 @@ protected:
   int SplitLen;
 
   bool Initialized;
-
-  struct BlockSizeProperties
-  {
-      int SplitMode;
-      unsigned long MinSize[3];      // The minimum size for each block
-      unsigned long  NumMicroBlocks[3]; // Number of minimum size blocks
-      int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
-      int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
-      int MacroToMicro[3];// Number of micro blocks per macro block
-  };
-  struct BlockSizeProperties BlockProperties;
+  BlockSizeProperties BlockProperties;
 
 private:
   vtkExtentTranslator(const vtkExtentTranslator&);  // Not implemented.

@@ -1,16 +1,12 @@
 /*=========================================================================
-
   Program:   Visualization Toolkit
   Module:    vtkImageIterator.h
-
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
   See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
-
      This software is distributed WITHOUT ANY WARRANTY; without even
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
-
 =========================================================================*/
 // .NAME vtkImageIterator - a simple image iterator
 // .SECTION Description
@@ -54,30 +50,28 @@ public:
   // Return an iterator (pointer) for the span
   SpanIterator BeginSpan()
     {
-    return this->Pointers[0];
+    return this->Pointer;
     }
 
   // Description:
   // Return an iterator (pointer) for the end of the span
   SpanIterator EndSpan()
     {
-    return this->Pointers[1];
+    return this->SpanEndPointer;
     }
 
   // Description:
   // Test if the end of the extent has been reached
   int IsAtEnd()
     {
-    return (this->Pointers[0] >= this->Pointers[3]);
+    return (this->Pointer >= this->EndPointer);
     }
 
 protected:
-  //Pack points together to ensure 1 read per next span
-  // Pointers[0] is Pointer
-  // Pointers[1] is SpanEndPointer
-  // Pointers[2] is SliceEndPointer
-  // Pointers[3] is EndPointer
-  DType *Pointers[4];
+  DType *Pointer;
+  DType *SpanEndPointer;
+  DType *SliceEndPointer;
+  DType *EndPointer;
   vtkIdType    Increments[3];
   vtkIdType    ContinuousIncrements[3];
 };
