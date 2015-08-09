@@ -160,12 +160,22 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
   return 1;
 }
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercentage
+int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercentage, bool byPoints
                                     ,int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
 {
-  int size[3] = {ext[1] - ext[0] + 1
-                ,ext[3] - ext[2] + 1
-                ,ext[5] - ext[4] + 1};
+  int size[3];
+  if (byPoints)
+    {
+    size[0] = ext[1] - ext[0] + 1;
+    size[1] = ext[3] - ext[2] + 1;
+    size[2] = ext[5] - ext[4] + 1;
+    }
+  else
+    {
+    size[0] = ext[1] - ext[0];
+    size[1] = ext[3] - ext[2];
+    size[2] = ext[5] - ext[4];
+    }
 
   BlockSizeProperties * properties = &this->BlockProperties;
 

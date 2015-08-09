@@ -35,3 +35,8 @@ int vtkImageTestMandelbrotSource::RequestData(vtkInformation *request,
 
   return 1;
 }
+
+void vtkImageTestMandelbrotSource::PrintSelf(ostream& os, vtkIndent indent)
+{
+  this->Superclass::PrintSelf(os,indent);
+}

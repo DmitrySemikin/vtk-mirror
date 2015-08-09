@@ -16,6 +16,7 @@ public:
   int RequestData(vtkInformation *request,
                           vtkInformationVector** inputVector,
                           vtkInformationVector* outputVector);
+  void PrintSelf(ostream& os, vtkIndent indent);
 };
 
 #endif

@@ -67,13 +67,13 @@ TEST(TestSlabMode)
   // check that 100 percent split how many blocks there are
   int blockPercentage = 100;
 
-  int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE, 100, 1, 1, 1);
+  int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE, true, 100, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[1] - startExt[0] + 1);
 
-  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE, 100, 1, 1, 1);
+  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE, true, 100, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[3] - startExt[2] + 1);
 
-  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE, 100, 1, 1, 1);
+  blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE, true, 100, 1, 1, 1);
   CHECK_EQUAL(blocks,startExt[5] - startExt[4] +1);
 
   float blockSizesToTest[4] = {10, 30, 50, 90};
@@ -83,6 +83,7 @@ TEST(TestSlabMode)
     //X_SLAB_MODE
     int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE
                                          , blockPercentage
+                                         , true
                                          , MinimumBlockSize[0]
                                          , MinimumBlockSize[1]
                                          , MinimumBlockSize[2]);
@@ -99,6 +100,7 @@ TEST(TestSlabMode)
     //Y_SLAB_MODE
     blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE
                                      , blockPercentage
+                                     , true
                                      , MinimumBlockSize[0]
                                      , MinimumBlockSize[1]
                                      , MinimumBlockSize[2]);
@@ -115,6 +117,7 @@ TEST(TestSlabMode)
     //Z_SLAB_MODE
     blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE
                                      , blockPercentage
+                                     , true
                                      , MinimumBlockSize[0]
                                      , MinimumBlockSize[1]
                                      , MinimumBlockSize[2]);
@@ -149,6 +152,7 @@ TEST(Test2DSplitMode)
     //XZ_MODE
     int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XZ_MODE
                                        , blockPercentage
+                                       , true
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
@@ -166,6 +170,7 @@ TEST(Test2DSplitMode)
     //XY_MODE
     blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XY_MODE
                                     , blockPercentage
+                                    , true
                                     , MinimumBlockSize[0]
                                     , MinimumBlockSize[1]
                                     , MinimumBlockSize[2]);
@@ -182,6 +187,7 @@ TEST(Test2DSplitMode)
     //YZ_MODE
     blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::YZ_MODE
                                     , blockPercentage
+                                    , true
                                     , MinimumBlockSize[0]
                                     , MinimumBlockSize[1]
                                     , MinimumBlockSize[2]);
@@ -218,6 +224,7 @@ TEST(Test3DSplitMode)
     float blockPercentage = blockSizesToTest[i];
     int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::BLOCK_MODE
                                        , blockPercentage
+                                       , true
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
@@ -245,6 +252,7 @@ TEST(TestEmptyExtent)
   int splitExt[6];
   int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::BLOCK_MODE
                                       , blockPercentage
+                                      , true
                                       , MinimumBlockSize[0]
                                       , MinimumBlockSize[1]
                                       , MinimumBlockSize[2]);
@@ -272,6 +280,7 @@ TEST(TestDefaultMode)
   int splitExt[6];
   int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::DEFAULT_MODE
                                       , blockPercentage
+                                      , true
                                       , MinimumBlockSize[0]
                                       , MinimumBlockSize[1]
                                       , MinimumBlockSize[2]);
@@ -292,6 +301,7 @@ TEST(TestDefaultMode)
   int startExt2[6] = {0, 300, 0, 301, 33, 33};
   blocks = translator->SetUpExtent(startExt2,vtkExtentTranslator::DEFAULT_MODE
                                       , blockPercentage
+                                      , true
                                       , MinimumBlockSize[0]
                                       , MinimumBlockSize[1]
                                       , MinimumBlockSize[2]);
@@ -311,6 +321,7 @@ TEST(TestDefaultMode)
   int startExt3[6] = {0, 300, 22, 22, 33, 33};
   blocks = translator->SetUpExtent(startExt3,vtkExtentTranslator::DEFAULT_MODE
                                     , blockPercentage
+                                    , true
                                     , MinimumBlockSize[0]
                                     , MinimumBlockSize[1]
                                     , MinimumBlockSize[2]);

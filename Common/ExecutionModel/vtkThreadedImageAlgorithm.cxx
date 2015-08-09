@@ -445,6 +445,7 @@ int vtkThreadedImageAlgorithm::RequestData(
 
     int blocks = this->Translator->SetUpExtent(updateExtent,this->SplitMode
                                               ,this->SMPSplitPercentage
+                                              ,this->SplitByPoints
                                               ,this->MinimumBlockSize[0]
                                               ,this->MinimumBlockSize[1]
                                               ,this->MinimumBlockSize[2]);

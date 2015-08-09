@@ -68,7 +68,7 @@ public:
   // This must be called to before the call to splitExtent.
   // This function calculates the appropiate number of blocks to split by and
   // the correct indexing scheme.
-  virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
+  virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, bool byPoints, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
 
   // Description:
   // How should the streamer break up extents. Block mode
