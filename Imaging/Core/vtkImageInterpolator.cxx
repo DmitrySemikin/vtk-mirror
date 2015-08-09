@@ -434,35 +434,37 @@ void vtkImageNLCInterpolate<F, T>::Tricubic(
   if (multipleY == 0) { fY[1] = 1; }
   if (multipleZ == 0) { fZ[1] = 1; }
 
-  do // loop over components
-    {
-    F val = 0;
+ do // loop over components
+  {
+    F val1 = F(0);
+    F val2 = F(0);
+    F val3 = F(0);
+    F val4 = F(0);
     int k = k1;
     do // loop over z
       {
       F ifz = fZ[k];
       vtkIdType factz = factZ[k];
       int j = j1;
-      do // loop over y
+      do // loop over z
         {
-        F ify = fY[j];
-        F fzy = ifz*ify;
-        vtkIdType factzy = factz + factY[j];
-        const T *tmpPtr = inPtr + factzy;
-        // loop over x is unrolled (significant performance boost)
-        val += fzy*(fX[0]*tmpPtr[factX[0]] +
-                    fX[1]*tmpPtr[factX[1]] +
-                    fX[2]*tmpPtr[factX[2]] +
-                    fX[3]*tmpPtr[factX[3]]);
+          F ify = fY[j];
+          const F fzy = ifz*ify;
+          vtkIdType factzy = factz + factY[j];
+          const T *tmpPtr = inPtr + factzy;
+          val1 +=tmpPtr[factX[0]] * fzy;
+          val2 +=tmpPtr[factX[1]] * fzy;
+          val3 +=tmpPtr[factX[2]] * fzy;
+          val4 +=tmpPtr[factX[3]] * fzy;
+
         }
       while (++j <= j2);
       }
     while (++k <= k2);
-
-    *outPtr++ = val;
+    *outPtr++ = (fX[0]*val1 + fX[1]*val2) + (fX[2]*val3 + fX[3]*val4);
     inPtr++;
-    }
-  while (--numscalars);
+  }
+   while (--numscalars);
 }
 
 //----------------------------------------------------------------------------
