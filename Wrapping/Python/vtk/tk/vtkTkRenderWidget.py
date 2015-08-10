@@ -44,9 +44,14 @@ i.e. set to some initial value.  Don't forget that 'None' means
 'NULL' - the python/vtk wrappers guarantee their equivalence.
 """
 
-import Tkinter
 import math, os, sys
 import vtk
+try:
+    # for Python2
+    import Tkinter as tk
+except ImportError:
+    # for Python3
+    import tkinter as tk
 
 from vtkLoadPythonTkWidgets import vtkLoadPythonTkWidgets
 

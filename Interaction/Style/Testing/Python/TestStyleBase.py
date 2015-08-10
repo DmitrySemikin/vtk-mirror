@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import vtk
 
 
@@ -35,7 +37,7 @@ class TestStyleBase(object):
         style.UseTimersOff()
         style.AutoAdjustCameraClippingRangeOn()
 
-        print "Testing: " + style.GetClassName()
+        print("Testing: " + style.GetClassName())
 
         iren = style.GetInteractor()
         renwin = iren.GetRenderWindow()
@@ -54,9 +56,9 @@ class TestStyleBase(object):
 
         for ctrl in ctrls:
             for shift in shifts:
-                print " - ctrl: " + str(ctrl) + " shift: " + str(shift) + " " + "button: ",
+                print(" - ctrl: " + str(ctrl) + " shift: " + str(shift) + " " + "button: ", end=' ')
                 for button in buttons:
-                    print button,
+                    print(button, end=' ')
                     # First try to find a starting position where an actor
                     # can be picked (not mandatory for trackball modes).
                     # Search in increasingly big area, until we reach win size
@@ -70,7 +72,7 @@ class TestStyleBase(object):
                             break
                         else:
                             if search > win_center_x or search > win_center_y:
-                                print "   (resetting camera)",
+                                print("   (resetting camera)", end=' ')
                                 self.ren1.ResetCamera()
                                 search = radius
                             else:
@@ -111,7 +113,7 @@ class TestStyleBase(object):
                     iren.SetEventInformationFlipY(x, y, ctrl, shift, '', 0, '')
                     eval('iren.InvokeEvent("' + button + 'ButtonReleaseEvent")')
 
-                print "."
+                print(".")
 
         style.SetUseTimers(use_timers)
 
