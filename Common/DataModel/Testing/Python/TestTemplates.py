@@ -53,7 +53,7 @@ class TestTemplates(Testing.vtkTest):
                 result = a.GetValue(i)
                 self.assertEqual(value, result)
             elif t in [str, 'str', 'unicode']:
-                value = unicode"hello"
+                value = u"hello"
                 a.SetValue(i, value)
                 result = a.GetValue(i)
                 self.assertEqual(value, result)
