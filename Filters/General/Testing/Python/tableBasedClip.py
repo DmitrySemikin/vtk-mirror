@@ -6,6 +6,21 @@ VTK_DATA_ROOT = vtkGetDataRoot()
 import sys
 
 class TestClip(Testing.vtkTest):
+    def testImage2DScalar(self):
+        r = vtk.vtkRTAnalyticSource()
+        r.SetWholeExtent(-5, 5, -5, 5, 0, 0)
+        r.Update()
+
+        c = vtk.vtkTableBasedClipDataSet()
+        c.SetInputConnection(r.GetOutputPort())
+        c.SetUseValueAsOffset(0)
+        c.SetValue(150)
+        c.SetInsideOut(1)
+
+        c.Update()
+
+        self.assertEqual(c.GetOutput().GetNumberOfCells(), 35)
+
     def testImage(self):
         r = vtk.vtkRTAnalyticSource()
         r.SetWholeExtent(-5, 5, -5, 5, -5, 5)

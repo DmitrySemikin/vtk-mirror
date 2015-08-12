@@ -1833,18 +1833,7 @@ int vtkTableBasedClipDataSet::RequestData( vtkInformation * vtkNotUsed( request 
                     ?  this->Value  :  0.0;
   if ( gridType == VTK_IMAGE_DATA || gridType == VTK_STRUCTURED_POINTS )
     {
-    int   numbDims;
-    int * dataDims = vtkImageData::SafeDownCast( cpyInput )->GetDimensions();
-    for ( numbDims = 3, i = 0; i < 3; i ++ )
-      {
-      numbDims -= (  ( dataDims[i] <= 1 ) ? 1 : 0  );
-      }
-    dataDims = NULL;
-
-    if ( numbDims == 3 )
-      {
-      this->ClipImageData( cpyInput.GetPointer(), clipAray, isoValue, outputUG );
-      }
+    this->ClipImageData( cpyInput.GetPointer(), clipAray, isoValue, outputUG );
     }
   else
   if ( gridType == VTK_POLY_DATA )
