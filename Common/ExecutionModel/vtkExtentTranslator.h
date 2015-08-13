@@ -94,9 +94,13 @@ public:
                                       int ghostLevel, int *wholeExtent,
                                       int *resultExtent, int splitMode,
                                       int byPoints);
+  virtual int PieceToExtentThreadSafeImaging(int piece, int numPieces,
+                                      int ghostLevel, int *wholeExtent,
+                                      int *resultExtent, int splitMode,
+                                      int byPoints);
 
   // Description:
-  // This must be called to before the call to splitExtent.
+  // This must be called to before the call to SplitExtentImaging.
   // This function calculates the appropiate number of blocks to split by and
   // the correct indexing scheme.
   virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, bool byPoints, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
@@ -156,7 +160,14 @@ protected:
   // Returns 0 if no data exist for a piece.
   // The whole extent Should be passed in as the extent.
   // It is modified to return the result.
-  int SplitExtent(int piece, int numPieces, int *extent, int splitMode,bool byPoints );
+  int SplitExtent(int piece, int numPieces, int *extent, int splitMode);
+  int SplitExtentByPoints(int piece, int numPieces, int *extent,
+                          int splitMode);
+  // Description:
+  // This is used in conjuncture with SetUpExtent.
+  // It is currently only used for SMP Imaging pipeline.
+  int SplitExtentImaging(int piece, int numPieces, int *ext,
+                                     int splitMode, bool byPoints);
 
   int Piece;
   int NumberOfPieces;

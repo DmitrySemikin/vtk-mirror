@@ -17,6 +17,9 @@ public:
                           vtkInformationVector** inputVector,
                           vtkInformationVector* outputVector);
   void PrintSelf(ostream& os, vtkIndent indent);
+private:
+  vtkImageTestMandelbrotSource(const vtkImageTestMandelbrotSource&);  // Not implemented.
+  void operator=(const vtkImageTestMandelbrotSource&);  // Not implemented.
 };
 
 #endif

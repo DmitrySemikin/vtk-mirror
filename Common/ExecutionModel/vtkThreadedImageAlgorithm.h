@@ -22,8 +22,6 @@
 // .SECTION See also
 // vtkSimpleImageToImageAlgorithm
 
-#define MAX_SMP_BLOCK_SIZE  10000000
-
 #ifndef vtkThreadedImageAlgorithm_h
 #define vtkThreadedImageAlgorithm_h
 
@@ -66,6 +64,11 @@ public:
   // Putting this here until I merge graphics and imaging streaming.
   virtual int SplitExtent(int splitExt[6], int startExt[6],
                           int num, int total);
+
+  // Description:
+  // Disable SMP for all derived Imaging filters.
+  static void SetGlobalEnableSMP(bool enable);
+  static bool GetGlobalEnableSMP();
 
   // Description:
   // Enable/Disable SMP for threading.

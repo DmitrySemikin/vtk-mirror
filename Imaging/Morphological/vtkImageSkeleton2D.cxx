@@ -30,7 +30,7 @@ vtkStandardNewMacro(vtkImageSkeleton2D);
 vtkImageSkeleton2D::vtkImageSkeleton2D()
 {
   this->Prune = 0;
-  this->SplitMode = vtkExtentTranslator::DEFAULT_MODE;
+  this->EnableSMP = false;
 }
 
 //----------------------------------------------------------------------------

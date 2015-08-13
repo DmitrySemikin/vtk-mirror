@@ -28,6 +28,8 @@
 #include "vtkExtentTranslator.h"
 
 
+static bool GlobalEnableSMP = false;
+
 static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *arg );
 
 struct vtkImageThreadStruct
@@ -136,6 +138,19 @@ vtkThreadedImageAlgorithm::~vtkThreadedImageAlgorithm()
   this->Translator->Delete();
 }
 
+void vtkThreadedImageAlgorithm::SetGlobalEnableSMP(bool enable)
+{
+  if (enable == GlobalEnableSMP)
+    {
+    return;
+    }
+  GlobalEnableSMP = enable;
+}
+bool vtkThreadedImageAlgorithm::GetGlobalEnableSMP()
+{
+  return GlobalEnableSMP;
+}
+
 
 //----------------------------------------------------------------------------
 int * vtkThreadedImageAlgorithm::GetSMPMinimumBlockSize()
@@ -144,17 +159,13 @@ int * vtkThreadedImageAlgorithm::GetSMPMinimumBlockSize()
 }
 
 //----------------------------------------------------------------------------
+// Derived class will override these if they have custom ThreadLocal initlization/reduction
 void vtkThreadedImageAlgorithm::SMPInit()
 {
-
 }
-
-//----------------------------------------------------------------------------
 void vtkThreadedImageAlgorithm::SMPReduce()
 {
-
 }
-
 
 //----------------------------------------------------------------------------
 void vtkThreadedImageAlgorithm::PrintSelf(ostream& os, vtkIndent indent)
@@ -186,63 +197,63 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
     }
 
   int ret;
-  if (this->EnableSMP) // this is block mode splitting
+  if (this->EnableSMP && GlobalEnableSMP) // this is block mode splitting
     {
-    ret = this->Translator->PieceToExtentThreadSafe(num,total,0,startExt,splitExt,this->SplitMode,this->SplitByPoints);
+    ret = this->Translator->PieceToExtentThreadSafeImaging(num,total,0,startExt,splitExt,this->SplitMode,this->SplitByPoints);
     }
   else
     {
-   // start with same extent
-  memcpy(splitExt, startExt, 6 * sizeof(int));
+    // start with same extent
+    memcpy(splitExt, startExt, 6 * sizeof(int));
 
-  splitAxis = 2;
-  min = startExt[4];
-  max = startExt[5];
-  while (min >= max)
-    {
-    // empty extent so cannot split
-    if (min > max)
+    splitAxis = 2;
+    min = startExt[4];
+    max = startExt[5];
+    while (min >= max)
       {
-      return 1;
+      // empty extent so cannot split
+      if (min > max)
+        {
+        return 1;
+        }
+      --splitAxis;
+      if (splitAxis < 0)
+        { // cannot split
+        vtkDebugMacro("  Cannot Split");
+        return 1;
+        }
+      min = startExt[splitAxis*2];
+      max = startExt[splitAxis*2+1];
       }
-    --splitAxis;
-    if (splitAxis < 0)
-      { // cannot split
-      vtkDebugMacro("  Cannot Split");
-      return 1;
+
+    // determine the actual number of pieces that will be generated
+    int range = max - min + 1;
+    int valuesPerThread = static_cast<int>(ceil(range/static_cast<double>(total)));
+    int maxThreadIdUsed = static_cast<int>(ceil(range/static_cast<double>(valuesPerThread))) - 1;
+    if (num < maxThreadIdUsed)
+      {
+      splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
+      splitExt[splitAxis*2+1] = splitExt[splitAxis*2] + valuesPerThread - 1;
       }
-    min = startExt[splitAxis*2];
-    max = startExt[splitAxis*2+1];
-    }
+    if (num == maxThreadIdUsed)
+      {
+      splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
+      }
 
-  // determine the actual number of pieces that will be generated
-  int range = max - min + 1;
-  int valuesPerThread = static_cast<int>(ceil(range/static_cast<double>(total)));
-  int maxThreadIdUsed = static_cast<int>(ceil(range/static_cast<double>(valuesPerThread))) - 1;
-  if (num < maxThreadIdUsed)
-    {
-    splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
-    splitExt[splitAxis*2+1] = splitExt[splitAxis*2] + valuesPerThread - 1;
-    }
-  if (num == maxThreadIdUsed)
-    {
-    splitExt[splitAxis*2] = splitExt[splitAxis*2] + num*valuesPerThread;
-    }
+    vtkDebugMacro("  Split Piece: ( " <<splitExt[0]<< ", " <<splitExt[1]<< ", "
+                  << splitExt[2] << ", " << splitExt[3] << ", "
+                  << splitExt[4] << ", " << splitExt[5] << ")");
 
-  vtkDebugMacro("  Split Piece: ( " <<splitExt[0]<< ", " <<splitExt[1]<< ", "
-                << splitExt[2] << ", " << splitExt[3] << ", "
-                << splitExt[4] << ", " << splitExt[5] << ")");
-
-  return maxThreadIdUsed + 1;
+    return maxThreadIdUsed + 1;
     }
-  if(ret == 1)//there is a return extent
-    {
-    return num+1;
-    }
-  else // there was no piece returned
-    {
-    return 0;
-    }
+    if(ret == 1)//there is a return extent
+      {
+      return num+1;
+      }
+    else // there was no piece returned
+      {
+      return 0;
+      }
 }
 
 // this mess is really a simple function. All it does is call
@@ -409,7 +420,7 @@ int vtkThreadedImageAlgorithm::RequestData(
     this->CopyAttributeData(str.Inputs[0][0],str.Outputs[0],inputVector);
     }
 
-  if (this->EnableSMP)
+  if (this->EnableSMP && GlobalEnableSMP)
     {
     // verify that the request number of blocks is valid
     int updateExtent[6];

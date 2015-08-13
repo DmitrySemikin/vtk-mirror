@@ -802,7 +802,7 @@ int vtkImageHistogram::RequestData(
       }
     }
 
-  if (this->EnableSMP)
+  if (this->EnableSMP && vtkImageHistogram::GetGlobalEnableSMP())
     {
     int blocks = this->Translator->SetUpExtent(inputExt,this->SplitMode
                                           ,this->SMPSplitPercentage
@@ -933,8 +933,10 @@ void vtkImageHistogram::ThreadedRequestData(
 
   double scalarRange[2];
 
+  bool EnableThreadLocalFeature = this->EnableSMP && vtkImageHistogram::GetGlobalEnableSMP();
+
   int *binRange;
-  if (this->EnableSMP)
+  if (EnableThreadLocalFeature)
     {
     binRange = this->functor->ThreadLocalHistogram.Local().ThreadLocalRange;
     }
@@ -986,18 +988,7 @@ void vtkImageHistogram::ThreadedRequestData(
     }
 
   vtkIdType *histogram;
-  if (!this->EnableSMP)
-    {
-    binRange[0] = vtkMath::Floor(minBinRange + 0.5);
-    binRange[1] = vtkMath::Floor(maxBinRange + 0.5);
-    // allocate the histogram
-    int n = binRange[1] - binRange[0] + 1;
-    histogram = new vtkIdType[n];
-    this->ThreadOutput[threadId] = histogram;
-    vtkIdType *tmpPtr = histogram;
-    do { *tmpPtr++ = 0; } while (--n);
-    }
-  else
+  if (EnableThreadLocalFeature)
     {
     int a = vtkMath::Floor(minBinRange + 0.5);
     int b = vtkMath::Floor(maxBinRange + 0.5);
@@ -1011,16 +1002,31 @@ void vtkImageHistogram::ThreadedRequestData(
       }
     histogram = this->functor->ThreadLocalHistogram.Local().ThreadLocalHistogram;
     }
+  else
+    {
+    binRange[0] = vtkMath::Floor(minBinRange + 0.5);
+    binRange[1] = vtkMath::Floor(maxBinRange + 0.5);
+    // allocate the histogram
+    int n = binRange[1] - binRange[0] + 1;
+    histogram = new vtkIdType[n];
+    this->ThreadOutput[threadId] = histogram;
+    vtkIdType *tmpPtr = histogram;
+    do { *tmpPtr++ = 0; } while (--n);
+    }
 
   // generate the histogram
   if (useFastExecute)
     {
     // adjust the pointer to allow direct indexing
-    if (!this->EnableSMP)
+    if (EnableThreadLocalFeature)
+      {
+      histogram -= vtkMath::Floor(binOrigin + 0.5);
+      }
+    else
       {
       histogram -= binRange[0];
       }
-    histogram -= vtkMath::Floor(binOrigin + 0.5);
+
 
     // fast path for integer data
     switch(scalarType)
@@ -1036,11 +1042,10 @@ void vtkImageHistogram::ThreadedRequestData(
   else
     {
     // adjust the pointer to allow direct indexing
-    if (!this->EnableSMP)
+    if (!EnableThreadLocalFeature)
       {
       histogram -= binRange[0];
       }
-
     // bin via floating point shift/scale
     switch (scalarType)
       {
