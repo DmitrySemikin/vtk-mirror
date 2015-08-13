@@ -566,10 +566,12 @@ void vtkViewport::NormalizedDisplayToDisplay(double &u, double &v)
 
     /* get physical window dimensions */
     size = this->VTKWindow->GetSize();
-    if (size)
+    if (size &&
+        size[0] > 1 &&
+        size[1] > 1)
       {
-      u = u*size[0];
-      v = v*size[1];
+      u = u*(size[0] - 1.0);
+      v = v*(size[1] - 1.0);
       }
     }
 }
