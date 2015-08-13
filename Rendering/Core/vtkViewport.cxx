@@ -460,8 +460,8 @@ void vtkViewport::DisplayToNormalizedDisplay(double &u, double &v)
         size[0] != 0 &&
         size[1] != 0)
       {
-      u = u/size[0];
-      v = v/size[1];
+      u = u/(size[0]-1);
+      v = v/(size[1]-1);
       }
     }
 }
