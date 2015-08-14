@@ -434,7 +434,7 @@ void vtkImageNLCInterpolate<F, T>::Tricubic(
   if (multipleY == 0) { fY[1] = 1; }
   if (multipleZ == 0) { fZ[1] = 1; }
 
- do // loop over components
+  do // loop over components
   {
     F val1 = F(0);
     F val2 = F(0);

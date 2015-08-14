@@ -568,6 +568,10 @@ void vtkImageHistogramGenerateImage(
 }
 } // end anonymous namespace
 
+// Description:
+// This is a container used for thread local storage
+// ThreadLocalHistogram is the calculated local histogram
+// while ThreadLocalRange is the range for ThreadLocalHistogram.
 struct ThreadLocalSum
 {
   vtkIdType * ThreadLocalHistogram;

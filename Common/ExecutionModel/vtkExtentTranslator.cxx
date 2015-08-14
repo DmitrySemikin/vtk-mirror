@@ -224,7 +224,7 @@ int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece, int numPieces
   return 1;
 }
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercentage, bool byPoints
+int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPercentage, bool byPoints
                                     ,int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
 {
   vtkTypeInt64 size[3];
@@ -344,10 +344,8 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
       vtkErrorMacro("There are too many blocks with the current configuration.");
       return -1;
       }
-
-    int Pieces = pieces;
-    properties->NumMacroBlocks[i] = Pieces;
-    properties->MacroToMicro[i] = blocks[i] / Pieces;
+    properties->NumMacroBlocks[i] = pieces;
+    properties->MacroToMicro[i] = blocks[i] / pieces;
     }
   vtkTypeInt64 totalPieces =properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
   if (totalPieces > INT_MAX)
@@ -367,7 +365,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, float splitPercen
 int vtkExtentTranslator::SplitExtentImaging(int piece, int numPieces, int *ext,
                                      int splitMode, bool byPoints)
 {
-  if (!Initialized)
+  if (!this -> Initialized)
     {
     vtkErrorMacro("SplitExtent has not being initialized.");
     return -1;
@@ -377,9 +375,9 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int numPieces, int *ext,
   int sY = ext[3] - ext[2] + 1;
   int sZ = ext[5] - ext[4] + 1;
 
-  int minSize[3] = {this->BlockProperties.MinSize[0]
-                 ,this->BlockProperties.MinSize[1]
-                 ,this->BlockProperties.MinSize[2]};
+  int minSize[3] = {this->BlockProperties.MinSize[0],
+                    this->BlockProperties.MinSize[1],
+                    this->BlockProperties.MinSize[2]};
 
   //Rotate axis based on whether blockmode, xy ,xz or yz split
   int planeAxis;
@@ -722,6 +720,22 @@ void vtkExtentTranslator::PrintSelf(ostream& os, vtkIndent indent)
   else if (this->SplitMode == vtkExtentTranslator::Z_SLAB_MODE)
     {
     os << "Z Slab\n";
+    }
+  else if (this->SplitMode == vtkExtentTranslator::XZ_MODE)
+    {
+    os << "X Z\n";
+    }
+  else if (this->SplitMode == vtkExtentTranslator::XY_MODE)
+    {
+    os << "X Y\n";
+    }
+  else if (this->SplitMode == vtkExtentTranslator::YZ_MODE)
+    {
+    os << "Y Z\n";
+    }
+  else if (this->SplitMode == vtkExtentTranslator::DEFAULT_MODE)
+    {
+    os << "Default\n";
     }
   else
     {

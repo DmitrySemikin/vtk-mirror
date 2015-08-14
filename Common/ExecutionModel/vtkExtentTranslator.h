@@ -29,6 +29,13 @@
 class vtkInformationIntegerRequestKey;
 class vtkInformationIntegerKey;
 
+// Description:
+// This class is used as storage to calculate the correct
+// indexing for SplitExtentImaging.  NumMicroBlocks
+// is the number of minimum size blocks calculated by
+// ext/minsize.  Macroblocks is the number of microblocks
+// taking into consideration the split percentage.  Finally,
+// Macro to micro is the ratio between the two.
 class BlockSizeProperties
 {
 public:
@@ -103,7 +110,7 @@ public:
   // This must be called to before the call to SplitExtentImaging.
   // This function calculates the appropiate number of blocks to split by and
   // the correct indexing scheme.
-  virtual int SetUpExtent(int * ext,int splitMode, float splitPercentage, bool byPoints, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
+  virtual int SetUpExtent(int * ext,int splitMode, double splitPercentage, bool byPoints, int minBlockSizeX,int minBlockSizeY, int minBlockSizeZ);
 
   // Description:
   // How should the streamer break up extents. Block mode
@@ -133,14 +140,14 @@ public:
   // to indicate array indices.
   enum Modes
   {
-    X_SLAB_MODE =0,
-    Y_SLAB_MODE =1,
-    Z_SLAB_MODE =2,
-    BLOCK_MODE  =3,
-    XZ_MODE     =4,
-    XY_MODE     =5,
-    YZ_MODE     =6,
-    DEFAULT_MODE=7
+    X_SLAB_MODE =0,  // Split along X axis
+    Y_SLAB_MODE =1,  // Split along Y axis
+    Z_SLAB_MODE =2,  // Split along Z axis
+    BLOCK_MODE  =3,  // Split along X Y Z axis
+    XZ_MODE     =4,  // Split along X Z axis
+    XY_MODE     =5,  // Split along X Y axis
+    YZ_MODE     =6,  // Split along Y Z axis
+    DEFAULT_MODE=7   // Split along first axis that isn't a single slice, will try Z then Y then X.
   };
 
   // Description:

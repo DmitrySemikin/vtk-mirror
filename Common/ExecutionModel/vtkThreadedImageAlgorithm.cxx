@@ -448,8 +448,8 @@ int vtkThreadedImageAlgorithm::RequestData(
         }
       }
     if (updateExtent[1] < updateExtent[0] ||
-      updateExtent[3] < updateExtent[2] ||
-      updateExtent[5] < updateExtent[4])
+        updateExtent[3] < updateExtent[2] ||
+        updateExtent[5] < updateExtent[4])
       {
       return -1;
       }

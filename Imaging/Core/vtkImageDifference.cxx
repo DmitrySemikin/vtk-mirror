@@ -19,26 +19,54 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkSMPTools.h"
 
 vtkStandardNewMacro(vtkImageDifference);
+// anonymous namespace for internal classes and functions// anonymous namespace for internal classes and functions
+namespace {
+vtkSMPThreadLocal<double> TLSError;
+vtkSMPThreadLocal<double> TLSThresholdError;
+}
 
 // Construct object to extract all of the input data.
 vtkImageDifference::vtkImageDifference()
 {
   int i;
-  for ( i = 0; i < 100000; i++ )
+  for ( i = 0; i < 1000; i++ )
     {
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
     }
-  this->EnableSMP = false;
+  this->EnableSMP = true;
   this->Threshold = 16;
   this->AllowShift = 1;
   this->Averaging = 1;
   this->SetNumberOfInputPorts(2);
   this->SMPSplitPercentage = 40.0;
+  this->TLError = 0.0;
+  this->TLThresholdError = 0.0;
 }
 
+void vtkImageDifference::Initialize()
+{
+  TLSError.Local() = 0;
+  TLSThresholdError.Local() = 0;
+}
+void vtkImageDifference::SMPReduce()
+{
+  vtkSMPThreadLocal<double>::iterator itr = TLSError.begin();
+  while (itr != TLSError.end())
+    {
+    this->TLError += *itr;
+    itr++;
+    }
+  vtkSMPThreadLocal<double>::iterator itr2 = TLSThresholdError.begin();
+  while (itr2 != TLSThresholdError.end())
+    {
+    this->TLThresholdError += *itr2;
+    itr2++;
+    }
+}
 // not so simple macro for calculating error
 #define vtkImageDifferenceComputeError(c1,c2) \
 /* compute the pixel to pixel difference first */ \
@@ -184,14 +212,25 @@ void vtkImageDifference::ThreadedRequestData(
   this->ErrorPerThread[id] = 0;
   this->ThresholdedErrorPerThread[id] = 0;
 
+  double * tlsErrorPtr = &TLSError.Local();
+  double * tlsThresholdErrorPtr = &TLSThresholdError.Local();
+
   if (inData[0] == NULL || inData[1] == NULL || outData == NULL)
     {
     if (!id)
       {
       vtkErrorMacro(<< "Execute: Missing data");
       }
-    this->ErrorPerThread[id] = 1000;
-    this->ThresholdedErrorPerThread[id] = 1000;
+    if (this -> EnableSMP)
+      {
+      *tlsErrorPtr = 1000;
+      *tlsThresholdErrorPtr = 1000;
+      }
+    else
+      {
+      this->ErrorPerThread[id] = 1000;
+      this->ThresholdedErrorPerThread[id] = 1000;
+      }
     return;
     }
 
@@ -203,8 +242,16 @@ void vtkImageDifference::ThreadedRequestData(
       {
       vtkErrorMacro(<< "Execute: Expecting 3 components (RGB)");
       }
-    this->ErrorPerThread[id] = 1000;
-    this->ThresholdedErrorPerThread[id] = 1000;
+    if (this -> EnableSMP)
+      {
+      *tlsErrorPtr = 1000;
+      *tlsThresholdErrorPtr = 1000;
+      }
+    else
+      {
+      this->ErrorPerThread[id] = 1000;
+      this->ThresholdedErrorPerThread[id] = 1000;
+      }
     return;
     }
 
@@ -217,8 +264,16 @@ void vtkImageDifference::ThreadedRequestData(
         {
         vtkErrorMacro(<< "Execute: All ScalarTypes must be unsigned char");
         }
-      this->ErrorPerThread[id] = 1000;
-      this->ThresholdedErrorPerThread[id] = 1000;
+      if (this -> EnableSMP)
+        {
+        *tlsErrorPtr = 1000;
+        *tlsThresholdErrorPtr = 1000;
+        }
+      else
+        {
+        this->ErrorPerThread[id] = 1000;
+        this->ThresholdedErrorPerThread[id] = 1000;
+        }
       return;
       }
 
@@ -325,7 +380,14 @@ void vtkImageDifference::ThreadedRequestData(
             }
           }
 
-        this->ErrorPerThread[id] = this->ErrorPerThread[id] + (tr + tg + tb)/(3.0*255);
+        if (this -> EnableSMP)
+          {
+          *tlsErrorPtr += (tr + tg + tb)/(3.0*255);
+          }
+        else
+          {
+          this->ErrorPerThread[id] = this->ErrorPerThread[id] + (tr + tg + tb)/(3.0*255);
+          }
         tr -= this->Threshold;
         if (tr < 0)
           {
@@ -344,7 +406,15 @@ void vtkImageDifference::ThreadedRequestData(
         *outPtr0++ = static_cast<unsigned char>(tr);
         *outPtr0++ = static_cast<unsigned char>(tg);
         *outPtr0++ = static_cast<unsigned char>(tb);
-        this->ThresholdedErrorPerThread[id] += (tr + tg + tb)/(3.0*255.0);
+        if (this -> EnableSMP)
+          {
+          *tlsThresholdErrorPtr += (tr + tg + tb)/(3.0*255.0);
+          }
+        else
+          {
+          this->ThresholdedErrorPerThread[id] += (tr + tg + tb)/(3.0*255.0);
+          }
+
 
         in1Ptr0 += in1Inc0;
         in2Ptr0 += in2Inc0;
@@ -380,11 +450,20 @@ int vtkImageDifference::RequestInformation (
       in1Ext[2] != in2Ext[2] || in1Ext[3] != in2Ext[3] ||
       in1Ext[4] != in2Ext[4] || in1Ext[5] != in2Ext[5])
     {
-    for (i = 0; i < this->NumberOfThreads; i++)
+    if (this -> EnableSMP)
       {
-      this->ErrorPerThread[i] = 1000;
-      this->ThresholdedErrorPerThread[i] = 1000;
+      this -> TLError = 1000;
+      this -> TLThresholdError = 1000;
       }
+    else
+      {
+      for (i = 0; i < this->NumberOfThreads; i++)
+        {
+        this->ErrorPerThread[i] = 1000;
+        this->ThresholdedErrorPerThread[i] = 1000;
+        }
+      }
+
     vtkErrorMacro("ExecuteInformation: Input are not the same size.\n"
       << " Input1 is: " << in1Ext[0] << "," << in1Ext[1] << ","
                         << in1Ext[2] << "," << in1Ext[3] << ","
@@ -418,26 +497,37 @@ int vtkImageDifference::RequestInformation (
 double vtkImageDifference::GetError()
 {
   double error = 0.0;
-  int i;
-
-  for ( i= 0; i < this->NumberOfThreads; i++ )
+  if (this -> EnableSMP)
     {
-    error += this->ErrorPerThread[i];
+    error = this->TLError;
     }
-
+  else
+    {
+    int i;
+    for ( i= 0; i < this->NumberOfThreads; i++ )
+      {
+      error += this->ErrorPerThread[i];
+      }
+    }
   return error;
 }
 
 double vtkImageDifference::GetThresholdedError()
 {
   double error = 0.0;
-  int i;
-
-  for ( i= 0; i < this->NumberOfThreads; i++ )
+  if (this -> EnableSMP)
     {
-    error += this->ThresholdedErrorPerThread[i];
+    error = this->TLThresholdError;
     }
+  else
+    {
+    int i;
 
+    for ( i= 0; i < this->NumberOfThreads; i++ )
+      {
+      error += this->ThresholdedErrorPerThread[i];
+      }
+    }
   return error;
 }
 
@@ -456,14 +546,23 @@ void vtkImageDifference::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  int i;
-
-  for ( i= 0; i < this->NumberOfThreads; i++ )
+  if (this -> EnableSMP)
     {
-    os << indent << "Error for thread " << i << ": " << this->ErrorPerThread[i] << "\n";
-    os << indent << "ThresholdedError for thread " << i << ": "
-       << this->ThresholdedErrorPerThread[i] << "\n";
+    os << indent << "Error " << ": " << this->TLError << "\n";
+    os << indent << "ThresholdedError " << ": " << this->TLThresholdError << "\n";
     }
+  else
+    {
+    int i;
+
+    for ( i= 0; i < this->NumberOfThreads; i++ )
+      {
+      os << indent << "Error for thread " << i << ": " << this->ErrorPerThread[i] << "\n";
+      os << indent << "ThresholdedError for thread " << i << ": "
+         << this->ThresholdedErrorPerThread[i] << "\n";
+      }
+    }
+
   os << indent << "Threshold: " << this->Threshold << "\n";
   os << indent << "AllowShift: " << this->AllowShift << "\n";
   os << indent << "Averaging: " << this->Averaging << "\n";

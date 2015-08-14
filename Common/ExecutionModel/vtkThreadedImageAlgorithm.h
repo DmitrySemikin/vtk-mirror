@@ -88,8 +88,8 @@ public:
 
   // Description:
   // Set the granularity of SMP split sizes.
-  vtkSetClampMacro( SMPSplitPercentage, float, 0.001, 100.0 );
-  vtkGetMacro(SMPSplitPercentage,float);
+  vtkSetClampMacro( SMPSplitPercentage, double, 0.001, 100.0 );
+  vtkGetMacro(SMPSplitPercentage,double);
 
   // Description:
   // Set the smallest block size that SMP will split.
@@ -113,7 +113,7 @@ protected:
   vtkExtentTranslator* Translator;
   int NumberOfThreads;
 
-  float SMPSplitPercentage;
+  double SMPSplitPercentage;
   int SplitMode;
   bool EnableSMP;
   bool SplitByPoints;

@@ -90,15 +90,20 @@ public:
   vtkGetMacro(Averaging,int);
   vtkBooleanMacro(Averaging,int);
 
+  void Initialize();
+  void SMPReduce();
+
 protected:
   vtkImageDifference();
   ~vtkImageDifference() {}
 
-  double ErrorPerThread[100000];
-  double ThresholdedErrorPerThread[100000];
+  double ErrorPerThread[1000];
+  double ThresholdedErrorPerThread[1000];
   int AllowShift;
   int Threshold;
   int Averaging;
+  double TLError;
+  double TLThresholdError;
 
   virtual int RequestInformation (vtkInformation *,
                                   vtkInformationVector **,
