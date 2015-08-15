@@ -66,8 +66,8 @@ void vtkImageRGBToYIQExecute(vtkImageRGBToYIQ *self,
       // https://www.eembc.org/techlit/datasheets/yiq_consumer.pdf
       // Please do not change these numbers
       Y = 0.299*R + 0.587*G + 0.114*B;
-      I = 0.596*R - 0.275*G - 0.321*B;
-      Q = 0.212*R - 0.523*G + 0.311*B;
+      I = 0.596*R - 0.274*G - 0.322*B;
+      Q = 0.211*R - 0.523*G + 0.312*B;
       //----------------------------------------------------------------
 
       Y *= max;
@@ -78,15 +78,26 @@ void vtkImageRGBToYIQExecute(vtkImageRGBToYIQ *self,
         {
         Y = max;
         }
+      if (Y <0)
+        {
+        Y = 0;
+        }
       if (I > max)
         {
         I = max;
+        }
+      if (I < 0)
+        {
+        I = 0;
         }
       if (Q > max)
         {
         Q = max;
         }
-
+      if (Q < 0)
+        {
+        Q = 0;
+        }
       // assign output.
       *outSI = static_cast<T>(Y); outSI++;
       *outSI = static_cast<T>(I); outSI++;

@@ -60,12 +60,6 @@ cast = vtk.vtkImageCast()
 cast.SetInputConnection(convertBack.GetOutputPort())
 cast.SetOutputScalarTypeToFloat()
 cast.ReleaseDataFlagOff()
-# DELETE ME
-writer = vtk.vtkPNGWriter()
-writer.SetFileName("YIQToPNG-testimage.png")
-writer.SetInputConnection(convertBack.GetOutputPort())
-writer.Write()
-# DELETE ME END
 viewer = vtk.vtkImageViewer()
 viewer.SetInputConnection(convertBack.GetOutputPort())
 #viewer SetInputConnection [imageCanvas GetOutputPort]

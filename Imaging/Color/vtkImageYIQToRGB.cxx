@@ -66,7 +66,7 @@ void vtkImageYIQToRGBExecute(vtkImageYIQToRGB *self,
       // Please do not change these numbers
       R = 1*Y + 0.956*I + 0.621*Q;
       G = 1*Y - 0.272*I - 0.647*Q;
-      B = 1*Y - 1.105*I + 1.702*Q;
+      B = 1*Y - 1.106*I + 1.703*Q;
       //----------------------------------------------------------------
 
       R *= max;
@@ -77,13 +77,25 @@ void vtkImageYIQToRGBExecute(vtkImageYIQToRGB *self,
         {
         R = max;
         }
+      if (R< 0)
+        {
+          R=0;
+        }
       if (G > max)
         {
         G = max;
         }
+      if (G< 0)
+        {
+          G=0;
+        }
       if (B > max)
         {
         B = max;
+        }
+      if (B< 0)
+        {
+          B=0;
         }
 
       // assign output.
