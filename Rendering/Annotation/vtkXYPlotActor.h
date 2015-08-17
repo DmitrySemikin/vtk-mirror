@@ -120,8 +120,9 @@ class vtkTextProperty;
 class VTKRENDERINGANNOTATION_EXPORT vtkXYPlotActor : public vtkActor2D
 {
 public:
-  vtkTypeMacro(vtkXYPlotActor,vtkActor2D)
-  ;
+
+  vtkTypeMacro(vtkXYPlotActor,vtkActor2D);
+
   void
   PrintSelf(ostream& os, vtkIndent indent);
 
