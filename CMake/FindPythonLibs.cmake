@@ -29,6 +29,20 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+# If explicitly set, use the CMakeified python instead
+if(Python_CONFIG)
+  # Support using the CMake python build
+  find_package(Python REQUIRED CONFIG)
+
+  # Parse the python version into it's 3 components
+  set(PYTHON_VERSION ${Python_VERSION})
+  set(PYTHON_MAJOR_VERSION ${Python_VERSION_MAJOR})
+  set(PYTHON_MINOR_VERSION ${Python_VERSION_MINOR})
+  set(PYTHON_MICRO_VERSION ${Python_VERSION_PATCH})
+  set(PYTHONLIBS_FOUND TRUE)
+  message(STATUS "PythonLibs: Found version ${Python_VERSION}")
+else()
+
 INCLUDE(CMakeFindFrameworks)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
@@ -140,3 +154,5 @@ SET(PYTHON_DEBUG_LIBRARIES "${PYTHON_DEBUG_LIBRARY}")
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonLibs DEFAULT_MSG PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS)
+
+endif() # CMakeified python
