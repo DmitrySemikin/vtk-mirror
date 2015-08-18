@@ -22,8 +22,8 @@
 #include "vtkSMPTools.h"
 
 vtkStandardNewMacro(vtkImageDifference);
-// anonymous namespace for internal classes and functions// anonymous namespace for internal classes and functions
-namespace {
+// anonymous namespace for internal classes and functions
+namespace{
 vtkSMPThreadLocal<double> TLSError;
 vtkSMPThreadLocal<double> TLSThresholdError;
 }
@@ -37,17 +37,15 @@ vtkImageDifference::vtkImageDifference()
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
     }
-  this->EnableSMP = true;
   this->Threshold = 16;
   this->AllowShift = 1;
   this->Averaging = 1;
   this->SetNumberOfInputPorts(2);
-  this->SMPSplitPercentage = 40.0;
   this->TLError = 0.0;
   this->TLThresholdError = 0.0;
 }
 
-void vtkImageDifference::Initialize()
+void vtkImageDifference::SMPInit()
 {
   TLSError.Local() = 0;
   TLSThresholdError.Local() = 0;
@@ -55,17 +53,21 @@ void vtkImageDifference::Initialize()
 void vtkImageDifference::SMPReduce()
 {
   vtkSMPThreadLocal<double>::iterator itr = TLSError.begin();
+  double tlError = 0.0;
+  double tlThresholdError = 0.0;
   while (itr != TLSError.end())
     {
-    this->TLError += *itr;
+    tlError += *itr;
     itr++;
     }
   vtkSMPThreadLocal<double>::iterator itr2 = TLSThresholdError.begin();
   while (itr2 != TLSThresholdError.end())
     {
-    this->TLThresholdError += *itr2;
+    tlThresholdError += *itr2;
     itr2++;
     }
+  this->TLError = tlError;
+  this->TLThresholdError = tlThresholdError;
 }
 // not so simple macro for calculating error
 #define vtkImageDifferenceComputeError(c1,c2) \
@@ -221,7 +223,7 @@ void vtkImageDifference::ThreadedRequestData(
       {
       vtkErrorMacro(<< "Execute: Missing data");
       }
-    if (this -> EnableSMP)
+    if (this -> EnableSMP && this -> GetGlobalEnableSMP())
       {
       *tlsErrorPtr = 1000;
       *tlsThresholdErrorPtr = 1000;
@@ -242,7 +244,7 @@ void vtkImageDifference::ThreadedRequestData(
       {
       vtkErrorMacro(<< "Execute: Expecting 3 components (RGB)");
       }
-    if (this -> EnableSMP)
+    if (this -> EnableSMP && this -> GetGlobalEnableSMP())
       {
       *tlsErrorPtr = 1000;
       *tlsThresholdErrorPtr = 1000;
@@ -264,7 +266,7 @@ void vtkImageDifference::ThreadedRequestData(
         {
         vtkErrorMacro(<< "Execute: All ScalarTypes must be unsigned char");
         }
-      if (this -> EnableSMP)
+      if (this -> EnableSMP && this -> GetGlobalEnableSMP())
         {
         *tlsErrorPtr = 1000;
         *tlsThresholdErrorPtr = 1000;
@@ -380,7 +382,7 @@ void vtkImageDifference::ThreadedRequestData(
             }
           }
 
-        if (this -> EnableSMP)
+        if (this -> EnableSMP && this -> GetGlobalEnableSMP())
           {
           *tlsErrorPtr += (tr + tg + tb)/(3.0*255);
           }
@@ -406,7 +408,7 @@ void vtkImageDifference::ThreadedRequestData(
         *outPtr0++ = static_cast<unsigned char>(tr);
         *outPtr0++ = static_cast<unsigned char>(tg);
         *outPtr0++ = static_cast<unsigned char>(tb);
-        if (this -> EnableSMP)
+        if (this -> EnableSMP && this -> GetGlobalEnableSMP())
           {
           *tlsThresholdErrorPtr += (tr + tg + tb)/(3.0*255.0);
           }
@@ -450,7 +452,7 @@ int vtkImageDifference::RequestInformation (
       in1Ext[2] != in2Ext[2] || in1Ext[3] != in2Ext[3] ||
       in1Ext[4] != in2Ext[4] || in1Ext[5] != in2Ext[5])
     {
-    if (this -> EnableSMP)
+    if (this -> EnableSMP && this -> GetGlobalEnableSMP())
       {
       this -> TLError = 1000;
       this -> TLThresholdError = 1000;
@@ -497,7 +499,7 @@ int vtkImageDifference::RequestInformation (
 double vtkImageDifference::GetError()
 {
   double error = 0.0;
-  if (this -> EnableSMP)
+  if (this -> EnableSMP && this -> GetGlobalEnableSMP())
     {
     error = this->TLError;
     }
@@ -515,7 +517,7 @@ double vtkImageDifference::GetError()
 double vtkImageDifference::GetThresholdedError()
 {
   double error = 0.0;
-  if (this -> EnableSMP)
+  if (this -> EnableSMP && this -> GetGlobalEnableSMP())
     {
     error = this->TLThresholdError;
     }
@@ -546,7 +548,7 @@ void vtkImageDifference::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
-  if (this -> EnableSMP)
+  if (this -> EnableSMP && this -> GetGlobalEnableSMP())
     {
     os << indent << "Error " << ": " << this->TLError << "\n";
     os << indent << "ThresholdedError " << ": " << this->TLThresholdError << "\n";

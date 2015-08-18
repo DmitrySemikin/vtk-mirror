@@ -90,7 +90,7 @@ public:
   vtkGetMacro(Averaging,int);
   vtkBooleanMacro(Averaging,int);
 
-  void Initialize();
+  void SMPInit();
   void SMPReduce();
 
 protected:

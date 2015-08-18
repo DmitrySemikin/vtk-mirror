@@ -28,7 +28,7 @@
 #include "vtkExtentTranslator.h"
 
 
-static bool GlobalEnableSMP = false;
+static bool GlobalEnableSMP = true;
 
 static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *arg );
 
@@ -113,7 +113,7 @@ vtkThreadedImageAlgorithm::vtkThreadedImageAlgorithm()
   //SMP default settings
   this->EnableSMP = true;
   this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
-  this->SMPSplitPercentage = 75.0;
+  this->SMPSplitPercentage = 3.0;
   this->SplitByPoints = true;
   this->MinimumBlockSize[0] = 1;
   this->MinimumBlockSize[1] = 1;
@@ -199,7 +199,7 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
   int ret;
   if (this->EnableSMP && GlobalEnableSMP) // this is block mode splitting
     {
-    ret = this->Translator->PieceToExtentThreadSafeImaging(num,total,0,startExt,splitExt,this->SplitMode,this->SplitByPoints);
+    ret = this->Translator->PieceToExtentThreadSafeImaging(num,total,0,startExt,splitExt);
     }
   else
     {

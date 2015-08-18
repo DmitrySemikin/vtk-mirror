@@ -49,7 +49,7 @@ vtkExtentTranslator::vtkExtentTranslator()
   this->WholeExtent[0] = this->WholeExtent[2] = this->WholeExtent[4] = 0;
   this->WholeExtent[1] = this->WholeExtent[3] = this->WholeExtent[5] = -1;
 
-  // Set a default split mode to be slabs
+  // Set a default split mode to be blocks
   this->SplitMode = vtkExtentTranslator::BLOCK_MODE;
 
   this->SplitLen = 0;
@@ -164,20 +164,10 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
 int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece, int numPieces,
                                                  int ghostLevel,
                                                  int *wholeExtent,
-                                                 int *resultExtent,
-                                                 int splitMode,
-                                                 int byPoints)
+                                                 int *resultExtent)
 {
   memcpy(resultExtent, wholeExtent, sizeof(int)*6);
-  int ret;
-  if (byPoints)
-    {
-    ret = this->SplitExtentImaging(piece, numPieces, resultExtent, splitMode, true);
-    }
-  else
-    {
-    ret = this->SplitExtentImaging(piece, numPieces, resultExtent, splitMode, false);
-    }
+  int ret = this->SplitExtentImaging(piece, numPieces, resultExtent);
 
   if (ret == 0)
     {
@@ -224,8 +214,8 @@ int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece, int numPieces
   return 1;
 }
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPercentage, bool byPoints
-                                    ,int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
+int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPercentage, bool byPoints,
+                                     int minBlockSizeX, int minBlockSizeY, int minBlockSizeZ)
 {
   vtkTypeInt64 size[3];
   if (byPoints)
@@ -241,7 +231,19 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
     size[2] = ext[5] - ext[4];
     }
 
+  // if the min blocksize configurations are invalid,
+  // just revert to default
+  if(minBlockSizeX < 0 || minBlockSizeY < 0 || minBlockSizeZ < 0
+     || minBlockSizeX > size[0] || minBlockSizeY > size[1] || minBlockSizeZ > size[2] )
+    {
+    minBlockSizeX = 1;
+    minBlockSizeY = 1;
+    minBlockSizeZ = 1;
+    }
+
   BlockSizeProperties * properties = &this->BlockProperties;
+  properties -> SplitMode = splitMode;
+  properties -> ByPoints = byPoints;
 
   properties->MinSize[0] = minBlockSizeX;
   properties->MinSize[1] = minBlockSizeY;
@@ -283,20 +285,29 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
       }
     case DEFAULT_MODE:
       {
-      if (size[2] != 1) //Z_SLAB_MODE
+      int singlePieceSize = 0;
+      if (byPoints)
         {
-        properties->MinSize[0] = size[0];
-        properties->MinSize[1] = size[1];
-        break;
-        }
-      else if (size[1] != 1) //Y_SLAB_MODE
-        {
-        properties->MinSize[0] = size[0];
-        properties->MinSize[2] = size[2];
-        break;
+        singlePieceSize = 1;
         }
       else
         {
+        singlePieceSize = 0;
+        }
+      if (size[2] != singlePieceSize) //Z_SLAB_MODE
+        {
+        properties->MinSize[0] = size[0];
+        properties->MinSize[1] = size[1];
+        break;
+        }
+      else if (size[1] != singlePieceSize) //Y_SLAB_MODE
+        {
+        properties->MinSize[0] = size[0];
+        properties->MinSize[2] = size[2];
+        break;
+        }
+      else //X_SLAB_MODE
+        {
         properties->MinSize[1] = size[1];
         properties->MinSize[2] = size[2];
         break;
@@ -304,40 +315,21 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
       }
     }
 
-  vtkTypeInt64 minSize[3] = {properties->MinSize[0]
-                 ,properties->MinSize[1]
-                 ,properties->MinSize[2]};
-
-  int startExt[6]= {ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]};
-
   vtkTypeInt64 blocks[3];
-  float dimensionsToSplit = 0;
   for (int i=0; i < 3; i++)
     {
-    vtkTypeInt64 block = size[i] / minSize[i];
-    if (block == 0 || block == 1)
+    vtkTypeInt64 block = size[i] / properties->MinSize[i];
+    if (block == 0 || block == 1) // if block ==1, then it means we are splitting along that direction so dont add a dim to split
       {
       block = 1;
       }
-    else
-      {
-      dimensionsToSplit++;
-      }
     blocks[i] = block;
     }
-  if (dimensionsToSplit == 0) // there is only 1 piece
-    {
-    splitPercentage = 100.0;
-    }
-  else
-    {
-    splitPercentage = pow(splitPercentage,1.0 / dimensionsToSplit);
-    }
 
-  for (int i =0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
     {
     properties->NumMicroBlocks[i] = blocks[i];
-    vtkTypeInt64 pieces = ceil(splitPercentage / 100.0 * static_cast <float>(blocks[i]));
+    vtkTypeInt64 pieces = ceil(splitPercentage / 100.0 * static_cast <double>(blocks[i]));
 
     if (pieces > INT_MAX)
       {
@@ -347,7 +339,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
     properties->NumMacroBlocks[i] = pieces;
     properties->MacroToMicro[i] = blocks[i] / pieces;
     }
-  vtkTypeInt64 totalPieces =properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
+  vtkTypeInt64 totalPieces = properties->NumMacroBlocks[0] * properties->NumMacroBlocks[1] * properties->NumMacroBlocks[2];
   if (totalPieces > INT_MAX)
       {
       vtkErrorMacro("There are too many blocks with the current configuration.");
@@ -362,48 +354,71 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
 }
 
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SplitExtentImaging(int piece, int numPieces, int *ext,
-                                     int splitMode, bool byPoints)
+int vtkExtentTranslator::SplitExtentImaging(int piece, int numPieces, int *ext)
 {
   if (!this -> Initialized)
     {
     vtkErrorMacro("SplitExtent has not being initialized.");
     return -1;
     }
+  bool byPoints = this->BlockProperties.ByPoints;
 
-  int sX = ext[1] - ext[0] + 1;
-  int sY = ext[3] - ext[2] + 1;
-  int sZ = ext[5] - ext[4] + 1;
+  int sX,sY,sZ;
+  if (byPoints)
+    {
+    sX = ext[1] - ext[0] + 1;
+    sY = ext[3] - ext[2] + 1;
+    sZ = ext[5] - ext[4] + 1;
+    }
+  else
+    {
+    sX = ext[1] - ext[0];
+    sY = ext[3] - ext[2];
+    sZ = ext[5] - ext[4];
+    }
+
+
 
   int minSize[3] = {this->BlockProperties.MinSize[0],
                     this->BlockProperties.MinSize[1],
                     this->BlockProperties.MinSize[2]};
 
+
   //Rotate axis based on whether blockmode, xy ,xz or yz split
+  int singlePieceSize = 0;
+  if (byPoints)
+    {
+    singlePieceSize = 1;
+    }
+  else
+    {
+    singlePieceSize = 0;
+    }
   int planeAxis;
   int strideAxis;
   int blockAxis;
 
-  if ((sX != 1 && sY != 1 && sZ != 1)
-    ||(sX != 1 && sY != 1 && sZ == 1))
+
+  if ((sX != singlePieceSize && sY != singlePieceSize && sZ != singlePieceSize)
+    ||(sX != singlePieceSize && sY != singlePieceSize && sZ == singlePieceSize))
     {
     planeAxis = 2;
     strideAxis = 1;
     blockAxis = 0;
     }
-  else if (sX != 1 && sY == 1 && sZ != 1)
+  else if (sX != singlePieceSize && sY == singlePieceSize && sZ != singlePieceSize)
     {
     planeAxis = 1;
     strideAxis = 2;
     blockAxis = 0;
     }
-  else if (sX != 1 && sY == 1 && sZ != 1)
+  else if (sX != singlePieceSize && sY == singlePieceSize && sZ != singlePieceSize)
     {
     planeAxis = 1;
     strideAxis = 2;
     blockAxis = 0;
     }
-  else if (sX == 1 && sY != 1 && sZ != 1)
+  else if (sX == singlePieceSize && sY != singlePieceSize && sZ != singlePieceSize)
     {
     planeAxis = 0;
     strideAxis = 2;

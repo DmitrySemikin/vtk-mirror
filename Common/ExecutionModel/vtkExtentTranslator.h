@@ -59,12 +59,17 @@ public:
     this -> MacroToMicro[1] = -1;
     this -> MacroToMicro[2] = -1;
 
+    this -> ByPoints = true;
+    this -> SplitMode = 3; // block mode
   }
+
   vtkTypeInt64 MinSize[3];      // The minimum size for each block
   vtkTypeInt64  NumMicroBlocks[3]; // Number of minimum size blocks
   int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
   int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
   int MacroToMicro[3];// Number of micro blocks per macro block
+  bool ByPoints;
+  int SplitMode;
 };
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkExtentTranslator : public vtkObject
@@ -103,8 +108,7 @@ public:
                                       int byPoints);
   virtual int PieceToExtentThreadSafeImaging(int piece, int numPieces,
                                       int ghostLevel, int *wholeExtent,
-                                      int *resultExtent, int splitMode,
-                                      int byPoints);
+                                      int *resultExtent);
 
   // Description:
   // This must be called to before the call to SplitExtentImaging.
@@ -173,8 +177,7 @@ protected:
   // Description:
   // This is used in conjuncture with SetUpExtent.
   // It is currently only used for SMP Imaging pipeline.
-  int SplitExtentImaging(int piece, int numPieces, int *ext,
-                                     int splitMode, bool byPoints);
+  int SplitExtentImaging(int piece, int numPieces, int *ext);
 
   int Piece;
   int NumberOfPieces;
