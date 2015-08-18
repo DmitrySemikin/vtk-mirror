@@ -155,7 +155,7 @@ INCLUDE_DIRECTORIES(
   )
 
 # --- mpi4py.MPI ---
-PYTHON_ADD_MODULE(mpi4py.MPI MODULE "${mpi4py_SOURCE_DIR}/MPI.c")
+PYTHON_ADD_MODULE(mpi4py.MPI "${mpi4py_SOURCE_DIR}/MPI.c")
 SET_TARGET_PROPERTIES(
   mpi4py.MPI PROPERTIES
   OUTPUT_NAME "MPI" PREFIX ""
@@ -171,7 +171,7 @@ TARGET_LINK_LIBRARIES(mpi4py.MPI ${CMAKE_DL_LIBS})
 
 
 # --- mpi4py.MPE ---
-PYTHON_ADD_MODULE(mpi4py.MPE MODULE ${mpi4py_SOURCE_DIR}/MPE.c)
+PYTHON_ADD_MODULE(mpi4py.MPE ${mpi4py_SOURCE_DIR}/MPE.c)
 SET_TARGET_PROPERTIES(
   mpi4py.MPE PROPERTIES
   OUTPUT_NAME "MPE" PREFIX ""
@@ -187,7 +187,7 @@ TARGET_LINK_LIBRARIES(mpi4py.MPE ${MPI_C_LIBRARIES})
 
 
 # --- mpi4py.dl ---
-PYTHON_ADD_MODULE(mpi4py.dl MODULE "${mpi4py_SOURCE_DIR}/dynload.c")
+PYTHON_ADD_MODULE(mpi4py.dl "${mpi4py_SOURCE_DIR}/dynload.c")
 SET_TARGET_PROPERTIES(
   mpi4py.dl PROPERTIES
   OUTPUT_NAME "dl" PREFIX ""
@@ -199,7 +199,7 @@ TARGET_LINK_LIBRARIES(mpi4py.dl ${PYTHON_LIBRARY})
 TARGET_LINK_LIBRARIES(mpi4py.dl ${CMAKE_DL_LIBS})
 
 # --- mpi4py/lib-pmpi/libmpe.so ---
-ADD_LIBRARY(pmpi-mpe MODULE "${mpi4py_SOURCE_DIR}/pmpi-mpe.c")
+ADD_LIBRARY(pmpi-mpe "${mpi4py_SOURCE_DIR}/pmpi-mpe.c")
 SET_TARGET_PROPERTIES(
   pmpi-mpe PROPERTIES
   OUTPUT_NAME "mpe"
@@ -211,7 +211,7 @@ TARGET_LINK_LIBRARIES(pmpi-mpe ${MPE_LIBRARIES})
 TARGET_LINK_LIBRARIES(pmpi-mpe ${MPI_C_LIBRARIES})
 
 # --- mpi4py/lib-pmpi/libvt.so ---
-ADD_LIBRARY(pmpi-vt MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt.c")
+ADD_LIBRARY(pmpi-vt "${mpi4py_SOURCE_DIR}/pmpi-vt.c")
 SET_TARGET_PROPERTIES(
   pmpi-vt PROPERTIES
   OUTPUT_NAME "vt"
@@ -223,7 +223,7 @@ TARGET_LINK_LIBRARIES(pmpi-vt ${VT_LIBRARIES})
 TARGET_LINK_LIBRARIES(pmpi-vt ${MPI_C_LIBRARIES})
 
 # --- mpi4py/lib-pmpi/libvt-mpi.so ---
-ADD_LIBRARY(pmpi-vt-mpi MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt-mpi.c")
+ADD_LIBRARY(pmpi-vt-mpi "${mpi4py_SOURCE_DIR}/pmpi-vt-mpi.c")
 SET_TARGET_PROPERTIES(
   pmpi-vt-mpi PROPERTIES
   OUTPUT_NAME "vt-mpi"
@@ -235,7 +235,7 @@ TARGET_LINK_LIBRARIES(pmpi-vt-mpi ${VT_MPI_LIBRARIES})
 TARGET_LINK_LIBRARIES(pmpi-vt-mpi ${MPI_C_LIBRARIES})
 
 # --- mpi4py/lib-pmpi/libvt-hyb.so ---
-ADD_LIBRARY(pmpi-vt-hyb MODULE "${mpi4py_SOURCE_DIR}/pmpi-vt-hyb.c")
+ADD_LIBRARY(pmpi-vt-hyb "${mpi4py_SOURCE_DIR}/pmpi-vt-hyb.c")
 SET_TARGET_PROPERTIES(
   pmpi-vt-hyb PROPERTIES
   OUTPUT_NAME "vt-hyb"
