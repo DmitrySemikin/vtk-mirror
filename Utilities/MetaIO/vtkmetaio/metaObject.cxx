@@ -45,7 +45,7 @@ MetaObject(void)
   }
 
 MetaObject::
-MetaObject(const char * _fileName)
+MetaObject(const char * fileName)
   {
   m_NDims = 0;
   this->ClearFields();
@@ -54,7 +54,7 @@ MetaObject(const char * _fileName)
   MetaObject::Clear();
   m_ReadStream = NULL;
   m_WriteStream = NULL;
-  this->Read(_fileName);
+  this->Read(fileName);
   m_Event = NULL;
   m_DoublePrecision = 6;
   m_DistanceUnits = MET_DISTANCE_UNITS_UNKNOWN;
@@ -217,13 +217,13 @@ void MetaObject
 //
 //
 void MetaObject::
-FileName(const char *_fileName)
+FileName(const char* fileName)
   {
-  if(_fileName != NULL)
+  if(fileName != NULL)
     {
-    if(_fileName[0] != '\0')
+    if(fileName[0] != '\0')
       {
-      strcpy(m_FileName, _fileName);
+      strcpy(m_FileName, fileName);
       }
     }
   }
@@ -235,43 +235,43 @@ FileName(void) const
   }
 
 void MetaObject::
-CopyInfo(const MetaObject * _object)
+CopyInfo(const MetaObject* object)
   {
-  if(NDims() != _object->NDims())
+  if(NDims() != object->NDims())
     {
     METAIO_STREAM::cout << "MetaObject: CopyInfo: Warning: NDims not same size"
                         << METAIO_STREAM::endl;
     }
 
-  FileName(_object->FileName());
-  Comment(_object->Comment());
-  ObjectTypeName(_object->ObjectTypeName());
-  ObjectSubTypeName(_object->ObjectSubTypeName());
-  CenterOfRotation(_object->CenterOfRotation());
-  Offset(_object->Offset());
-  TransformMatrix(_object->TransformMatrix());
-  ElementSpacing(_object->ElementSpacing());
-  ID(_object->ID());
-  Color(_object->Color());
-  ParentID(_object->ParentID());
-  AcquisitionDate(_object->AcquisitionDate());
-  Name(_object->Name());
-  BinaryData(_object->BinaryData());
-  BinaryDataByteOrderMSB(_object->BinaryDataByteOrderMSB());
-  DistanceUnits(_object->DistanceUnits());
+  FileName(object->FileName());
+  Comment(object->Comment());
+  ObjectTypeName(object->ObjectTypeName());
+  ObjectSubTypeName(object->ObjectSubTypeName());
+  CenterOfRotation(object->CenterOfRotation());
+  Offset(object->Offset());
+  TransformMatrix(object->TransformMatrix());
+  ElementSpacing(object->ElementSpacing());
+  ID(object->ID());
+  Color(object->Color());
+  ParentID(object->ParentID());
+  AcquisitionDate(object->AcquisitionDate());
+  Name(object->Name());
+  BinaryData(object->BinaryData());
+  BinaryDataByteOrderMSB(object->BinaryDataByteOrderMSB());
+  DistanceUnits(object->DistanceUnits());
   }
 
 bool MetaObject::
-Read(const char *_fileName)
+Read(const char* fileName)
   {
   if(META_DEBUG)
     {
     METAIO_STREAM::cout << "MetaObject: Read" << METAIO_STREAM::endl;
     }
 
-  if(_fileName != NULL)
+  if(fileName != NULL)
     {
-    strcpy(m_FileName, _fileName);
+    strcpy(m_FileName, fileName);
     }
 
   METAIO_STREAM::ifstream * tmpReadStream = new METAIO_STREAM::ifstream;
@@ -305,7 +305,7 @@ Read(const char *_fileName)
 
 
 bool MetaObject::
-ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream)
+ReadStream(int nDims, METAIO_STREAM::ifstream * stream)
   {
   if(META_DEBUG)
     {
@@ -320,10 +320,10 @@ ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream)
 
   M_SetupReadFields();
 
-  if(_nDims > 0)
+  if(nDims > 0)
     {
     MET_FieldRecordType * mF = MET_GetFieldRecord("NDims", &m_Fields);
-    mF->value[0] = _nDims;
+    mF->value[0] = nDims;
     mF->defined = true;
     }
 
@@ -332,7 +332,7 @@ ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream)
     delete m_ReadStream;
     }
 
-  m_ReadStream = _stream;
+  m_ReadStream = stream;
 
   bool result = M_Read();
 
@@ -343,11 +343,11 @@ ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream)
 
 
 bool MetaObject::
-Write(const char *_fileName)
+Write(const char* fileName)
   {
-  if(_fileName != NULL)
+  if(fileName != NULL)
     {
-    FileName(_fileName);
+    FileName(fileName);
     }
 
   M_SetupWriteFields();
@@ -548,9 +548,9 @@ Comment(void) const
   }
 
 void MetaObject::
-Comment(const char * _comment)
+Comment(const char * comment)
   {
-  strcpy(m_Comment, _comment);
+  strcpy(m_Comment, comment);
   }
 
 const char * MetaObject::
@@ -560,9 +560,9 @@ ObjectTypeName(void) const
   }
 
 void MetaObject::
-ObjectTypeName(const char * _objectTypeName)
+ObjectTypeName(const char * objectTypeName)
   {
-  strcpy(m_ObjectTypeName, _objectTypeName);
+  strcpy(m_ObjectTypeName, objectTypeName);
   }
 
 const char * MetaObject::
@@ -572,9 +572,9 @@ ObjectSubTypeName(void) const
   }
 
 void MetaObject::
-ObjectSubTypeName(const char * _objectSubTypeName)
+ObjectSubTypeName(const char * objectSubTypeName)
   {
-  strcpy(m_ObjectSubTypeName, _objectSubTypeName);
+  strcpy(m_ObjectSubTypeName, objectSubTypeName);
   }
 
 int MetaObject::
@@ -590,25 +590,25 @@ Offset(void) const
   }
 
 double MetaObject::
-Offset(int _i) const
+Offset(int i) const
   {
-  return m_Offset[_i];
+  return m_Offset[i];
   }
 
 void MetaObject::
-Offset(const double * _position)
+Offset(const double * position)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_Offset[i] = _position[i];
+    m_Offset[i] = position[i];
     }
   }
 
 void MetaObject::
-Offset(int _i, double _value)
+Offset(int i, double value)
   {
-  m_Offset[_i] = _value;
+  m_Offset[i] = value;
   }
 
 
@@ -619,25 +619,25 @@ Position(void) const
   }
 
 double MetaObject::
-Position(int _i) const
+Position(int i) const
   {
-  return m_Offset[_i];
+  return m_Offset[i];
   }
 
 void MetaObject::
-Position(const double * _position)
+Position(const double * position)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_Offset[i] = _position[i];
+    m_Offset[i] = position[i];
     }
   }
 
 void MetaObject::
-Position(int _i, double _value)
+Position(int i, double value)
   {
-  m_Offset[_i] = _value;
+  m_Offset[i] = value;
   }
 
 const double * MetaObject::
@@ -647,25 +647,25 @@ Origin(void) const
   }
 
 double MetaObject::
-Origin(int _i) const
+Origin(int i) const
   {
-  return m_Offset[_i];
+  return m_Offset[i];
   }
 
 void MetaObject::
-Origin(const double * _position)
+Origin(const double * position)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_Offset[i] = _position[i];
+    m_Offset[i] = position[i];
     }
   }
 
 void MetaObject::
-Origin(int _i, double _value)
+Origin(int i, double value)
   {
-  m_Offset[_i] = _value;
+  m_Offset[i] = value;
   }
 
 //
@@ -677,25 +677,25 @@ TransformMatrix(void) const
   }
 
 double MetaObject::
-TransformMatrix(int _i, int _j) const
+TransformMatrix(int i, int j) const
   {
-  return m_TransformMatrix[_i*m_NDims+_j];
+  return m_TransformMatrix[i*m_NDims+j];
   }
 
 void MetaObject::
-TransformMatrix(const double * _orientation)
+TransformMatrix(const double * orientation)
   {
   int i;
   for(i=0; i<m_NDims*m_NDims; i++)
     {
-    m_TransformMatrix[i] = _orientation[i];
+    m_TransformMatrix[i] = orientation[i];
     }
   }
 
 void MetaObject::
-TransformMatrix(int _i, int _j, double _value)
+TransformMatrix(int i, int j, double value)
   {
-  m_TransformMatrix[_i*m_NDims+_j] = _value;
+  m_TransformMatrix[i*m_NDims+j] = value;
   }
 
 //
@@ -706,25 +706,25 @@ Rotation(void) const
   }
 
 double MetaObject::
-Rotation(int _i, int _j) const
+Rotation(int i, int j) const
   {
-  return m_TransformMatrix[_i*m_NDims+_j];
+  return m_TransformMatrix[i*m_NDims+j];
   }
 
 void MetaObject::
-Rotation(const double * _orientation)
+Rotation(const double * orientation)
   {
   int i;
   for(i=0; i<m_NDims*m_NDims; i++)
     {
-    m_TransformMatrix[i] = _orientation[i];
+    m_TransformMatrix[i] = orientation[i];
     }
   }
 
 void MetaObject::
-Rotation(int _i, int _j, double _value)
+Rotation(int i, int j, double value)
   {
-  m_TransformMatrix[_i*m_NDims+_j] = _value;
+  m_TransformMatrix[i*m_NDims+j] = value;
   }
 
 //
@@ -735,25 +735,25 @@ Orientation(void) const
   }
 
 double MetaObject::
-Orientation(int _i, int _j) const
+Orientation(int i, int j) const
   {
-  return m_TransformMatrix[_i*m_NDims+_j];
+  return m_TransformMatrix[i*m_NDims+j];
   }
 
 void MetaObject::
-Orientation(const double * _orientation)
+Orientation(const double * orientation)
   {
   int i;
   for(i=0; i<m_NDims*m_NDims; i++)
     {
-    m_TransformMatrix[i] = _orientation[i];
+    m_TransformMatrix[i] = orientation[i];
     }
   }
 
 void MetaObject::
-Orientation(int _i, int _j, double _value)
+Orientation(int i, int j, double value)
   {
-  m_TransformMatrix[_i*m_NDims+_j] = _value;
+  m_TransformMatrix[i*m_NDims+j] = value;
   }
 
 //
@@ -765,25 +765,25 @@ CenterOfRotation(void) const
   }
 
 double MetaObject::
-CenterOfRotation(int _i) const
+CenterOfRotation(int i) const
   {
-  return m_CenterOfRotation[_i];
+  return m_CenterOfRotation[i];
   }
 
 void MetaObject::
-CenterOfRotation(const double * _position)
+CenterOfRotation(const double * position)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_CenterOfRotation[i] = _position[i];
+    m_CenterOfRotation[i] = position[i];
     }
   }
 
 void MetaObject::
-CenterOfRotation(int _i, double _value)
+CenterOfRotation(int i, double value)
   {
-  m_CenterOfRotation[_i] = _value;
+  m_CenterOfRotation[i] = value;
   }
 
 //
@@ -800,19 +800,19 @@ DistanceUnits(void) const
   }
 
 void MetaObject::
-DistanceUnits(MET_DistanceUnitsEnumType _distanceUnits)
+DistanceUnits(MET_DistanceUnitsEnumType distanceUnits)
   {
-  m_DistanceUnits = _distanceUnits;
+  m_DistanceUnits = distanceUnits;
   }
 
 void MetaObject::
-DistanceUnits(const char * _distanceUnits)
+DistanceUnits(const char * distanceUnits)
   {
   int i;
   bool found = false;
   for(i=0; i<MET_NUM_DISTANCE_UNITS_TYPES; i++)
     {
-    if(!strcmp(_distanceUnits, MET_DistanceUnitsTypeName[i]))
+    if(!strcmp(distanceUnits, MET_DistanceUnitsTypeName[i]))
       {
       m_DistanceUnits = static_cast<MET_DistanceUnitsEnumType>(i);
       found = true;
@@ -847,20 +847,20 @@ AnatomicalOrientation(void) const
   }
 
 MET_OrientationEnumType MetaObject::
-AnatomicalOrientation(int _dim) const
+AnatomicalOrientation(int dim) const
   {
-  return m_AnatomicalOrientation[_dim];
+  return m_AnatomicalOrientation[dim];
   }
 
 void MetaObject::
-AnatomicalOrientation(const char *_ao)
+AnatomicalOrientation(const char* ao)
   {
   int i, j;
   for(i=0; i<m_NDims; i++)
     {
     for(j=0; j<MET_NUM_ORIENTATION_TYPES; j++)
       {
-      if(_ao[i] == MET_OrientationTypeName[j][0])
+      if(ao[i] == MET_OrientationTypeName[j][0])
         {
         m_AnatomicalOrientation[i] = (MET_OrientationEnumType)j;
         break;
@@ -874,35 +874,35 @@ AnatomicalOrientation(const char *_ao)
   }
 
 void MetaObject::
-AnatomicalOrientation(const MET_OrientationEnumType *_ao)
+AnatomicalOrientation(const MET_OrientationEnumType* ao)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_AnatomicalOrientation[i] = _ao[i];
+    m_AnatomicalOrientation[i] = ao[i];
     }
   }
 
 void MetaObject::
-AnatomicalOrientation(int _dim, MET_OrientationEnumType _ao)
+AnatomicalOrientation(int dim, MET_OrientationEnumType ao)
   {
-  m_AnatomicalOrientation[_dim] = _ao;
+  m_AnatomicalOrientation[dim] = ao;
   }
 
 void MetaObject::
-AnatomicalOrientation(int _dim, char _ao)
+AnatomicalOrientation(int dim, char ao)
   {
   int j;
   for(j=0; j<MET_NUM_ORIENTATION_TYPES; j++)
     {
-    if(_ao == MET_OrientationTypeName[j][0])
+    if(ao == MET_OrientationTypeName[j][0])
       {
-      m_AnatomicalOrientation[_dim] = (MET_OrientationEnumType)j;
+      m_AnatomicalOrientation[dim] = (MET_OrientationEnumType)j;
       return;
       }
     }
 
-  m_AnatomicalOrientation[_dim] = MET_ORIENTATION_UNKNOWN;
+  m_AnatomicalOrientation[dim] = MET_ORIENTATION_UNKNOWN;
   }
 
 //
@@ -914,34 +914,34 @@ ElementSpacing(void) const
   }
 
 float MetaObject::
-ElementSpacing(int _i) const
+ElementSpacing(int i) const
   {
-  return m_ElementSpacing[_i];
+  return m_ElementSpacing[i];
   }
 
 void MetaObject::
-ElementSpacing(const float * _elementSpacing)
+ElementSpacing(const float * elementSpacing)
   {
   int i;
   for(i=0; i<m_NDims; i++)
     {
-    m_ElementSpacing[i] = _elementSpacing[i];
+    m_ElementSpacing[i] = elementSpacing[i];
     }
   }
 
 void MetaObject::
-ElementSpacing(int _i, float _value)
+ElementSpacing(int i, float value)
   {
-  m_ElementSpacing[_i] = _value;
+  m_ElementSpacing[i] = value;
   }
 
 
 void  MetaObject::
-Name(const char *_Name)
+Name(const char* Name)
   {
-  if(_Name != NULL)
+  if(Name != NULL)
     {
-    strcpy(m_Name, _Name);
+    strcpy(m_Name, Name);
     }
   }
 
@@ -959,27 +959,27 @@ Color(void) const
   }
 
 void  MetaObject::
-Color(float _r, float _g, float _b, float _a)
+Color(float r, float g, float b, float a)
   {
-  m_Color[0] = _r;
-  m_Color[1] = _g;
-  m_Color[2] = _b;
-  m_Color[3] = _a;
+  m_Color[0] = r;
+  m_Color[1] = g;
+  m_Color[2] = b;
+  m_Color[3] = a;
   }
 void MetaObject::
-Color(const float * _color)
+Color(const float * color)
   {
   for(unsigned int i=0; i<4; i++)
     {
-    m_Color[i] = _color[i];
+    m_Color[i] = color[i];
     }
   }
 
 
 void  MetaObject::
-ID(int _id)
+ID(int id)
   {
-  m_ID = _id;
+  m_ID = id;
   }
 
 int  MetaObject::
@@ -989,9 +989,9 @@ ID(void) const
   }
 
 void  MetaObject::
-ParentID(int _parentId)
+ParentID(int parentId)
   {
-  m_ParentID = _parentId;
+  m_ParentID = parentId;
   }
 
 int   MetaObject::ParentID(void) const
@@ -1000,13 +1000,13 @@ int   MetaObject::ParentID(void) const
   }
 
 void  MetaObject::
-AcquisitionDate(const char * _acquisitionDate)
+AcquisitionDate(const char * acquisitionDate)
   {
-  for(size_t i=0; i<strlen( _acquisitionDate ); i++)
+  for(size_t i=0; i<strlen( acquisitionDate ); i++)
     {
-    m_AcquisitionDate[i] = _acquisitionDate[i];
+    m_AcquisitionDate[i] = acquisitionDate[i];
     }
-  m_AcquisitionDate[strlen( _acquisitionDate )] = '\0';
+  m_AcquisitionDate[strlen( acquisitionDate )] = '\0';
   }
 
 const char * MetaObject::AcquisitionDate(void) const
@@ -1014,9 +1014,9 @@ const char * MetaObject::AcquisitionDate(void) const
   return m_AcquisitionDate;
   }
 
-void MetaObject::CompressedData(bool _compressedData)
+void MetaObject::CompressedData(bool compressedData)
   {
-  m_CompressedData = _compressedData;
+  m_CompressedData = compressedData;
   }
 
 bool MetaObject::CompressedData(void) const
@@ -1024,9 +1024,9 @@ bool MetaObject::CompressedData(void) const
   return m_CompressedData;
   }
 
-void  MetaObject::BinaryData(bool _binaryData)
+void  MetaObject::BinaryData(bool binaryData)
   {
-  m_BinaryData = _binaryData;
+  m_BinaryData = binaryData;
   }
 
 bool   MetaObject::BinaryData(void) const
@@ -1041,9 +1041,9 @@ BinaryDataByteOrderMSB(void) const
   }
 
 void MetaObject::
-BinaryDataByteOrderMSB(bool _elementByteOrderMSB)
+BinaryDataByteOrderMSB(bool elementByteOrderMSB)
   {
-  m_BinaryDataByteOrderMSB = _elementByteOrderMSB;
+  m_BinaryDataByteOrderMSB = elementByteOrderMSB;
   }
 
 void MetaObject::
@@ -1104,7 +1104,7 @@ Clear(void)
   }
 
 bool MetaObject::
-InitializeEssential(int _nDims)
+InitializeEssential(int nDims)
   {
   if(META_DEBUG)
     {
@@ -1113,27 +1113,27 @@ InitializeEssential(int _nDims)
 
   M_Destroy();
 
-  if(_nDims > 10)
+  if(nDims > 10)
     {
     METAIO_STREAM::cout
       << "MetaObject: Initialize: Warning: Number of dimensions limited to 10"
       << METAIO_STREAM::endl
       << "Resetting number of dimensions to 10"
       << METAIO_STREAM::endl;
-    _nDims = 10;
+    nDims = 10;
     }
 
-  if(_nDims < 0)
+  if(nDims < 0)
     {
     METAIO_STREAM::cout
       << "MetaObject: Initialize: Warning: Number of dimensions must be >= 0"
       << METAIO_STREAM::endl
       << "Resetting number of dimensions to 0"
       << METAIO_STREAM::endl;
-    _nDims = 0;
+    nDims = 0;
     }
 
-  m_NDims = _nDims;
+  m_NDims = nDims;
 
   return true;
   }
@@ -1813,16 +1813,16 @@ M_Write(void)
 
 
 bool MetaObject
-::Append(const char *_headName)
+::Append(const char* headName)
 {
   if(META_DEBUG)
     {
     METAIO_STREAM::cout << "MetaObject: Append" << METAIO_STREAM::endl;
     }
 
-  if(_headName != NULL)
+  if(headName != NULL)
     {
-    FileName(_headName);
+    FileName(headName);
     }
 
   M_SetupWriteFields();
@@ -1868,7 +1868,7 @@ bool MetaObject
 
 // Get the user field
 void* MetaObject
-::GetUserField(const char* _name)
+::GetUserField(const char* name)
 {
   FieldsContainerType::iterator  it  = m_UserDefinedWriteFields.begin();
   FieldsContainerType::iterator  end = m_UserDefinedWriteFields.end();
@@ -1879,7 +1879,7 @@ void* MetaObject
     const unsigned int itLength =
                 static_cast<unsigned int>( (*it)->length );
     void * out;
-    if(!strcmp((*it)->name,_name))
+    if(!strcmp((*it)->name,name))
       {
       if((*it)->type == MET_STRING)
         {
@@ -1936,11 +1936,11 @@ int MetaObject
 }
 
 bool MetaObject
-::AddUserField(const char* _fieldName,MET_ValueEnumType _type,int _length,
-                        bool _required,int _dependsOn)
+::AddUserField(const char* fieldName,MET_ValueEnumType type,int length,
+                        bool required,int dependsOn)
 {
   MET_FieldRecordType* mFr = new MET_FieldRecordType;
-  MET_InitReadField(mFr,_fieldName, _type, _required,_dependsOn,_length);
+  MET_InitReadField(mFr, fieldName, type, required, dependsOn, length);
   m_UserDefinedReadFields.push_back(mFr);
   return 1;
 }

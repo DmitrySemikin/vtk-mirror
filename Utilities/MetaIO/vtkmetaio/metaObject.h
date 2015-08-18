@@ -96,8 +96,8 @@ class METAIO_EXPORT MetaObject
       virtual void M_PrepareNewReadStream();
 
       MetaEvent*     m_Event;
-      //MET_FieldRecordType * M_GetFieldRecord(const char * _fieldName);
-      //int   M_GetFieldRecordNumber(const char * _fieldName);
+      //MET_FieldRecordType * M_GetFieldRecord(const char * fieldName);
+      //int   M_GetFieldRecordNumber(const char * fieldName);
 
       unsigned int m_DoublePrecision;
 
@@ -112,7 +112,7 @@ class METAIO_EXPORT MetaObject
       // Constructors & Destructor
       ////
       MetaObject(void);
-      MetaObject(const char * _fileName);
+      MetaObject(const char * fileName);
       MetaObject(unsigned int dim);
 
       virtual ~MetaObject(void);
@@ -120,13 +120,13 @@ class METAIO_EXPORT MetaObject
       void  FileName(const char *_fileName);
       const char  * FileName(void) const;
 
-      virtual void  CopyInfo(const MetaObject * _object);
+      virtual void  CopyInfo(const MetaObject * object);
 
-      bool  Read(const char * _fileName=NULL);
+      bool  Read(const char * fileName=NULL);
 
-      bool  ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream);
+      bool  ReadStream(int nDims, METAIO_STREAM::ifstream * stream);
 
-      bool  Write(const char * _fileName=NULL);
+      bool  Write(const char * fileName=NULL);
 
       virtual bool  Append(const char *_headName=NULL);
 
@@ -144,12 +144,12 @@ class METAIO_EXPORT MetaObject
       //       Optional Field
       //       Arbitrary string
       const char  * Comment(void) const;
-      void    Comment(const char * _comment);
+      void    Comment(const char * comment);
 
       const char  * ObjectTypeName(void) const;
-      void    ObjectTypeName(const char * _objectTypeName);
+      void    ObjectTypeName(const char * objectTypeName);
       const char  * ObjectSubTypeName(void) const;
-      void    ObjectSubTypeName(const char * _objectSubTypeName);
+      void    ObjectSubTypeName(const char * objectSubTypeName);
 
       //    NDims()
       //       REQUIRED Field
@@ -161,109 +161,109 @@ class METAIO_EXPORT MetaObject
       //       Physical location (in millimeters and wrt machine coordinate
       //         system or the patient) of the first element in the image
       const double * Offset(void) const;
-      double Offset(int _i) const;
-      void  Offset(const double * _position);
-      void  Offset(int _i, double _value);
+      double Offset(int i) const;
+      void  Offset(const double * position);
+      void  Offset(int i, double value);
       const double * Position(void) const;
-      double Position(int _i) const;
-      void  Position(const double * _position);
-      void  Position(int _i, double _value);
+      double Position(int i) const;
+      void  Position(const double * position);
+      void  Position(int i, double value);
       const double * Origin(void) const;
-      double Origin(int _i) const;
-      void  Origin(const double * _position);
-      void  Origin(int _i, double _value);
+      double Origin(int i) const;
+      void  Origin(const double * position);
+      void  Origin(int i, double value);
 
       //    TransformMatrix(...)
       //       Optional Field
       //       Physical orientation of the object as an NDims x NDims matrix
       const double * TransformMatrix(void) const;
-      double TransformMatrix(int _i, int _j) const;
-      void  TransformMatrix(const double * _orientation);
-      void  TransformMatrix(int _i, int _j, double _value);
+      double TransformMatrix(int i, int j) const;
+      void  TransformMatrix(const double * orientation);
+      void  TransformMatrix(int i, int j, double value);
       const double * Rotation(void) const;
-      double Rotation(int _i, int _j) const;
-      void  Rotation(const double * _orientation);
-      void  Rotation(int _i, int _j, double _value);
+      double Rotation(int i, int j) const;
+      void  Rotation(const double * orientation);
+      void  Rotation(int i, int j, double value);
       const double * Orientation(void) const;
-      double Orientation(int _i, int _j) const;
-      void  Orientation(const double * _orientation);
-      void  Orientation(int _i, int _j, double _value);
+      double Orientation(int i, int j) const;
+      void  Orientation(const double * orientation);
+      void  Orientation(int i, int j, double value);
 
       //
       //
       //
       const double * CenterOfRotation(void) const;
-      double CenterOfRotation(int _i) const;
-      void  CenterOfRotation(const double * _position);
-      void  CenterOfRotation(int _i, double _value);
+      double CenterOfRotation(int i) const;
+      void  CenterOfRotation(const double * position);
+      void  CenterOfRotation(int i, double value);
 
       //
       //
       //
       const char * DistanceUnitsName(void) const;
       MET_DistanceUnitsEnumType DistanceUnits(void) const;
-      void DistanceUnits(MET_DistanceUnitsEnumType _distanceUnits);
-      void DistanceUnits(const char * _distanceUnits);
+      void DistanceUnits(MET_DistanceUnitsEnumType distanceUnits);
+      void DistanceUnits(const char * distanceUnits);
 
       const char * AnatomicalOrientationAcronym(void) const;
       const MET_OrientationEnumType * AnatomicalOrientation(void) const;
-      MET_OrientationEnumType AnatomicalOrientation(int _dim) const;
+      MET_OrientationEnumType AnatomicalOrientation(int dim) const;
       void AnatomicalOrientation(const char *_ao);
       void AnatomicalOrientation(const MET_OrientationEnumType *_ao);
-      void AnatomicalOrientation(int _dim, MET_OrientationEnumType _ao);
-      void AnatomicalOrientation(int _dim, char ao);
+      void AnatomicalOrientation(int dim, MET_OrientationEnumType ao);
+      void AnatomicalOrientation(int dim, char ao);
 
 
       //    ElementSpacing(...)
       //       Optional Field
       //       Physical Spacing (in same units as position)
       const float * ElementSpacing(void) const;
-      float ElementSpacing(int _i) const;
-      void  ElementSpacing(const float * _elementSpacing);
-      void  ElementSpacing(int _i, float _value);
+      float ElementSpacing(int i) const;
+      void  ElementSpacing(const float * elementSpacing);
+      void  ElementSpacing(int i, float value);
 
       //    Name(...)
       //       Optional Field
       //       Name of the current metaObject
-      void  Name(const char *_Name);
+      void  Name(const char *_name);
       const char  * Name(void) const;
 
       //    Color(...)
       //       Optional Field
       //       Color of the current metaObject
       const float * Color(void) const;
-      void  Color(float _r, float _g, float _b, float _a);
-      void  Color(const float * _color);
+      void  Color(float r, float g, float b, float a);
+      void  Color(const float * color);
 
       //    ID(...)
       //       Optional Field
       //       ID number of the current metaObject
-      void ID(int _id);
+      void ID(int id);
       int  ID(void) const;
 
       //    ParentID(...)
       //       Optional Field
       //       ID number of the parent  metaObject
-      void  ParentID(int _parentId);
+      void  ParentID(int parentId);
       int   ParentID(void) const;
 
       //    AcquisitionDate(...)
       //       Optional Field
       //       YYYY.MM.DD is the recommended format
-      void  AcquisitionDate(const char * _acquisitionDate);
+      void  AcquisitionDate(const char * acquisitionDate);
       const char *  AcquisitionDate(void) const;
 
       //    BinaryData(...)
       //       Optional Field
       //       Data is binary or not
-      void  BinaryData(bool _binaryData);
+      void  BinaryData(bool binaryData);
       bool  BinaryData(void) const;
 
-      void  BinaryDataByteOrderMSB(bool _binaryDataByteOrderMSB);
+      void  BinaryDataByteOrderMSB(bool binaryDataByteOrderMSB);
       bool  BinaryDataByteOrderMSB(void) const;
 
 
-      void  CompressedData(bool _compressedData);
+      void  CompressedData(bool compressedData);
       bool  CompressedData(void) const;
 
 
@@ -273,14 +273,14 @@ class METAIO_EXPORT MetaObject
 
       void ClearAdditionalFields(void);
 
-      bool InitializeEssential(int _NDims);
+      bool InitializeEssential(int nDims);
 
       //
       //
       // User's field definitions
-      bool AddUserField(const char* _fieldName, MET_ValueEnumType _type,
-                        int _length=0, bool _required=true,
-                        int _dependsOn=-1);
+      bool AddUserField(const char* fieldName, MET_ValueEnumType type,
+                        int length=0, bool required=true,
+                        int dependsOn=-1);
 
       // find a field record in a field vector
       MET_FieldRecordType *FindFieldRecord(FieldsContainerType &container,
@@ -301,9 +301,9 @@ class METAIO_EXPORT MetaObject
 
       // Add a user's field
       template <class T>
-      bool AddUserField(const char* _fieldName, MET_ValueEnumType _type,
-                        int _length, T *_v, bool _required=true,
-                        int _dependsOn=-1 )
+      bool AddUserField(const char* fieldName, MET_ValueEnumType type,
+                        int length, T* v, bool required=true,
+                        int dependsOn=-1 )
         {
         // don't add the same field twice. In the unlikely event
         // a field of the same name gets added more than once,
@@ -311,13 +311,13 @@ class METAIO_EXPORT MetaObject
         bool duplicate(true);
         MET_FieldRecordType* mFw =
           this->FindFieldRecord(m_UserDefinedWriteFields,
-                                _fieldName);
+                                fieldName);
         if(mFw == 0)
           {
           duplicate = false;
           mFw = new MET_FieldRecordType;
           }
-        MET_InitWriteField(mFw, _fieldName, _type, _length, _v);
+        MET_InitWriteField(mFw, fieldName, type, length, v);
         if(!duplicate)
           {
           m_UserDefinedWriteFields.push_back(mFw);
@@ -326,15 +326,15 @@ class METAIO_EXPORT MetaObject
         duplicate = true;
         MET_FieldRecordType* mFr =
           this->FindFieldRecord(m_UserDefinedReadFields,
-                                _fieldName);
+                                fieldName);
         if(mFr == 0)
           {
           duplicate = false;
           mFr = new MET_FieldRecordType;
           }
 
-        MET_InitReadField(mFr,_fieldName, _type, _required, _dependsOn,
-          _length);
+        MET_InitReadField(mFr, fieldName, type, required, dependsOn,
+          length);
         if(!duplicate)
           {
           m_UserDefinedReadFields.push_back(mFr);
@@ -346,7 +346,7 @@ class METAIO_EXPORT MetaObject
       void ClearUserFields();
 
       // Get the user field
-      void* GetUserField(const char* _name);
+      void* GetUserField(const char* name);
 
       int GetNumberOfAdditionalReadFields();
       char * GetAdditionalReadFieldName( int i );
