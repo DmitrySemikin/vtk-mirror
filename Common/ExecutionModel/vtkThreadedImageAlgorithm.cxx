@@ -114,6 +114,7 @@ public:
                                        str->Inputs, str->Outputs,
                                        splitExt, blockId);
       }
+    return VTK_THREAD_RETURN_VALUE;
   }
 
   void operator()(vtkIdType begin, vtkIdType end)
