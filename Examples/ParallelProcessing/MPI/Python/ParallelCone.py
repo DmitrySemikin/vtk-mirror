@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 from vtk import *
 import sys
 import os
@@ -19,8 +20,9 @@ try:
         _graphics_fact.SetUseMesaClasses(1)
         del _graphics_fact
     del v
-except Exception, (bar):
-    print "No mesa", bar
+except Exception as xxx_todo_changeme:
+    (bar) = xxx_todo_changeme
+    print("No mesa", bar)
 
 
 
