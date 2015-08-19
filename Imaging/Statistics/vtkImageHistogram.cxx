@@ -28,6 +28,7 @@
 #include "vtkSMPTools.h"
 #include <math.h>
 #include "vtkExtentTranslator.h"
+#include <vtkSmartPointer.h>
 
 // turn off 64-bit ints when templating over all types
 # undef VTK_USE_INT64
@@ -606,17 +607,20 @@ class HistogramSumFunctor {
   vtkSMPImageHistogramThreadInfo * ThreadInfo;
   int Ext[6];
 public:
-  int Total;
-  vtkIdTypeArray *Histogram;
+  vtkIdType * Total;
+  vtkIdTypeArray * Histogram;
 
   vtkSMPThreadLocal<struct ThreadLocalSum> ThreadLocalHistogram;
   vtkSMPThreadLocal<int> ThreadLocalTotal;
 
-  HistogramSumFunctor(vtkSMPImageHistogramThreadInfo *threadInfo, int * ext)
+  HistogramSumFunctor(vtkSMPImageHistogramThreadInfo *threadInfo, int * ext, vtkIdTypeArray* histogram, vtkIdType * total)
   {
     memcpy(Ext, ext, sizeof(int) * 6);
     this->ThreadInfo = threadInfo;
-    Total = 0;
+    this->Total = total;
+    *this->Total = 0;
+
+    this->Histogram = histogram;
   }
 
   VTK_THREAD_RETURN_TYPE Execute(int blockId)
@@ -667,16 +671,11 @@ public:
 
   void Reduce()
   {
-    this->Total = 0;
+    *(this->Total) = 0;
+    vtkIdType *histogram = this->Histogram->GetPointer(0);
 
     vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->GetUserData());
-
     int numberOfBins = ts->Algorithm->NumberOfBins;
-
-    this->Histogram = vtkIdTypeArray::New();
-    this->Histogram->SetNumberOfComponents(1);
-    this->Histogram->SetNumberOfTuples(numberOfBins);
-    vtkIdType *histogram = this->Histogram->GetPointer(0);
 
     // clear histogram to zero
     int nx = numberOfBins;
@@ -694,7 +693,7 @@ public:
         {
         int num = (*itr2).ThreadLocalHistogram[i];
         histogram[i] += num;
-        this->Total += num;
+        *(this->Total) += num;
         }
       delete[](*itr2).ThreadLocalHistogram;
       delete[](*itr2).ThreadLocalRange;
@@ -841,16 +840,15 @@ int vtkImageHistogram::RequestData(
 
 
     vtkSMPImageHistogramThreadInfo threadInfo (blocks, &ts);
-
+    this->Histogram->SetNumberOfComponents(1);
+    this->Histogram->SetNumberOfTuples(this->NumberOfBins);
     bool debug = this->Debug;
     this->Debug = false;
-    HistogramSumFunctor sum(&threadInfo,inputExt);
+    HistogramSumFunctor sum(&threadInfo,inputExt, this->Histogram, &this->Total);
     this->functor = &sum;
     vtkSMPTools::For(0, blocks, sum);
     this->Debug = debug;
 
-    this->Histogram = sum.Histogram;
-    this->Total = sum.Total;
     }
   else
     {

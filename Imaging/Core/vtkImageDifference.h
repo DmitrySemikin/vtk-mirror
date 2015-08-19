@@ -37,6 +37,8 @@
 #include "vtkImagingCoreModule.h" // For export macro
 #include "vtkThreadedImageAlgorithm.h"
 
+struct ThreadLocalContainer;
+
 class VTKIMAGINGCORE_EXPORT vtkImageDifference : public vtkThreadedImageAlgorithm
 {
 public:
@@ -98,7 +100,7 @@ public:
 
 protected:
   vtkImageDifference();
-  ~vtkImageDifference() {}
+  ~vtkImageDifference();
 
   double ErrorPerThread[VTK_MAX_THREADS];
   double ThresholdedErrorPerThread[VTK_MAX_THREADS];
@@ -107,6 +109,8 @@ protected:
   int Averaging;
   double TLError;
   double TLThresholdError;
+
+  struct ThreadLocalContainer * TLContainer;
 
   virtual int RequestInformation (vtkInformation *,
                                   vtkInformationVector **,

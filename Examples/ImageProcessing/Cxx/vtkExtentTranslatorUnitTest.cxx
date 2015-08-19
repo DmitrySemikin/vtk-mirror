@@ -55,8 +55,8 @@ bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool
 TEST(TestSlabMode)
 {
   int minimumBlockSize = 8;
-  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
-  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkExtentTranslator::New();
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
+  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
   bool byPoints = true;
   int startExt[6] = {0, 255, 0, 214, 0, 323};
   int splitExt[6];
@@ -189,8 +189,8 @@ TEST(TestSlabMode)
 TEST(Test2DSplitMode)
 {
   int minimumBlockSize = 8;
-  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
-  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkExtentTranslator::New();
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
+  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
   bool allowDuplicate= true;
   bool byPoints = true;
   int startExt[6] = {-145, 234, 33, 235, -148, 0};
@@ -324,8 +324,8 @@ TEST(Test2DSplitMode)
 TEST(Test3DSplitMode)
 {
   int minimumBlockSize = 8;
-  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
-  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkExtentTranslator::New();
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
+  vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
 
   bool allowDuplicate= true;
   bool byPoints = true;
@@ -366,7 +366,7 @@ TEST(TestEmptyExtent)
   bool allowDuplicate = true;
   bool allowEmptyExtent = false;
   int minimumBlockSize =1;
-  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
   int startExt[6] = {0, 0, 0, 0, 0, 0};
   int splitExt[6];
   int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::BLOCK_MODE
@@ -394,7 +394,7 @@ TEST(TestDefaultMode)
   int minimumBlockSize =1;
   int blockPercentage = 50;
   bool byPoints = true;
-  vtkSmartPointer<vtkExtentTranslator> translator = vtkExtentTranslator::New();
+  vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
   int startExt[6] = {0, 300, 0, 301, 0, 302};
   int splitExt[6];
   int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::DEFAULT_MODE

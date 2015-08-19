@@ -22,11 +22,11 @@
 #include "vtkSMPTools.h"
 
 vtkStandardNewMacro(vtkImageDifference);
-// anonymous namespace for Thread Local variables
-namespace{
-vtkSMPThreadLocal<double> TLSError;
-vtkSMPThreadLocal<double> TLSThresholdError;
-}
+struct ThreadLocalContainer
+{
+  vtkSMPThreadLocal<double> TLSError;
+  vtkSMPThreadLocal<double> TLSThresholdError;
+};
 
 // Construct object to extract all of the input data.
 vtkImageDifference::vtkImageDifference()
@@ -43,25 +43,30 @@ vtkImageDifference::vtkImageDifference()
   this->SetNumberOfInputPorts(2);
   this->TLError = 0.0;
   this->TLThresholdError = 0.0;
+  this->TLContainer = new struct ThreadLocalContainer;
+}
+vtkImageDifference::~vtkImageDifference()
+{
+  delete this->TLContainer;
 }
 
 void vtkImageDifference::SMPInit()
 {
-  TLSError.Local() = 0;
-  TLSThresholdError.Local() = 0;
+  this->TLContainer->TLSError.Local() = 0;
+  this->TLContainer->TLSThresholdError.Local() = 0;
 }
 void vtkImageDifference::SMPReduce()
 {
-  vtkSMPThreadLocal<double>::iterator itr = TLSError.begin();
+  vtkSMPThreadLocal<double>::iterator itr = this->TLContainer->TLSError.begin();
   double tlError = 0.0;
   double tlThresholdError = 0.0;
-  while (itr != TLSError.end())
+  while (itr != this->TLContainer->TLSError.end())
     {
     tlError += *itr;
     itr++;
     }
-  vtkSMPThreadLocal<double>::iterator itr2 = TLSThresholdError.begin();
-  while (itr2 != TLSThresholdError.end())
+  vtkSMPThreadLocal<double>::iterator itr2 = this->TLContainer->TLSThresholdError.begin();
+  while (itr2 != this->TLContainer->TLSThresholdError.end())
     {
     tlThresholdError += *itr2;
     itr2++;
@@ -218,8 +223,8 @@ void vtkImageDifference::ThreadedRequestData(
     }
 
 
-  double * tlsErrorPtr = &TLSError.Local();
-  double * tlsThresholdErrorPtr = &TLSThresholdError.Local();
+  double * tlsErrorPtr = &this->TLContainer->TLSError.Local();
+  double * tlsThresholdErrorPtr = &this->TLContainer->TLSThresholdError.Local();
 
   if (inData[0] == NULL || inData[1] == NULL || outData == NULL)
     {
