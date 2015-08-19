@@ -100,8 +100,8 @@ protected:
   vtkImageDifference();
   ~vtkImageDifference() {}
 
-  double ErrorPerThread[1000];
-  double ThresholdedErrorPerThread[1000];
+  double ErrorPerThread[VTK_MAX_THREADS];
+  double ThresholdedErrorPerThread[VTK_MAX_THREADS];
   int AllowShift;
   int Threshold;
   int Averaging;

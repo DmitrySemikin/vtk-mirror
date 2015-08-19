@@ -35,12 +35,20 @@ static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *ar
 class vtkSMPThreadInfo
 {
 public:
-  vtkGetMacro(NumberOfBlocks, int);
-  vtkGetMacro(UserData, void *);
   vtkSMPThreadInfo(int numberOfblocks, void * userData)
   {
-    this -> UserData = userData;
-    this -> NumberOfBlocks = numberOfblocks;
+    this->UserData = userData;
+    this->NumberOfBlocks = numberOfblocks;
+  }
+
+  int GetNumberOfBlocks()
+  {
+    return this->NumberOfBlocks;
+  }
+
+  void * GetUserData()
+  {
+    return this->UserData;
   }
 protected:
   int NumberOfBlocks; // The number of blocks used

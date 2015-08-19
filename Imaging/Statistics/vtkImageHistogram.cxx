@@ -253,12 +253,20 @@ namespace {
 class vtkSMPImageHistogramThreadInfo
 {
 public:
-  vtkGetMacro(NumberOfBlocks, int);
-  vtkGetMacro(UserData, void *);
   vtkSMPImageHistogramThreadInfo(int numberOfblocks, void * userData)
   {
     this -> UserData = userData;
     this -> NumberOfBlocks = numberOfblocks;
+  }
+
+  int GetNumberOfBlocks()
+  {
+    return this->NumberOfBlocks;
+  }
+
+  void * GetUserData()
+  {
+    return this->UserData;
   }
 protected:
   int NumberOfBlocks; // The number of blocks used

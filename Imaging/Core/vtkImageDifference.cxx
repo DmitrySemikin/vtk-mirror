@@ -22,7 +22,7 @@
 #include "vtkSMPTools.h"
 
 vtkStandardNewMacro(vtkImageDifference);
-// anonymous namespace for internal classes and functions
+// anonymous namespace for Thread Local variables
 namespace{
 vtkSMPThreadLocal<double> TLSError;
 vtkSMPThreadLocal<double> TLSThresholdError;
@@ -32,7 +32,7 @@ vtkSMPThreadLocal<double> TLSThresholdError;
 vtkImageDifference::vtkImageDifference()
 {
   int i;
-  for ( i = 0; i < 1000; i++ )
+  for ( i = 0; i < this->NumberOfThreads; i++ )
     {
     this->ErrorPerThread[i] = 0;
     this->ThresholdedErrorPerThread[i] = 0.0;
@@ -211,8 +211,12 @@ void vtkImageDifference::ThreadedRequestData(
   unsigned long count = 0;
   unsigned long target;
 
-  this->ErrorPerThread[id] = 0;
-  this->ThresholdedErrorPerThread[id] = 0;
+  if (!this -> EnableSMP || !this -> GetGlobalEnableSMP())
+    {
+    this->ErrorPerThread[id] = 0;
+    this->ThresholdedErrorPerThread[id] = 0;
+    }
+
 
   double * tlsErrorPtr = &TLSError.Local();
   double * tlsThresholdErrorPtr = &TLSThresholdError.Local();

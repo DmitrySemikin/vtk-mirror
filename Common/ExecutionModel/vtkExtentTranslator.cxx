@@ -34,9 +34,7 @@ public:
     this -> MinSize[0] = this -> MinSize[1] = this -> MinSize[2]-1;
     this -> NumMicroBlocks[0] = this -> NumMicroBlocks[1] = this -> NumMicroBlocks[2] = -1;
     this -> NumMacroBlocks[0] = this -> NumMacroBlocks[1] = this -> NumMacroBlocks[2] =-1;
-
     this -> TotalMacroBlocks = -1;
-
     this -> MacroToMicro[0] = this -> MacroToMicro[1] = this -> MacroToMicro[2] = -1;
 
     this -> ByPoints = true;
@@ -272,7 +270,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
 
   // if the min blocksize configurations are invalid,
   // just revert to default
-  if(minBlockSizeX < 0 || minBlockSizeY < 0 || minBlockSizeZ < 0
+  if(minBlockSizeX < 1 || minBlockSizeY < 1 || minBlockSizeZ < 1
      || minBlockSizeX > size[0] || minBlockSizeY > size[1] || minBlockSizeZ > size[2] )
     {
     minBlockSizeX = 1;
@@ -356,10 +354,10 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
     }
 
   vtkTypeInt64 blocks[3];
-  for (int i=0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
     {
     vtkTypeInt64 block = size[i] / properties->MinSize[i];
-    if (block == 0 || block == 1) // if block ==1, then it means we are splitting along that direction so dont add a dim to split
+    if (block == 0)
       {
       block = 1;
       }
