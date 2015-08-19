@@ -22,27 +22,29 @@ O_PERF_EVENTS="--event=CPU_CLK_UNHALTED:100000,l2_rqsts:200000:0x80"
 #NUMBER OF WORKSIZE SAMPLES TAKEN
 NUMBER_OF_SAMPLES=9
 
+# Range Start and End is divided by 10
+
 WORK_SIZES_TEST1="1024"
 BLOCK_RANGE_START1=1
-BLOCK_RANGE_END1=100
+BLOCK_RANGE_END1=750
 
 WORK_SIZES_TEST2="512"
 BLOCK_RANGE_START2=1
-BLOCK_RANGE_END2=100
+BLOCK_RANGE_END2=750
 KERNEL_SIZE=5
 
 WORK_SIZES_TEST3="512"
 BLOCK_RANGE_START3=1
-BLOCK_RANGE_END3=100
+BLOCK_RANGE_END3=750
 STENCIL_RADIUS=100
 
 WORK_SIZES_TEST4="512"
 BLOCK_RANGE_START4=1
-BLOCK_RANGE_END4=100
+BLOCK_RANGE_END4=750
 
 WORK_SIZES_TEST5="1024"
 BLOCK_RANGE_START5=1
-BLOCK_RANGE_END5=100
+BLOCK_RANGE_END5=750
 STENCIL_RADIUS=30
 
 #------------------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +55,7 @@ TESTS_TO_RUN="1 2 3 4 5"
 RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S')"
 
 #MAXIUM NUMBER OF PROCESSORS
-processorCountSizes="1 2 4 8 12 24 36"
+processorCountSizes="1 2 4 8 12 24 28 32 36"
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 

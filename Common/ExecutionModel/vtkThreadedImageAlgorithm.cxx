@@ -110,7 +110,7 @@ public:
 
   void operator()(vtkIdType begin, vtkIdType end)
   {
-    for (int i =begin; i < end; i++)
+    for (int i = begin; i < end; i++)
       {
       this->Execute(i);
       }
