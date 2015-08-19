@@ -637,6 +637,7 @@ public:
         ts->Request, ts->InputsInfo, ts->OutputsInfo, NULL, NULL,
         splitExt, blockId);
       }
+    return VTK_THREAD_RETURN_VALUE;
   }
 
   void operator()(vtkIdType begin, vtkIdType end)

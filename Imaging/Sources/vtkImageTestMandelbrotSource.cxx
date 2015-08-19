@@ -7,8 +7,8 @@
 
 vtkStandardNewMacro(vtkImageTestMandelbrotSource);
 
-int vtkImageTestMandelbrotSource::RequestData(vtkInformation *request,
-                        vtkInformationVector** inputVector,
+int vtkImageTestMandelbrotSource::RequestData(vtkInformation * vtkNotUsed(request),
+                        vtkInformationVector** vtkNotUsed(inputVector),
                         vtkInformationVector* outputVector)
 {
   // get the output
