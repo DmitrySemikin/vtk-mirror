@@ -28,49 +28,7 @@
 
 class vtkInformationIntegerRequestKey;
 class vtkInformationIntegerKey;
-
-// Description:
-// This class is used as storage to calculate the correct
-// indexing for SplitExtentImaging.  NumMicroBlocks
-// is the number of minimum size blocks calculated by
-// ext/minsize.  Macroblocks is the number of microblocks
-// taking into consideration the split percentage.  Finally,
-// Macro to micro is the ratio between the two.
-class BlockSizeProperties
-{
-public:
-  BlockSizeProperties()
-  {
-    this -> MinSize[0] = -1;
-    this -> MinSize[1] = -1;
-    this -> MinSize[2] = -1;
-
-    this -> NumMicroBlocks[0] = -1;
-    this -> NumMicroBlocks[1] = -1;
-    this -> NumMicroBlocks[2] = -1;
-
-    this -> NumMacroBlocks[0] = -1;
-    this -> NumMacroBlocks[1] = -1;
-    this -> NumMacroBlocks[2] = -1;
-
-    this -> TotalMacroBlocks = -1;
-
-    this -> MacroToMicro[0] = -1;
-    this -> MacroToMicro[1] = -1;
-    this -> MacroToMicro[2] = -1;
-
-    this -> ByPoints = true;
-    this -> SplitMode = 3; // block mode
-  }
-
-  vtkTypeInt64 MinSize[3];      // The minimum size for each block
-  vtkTypeInt64  NumMicroBlocks[3]; // Number of minimum size blocks
-  int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
-  int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
-  int MacroToMicro[3];// Number of micro blocks per macro block
-  bool ByPoints;
-  int SplitMode;
-};
+class BlockSizeProperties;
 
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkExtentTranslator : public vtkObject
 {
@@ -106,9 +64,7 @@ public:
                                       int ghostLevel, int *wholeExtent,
                                       int *resultExtent, int splitMode,
                                       int byPoints);
-  virtual int PieceToExtentThreadSafeImaging(int piece,
-                                      int ghostLevel, int *wholeExtent,
-                                      int *resultExtent);
+  virtual int PieceToExtentThreadSafeImaging(int piece, int ghostLevel, int *resultExtent);
 
   // Description:
   // This must be called to before the call to SplitExtentImaging.
@@ -190,7 +146,7 @@ protected:
   int SplitLen;
 
   bool Initialized;
-  BlockSizeProperties BlockProperties;
+  BlockSizeProperties* BlockProperties;
 
 private:
   vtkExtentTranslator(const vtkExtentTranslator&);  // Not implemented.

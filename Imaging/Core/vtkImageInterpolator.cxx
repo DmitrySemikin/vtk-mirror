@@ -446,25 +446,25 @@ void vtkImageNLCInterpolate<F, T>::Tricubic(
       F ifz = fZ[k];
       vtkIdType factz = factZ[k];
       int j = j1;
-      do // loop over z
+      do // loop over y
         {
           F ify = fY[j];
           const F fzy = ifz*ify;
           vtkIdType factzy = factz + factY[j];
           const T *tmpPtr = inPtr + factzy;
-          val1 +=tmpPtr[factX[0]] * fzy;
-          val2 +=tmpPtr[factX[1]] * fzy;
-          val3 +=tmpPtr[factX[2]] * fzy;
-          val4 +=tmpPtr[factX[3]] * fzy;
+          val1 += tmpPtr[factX[0]] * fzy;
+          val2 += tmpPtr[factX[1]] * fzy;
+          val3 += tmpPtr[factX[2]] * fzy;
+          val4 += tmpPtr[factX[3]] * fzy;
 
         }
       while (++j <= j2);
       }
     while (++k <= k2);
-    *outPtr++ = (fX[0]*val1 + fX[1]*val2) + (fX[2]*val3 + fX[3]*val4);
+    *outPtr++ = (fX[0] * val1 + fX[1] * val2) + (fX[2] * val3 + fX[3] * val4);
     inPtr++;
   }
-   while (--numscalars);
+  while (--numscalars);
 }
 
 //----------------------------------------------------------------------------

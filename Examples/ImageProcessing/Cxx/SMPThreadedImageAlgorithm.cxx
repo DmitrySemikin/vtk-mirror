@@ -66,7 +66,7 @@ void TrashCache()
 {
   double start = 0.32;
   double * trash = new double[TRASH_CACHE_SIZE];
-  for (int i=0; i<TRASH_CACHE_SIZE; i++)
+  for (int i=0; i < TRASH_CACHE_SIZE; i++)
     {
     trash[i] = start*1.13;
     }
@@ -77,32 +77,32 @@ int WriteResultToCSV(float* executionTime, TestParms *parm)
 {
   // calculate average
 
-  float total =0.0;
-  for (int i =0; i<parm->numberOfIterationsToRun; i++)
+  float total = 0.0;
+  for (int i = 0; i < parm -> numberOfIterationsToRun; i++)
     {
-    total +=executionTime[i];
+    total += executionTime[i];
     }
-  float average = total/static_cast<float>(parm->numberOfIterationsToRun);
+  float average = total / static_cast<float>(parm -> numberOfIterationsToRun);
 
   float std =0.0;
-  for (int i =0; i<parm->numberOfIterationsToRun; i++)
+  for (int i =0; i < parm->numberOfIterationsToRun; i++)
     {
-    std+=pow((executionTime[i]-average),2);
+    std += pow((executionTime[i] - average), 2.0);
     }
-  std = sqrt(std/static_cast<float>(parm->numberOfIterationsToRun));
+  std = sqrt(std / static_cast<float>(parm -> numberOfIterationsToRun));
 
   char writeOutput[100];
   sprintf(writeOutput, "%d,%d,%d,%d,%d,%f,%d,%f,%f,%s\n"
-  ,parm->numberOfIterationsToRun
-  ,parm->testCase
-  ,parm->enableSMP
-  ,parm->SMPSplitMode
-  ,parm->numberOfThreadsToRun
-  ,parm->smpSplitPercentage
-  ,parm->workSize
+  ,parm -> numberOfIterationsToRun
+  ,parm -> testCase
+  ,parm -> enableSMP
+  ,parm -> SMPSplitMode
+  ,parm -> numberOfThreadsToRun
+  ,parm -> smpSplitPercentage
+  ,parm -> workSize
   ,average
   ,std
-  ,parm->additionalData);
+  ,parm -> additionalData);
 
   FILE *f = fopen(parm->outputCSVFile, "a+");
   if (f == NULL)
@@ -117,17 +117,18 @@ int WriteResultToCSV(float* executionTime, TestParms *parm)
 
 int main(int argc, char *argv[])
 {
-  if (argc <9)
+  if (argc < 9)
     {
     printf ("Not all parms have being passed in\n"
       "parm#1: NumberOfIterationsToRun.\n"
       "parm#2: Test Number.\n"
       "parm#3: Enable/Disabl SMP, use true/false\n"
       "parm#4: Enable block mode splitting, this is only valid if SMP is true. \n"
-      "parm#5: Number Of threads to run ~4, this is only valid if SMP is true. \n"
-      "parm#6: Number of split SMP blocks ~500.\n"
-      "parm#7: The size of the work load ~5000\n"
-      "parm#8: Output csv file\n"
+      "parm#5: Number Of threads to run , this is only valid if SMP is true. \n"
+      "parm#6: Number of split SMP blocks.\n"
+      "parm#7: The size of the work load.\n"
+      "parm#8: Additional Data.\n"
+      "parm#8: Output csv file.\n"
       );
     return -1;
     }
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
   parms.testCase = atoi(argv[2]);
 
 
-  if (strcmp(argv[3],"true")==0)
+  if (strcmp(argv[3],"true") ==0 )
     {
     parms.enableSMP =true;
     }
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
     {
     parms.enableSMP =false;
     }
-  if (strcmp(argv[4],"true")==0)
+  if (strcmp(argv[4],"true") == 0)
     {
     parms.SMPSplitMode = vtkExtentTranslator::BLOCK_MODE;
     }
@@ -158,7 +159,7 @@ int main(int argc, char *argv[])
     }
 
   parms.numberOfThreadsToRun = atoi(argv[5]);
-  parms.smpSplitPercentage = atof(argv[6]);
+  parms.smpSplitPercentage = atof(argv[6]) / 10.0;
   parms.workSize = atoi(argv[7]);
   parms.outputCSVFile = argv[8];
 
@@ -176,33 +177,31 @@ int main(int argc, char *argv[])
   case 1:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for (int i=0; i<parms.numberOfIterationsToRun; i++)
+    for (int i=0; i < parms.numberOfIterationsToRun; i++)
       {
-      int workExtent[6] = {0, parms.workSize-1, 0, parms.workSize-1, 0, parms.workSize*2-1};
-      vtkImageTestMandelbrotSource * source =
-        vtkImageTestMandelbrotSource::New();
+      int workExtent[6] = {0, parms.workSize - 1, 0, parms.workSize - 1, 0, parms.workSize * 2 - 1};
+      vtkImageTestMandelbrotSource * source = vtkImageTestMandelbrotSource::New();
       source->SetWholeExtent(workExtent);
       source->Update();
       // flush out cache
       TrashCache();
 
-      int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
+      int minBlockSize[3]= {MIN_BLOCK_SIZE_X, MIN_BLOCK_SIZE_Y, MIN_BLOCK_SIZE_Z};
 
-      vtkSmartPointer<vtkImageCast> castFilter =
-        vtkSmartPointer<vtkImageCast>::New();
-      castFilter->SetInputConnection(source->GetOutputPort());
-      castFilter->SetEnableSMP(parms.enableSMP);
-      castFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
-      castFilter->SetSplitMode(parms.SMPSplitMode);
-      castFilter->SetOutputScalarTypeToUnsignedChar();
-      castFilter->SetSMPMinimumBlockSize(minBlockSize);
+      vtkSmartPointer<vtkImageCast> castFilter = vtkSmartPointer<vtkImageCast>::New();
+      castFilter -> SetInputConnection(source -> GetOutputPort());
+      castFilter -> SetEnableSMP(parms.enableSMP);
+      castFilter -> SetSMPSplitPercentage(parms.smpSplitPercentage);
+      castFilter -> SetSplitMode(parms.SMPSplitMode);
+      castFilter -> SetOutputScalarTypeToUnsignedChar();
+      castFilter -> SetSMPMinimumBlockSize(minBlockSize);
 
-      tl->StartTimer();
-      castFilter->Update();
-      tl->StopTimer();
+      tl -> StartTimer();
+      castFilter -> Update();
+      tl -> StopTimer();
 
-      executionTimes[i] = tl->GetElapsedTime();
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      executionTimes[i] = tl -> GetElapsedTime();
+      cerr << "Wall Time = " << tl -> GetElapsedTime() << "\n";
       }
 
     WriteResultToCSV(executionTimes,&parms);
@@ -212,84 +211,78 @@ int main(int argc, char *argv[])
 //----Test Case 2: SMP overhead compared with old multi-threader
   case 2:
     {
-
     // read in kernel size
-    if (argc <10)
+    if (argc < 10)
       {
       cerr << "Additional Data not inputed into argument 8\n";
       break;
       }
 
-    int minBlockSize[3]= {MIN_BLOCK_SIZE_X,MIN_BLOCK_SIZE_Y,MIN_BLOCK_SIZE_Z};
+    int minBlockSize[3]= {MIN_BLOCK_SIZE_X, MIN_BLOCK_SIZE_Y, MIN_BLOCK_SIZE_Z};
 
     int kernelSize = atoi(argv[9]);
 
-    parms.additionalData =argv[9];
+    parms.additionalData = argv[9];
 
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for(int i=0; i<parms.numberOfIterationsToRun; i++)
+    for(int i = 0; i < parms.numberOfIterationsToRun; i++)
       {
       // Create an image
-      vtkSmartPointer<vtkImageTestMandelbrotSource> source =
-        vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
+      vtkSmartPointer<vtkImageTestMandelbrotSource> source = vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-      int workExtent[6] = {0, parms.workSize-1, 0, parms.workSize-1,0, parms.workSize*2-1};
+      int workExtent[6] = {0, parms.workSize - 1, 0, parms.workSize - 1,0, parms.workSize * 2 - 1};
       source->SetWholeExtent(workExtent);
       source->Update();
 
-      vtkSmartPointer<vtkImageCast> originalCastFilter =
-        vtkSmartPointer<vtkImageCast>::New();
-      originalCastFilter->SetInputConnection(source->GetOutputPort());
-      originalCastFilter->SetOutputScalarTypeToUnsignedChar();
-      originalCastFilter->Update();
+      vtkSmartPointer<vtkImageCast> originalCastFilter = vtkSmartPointer<vtkImageCast>::New();
+      originalCastFilter -> SetInputConnection(source -> GetOutputPort());
+      originalCastFilter -> SetOutputScalarTypeToUnsignedChar();
+      originalCastFilter -> Update();
       // flush out cache
       TrashCache();
 
-      vtkSmartPointer<vtkImageMedian3D> medianFilter =
-        vtkSmartPointer<vtkImageMedian3D>::New();
-      medianFilter->SetInputConnection(source->GetOutputPort());
+      vtkSmartPointer<vtkImageMedian3D> medianFilter = vtkSmartPointer<vtkImageMedian3D>::New();
+      medianFilter->SetInputConnection(source -> GetOutputPort());
 
-      medianFilter->SetKernelSize(kernelSize,kernelSize,kernelSize);
-      medianFilter->SetEnableSMP(parms.enableSMP);
-      medianFilter->SetSMPSplitPercentage(parms.smpSplitPercentage);
-      medianFilter->SetSplitMode(parms.SMPSplitMode);
+      medianFilter -> SetKernelSize(kernelSize, kernelSize, kernelSize);
+      medianFilter -> SetEnableSMP(parms.enableSMP);
+      medianFilter -> SetSMPSplitPercentage(parms.smpSplitPercentage);
+      medianFilter -> SetSplitMode(parms.SMPSplitMode);
 
-      medianFilter->SetSMPMinimumBlockSize(minBlockSize);
+      medianFilter -> SetSMPMinimumBlockSize(minBlockSize);
 
-      tl->StartTimer();
-      medianFilter->Update();
-      tl->StopTimer();
+      tl -> StartTimer();
+      medianFilter -> Update();
+      tl -> StopTimer();
 
-      executionTimes[i] = tl->GetElapsedTime();
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      executionTimes[i] = tl -> GetElapsedTime();
+      cerr << "Wall Time = " << tl -> GetElapsedTime() << "\n";
       }
-    WriteResultToCSV(executionTimes,&parms);
+    WriteResultToCSV(executionTimes, &parms);
     delete [] executionTimes;
     break;
     }
 //----Test Case 3: SMP overhead compared with old multi-threader
   case 3:
     {
-      double angle = 45;
+      double angle = 45.0;
 
       float * executionTimes = new float[parms.numberOfIterationsToRun];
 
-      for (int i=0; i<parms.numberOfIterationsToRun; i++)
+      for (int i=0; i < parms.numberOfIterationsToRun; i++)
         {
         // Create an image
-        vtkSmartPointer<vtkImageTestMandelbrotSource> source =
-          vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
+        vtkSmartPointer<vtkImageTestMandelbrotSource> source = vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-        int workExtent[6] = {0,parms.workSize-1,0,parms.workSize-1,0,parms.workSize*2-1};
+        int workExtent[6] = {0, parms.workSize-1, 0, parms.workSize - 1, 0, parms.workSize * 2 - 1};
         source->SetWholeExtent(workExtent);
         source->Update();
         // Rotate about the center of the image
-        vtkSmartPointer<vtkTransform> transform =
-          vtkSmartPointer<vtkTransform>::New();
+        vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
 
         // Compute the center of the image
         double bounds[6];
-        source->GetOutput()->GetBounds(bounds);
+        source -> GetOutput() -> GetBounds(bounds);
         double center[3];
         center[0] = (bounds[1] + bounds[0]) / 2.0;
         center[1] = (bounds[3] + bounds[2]) / 2.0;
@@ -304,191 +297,174 @@ int main(int argc, char *argv[])
         TrashCache();
 
         // Reslice does all of the work
-        vtkSmartPointer<vtkImageReslice> reslice =
-          vtkSmartPointer<vtkImageReslice>::New();
-        reslice->SetInputConnection(source->GetOutputPort());
-        reslice->SetResliceTransform(transform);
-        reslice->SetInterpolationModeToCubic();
+        vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
+        reslice -> SetInputConnection(source->GetOutputPort());
+        reslice -> SetResliceTransform(transform);
+        reslice -> SetInterpolationModeToCubic();
 
-        reslice->SetEnableSMP(parms.enableSMP);
-        reslice->SetSMPSplitPercentage(parms.smpSplitPercentage);
-        reslice->SetSplitMode(parms.SMPSplitMode);
+        reslice -> SetEnableSMP(parms.enableSMP);
+        reslice -> SetSMPSplitPercentage(parms.smpSplitPercentage);
+        reslice -> SetSplitMode(parms.SMPSplitMode);
 
         int minBlockSize[3]= {MIN_BLOCK_SIZE_X, MIN_BLOCK_SIZE_Y, MIN_BLOCK_SIZE_Z};
 
-        reslice->SetSMPMinimumBlockSize(minBlockSize);
+        reslice -> SetSMPMinimumBlockSize(minBlockSize);
 
         // read in size for stencil window
-        if (argc ==10)
+        if (argc == 10)
           {
 
           parms.additionalData = argv[9];
           vtkSmartPointer<vtkROIStencilSource> stencilSource = vtkSmartPointer<vtkROIStencilSource>::New();
-          stencilSource->SetShapeToBox();
+          stencilSource -> SetShapeToBox();
           double radius = atof(argv[9]);
           double boundss[6] = { center[0] - radius, center[0] + radius, center[1] - radius, center[1] + radius, center[2] - radius, center[2] + radius };
-          stencilSource->SetBounds(boundss);
+          stencilSource -> SetBounds(boundss);
 
-          stencilSource->SetInformationInput(source->GetOutput());
-          stencilSource->Update();
+          stencilSource -> SetInformationInput(source -> GetOutput());
+          stencilSource -> Update();
 
-          reslice->SetStencilData(stencilSource->GetOutput());
+          reslice -> SetStencilData(stencilSource -> GetOutput());
           }
 
-          tl->StartTimer();
-          reslice->Update();
-          tl->StopTimer();
+          tl -> StartTimer();
+          reslice -> Update();
+          tl -> StopTimer();
 
-          executionTimes[i] = tl->GetElapsedTime();
-          cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+          executionTimes[i] = tl -> GetElapsedTime();
+          cerr << "Wall Time = " << tl -> GetElapsedTime() << "\n";
           }
-      WriteResultToCSV(executionTimes,&parms);
+      WriteResultToCSV(executionTimes, &parms);
       delete [] executionTimes;
       break;
     }
   case 4:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for (int i=0; i<parms.numberOfIterationsToRun; i++)
+    for (int i = 0; i < parms.numberOfIterationsToRun; i++)
       {
       // flush out cache
       TrashCache();
       // first, create an image that looks like
       // graph paper by combining two image grid
       // sources via vtkImageBlend
-      vtkSmartPointer<vtkImageGridSource> imageGrid1 =
-        vtkSmartPointer<vtkImageGridSource>::New();
-      imageGrid1->SetGridSpacing(4,4,0);
-      imageGrid1->SetGridOrigin(0,0,0);
-      imageGrid1->SetDataExtent(0,1023,0,1023,0,0);
-      imageGrid1->SetDataScalarTypeToUnsignedChar();
+      vtkSmartPointer<vtkImageGridSource> imageGrid1 = vtkSmartPointer<vtkImageGridSource>::New();
+      imageGrid1 -> SetGridSpacing(4,4,0);
+      imageGrid1 -> SetGridOrigin(0,0,0);
+      imageGrid1 -> SetDataExtent(0,1023,0,1023,0,0);
+      imageGrid1 -> SetDataScalarTypeToUnsignedChar();
 
-      vtkSmartPointer<vtkImageGridSource> imageGrid2 =
-        vtkSmartPointer<vtkImageGridSource>::New();
-      imageGrid2->SetGridSpacing(16,16,0);
-      imageGrid2->SetGridOrigin(0,0,0);
-      imageGrid2->SetDataExtent(0,1023,0,1023,0,0);
-      imageGrid2->SetDataScalarTypeToUnsignedChar();
+      vtkSmartPointer<vtkImageGridSource> imageGrid2 = vtkSmartPointer<vtkImageGridSource>::New();
+      imageGrid2 -> SetGridSpacing(16, 16, 0);
+      imageGrid2 -> SetGridOrigin(0, 0, 0);
+      imageGrid2 -> SetDataExtent(0, 1023, 0, 1023, 0, 0);
+      imageGrid2 -> SetDataScalarTypeToUnsignedChar();
 
-      vtkSmartPointer<vtkLookupTable> table1 =
-        vtkSmartPointer<vtkLookupTable>::New();
-      table1->SetTableRange(0,1);
-      table1->SetValueRange(1.0,0.7);
-      table1->SetSaturationRange(0.0,1.0);
-      table1->SetHueRange(0.12,0.12);
-      table1->SetAlphaRange(1.0,1.0);
-      table1->Build();
+      vtkSmartPointer<vtkLookupTable> table1 = vtkSmartPointer<vtkLookupTable>::New();
+      table1 -> SetTableRange(0, 1);
+      table1 -> SetValueRange(1.0, 0.7);
+      table1 -> SetSaturationRange(0.0, 1.0);
+      table1 -> SetHueRange(0.12, 0.12);
+      table1 -> SetAlphaRange(1.0, 1.0);
+      table1 -> Build();
 
-      vtkSmartPointer<vtkLookupTable> table2 =
-        vtkSmartPointer<vtkLookupTable>::New();
-      table2->SetTableRange(0,1);
-      table2->SetValueRange(1.0,0.0);
-      table2->SetSaturationRange(0.0,0.0);
-      table2->SetHueRange(0.0,0.0);
-      table2->SetAlphaRange(0.0,1.0);
-      table2->Build();
+      vtkSmartPointer<vtkLookupTable> table2 = vtkSmartPointer<vtkLookupTable>::New();
+      table2 -> SetTableRange(0,1);
+      table2 -> SetValueRange(1.0,0.0);
+      table2 -> SetSaturationRange(0.0,0.0);
+      table2 -> SetHueRange(0.0,0.0);
+      table2 -> SetAlphaRange(0.0,1.0);
+      table2 -> Build();
 
-      vtkSmartPointer<vtkImageMapToColors> map1 =
-        vtkSmartPointer<vtkImageMapToColors>::New();
-      map1->SetInputConnection(imageGrid1->GetOutputPort());
-      map1->SetLookupTable(table1);
+      vtkSmartPointer<vtkImageMapToColors> map1 = vtkSmartPointer<vtkImageMapToColors>::New();
+      map1 -> SetInputConnection(imageGrid1 -> GetOutputPort());
+      map1 -> SetLookupTable(table1);
 
-      vtkSmartPointer<vtkImageMapToColors> map2 =
-        vtkSmartPointer<vtkImageMapToColors>::New();
-      map2->SetInputConnection(imageGrid2->GetOutputPort());
-      map2->SetLookupTable(table2);
+      vtkSmartPointer<vtkImageMapToColors> map2 = vtkSmartPointer<vtkImageMapToColors>::New();
+      map2 -> SetInputConnection(imageGrid2 -> GetOutputPort());
+      map2 -> SetLookupTable(table2);
 
-      vtkSmartPointer<vtkImageBlend> blend =
-        vtkSmartPointer<vtkImageBlend>::New();
-      blend->AddInputConnection(map1->GetOutputPort());
-      blend->AddInputConnection(map2->GetOutputPort());
+      vtkSmartPointer<vtkImageBlend> blend = vtkSmartPointer<vtkImageBlend>::New();
+      blend -> AddInputConnection(map1 -> GetOutputPort());
+      blend -> AddInputConnection(map2 -> GetOutputPort());
 
       // next, create a ThinPlateSpline transform, which
       // will then be used to create the B-spline transform
-      vtkSmartPointer<vtkPoints> p1 =
-        vtkSmartPointer<vtkPoints>::New();
-      p1->SetNumberOfPoints(8);
-      p1->SetPoint(0,0,0,0);
-      p1->SetPoint(1,0,255,0);
-      p1->SetPoint(2,255,0,0);
-      p1->SetPoint(3,255,255,0);
-      p1->SetPoint(4,96,96,0);
-      p1->SetPoint(5,96,159,0);
-      p1->SetPoint(6,159,159,0);
-      p1->SetPoint(7,159,96,0);
+      vtkSmartPointer<vtkPoints> p1 = vtkSmartPointer<vtkPoints>::New();
+      p1 -> SetNumberOfPoints(8);
+      p1 -> SetPoint(0, 0, 0, 0);
+      p1 -> SetPoint(1, 0, 255, 0);
+      p1 -> SetPoint(2, 255, 0, 0);
+      p1 -> SetPoint(3, 255, 255, 0);
+      p1 -> SetPoint(4, 96, 96, 0);
+      p1 -> SetPoint(5, 96, 159, 0);
+      p1 -> SetPoint(6, 159, 159, 0);
+      p1 -> SetPoint(7, 159, 96, 0);
 
-      vtkSmartPointer<vtkPoints> p2 =
-        vtkSmartPointer<vtkPoints>::New();
-      p2->SetNumberOfPoints(8);
-      p2->SetPoint(0,0,0,0);
-      p2->SetPoint(1,0,255,0);
-      p2->SetPoint(2,255,0,0);
-      p2->SetPoint(3,255,255,0);
-      p2->SetPoint(4,96,159,0);
-      p2->SetPoint(5,159,159,0);
-      p2->SetPoint(6,159,96,0);
-      p2->SetPoint(7,96,96,0);
+      vtkSmartPointer<vtkPoints> p2 = vtkSmartPointer<vtkPoints>::New();
+      p2 -> SetNumberOfPoints(8);
+      p2 -> SetPoint(0, 0, 0, 0);
+      p2 -> SetPoint(1, 0, 255, 0);
+      p2 -> SetPoint(2, 255, 0, 0);
+      p2 -> SetPoint(3, 255, 255, 0);
+      p2 -> SetPoint(4, 96, 159, 0);
+      p2 -> SetPoint(5, 159, 159, 0);
+      p2 -> SetPoint(6, 159, 96, 0);
+      p2 -> SetPoint(7, 96, 96, 0);
 
-      vtkSmartPointer<vtkThinPlateSplineTransform> thinPlate =
-        vtkSmartPointer<vtkThinPlateSplineTransform>::New();
-      thinPlate->SetSourceLandmarks(p2);
-      thinPlate->SetTargetLandmarks(p1);
-      thinPlate->SetBasisToR2LogR();
+      vtkSmartPointer<vtkThinPlateSplineTransform> thinPlate = vtkSmartPointer<vtkThinPlateSplineTransform>::New();
+      thinPlate -> SetSourceLandmarks(p2);
+      thinPlate -> SetTargetLandmarks(p1);
+      thinPlate -> SetBasisToR2LogR();
 
       // convert the thin plate spline into a B-spline, by
       // sampling it onto a grid and then computing the
       // B-spline coefficients
-      vtkSmartPointer<vtkTransformToGrid> transformToGrid =
-        vtkSmartPointer<vtkTransformToGrid>::New();
-      transformToGrid->SetInput(thinPlate);
-      transformToGrid->SetGridSpacing(64.0, 64.0, 1.0);
-      transformToGrid->SetGridOrigin(0.0, 0.0, 0.0);
-      transformToGrid->SetGridExtent(0,64, 0,64, 0,0);
+      vtkSmartPointer<vtkTransformToGrid> transformToGrid = vtkSmartPointer<vtkTransformToGrid>::New();
+      transformToGrid -> SetInput(thinPlate);
+      transformToGrid -> SetGridSpacing(64.0, 64.0, 1.0);
+      transformToGrid -> SetGridOrigin(0.0, 0.0, 0.0);
+      transformToGrid -> SetGridExtent(0,64, 0,64, 0,0);
 
-      vtkSmartPointer<vtkImageBSplineCoefficients> grid =
-        vtkSmartPointer<vtkImageBSplineCoefficients>::New();
-      grid->SetInputConnection(transformToGrid->GetOutputPort());
-      grid->UpdateWholeExtent();
+      vtkSmartPointer<vtkImageBSplineCoefficients> grid = vtkSmartPointer<vtkImageBSplineCoefficients>::New();
+      grid -> SetInputConnection(transformToGrid -> GetOutputPort());
+      grid -> UpdateWholeExtent();
 
       // create the B-spline transform, scale the deformation by
       // half to demonstrate how deformation scaling works
-      vtkSmartPointer<vtkBSplineTransform> transform =
-        vtkSmartPointer<vtkBSplineTransform>::New();
-      transform->SetCoefficientData(grid->GetOutput());
-      transform->SetDisplacementScale(0.5);
-      transform->SetBorderModeToZero();
+      vtkSmartPointer<vtkBSplineTransform> transform = vtkSmartPointer<vtkBSplineTransform>::New();
+      transform -> SetCoefficientData(grid -> GetOutput());
+      transform -> SetDisplacementScale(0.5);
+      transform -> SetBorderModeToZero();
 
       // invert the transform before passing it to vtkImageReslice
-      transform->Inverse();
+      transform -> Inverse();
 
       // reslice the image through the B-spline transform,
       // using B-spline interpolation and the "Repeat"
       // boundary condition
-      vtkSmartPointer<vtkImageBSplineCoefficients> prefilter =
-        vtkSmartPointer<vtkImageBSplineCoefficients>::New();
-      prefilter->SetInputConnection(blend->GetOutputPort());
-      prefilter->SetBorderModeToRepeat();
-      prefilter->SetSplineDegree(3);
+      vtkSmartPointer<vtkImageBSplineCoefficients> prefilter = vtkSmartPointer<vtkImageBSplineCoefficients>::New();
+      prefilter -> SetInputConnection(blend -> GetOutputPort());
+      prefilter -> SetBorderModeToRepeat();
+      prefilter -> SetSplineDegree(3);
 
-      vtkSmartPointer<vtkImageBSplineInterpolator> interpolator =
-        vtkSmartPointer<vtkImageBSplineInterpolator>::New();
-      interpolator->SetSplineDegree(3);
+      vtkSmartPointer<vtkImageBSplineInterpolator> interpolator = vtkSmartPointer<vtkImageBSplineInterpolator>::New();
+      interpolator -> SetSplineDegree(3);
 
-      vtkSmartPointer<vtkImageReslice> reslice =
-      vtkSmartPointer<vtkImageReslice>::New();
-        reslice->SetInputConnection(prefilter->GetOutputPort());
-      reslice->SetResliceTransform(transform);
-      reslice->WrapOn();
-      reslice->SetInterpolator(interpolator);
-      reslice->SetOutputSpacing(1.0, 1.0, 1.0);
-      reslice->SetOutputOrigin(-32.0, -32.0, 0.0);
-      reslice->SetOutputExtent(0, 1023, 0, 1023, 0, 0);
+      vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
+      reslice -> SetInputConnection(prefilter -> GetOutputPort());
+      reslice -> SetResliceTransform(transform);
+      reslice -> WrapOn();
+      reslice -> SetInterpolator(interpolator);
+      reslice -> SetOutputSpacing(1.0, 1.0, 1.0);
+      reslice -> SetOutputOrigin(-32.0, -32.0, 0.0);
+      reslice -> SetOutputExtent(0, 1023, 0, 1023, 0, 0);
 
-      tl->StartTimer();
-      reslice->Update();
-      tl->StopTimer();
-      executionTimes[i] = tl->GetElapsedTime();
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      tl -> StartTimer();
+      reslice -> Update();
+      tl -> StopTimer();
+      executionTimes[i] = tl -> GetElapsedTime();
+      cerr << "Wall Time = " << tl -> GetElapsedTime() << "\n";
       }
     WriteResultToCSV(executionTimes,&parms);
     delete [] executionTimes;
@@ -498,31 +474,28 @@ int main(int argc, char *argv[])
   case 5:
     {
     float * executionTimes = new float[parms.numberOfIterationsToRun];
-    for (int i=0; i<parms.numberOfIterationsToRun; i++)
+    for (int i = 0; i < parms.numberOfIterationsToRun; i++)
       {
-      vtkSmartPointer<vtkImageTestMandelbrotSource> source =
-        vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
+      vtkSmartPointer<vtkImageTestMandelbrotSource> source = vtkSmartPointer<vtkImageTestMandelbrotSource>::New();
 
-      int workExtent[6] = {0, parms.workSize-1,0, parms.workSize-1, 0, parms.workSize*2-1};
+      int workExtent[6] = {0, parms.workSize - 1, 0, parms.workSize - 1, 0, parms.workSize * 2 - 1};
       source->SetWholeExtent(workExtent);
       source->Update();
 
-      vtkSmartPointer<vtkImageCast> imageCast =
-        vtkSmartPointer<vtkImageCast>::New();
-      imageCast->SetInputConnection(source->GetOutputPort());
-      imageCast->SetOutputScalarTypeToUnsignedChar();
-      imageCast->Update();
+      vtkSmartPointer<vtkImageCast> imageCast = vtkSmartPointer<vtkImageCast>::New();
+      imageCast -> SetInputConnection(source -> GetOutputPort());
+      imageCast -> SetOutputScalarTypeToUnsignedChar();
+      imageCast -> Update();
 
       // flush out cache
       TrashCache();
       // Create an image
 
-      vtkSmartPointer<vtkImageHistogramStatistics > statistics =
-        vtkSmartPointer<vtkImageHistogramStatistics >::New();
-      statistics->SetInputConnection(imageCast->GetOutputPort());
-      statistics->GenerateHistogramImageOff();
-      statistics->SetSMPSplitPercentage(parms.smpSplitPercentage);
-      statistics->SetSplitMode(parms.SMPSplitMode);
+      vtkSmartPointer<vtkImageHistogramStatistics > statistics = vtkSmartPointer<vtkImageHistogramStatistics >::New();
+      statistics -> SetInputConnection(imageCast -> GetOutputPort());
+      statistics -> GenerateHistogramImageOff();
+      statistics -> SetSMPSplitPercentage(parms.smpSplitPercentage);
+      statistics -> SetSplitMode(parms.SMPSplitMode);
 
       // read in size for stencil window
       if (argc ==10)
@@ -534,21 +507,21 @@ int main(int argc, char *argv[])
 
         parms.additionalData = argv[9];
         vtkROIStencilSource * stencilSource = vtkROIStencilSource::New();
-        stencilSource->SetShapeToBox();
+        stencilSource -> SetShapeToBox();
         double radius = atoi(argv[9]);;
         double boundss[6] = { center[0] - radius, center[0] + radius, center[1] - radius, center[1] + radius, center[2] - radius, center[2] + radius };
-        stencilSource->SetBounds(boundss);
+        stencilSource -> SetBounds(boundss);
 
-        stencilSource->SetInformationInput(source->GetOutput());
-        stencilSource->Update();
-        statistics->SetStencilData(stencilSource->GetOutput());
+        stencilSource -> SetInformationInput(source -> GetOutput());
+        stencilSource -> Update();
+        statistics->SetStencilData(stencilSource -> GetOutput());
         }
 
-      tl->StartTimer();
-      statistics->Update();
-      tl->StopTimer();
-      executionTimes[i] = tl->GetElapsedTime();
-      cerr << "Wall Time = " << tl->GetElapsedTime() << "\n";
+      tl -> StartTimer();
+      statistics -> Update();
+      tl -> StopTimer();
+      executionTimes[i] = tl -> GetElapsedTime();
+      cerr << "Wall Time = " << tl -> GetElapsedTime() << "\n";
       }
 
     WriteResultToCSV(executionTimes,&parms);
@@ -562,6 +535,6 @@ int main(int argc, char *argv[])
     }
   }
 
-  tl->Delete();
+  tl -> Delete();
   return EXIT_SUCCESS;
 }

@@ -19,6 +19,43 @@
 #include "vtkLargeInteger.h"
 #include "limits.h"
 
+// Description:
+// This class is used as storage to calculate the correct
+// indexing for SplitExtentImaging.  NumMicroBlocks
+// is the number of minimum size blocks calculated by
+// ext/minsize.  Macroblocks is the number of microblocks
+// taking into consideration the split percentage.  Finally,
+// Macro to micro is the ratio between the two.
+class BlockSizeProperties
+{
+public:
+  BlockSizeProperties()
+  {
+    this -> MinSize[0] = this -> MinSize[1] = this -> MinSize[2]-1;
+    this -> NumMicroBlocks[0] = this -> NumMicroBlocks[1] = this -> NumMicroBlocks[2] = -1;
+    this -> NumMacroBlocks[0] = this -> NumMacroBlocks[1] = this -> NumMacroBlocks[2] =-1;
+
+    this -> TotalMacroBlocks = -1;
+
+    this -> MacroToMicro[0] = this -> MacroToMicro[1] = this -> MacroToMicro[2] = -1;
+
+    this -> ByPoints = true;
+    this -> SplitMode = 3; // block mode
+    WholeExtent[0] = WholeExtent[2] = WholeExtent[4]= 0;
+    WholeExtent[1] = WholeExtent[3] = WholeExtent[5]= -1;
+
+  }
+
+  vtkTypeInt64 MinSize[3];      // The minimum size for each block
+  vtkTypeInt64  NumMicroBlocks[3]; // Number of minimum size blocks
+  int NumMacroBlocks[3];    // Number of macro blocks taking into consideration the split Percentage
+  int TotalMacroBlocks;     // Total macro blocks taking into consideration the split Percentage
+  int MacroToMicro[3];// Number of micro blocks per macro block
+  bool ByPoints;  // To split by points or not
+  int SplitMode;  // SplitMode
+  int WholeExtent[6];// The original extent
+};
+
 vtkStandardNewMacro(vtkExtentTranslator);
 
 vtkInformationKeyMacro(vtkExtentTranslator, DATA_SPLIT_MODE, Integer);
@@ -55,9 +92,11 @@ vtkExtentTranslator::vtkExtentTranslator()
   this->SplitLen = 0;
   this->SplitPath = NULL;
 
-  this->BlockProperties.MinSize[0] = 1;
-  this->BlockProperties.MinSize[1] = 1;
-  this->BlockProperties.MinSize[2] = 1;
+  this->BlockProperties = new BlockSizeProperties();
+
+  this->BlockProperties->MinSize[0] = 1;
+  this->BlockProperties->MinSize[1] = 1;
+  this->BlockProperties->MinSize[2] = 1;
 
   this->Initialized = false;
 }
@@ -66,6 +105,7 @@ vtkExtentTranslator::vtkExtentTranslator()
 vtkExtentTranslator::~vtkExtentTranslator()
 {
   this->SetSplitPath(0, NULL);
+  delete this->BlockProperties;
 }
 
 //----------------------------------------------------------------------------
@@ -163,10 +203,9 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
 //----------------------------------------------------------------------------
 int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece,
                                                  int ghostLevel,
-                                                 int *wholeExtent,
                                                  int *resultExtent)
 {
-  memcpy(resultExtent, wholeExtent, sizeof(int)*6);
+  memcpy(resultExtent, this->BlockProperties->WholeExtent, sizeof(int)*6);
   int ret = this->SplitExtentImaging(piece, resultExtent);
 
   if (ret == 0)
@@ -185,29 +224,29 @@ int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece,
     resultExtent[4] -= ghostLevel;
     resultExtent[5] += ghostLevel;
 
-    if (resultExtent[0] < wholeExtent[0])
+    if (resultExtent[0] < this->BlockProperties->WholeExtent[0])
       {
-      resultExtent[0] = wholeExtent[0];
+      resultExtent[0] = this->BlockProperties->WholeExtent[0];
       }
-    if (resultExtent[1] > wholeExtent[1])
+    if (resultExtent[1] > this->BlockProperties->WholeExtent[1])
       {
-      resultExtent[1] = wholeExtent[1];
+      resultExtent[1] = this->BlockProperties->WholeExtent[1];
       }
-    if (resultExtent[2] < wholeExtent[2])
+    if (resultExtent[2] < this->BlockProperties->WholeExtent[2])
       {
-      resultExtent[2] = wholeExtent[2];
+      resultExtent[2] = this->BlockProperties->WholeExtent[2];
       }
-    if (resultExtent[3] > wholeExtent[3])
+    if (resultExtent[3] > this->BlockProperties->WholeExtent[3])
       {
-      resultExtent[3] = wholeExtent[3];
+      resultExtent[3] = this->BlockProperties->WholeExtent[3];
       }
-    if (resultExtent[4] < wholeExtent[4])
+    if (resultExtent[4] < this->BlockProperties->WholeExtent[4])
       {
-      resultExtent[4] = wholeExtent[4];
+      resultExtent[4] = this->BlockProperties->WholeExtent[4];
       }
-    if (resultExtent[5] > wholeExtent[5])
+    if (resultExtent[5] > this->BlockProperties->WholeExtent[5])
       {
-      resultExtent[5] = wholeExtent[5];
+      resultExtent[5] = this->BlockProperties->WholeExtent[5];
       }
     }
 
@@ -241,9 +280,10 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
     minBlockSizeZ = 1;
     }
 
-  BlockSizeProperties * properties = &this->BlockProperties;
+  BlockSizeProperties * properties = this->BlockProperties;
   properties -> SplitMode = splitMode;
   properties -> ByPoints = byPoints;
+  memcpy(properties -> WholeExtent, ext, 6 * sizeof(int));
 
   properties->MinSize[0] = minBlockSizeX;
   properties->MinSize[1] = minBlockSizeY;
@@ -361,7 +401,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
     vtkErrorMacro("SplitExtent has not being initialized.");
     return -1;
     }
-  bool byPoints = this->BlockProperties.ByPoints;
+  bool byPoints = this->BlockProperties->ByPoints;
 
   int sX,sY,sZ;
   if (byPoints)
@@ -379,9 +419,9 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
 
 
 
-  int minSize[3] = {this->BlockProperties.MinSize[0],
-                    this->BlockProperties.MinSize[1],
-                    this->BlockProperties.MinSize[2]};
+  int minSize[3] = {this->BlockProperties->MinSize[0],
+                    this->BlockProperties->MinSize[1],
+                    this->BlockProperties->MinSize[2]};
 
 
   //Rotate axis based on whether blockmode, xy ,xz or yz split
@@ -432,9 +472,9 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
     }
 
   // Find Appropiate split
-  int size[3] = {this->BlockProperties.NumMacroBlocks[0]
-                ,this->BlockProperties.NumMacroBlocks[1]
-                ,this->BlockProperties.NumMacroBlocks[2]};
+  int size[3] = {this->BlockProperties->NumMacroBlocks[0]
+                ,this->BlockProperties->NumMacroBlocks[1]
+                ,this->BlockProperties->NumMacroBlocks[2]};
 
   int startExt[6] = {ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]};
   int targetPiece = piece;
@@ -445,7 +485,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
   int numberOfBlocksPerPlane = size[strideAxis] * size[blockAxis];
   int planeOffset = targetPiece / numberOfBlocksPerPlane;
 
-  int macroToMicroModifer = this->BlockProperties.MacroToMicro[planeAxis];
+  int macroToMicroModifer = this->BlockProperties->MacroToMicro[planeAxis];
 
   ext[planeAxis * 2] = startExt[planeAxis * 2] + planeOffset * minSize[planeAxis] * macroToMicroModifer;
   if (byPoints)
@@ -457,7 +497,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
     ext[planeAxis * 2 + 1] = ext[planeAxis * 2] + minSize[planeAxis] * macroToMicroModifer;  // shared points between pieces
     }
 
-  if (planeOffset == this->BlockProperties.NumMacroBlocks[planeAxis] - 1)
+  if (planeOffset == this->BlockProperties->NumMacroBlocks[planeAxis] - 1)
     {
     ext[planeAxis * 2 + 1] = startExt[planeAxis * 2 + 1];
     }
@@ -468,7 +508,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
   int numberOfBlocksPerStride = size[blockAxis];
   int strideOffset = targetPiece / numberOfBlocksPerStride;
 
-  macroToMicroModifer = this->BlockProperties.MacroToMicro[strideAxis];
+  macroToMicroModifer = this->BlockProperties->MacroToMicro[strideAxis];
 
   ext[strideAxis * 2] = startExt[strideAxis * 2]+ strideOffset * minSize[strideAxis] * macroToMicroModifer;
   if (byPoints)
@@ -480,7 +520,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
     ext[strideAxis * 2 + 1] = ext[strideAxis * 2] + minSize[strideAxis] * macroToMicroModifer; // shared points between pieces
     }
 
-  if (strideOffset == this->BlockProperties.NumMacroBlocks[strideAxis] - 1)
+  if (strideOffset == this->BlockProperties->NumMacroBlocks[strideAxis] - 1)
     {
     ext[strideAxis * 2 + 1] = startExt[strideAxis * 2 + 1];
     }
@@ -488,7 +528,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
   targetPiece = targetPiece - numberOfBlocksPerStride*strideOffset;
 
   // Find BlockOffset
-  macroToMicroModifer = this->BlockProperties.MacroToMicro[blockAxis];
+  macroToMicroModifer = this->BlockProperties->MacroToMicro[blockAxis];
   ext[blockAxis * 2] = startExt[blockAxis * 2] + targetPiece * minSize[blockAxis] * macroToMicroModifer;
 
   if (byPoints)
@@ -500,7 +540,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
     ext[blockAxis * 2 + 1] = ext[blockAxis * 2] + minSize[blockAxis] * macroToMicroModifer; // shared points between pieces
     }
 
-  if (targetPiece == this->BlockProperties.NumMacroBlocks[blockAxis] - 1)
+  if (targetPiece == this->BlockProperties->NumMacroBlocks[blockAxis] - 1)
     {
     ext[blockAxis * 2 + 1] = startExt[blockAxis * 2 + 1];
     }

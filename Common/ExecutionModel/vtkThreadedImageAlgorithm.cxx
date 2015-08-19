@@ -213,7 +213,7 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
   int ret;
   if (this->EnableSMP && GlobalEnableSMP) // this is block mode splitting
     {
-    ret = this->Translator->PieceToExtentThreadSafeImaging(num,0,startExt,splitExt);
+    ret = this->Translator->PieceToExtentThreadSafeImaging(num,0,splitExt);
 
     if(ret == 1)//there is a return extent
       {
