@@ -161,13 +161,13 @@ int vtkExtentTranslator::PieceToExtentThreadSafe(int piece, int numPieces,
   return 1;
 }
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece, int numPieces,
+int vtkExtentTranslator::PieceToExtentThreadSafeImaging(int piece,
                                                  int ghostLevel,
                                                  int *wholeExtent,
                                                  int *resultExtent)
 {
   memcpy(resultExtent, wholeExtent, sizeof(int)*6);
-  int ret = this->SplitExtentImaging(piece, numPieces, resultExtent);
+  int ret = this->SplitExtentImaging(piece, resultExtent);
 
   if (ret == 0)
     {
@@ -354,7 +354,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
 }
 
 //----------------------------------------------------------------------------
-int vtkExtentTranslator::SplitExtentImaging(int piece, int numPieces, int *ext)
+int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
 {
   if (!this -> Initialized)
     {

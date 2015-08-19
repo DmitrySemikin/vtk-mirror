@@ -100,7 +100,7 @@ TEST(TestSlabMode)
     int totalCalculatedSize = 0;
     for (int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -116,7 +116,7 @@ TEST(TestSlabMode)
                                          , MinimumBlockSize[2]);
     for (int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       }
@@ -132,7 +132,7 @@ TEST(TestSlabMode)
     totalCalculatedSize = 0;
     for (int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -148,7 +148,7 @@ TEST(TestSlabMode)
                                          , MinimumBlockSize[2]);
     for (int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       }
@@ -163,7 +163,7 @@ TEST(TestSlabMode)
     totalCalculatedSize = 0;
     for(int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -179,7 +179,7 @@ TEST(TestSlabMode)
                                          , MinimumBlockSize[2]);
     for (int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       }
@@ -234,7 +234,7 @@ TEST(Test2DSplitMode)
     int totalCalculatedSize = 0;
     for(int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       CHECK_EQUAL (splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
 
@@ -251,7 +251,7 @@ TEST(Test2DSplitMode)
                                        , MinimumBlockSize[2]);
     for(int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       CHECK_EQUAL (splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
       }
@@ -266,7 +266,7 @@ TEST(Test2DSplitMode)
     totalCalculatedSize = 0;
     for(int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i,blocks,0,startExt,splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -282,7 +282,7 @@ TEST(Test2DSplitMode)
                                        , MinimumBlockSize[2]);
     for(int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       }
@@ -297,7 +297,7 @@ TEST(Test2DSplitMode)
     totalCalculatedSize = 0;
     for(int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -314,7 +314,7 @@ TEST(Test2DSplitMode)
                                        , MinimumBlockSize[2]);
     for(int i = 0; i < blocks; i++)
       {
-      translatorNonPoints->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       }
@@ -351,7 +351,7 @@ TEST(Test3DSplitMode)
     int totalCalculatedSize = 0;
     for(int i = 0; i < blocks; i++)
       {
-      translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+      translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
@@ -380,7 +380,7 @@ TEST(TestEmptyExtent)
   int totalCalculatedSize = 0;
   for (int i = 0;i < blocks; i++)
     {
-    translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+    translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
     CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
     }
@@ -409,7 +409,7 @@ TEST(TestDefaultMode)
   int totalCalculatedSize = 0;
   for(int i = 0;i < blocks; i++)
     {
-    translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt, splitExt);
+    translator->PieceToExtentThreadSafeImaging(i, 0, startExt, splitExt);
     totalCalculatedSize +=(splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
     CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
     CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
@@ -429,7 +429,7 @@ TEST(TestDefaultMode)
   totalCalculatedSize = 0;
   for(int i =0; i < blocks; i++)
     {
-    translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt2, splitExt);
+    translator->PieceToExtentThreadSafeImaging(i, 0, startExt2, splitExt);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3]-  splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
     CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
     CHECK_EQUAL (splitExt[0] == startExt2[0] && splitExt[1] == startExt2[1] && splitExt[4] == startExt2[4] && splitExt[5] == startExt2[5], true);
@@ -448,7 +448,7 @@ TEST(TestDefaultMode)
   totalCalculatedSize = 0;
   for(int i = 0;i < blocks; i++)
     {
-    translator->PieceToExtentThreadSafeImaging(i, blocks, 0, startExt3, splitExt);
+    translator->PieceToExtentThreadSafeImaging(i, 0, startExt3, splitExt);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
     CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
     CHECK_EQUAL (splitExt[2] == startExt3[2] && splitExt[3] == startExt3[3] && splitExt[4] == startExt3[4] && splitExt[5] == startExt3[5], true);

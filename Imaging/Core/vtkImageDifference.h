@@ -90,6 +90,9 @@ public:
   vtkGetMacro(Averaging,int);
   vtkBooleanMacro(Averaging,int);
 
+  // Description:
+  // SMPInit and SMPReduce over-ride the base classes initilizer to support the
+  // Thread Local Storage objects used in this class.
   void SMPInit();
   void SMPReduce();
 

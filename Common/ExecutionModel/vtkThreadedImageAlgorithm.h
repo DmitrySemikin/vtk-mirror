@@ -66,7 +66,7 @@ public:
                           int num, int total);
 
   // Description:
-  // Disable SMP for all derived Imaging filters.
+  // Global Disable SMP for all derived Imaging filters.
   static void SetGlobalEnableSMP(bool enable);
   static bool GetGlobalEnableSMP();
 

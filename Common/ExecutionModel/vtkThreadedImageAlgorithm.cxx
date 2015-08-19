@@ -32,6 +32,21 @@ static bool GlobalEnableSMP = true;
 
 static VTK_THREAD_RETURN_TYPE vtkThreadedImageAlgorithmThreadedExecute( void *arg );
 
+class vtkSMPThreadInfo
+{
+public:
+  vtkGetMacro(NumberOfBlocks, int);
+  vtkGetMacro(UserData, void *);
+  vtkSMPThreadInfo(int numberOfblocks, void * userData)
+  {
+    this -> UserData = userData;
+    this -> NumberOfBlocks = numberOfblocks;
+  }
+protected:
+  int NumberOfBlocks; // The number of blocks used
+  void * UserData;
+};
+
 struct vtkImageThreadStruct
 {
   vtkThreadedImageAlgorithm *Filter;
@@ -44,13 +59,13 @@ struct vtkImageThreadStruct
 
 class vtkThreadedImageAlgorithmFunctor
 {
-  vtkMultiThreader::ThreadInfo * ThreadInfo;
+  vtkSMPThreadInfo * ThreadInfo;
   int Ext[6];
   vtkSMPThreadLocal<vtkImageData * > ThreadLocalImageData;
   vtkThreadedImageAlgorithm * Algo;
 
 public:
-  vtkThreadedImageAlgorithmFunctor(vtkMultiThreader::ThreadInfo * info, int * ext, vtkThreadedImageAlgorithm *algo)
+  vtkThreadedImageAlgorithmFunctor(vtkSMPThreadInfo * info, int * ext, vtkThreadedImageAlgorithm *algo)
   {
     memcpy(Ext,ext,sizeof (int)*6);
     this->ThreadInfo = info;
@@ -67,18 +82,17 @@ public:
     this->Algo->SMPReduce();
   }
 
-  VTK_THREAD_RETURN_TYPE Execute(int thread)
+  VTK_THREAD_RETURN_TYPE Execute(int blockId)
   {
-    vtkMultiThreader::ThreadInfo *ti = this->ThreadInfo;
     vtkImageThreadStruct *str =
-      static_cast<vtkImageThreadStruct *>(ti->UserData);
+      static_cast<vtkImageThreadStruct *>(this->ThreadInfo->GetUserData());
 
     int splitExt[6] = {0,-1,0,-1,0,-1};
     // execute the actual method with appropriate extent
     // first find out how many pieces extent can be split into.
-    int total = str->Filter->SplitExtent(splitExt, this->Ext, thread, ti->NumberOfThreads);
+    int total = str->Filter->SplitExtent(splitExt, this->Ext, blockId, this->ThreadInfo->GetNumberOfBlocks());
 
-    if (thread < total)
+    if (blockId < total)
       {
       // return if nothing to do
       if (splitExt[1] < splitExt[0] ||
@@ -90,7 +104,7 @@ public:
       str->Filter->ThreadedRequestData(str->Request,
                                        str->InputsInfo, str->OutputsInfo,
                                        str->Inputs, str->Outputs,
-                                       splitExt, thread);
+                                       splitExt, blockId);
       }
   }
 
@@ -199,7 +213,16 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
   int ret;
   if (this->EnableSMP && GlobalEnableSMP) // this is block mode splitting
     {
-    ret = this->Translator->PieceToExtentThreadSafeImaging(num,total,0,startExt,splitExt);
+    ret = this->Translator->PieceToExtentThreadSafeImaging(num,0,startExt,splitExt);
+
+    if(ret == 1)//there is a return extent
+      {
+      return num+1;
+      }
+    else // there was no piece returned
+      {
+      return 0;
+      }
     }
   else
     {
@@ -246,14 +269,6 @@ int vtkThreadedImageAlgorithm::SplitExtent(int splitExt[6],
 
     return maxThreadIdUsed + 1;
     }
-    if(ret == 1)//there is a return extent
-      {
-      return num+1;
-      }
-    else // there was no piece returned
-      {
-      return 0;
-      }
 }
 
 // this mess is really a simple function. All it does is call
@@ -465,10 +480,7 @@ int vtkThreadedImageAlgorithm::RequestData(
     bool debug = this->Debug;
     this->Debug = false;
 
-    vtkMultiThreader::ThreadInfo threadInfo;
-    threadInfo.NumberOfThreads = blocks;
-    threadInfo.UserData = &str;
-    threadInfo.ThreadID = -1;
+    vtkSMPThreadInfo threadInfo (blocks, &str);
 
     vtkThreadedImageAlgorithmFunctor functor(&threadInfo,updateExtent,this);
     vtkSMPTools::For(0, blocks, functor);

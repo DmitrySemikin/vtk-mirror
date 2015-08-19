@@ -249,6 +249,22 @@ int vtkImageHistogram::RequestUpdateExtent(
 //----------------------------------------------------------------------------
 // anonymous namespace for internal classes and functions
 namespace {
+
+class vtkSMPImageHistogramThreadInfo
+{
+public:
+  vtkGetMacro(NumberOfBlocks, int);
+  vtkGetMacro(UserData, void *);
+  vtkSMPImageHistogramThreadInfo(int numberOfblocks, void * userData)
+  {
+    this -> UserData = userData;
+    this -> NumberOfBlocks = numberOfblocks;
+  }
+protected:
+  int NumberOfBlocks; // The number of blocks used
+  void * UserData;
+};
+
 struct vtkImageHistogramThreadStruct
 {
   vtkImageHistogram *Algorithm;
@@ -579,7 +595,7 @@ struct ThreadLocalSum
 };
 
 class HistogramSumFunctor {
-  vtkMultiThreader::ThreadInfo * ThreadInfo;
+  vtkSMPImageHistogramThreadInfo * ThreadInfo;
   int Ext[6];
 public:
   int Total;
@@ -588,31 +604,30 @@ public:
   vtkSMPThreadLocal<struct ThreadLocalSum> ThreadLocalHistogram;
   vtkSMPThreadLocal<int> ThreadLocalTotal;
 
-  HistogramSumFunctor(vtkMultiThreader::ThreadInfo *threadInfo, int * ext)
+  HistogramSumFunctor(vtkSMPImageHistogramThreadInfo *threadInfo, int * ext)
   {
     memcpy(Ext, ext, sizeof(int) * 6);
     this->ThreadInfo = threadInfo;
     Total = 0;
   }
 
-  VTK_THREAD_RETURN_TYPE Execute(int thread)
+  VTK_THREAD_RETURN_TYPE Execute(int blockId)
   {
-    vtkMultiThreader::ThreadInfo *ti = this->ThreadInfo;
     vtkImageHistogramThreadStruct *ts =
-      static_cast<vtkImageHistogramThreadStruct *>(ti->UserData);
+      static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->GetUserData());
 
     int splitExt[6] = {0, -1, 0, -1, 0, -1};
 
-    int total = ts->Algorithm->SplitExtent(splitExt, this->Ext, thread, ti->NumberOfThreads);
+    int total = ts->Algorithm->SplitExtent(splitExt, this->Ext, blockId, this->ThreadInfo->GetNumberOfBlocks());
 
-    if (ti->ThreadID < total &&
+    if (blockId < total &&
         splitExt[1] >= splitExt[0] &&
         splitExt[3] >= splitExt[2] &&
         splitExt[5] >= splitExt[4])
       {
       ts->Algorithm->ThreadedRequestData(
         ts->Request, ts->InputsInfo, ts->OutputsInfo, NULL, NULL,
-        splitExt, ti->ThreadID);
+        splitExt, blockId);
       }
   }
 
@@ -627,7 +642,7 @@ public:
   void Initialize()
   {
     ThreadLocalTotal.Local() = 0;
-    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->UserData);
+    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->GetUserData());
 
     int numberOfBins = ts->Algorithm->NumberOfBins;
     ThreadLocalHistogram.Local().ThreadLocalHistogram = new vtkIdType[numberOfBins];
@@ -645,7 +660,7 @@ public:
   {
     this->Total = 0;
 
-    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->UserData);
+    vtkImageHistogramThreadStruct *ts = static_cast<vtkImageHistogramThreadStruct *>(this->ThreadInfo->GetUserData());
 
     int numberOfBins = ts->Algorithm->NumberOfBins;
 
@@ -814,10 +829,9 @@ int vtkImageHistogram::RequestData(
                                           ,this->MinimumBlockSize[0]
                                           ,this->MinimumBlockSize[1]
                                           ,this->MinimumBlockSize[2]);
-    vtkMultiThreader::ThreadInfo threadInfo;
-    threadInfo.NumberOfThreads = blocks;
-    threadInfo.UserData = &ts;
-    threadInfo.ThreadID = -1;
+
+
+    vtkSMPImageHistogramThreadInfo threadInfo (blocks, &ts);
 
     bool debug = this->Debug;
     this->Debug = false;

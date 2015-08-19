@@ -21,7 +21,6 @@
 #include "vtkObjectFactory.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include "vtkExtentTranslator.h"
 
 vtkStandardNewMacro(vtkImageSkeleton2D);
 

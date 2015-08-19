@@ -106,7 +106,7 @@ public:
                                       int ghostLevel, int *wholeExtent,
                                       int *resultExtent, int splitMode,
                                       int byPoints);
-  virtual int PieceToExtentThreadSafeImaging(int piece, int numPieces,
+  virtual int PieceToExtentThreadSafeImaging(int piece,
                                       int ghostLevel, int *wholeExtent,
                                       int *resultExtent);
 
@@ -177,7 +177,7 @@ protected:
   // Description:
   // This is used in conjuncture with SetUpExtent.
   // It is currently only used for SMP Imaging pipeline.
-  int SplitExtentImaging(int piece, int numPieces, int *ext);
+  int SplitExtentImaging(int piece, int *ext);
 
   int Piece;
   int NumberOfPieces;
