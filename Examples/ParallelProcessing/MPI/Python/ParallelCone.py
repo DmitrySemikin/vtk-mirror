@@ -20,13 +20,12 @@ try:
         _graphics_fact.SetUseMesaClasses(1)
         del _graphics_fact
     del v
-except Exception as xxx_todo_changeme:
-    (bar) = xxx_todo_changeme
+except Exception as bar:
     print("No mesa", bar)
 
 
 
-#print "I am process: %d / %d" % (myProcId, numProcs)
+#print ("I am process: %d / %d" % (myProcId, numProcs))
 
 # create a rendering window and renderer
 ren = vtkRenderer()
@@ -55,10 +54,10 @@ if numProcs > 1:
     compManager.SetRenderWindow(renWin)
     compManager.InitializePieces()
 
-#print "Pid of process %d is %d" % (myProcId, os.getpid())
+#print ("Pid of process %d is %d" % (myProcId, os.getpid()))
 
 def ExitMaster(a, b):
-    #print "ExitMaster; I am %d / %d" % ( myProcId, numProcs )
+    #print ("ExitMaster; I am %d / %d" % (myProcId, numProcs))
     if numProcs > 1 and myProcId == 0:
         #print "Trigger exit RMI on all satellite nodes"
         for a in range(1, numProcs):
