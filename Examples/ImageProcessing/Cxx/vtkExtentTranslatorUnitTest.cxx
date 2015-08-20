@@ -57,7 +57,6 @@ TEST(TestSlabMode)
   int minimumBlockSize = 8;
   vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
   vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
-  bool byPoints = true;
   int startExt[6] = {0, 255, 0, 214, 0, 323};
   int splitExt[6];
   bool allowDuplicate= true;
@@ -87,18 +86,18 @@ TEST(TestSlabMode)
   CHECK_EQUAL(blocks,startExt[5] - startExt[4]);
 
   float blockSizesToTest[4] = {10, 30, 50, 90};
-  for (int i = 0; i < 4; i++)
+  for (int j = 0; j < 4; j++)
     {
-    float blockPercentage = blockSizesToTest[i];
+    float blockPercentage = blockSizesToTest[j];
     //X_SLAB_MODE
-    int blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE
+    int splitBlocks = translator->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE
                                          , blockPercentage
                                          , true
                                          , MinimumBlockSize[0]
                                          , MinimumBlockSize[1]
                                          , MinimumBlockSize[2]);
     int totalCalculatedSize = 0;
-    for (int i = 0; i < blocks; i++)
+    for (int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -108,13 +107,13 @@ TEST(TestSlabMode)
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::X_SLAB_MODE
                                          , blockPercentage
                                          , false
                                          , MinimumBlockSize[0]
                                          , MinimumBlockSize[1]
                                          , MinimumBlockSize[2]);
-    for (int i = 0; i < blocks; i++)
+    for (int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -123,14 +122,14 @@ TEST(TestSlabMode)
 
 
     //Y_SLAB_MODE
-    blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE
+    splitBlocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE
                                      , blockPercentage
                                      , true
                                      , MinimumBlockSize[0]
                                      , MinimumBlockSize[1]
                                      , MinimumBlockSize[2]);
     totalCalculatedSize = 0;
-    for (int i = 0; i < blocks; i++)
+    for (int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -140,13 +139,13 @@ TEST(TestSlabMode)
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::Y_SLAB_MODE
                                          , blockPercentage
                                          , false
                                          , MinimumBlockSize[0]
                                          , MinimumBlockSize[1]
                                          , MinimumBlockSize[2]);
-    for (int i = 0; i < blocks; i++)
+    for (int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -154,14 +153,14 @@ TEST(TestSlabMode)
       }
 
     //Z_SLAB_MODE
-    blocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE
+    splitBlocks = translator->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE
                                      , blockPercentage
                                      , true
                                      , MinimumBlockSize[0]
                                      , MinimumBlockSize[1]
                                      , MinimumBlockSize[2]);
     totalCalculatedSize = 0;
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
@@ -171,13 +170,13 @@ TEST(TestSlabMode)
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt, vtkExtentTranslator::Z_SLAB_MODE
                                          , blockPercentage
                                          , false
                                          , MinimumBlockSize[0]
                                          , MinimumBlockSize[1]
                                          , MinimumBlockSize[2]);
-    for (int i = 0; i < blocks; i++)
+    for (int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
@@ -192,7 +191,6 @@ TEST(Test2DSplitMode)
   vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
   vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
   bool allowDuplicate= true;
-  bool byPoints = true;
   int startExt[6] = {-145, 234, 33, 235, -148, 0};
   int splitExt[6];
   int expectedTotalSize = (startExt[1] - startExt[0] + 1) * (startExt[3] - startExt[2] + 1) * (startExt[5] - startExt[4] +1);
@@ -220,19 +218,19 @@ TEST(Test2DSplitMode)
   CHECK_EQUAL(blocks,(startExt[5] - startExt[4]) * (startExt[3] - startExt[2]));
 
   float blockSizesToTest[4] = {10, 30, 50, 90};
-  for(int i = 0; i < 4; i++)
+  for(int j = 0; j < 4; j++)
     {
-    float blockPercentage = blockSizesToTest[i];
+    float blockPercentage = blockSizesToTest[j];
 
     //XZ_MODE
-    int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XZ_MODE
+    int splitBlocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XZ_MODE
                                        , blockPercentage
                                        , true
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
     int totalCalculatedSize = 0;
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
@@ -243,13 +241,13 @@ TEST(Test2DSplitMode)
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::XZ_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::XZ_MODE
                                        , blockPercentage
                                        , false
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
@@ -257,14 +255,14 @@ TEST(Test2DSplitMode)
       }
 
     //XY_MODE
-    blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XY_MODE
+    splitBlocks = translator->SetUpExtent(startExt,vtkExtentTranslator::XY_MODE
                                     , blockPercentage
                                     , true
                                     , MinimumBlockSize[0]
                                     , MinimumBlockSize[1]
                                     , MinimumBlockSize[2]);
     totalCalculatedSize = 0;
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -274,13 +272,13 @@ TEST(Test2DSplitMode)
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::XY_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::XY_MODE
                                        , blockPercentage
                                        , false
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
@@ -288,14 +286,14 @@ TEST(Test2DSplitMode)
       }
 
     //YZ_MODE
-    blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::YZ_MODE
+    splitBlocks = translator->SetUpExtent(startExt,vtkExtentTranslator::YZ_MODE
                                     , blockPercentage
                                     , true
                                     , MinimumBlockSize[0]
                                     , MinimumBlockSize[1]
                                     , MinimumBlockSize[2]);
     totalCalculatedSize = 0;
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
@@ -306,13 +304,13 @@ TEST(Test2DSplitMode)
 
 
     // check split by blocks rather than points
-    blocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::YZ_MODE
+    splitBlocks = translatorNonPoints->SetUpExtent(startExt,vtkExtentTranslator::YZ_MODE
                                        , blockPercentage
                                        , false
                                        , MinimumBlockSize[0]
                                        , MinimumBlockSize[1]
                                        , MinimumBlockSize[2]);
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
@@ -328,20 +326,18 @@ TEST(Test3DSplitMode)
   vtkSmartPointer<vtkExtentTranslator> translatorNonPoints = vtkSmartPointer<vtkExtentTranslator>::New();
 
   bool allowDuplicate= true;
-  bool byPoints = true;
   int startExt[6] = {-323, 511, -323, 127, -323, 255};
   int splitExt[6];
-  float blockPercentage = 0.5;
 
   int expectedTotalSize = (startExt[1] - startExt[0] + 1) * (startExt[3] - startExt[2] + 1) * (startExt[5] - startExt[4] + 1);
 
   float blockSizesToTest[4] = {10, 30, 50, 90};
   bool allowEmptyExtent = false;
 
-  for(int i = 0; i < 1; i++)
+  for(int j = 0; j < 1; j++)
     {
-    float blockPercentage = blockSizesToTest[i];
-    int blocks = translator->SetUpExtent(startExt,vtkExtentTranslator::BLOCK_MODE
+    float blockPercentage = blockSizesToTest[j];
+    int splitBlocks = translator->SetUpExtent(startExt,vtkExtentTranslator::BLOCK_MODE
                                        , blockPercentage
                                        , true
                                        , MinimumBlockSize[0]
@@ -349,7 +345,7 @@ TEST(Test3DSplitMode)
                                        , MinimumBlockSize[2]);
 
     int totalCalculatedSize = 0;
-    for(int i = 0; i < blocks; i++)
+    for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
@@ -362,7 +358,6 @@ TEST(Test3DSplitMode)
 TEST(TestEmptyExtent)
 {
   int blockPercentage = 50;
-  bool byPoints = true;
   bool allowDuplicate = true;
   bool allowEmptyExtent = false;
   int minimumBlockSize =1;
@@ -393,7 +388,6 @@ TEST(TestDefaultMode)
   bool allowEmptyExtent = false;
   int minimumBlockSize =1;
   int blockPercentage = 50;
-  bool byPoints = true;
   vtkSmartPointer<vtkExtentTranslator> translator = vtkSmartPointer<vtkExtentTranslator>::New();
   int startExt[6] = {0, 300, 0, 301, 0, 302};
   int splitExt[6];
