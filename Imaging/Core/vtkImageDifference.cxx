@@ -43,7 +43,8 @@ vtkImageDifference::vtkImageDifference()
   this->SetNumberOfInputPorts(2);
   this->TLError = 0.0;
   this->TLThresholdError = 0.0;
-  this->TLContainer = new struct ThreadLocalContainer;
+  this->TLContainer = new  ThreadLocalContainer;
+  this->EnableSMP = false;
 }
 vtkImageDifference::~vtkImageDifference()
 {
