@@ -4,7 +4,7 @@
 
 int MinimumBlockSize[3] = {8, 8, 8};
 
-bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool allowEmptyBlocks)
+int verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool allowEmptyBlocks)
 {
   //printf("%d,%d x %d,%d x %d,%d\n",ext[0],ext[1],ext[2],ext[3],ext[4],ext[5]);
   if (!allowEmptyBlocks)
@@ -14,7 +14,7 @@ bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool
       ||(ext[4] == 0 && ext[5] == -1) )
       {
       printf("%d,%d x %d,%d x %d,%d\n", ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
-      return false;
+      return -1;
       }
     }
   if (!allowDuplicate)
@@ -24,7 +24,7 @@ bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool
      || ext[4] >= ext[5])
       {
       printf("%d,%d x %d,%d x %d,%d\n", ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
-      return false;
+      return -1;
       }
     }
   else
@@ -34,7 +34,7 @@ bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool
      || ext[4] > ext[5])
       {
       printf("%d,%d x %d,%d x %d,%d\n", ext[0], ext[1], ext[2], ext[3], ext[4], ext[5]);
-      return false;
+      return -1;
       }
     }
 
@@ -45,10 +45,10 @@ bool verifyValidExtent(int *ext, bool allowDuplicate, int minimumBlockSize, bool
      yExt < minimumBlockSize ||
      zExt <  minimumBlockSize)
     {
-    return false;
+    return -1;
     }
 
-  return true;
+  return 1;
 }
 
 
@@ -101,7 +101,7 @@ TEST(TestSlabMode)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -117,7 +117,7 @@ TEST(TestSlabMode)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[2] == startExt[2] && splitExt[3] == startExt[3] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       }
 
 
@@ -133,7 +133,7 @@ TEST(TestSlabMode)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -149,7 +149,7 @@ TEST(TestSlabMode)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL(splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       }
 
     //Z_SLAB_MODE
@@ -164,7 +164,7 @@ TEST(TestSlabMode)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -180,7 +180,7 @@ TEST(TestSlabMode)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       }
     }
 }
@@ -233,7 +233,7 @@ TEST(Test2DSplitMode)
     for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       CHECK_EQUAL (splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
 
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
@@ -250,7 +250,7 @@ TEST(Test2DSplitMode)
     for(int i = 0; i < splitBlocks; i++)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       CHECK_EQUAL (splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
       }
 
@@ -266,7 +266,7 @@ TEST(Test2DSplitMode)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -282,7 +282,7 @@ TEST(Test2DSplitMode)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[4] == startExt[4] && splitExt[5] == startExt[5], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       }
 
     //YZ_MODE
@@ -297,7 +297,7 @@ TEST(Test2DSplitMode)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -314,7 +314,7 @@ TEST(Test2DSplitMode)
       {
       translatorNonPoints->PieceToExtentThreadSafeImaging(i, 0, splitExt);
       CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1], true);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       }
     }
 }
@@ -348,7 +348,7 @@ TEST(Test3DSplitMode)
     for(int i = 0; i < splitBlocks; i++)
       {
       translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
-      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+      CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
       totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
       }
     CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -376,7 +376,7 @@ TEST(TestEmptyExtent)
   for (int i = 0;i < blocks; i++)
     {
     translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
-    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
     }
   CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -405,7 +405,7 @@ TEST(TestDefaultMode)
     {
     translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
     totalCalculatedSize +=(splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
-    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
     CHECK_EQUAL (splitExt[0] == startExt[0] && splitExt[1] == startExt[1] && splitExt[2] == startExt[2] && splitExt[3] == startExt[3], true);
     }
   CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -425,7 +425,7 @@ TEST(TestDefaultMode)
     {
     translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3]-  splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
-    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
     CHECK_EQUAL (splitExt[0] == startExt2[0] && splitExt[1] == startExt2[1] && splitExt[4] == startExt2[4] && splitExt[5] == startExt2[5], true);
     }
   CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);
@@ -444,7 +444,7 @@ TEST(TestDefaultMode)
     {
     translator->PieceToExtentThreadSafeImaging(i, 0, splitExt);
     totalCalculatedSize += (splitExt[1] - splitExt[0] + 1) * (splitExt[3] - splitExt[2] + 1) * (splitExt[5] - splitExt[4] + 1);
-    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), true);
+    CHECK_EQUAL(verifyValidExtent(splitExt, allowDuplicate, allowEmptyExtent, minimumBlockSize), 1);
     CHECK_EQUAL (splitExt[2] == startExt3[2] && splitExt[3] == startExt3[3] && splitExt[4] == startExt3[4] && splitExt[5] == startExt3[5], true);
     }
   CHECK_EQUAL(totalCalculatedSize, expectedTotalSize);

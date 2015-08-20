@@ -417,7 +417,7 @@ int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
 
 
 
-  int minSize[3] = {this->BlockProperties->MinSize[0],
+  vtkTypeInt64 minSize[3] = {this->BlockProperties->MinSize[0],
                     this->BlockProperties->MinSize[1],
                     this->BlockProperties->MinSize[2]};
 
