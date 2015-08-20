@@ -256,8 +256,8 @@ class vtkSMPImageHistogramThreadInfo
 public:
   vtkSMPImageHistogramThreadInfo(int numberOfblocks, void * userData)
   {
-    this -> UserData = userData;
-    this -> NumberOfBlocks = numberOfblocks;
+    this->UserData = userData;
+    this->NumberOfBlocks = numberOfblocks;
   }
 
   int GetNumberOfBlocks()

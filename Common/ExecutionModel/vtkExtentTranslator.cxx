@@ -31,14 +31,14 @@ class BlockSizeProperties
 public:
   BlockSizeProperties()
   {
-    this -> MinSize[0] = this -> MinSize[1] = this -> MinSize[2]-1;
-    this -> NumMicroBlocks[0] = this -> NumMicroBlocks[1] = this -> NumMicroBlocks[2] = -1;
-    this -> NumMacroBlocks[0] = this -> NumMacroBlocks[1] = this -> NumMacroBlocks[2] =-1;
-    this -> TotalMacroBlocks = -1;
-    this -> MacroToMicro[0] = this -> MacroToMicro[1] = this -> MacroToMicro[2] = -1;
+    this->MinSize[0] = this->MinSize[1] = this->MinSize[2] - 1;
+    this->NumMicroBlocks[0] = this->NumMicroBlocks[1] = this->NumMicroBlocks[2] = -1;
+    this->NumMacroBlocks[0] = this->NumMacroBlocks[1] = this->NumMacroBlocks[2] =-1;
+    this->TotalMacroBlocks = -1;
+    this->MacroToMicro[0] = this->MacroToMicro[1] = this->MacroToMicro[2] = -1;
 
-    this -> ByPoints = true;
-    this -> SplitMode = 3; // block mode
+    this->ByPoints = true;
+    this->SplitMode = 3; // block mode
     WholeExtent[0] = WholeExtent[2] = WholeExtent[4]= 0;
     WholeExtent[1] = WholeExtent[3] = WholeExtent[5]= -1;
 
@@ -279,9 +279,9 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
     }
 
   BlockSizeProperties * properties = this->BlockProperties;
-  properties -> SplitMode = splitMode;
-  properties -> ByPoints = byPoints;
-  memcpy(properties -> WholeExtent, ext, 6 * sizeof(int));
+  properties->SplitMode = splitMode;
+  properties->ByPoints = byPoints;
+  memcpy(properties->WholeExtent, ext, 6 * sizeof(int));
 
   properties->MinSize[0] = minBlockSizeX;
   properties->MinSize[1] = minBlockSizeY;
@@ -394,7 +394,7 @@ int vtkExtentTranslator::SetUpExtent(int * ext, int splitMode, double splitPerce
 //----------------------------------------------------------------------------
 int vtkExtentTranslator::SplitExtentImaging(int piece, int *ext)
 {
-  if (!this -> Initialized)
+  if (!this->Initialized)
     {
     vtkErrorMacro("SplitExtent has not being initialized.");
     return -1;

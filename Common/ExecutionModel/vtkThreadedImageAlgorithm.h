@@ -102,8 +102,8 @@ public:
   // Description:
   // Override this in an inherited class
   // to initialize or reduce SMP thread local objects
-  virtual void SMPInit ();
-  virtual void SMPReduce ();
+  virtual void SMPInit();
+  virtual void SMPReduce();
 
 protected:
   vtkThreadedImageAlgorithm();
