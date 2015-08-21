@@ -167,8 +167,11 @@ int main(int argc, char *argv[])
 
   // Initilize with passed in number of threads
   vtkTimerLog *tl = vtkTimerLog::New();
-  vtkSMPTools::Initialize(parms.numberOfThreadsToRun);
 
+  if(parms.enableSMP)
+    {
+    vtkSMPTools::Initialize(parms.numberOfThreadsToRun);
+    }
 
 //---------------------------------------------------------------------
 //----Test Case 1: SMP overhead compared with old multi-threader
@@ -459,6 +462,7 @@ int main(int argc, char *argv[])
       reslice->SetOutputSpacing(1.0, 1.0, 1.0);
       reslice->SetOutputOrigin(-32.0, -32.0, 0.0);
       reslice->SetOutputExtent(0, 1023, 0, 1023, 0, 0);
+      reslice->SetEnableSMP(parms.enableSMP);
 
       tl->StartTimer();
       reslice->Update();
@@ -496,6 +500,7 @@ int main(int argc, char *argv[])
       statistics->GenerateHistogramImageOff();
       statistics->SetSMPSplitPercentage(parms.smpSplitPercentage);
       statistics->SetSplitMode(parms.SMPSplitMode);
+      statistics->SetEnableSMP(parms.enableSMP);
 
       // read in size for stencil window
       if (argc ==10)
