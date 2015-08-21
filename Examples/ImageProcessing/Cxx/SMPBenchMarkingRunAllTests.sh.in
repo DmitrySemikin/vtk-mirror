@@ -40,22 +40,22 @@ STENCIL_RADIUS=100
 
 WORK_SIZES_TEST4="512"
 BLOCK_RANGE_START4=1
-BLOCK_RANGE_END4=750
+BLOCK_RANGE_END4=90
 
 WORK_SIZES_TEST5="1024"
 BLOCK_RANGE_START5=1
-BLOCK_RANGE_END5=1000
+BLOCK_RANGE_END5=90
 STENCIL_RADIUS=30
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 #SPECIFY WHICH TEST TO RUN
-TESTS_TO_RUN="5"
+TESTS_TO_RUN="4 5"
 
 #RUN DESCRIPTION
 RUN_DESCRIPTION="$(date '+%d-%m-%Y_%H-%M-%S')"
 
 #MAXIUM NUMBER OF PROCESSORS
-processorCountSizes="1 2 4 8 12 24 28 32 36"
+processorCountSizes="36"
 
 #------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -251,12 +251,12 @@ if [[ ${TESTS_TO_RUN[*]} =~ 4 ]]; then
 			./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			done
 
-			echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			# echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 
-			for (( blockSize = $BLOCK_RANGE_START4; blockSize <= $BLOCK_RANGE_END4; blockSize+=(($BLOCK_RANGE_END4-$BLOCK_RANGE_START4)/$NUMBER_OF_SAMPLES) ))
-			do
-			./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
-			done
+			# for (( blockSize = $BLOCK_RANGE_START4; blockSize <= $BLOCK_RANGE_END4; blockSize+=(($BLOCK_RANGE_END4-$BLOCK_RANGE_START4)/$NUMBER_OF_SAMPLES) ))
+			# do
+			# ./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
+			# done
 		done
 	done
 fi
@@ -283,17 +283,17 @@ if [[ ${TESTS_TO_RUN[*]} =~ 5 ]]; then
 		echo "---,SMP-OFF Stencil-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
 		./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER false false "999" "-1" $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 
-		# for  processorCount in `echo $processorCountSizes`
-		# do
-		# 	echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
+		for  processorCount in `echo $processorCountSizes`
+		do
+			echo " ,$processorCount PROCESSORS" >> "$OUTPUT_CSV_FILE"
 
-		# 	echo "---,Stencil OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
+			echo "---,Stencil OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 
-			# echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
-			# for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
-			# do
-			# ./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
-			# done
+			echo "---,SMP-ON BLOCKING-ON,---,---,---" >> "$OUTPUT_CSV_FILE"
+			for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
+			do
+			./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true true $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE"
+			done
 
 			# echo "---,SMP-ON BLOCKING-OFF,---,---,---" >> "$OUTPUT_CSV_FILE"
 			# for (( blockSize = $BLOCK_RANGE_START5; blockSize <= $BLOCK_RANGE_END5; blockSize+=(($BLOCK_RANGE_END5-$BLOCK_RANGE_START5)/$NUMBER_OF_SAMPLES) ))
@@ -315,6 +315,6 @@ if [[ ${TESTS_TO_RUN[*]} =~ 5 ]]; then
 			# ./SMPBenchMarking.sh $TEST_PROGRAM_PATH $O_PROFILE_ENABLE $NUMBER_OF_TIMES_TEST_RUN $TEST_NUMBER true false $processorCount $blockSize $workSize "$O_PERF_EVENTS" "$LOCAL_DIRECTORY" "$OUTPUT_CSV_FILE" "$ADDITIONAL_DATA"
 			# done
 
-		#done
+		done
 	done
 fi
