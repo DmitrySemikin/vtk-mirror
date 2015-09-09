@@ -24,6 +24,7 @@
 #include "vtkInformation.h"
 #include "vtkLight.h"
 #include "vtkLightCollection.h"
+#include "vtkLightingMapPass.h"
 #include "vtkMath.h"
 #include "vtkMatrix3x3.h"
 #include "vtkMatrix4x4.h"
@@ -577,8 +578,19 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
 {
   std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
 
-  // check for shadow maps
+  // check for normal rendering
   vtkInformation *info = actor->GetPropertyKeys();
+  if (info && info->Has(vtkLightingMapPass::RENDER_NORMALS()))
+      {
+      vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
+        "  vec3 n = (normalVCVSOutput + 1.0) * 0.5;\n"
+        "  gl_FragData[0] = vec4(n.x, n.y, n.z, 1.0);"
+      );
+      shaders[vtkShader::Fragment]->SetSource(FSSource);
+      return;
+      }
+
+  // check for shadow maps
   std::string shadowFactor = "";
   if (info && info->Has(vtkShadowMapPass::ShadowMapTextures()))
     {
@@ -654,22 +666,37 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
     shadowFactor = "*factors[lightNum]";
     }
 
+  // If rendering, set diffuse and specular colors to pure white
+  if (info && info->Has(vtkLightingMapPass::RENDER_LUMINANCE()))
+    {
+      vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
+        "  diffuseColor = vec3(1, 1, 1);\n"
+        "  specularColor = vec3(1, 1, 1);\n"
+        "  //VTK::Light::Impl\n",
+        false
+      );
+    }
+
   switch (this->LastLightComplexity[this->LastBoundBO])
     {
     case 0: // no lighting
-      vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
-        "gl_FragData[0] =  vec4(ambientColor + diffuseColor, opacity);"
+      vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
+        "  gl_FragData[0] = vec4(ambientColor + diffuseColor, opacity);\n"
+        "  //VTK::Light::Impl\n",
+        false
         );
       break;
 
     case 1:  // headlight
-      vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
-        "float df = max(0.0, normalVCVSOutput.z);\n"
+      vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
+        "  float df = max(0.0, normalVCVSOutput.z);\n"
         "  float sf = pow(df, specularPower);\n"
         "  vec3 diffuse = df * diffuseColor;\n"
         "  vec3 specular = sf * specularColor;\n"
-        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);"
-        );
+        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);\n"
+        "  //VTK::Light::Impl\n",
+        false
+      );
       break;
 
     case 2: // light kit
@@ -680,7 +707,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
         "uniform vec3 lightColor[6];\n"
         "uniform vec3 lightDirectionVC[6]; // normalized\n"
         "uniform vec3 lightHalfAngleVC[6]; // normalized"
-        );
+      );
       vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
         "vec3 diffuse = vec3(0,0,0);\n"
         "  vec3 specular = vec3(0,0,0);\n"
@@ -696,8 +723,10 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
         "    }\n"
         "  diffuse = diffuse * diffuseColor;\n"
         "  specular = specular * specularColor;\n"
-        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);\n"
-        );
+        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);"
+        "  //VTK::Light::Impl",
+        false
+      );
       break;
 
     case 3: // positional
@@ -713,7 +742,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
         "uniform float lightConeAngle[6];\n"
         "uniform float lightExponent[6];\n"
         "uniform int lightPositional[6];"
-        );
+      );
       vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
         "  vec3 diffuse = vec3(0,0,0);\n"
         "  vec3 specular = vec3(0,0,0);\n"
@@ -759,10 +788,32 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
         "    }\n"
         "  diffuse = diffuse * diffuseColor;\n"
         "  specular = specular * specularColor;\n"
-        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);"
+        "  gl_FragData[0] = vec4(ambientColor + diffuse + specular, opacity);\n"
+        "  //VTK::Light::Impl",
+        false
         );
       break;
     }
+
+  // If rendering luminance values, write those values to the fragment
+  if (info && info->Has(vtkLightingMapPass::RENDER_LUMINANCE()))
+  {
+    switch (this->LastLightComplexity[this->LastBoundBO])
+    {
+      case 0: // no lighting
+        vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
+          "  gl_FragData[0] = vec4(0.0, 0.0, 0.0, 1.0);"
+        );
+        break;
+      case 1: // headlight
+      case 2: // light kit
+      case 3: // positional
+        vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
+          "  gl_FragData[0] = vec4(diffuse.x, specular.x, 0.0, 1.0);"
+        );
+        break;
+    }
+  }
 
   shaders[vtkShader::Fragment]->SetSource(FSSource);
 }
@@ -1231,8 +1282,9 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderValues(
   this->ReplaceShaderPrimID(shaders, ren, actor);
   this->ReplaceShaderPositionVC(shaders, ren, actor);
 
-  //cout << "VS: " << VSSource << endl;
-  //cout << "FS: " << FSSource << endl;
+  //cout << "VS: " << shaders[vtkShader::Vertex]->GetSource() << endl;
+  //cout << "GS: " << shaders[vtkShader::Geometry]->GetSource() << endl;
+  //cout << "FS: " << shaders[vtkShader::Fragment]->GetSource() << endl;
 }
 
 //-----------------------------------------------------------------------------
@@ -1628,6 +1680,9 @@ void vtkOpenGLPolyDataMapper::SetLightingShaderParameters(
   vtkLightCollection *lc = ren->GetLights();
   vtkLight *light;
 
+  bool renderLuminance = info &&
+    info->Has(vtkLightingMapPass::RENDER_LUMINANCE());
+
   vtkCollectionSimpleIterator sit;
   float lightColor[6][3];
   float lightDirection[6][3];
@@ -1640,9 +1695,18 @@ void vtkOpenGLPolyDataMapper::SetLightingShaderParameters(
       {
       double *dColor = light->GetDiffuseColor();
       double intensity = light->GetIntensity();
-      lightColor[numberOfLights][0] = dColor[0] * intensity;
-      lightColor[numberOfLights][1] = dColor[1] * intensity;
-      lightColor[numberOfLights][2] = dColor[2] * intensity;
+      if (renderLuminance)
+        {
+        lightColor[numberOfLights][0] = intensity;
+        lightColor[numberOfLights][1] = intensity;
+        lightColor[numberOfLights][2] = intensity;
+        }
+      else
+        {
+        lightColor[numberOfLights][0] = dColor[0] * intensity;
+        lightColor[numberOfLights][1] = dColor[1] * intensity;
+        lightColor[numberOfLights][2] = dColor[2] * intensity;
+        }
       // get required info from light
       double *lfp = light->GetTransformedFocalPoint();
       double *lp = light->GetTransformedPosition();
