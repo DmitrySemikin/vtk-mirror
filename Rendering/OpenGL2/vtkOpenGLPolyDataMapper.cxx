@@ -1849,7 +1849,7 @@ void vtkOpenGLPolyDataMapper::SetPropertyShaderParameters(vtkOpenGLHelper &cellB
 void vtkOpenGLPolyDataMapper::RenderPieceStart(vtkRenderer* ren, vtkActor *actor)
 {
   // Set the PointSize and LineWidget
-#if GL_ES_VERSION_2_0 != 1
+#if GL_ES_VERSION_2_0 != 1 ||  GL_ES_VERSION_3_0 != 1
   glPointSize(actor->GetProperty()->GetPointSize()); // not on ES2
 #endif
 
@@ -1869,7 +1869,7 @@ void vtkOpenGLPolyDataMapper::RenderPieceStart(vtkRenderer* ren, vtkActor *actor
     if (selector->GetFieldAssociation() == vtkDataObject::FIELD_ASSOCIATION_POINTS &&
         selector->GetCurrentPass() >= vtkHardwareSelector::ID_LOW24)
       {
-#if GL_ES_VERSION_2_0 != 1
+#if GL_ES_VERSION_2_0 != 1 ||  GL_ES_VERSION_3_0 != 1
       glPointSize(4.0); //make verts large enough to be sure to overlap cell
 #endif
       glEnable(GL_POLYGON_OFFSET_FILL);
