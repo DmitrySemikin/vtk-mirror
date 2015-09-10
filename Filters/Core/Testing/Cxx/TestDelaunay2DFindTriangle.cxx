@@ -16,7 +16,7 @@
 #include "vtkDelaunay2D.h"
 #include "vtkCellArray.h"
 
-int TestDelaunay2D_FindTriangle( int vtkNotUsed(argc), char* vtkNotUsed(argv)[] )
+int TestDelaunay2DFindTriangle( int vtkNotUsed(argc), char* vtkNotUsed(argv)[] )
 {
   vtkPoints *newPts = vtkPoints::New();
   newPts->InsertNextPoint(0.650665, -0.325333, 0);
