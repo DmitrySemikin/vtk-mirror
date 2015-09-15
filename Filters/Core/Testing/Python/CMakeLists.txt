@@ -15,6 +15,9 @@ vtk_add_test_python(
   Delaunay3DAlphaTest.py
   QuadricDecimation.py
   StreamPolyData.py
+  TestElevationFilter.py
+  TestFlyingEdges2D.py
+  TestFlyingEdges3D.py
   TestGridSynchronizedTemplates3D.py
   TestMarchingSquares.py
   TestRectilinearSynchronizedTemplates.py
@@ -35,6 +38,8 @@ vtk_add_test_python(
   contourQuadraticTetra.py,NO_RT
   createBFont.py
   cutLoop.py
+  cutPolygons.py
+  cutter.py
   dispPlot.py
   fieldToPolyData.py
   fieldToRGrid.py

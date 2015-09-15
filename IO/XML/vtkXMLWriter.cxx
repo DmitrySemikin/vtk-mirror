@@ -44,7 +44,7 @@
 #include "vtkQuadratureSchemeDefinition.h"
 #include "vtkInformationStringKey.h"
 
-#include <vtksys/auto_ptr.hxx>
+#include <memory>
 
 #include <cassert>
 #include <string>
@@ -1161,7 +1161,7 @@ int vtkXMLWriter::WriteBinaryData(vtkAbstractArray* a)
       }
 
     // No data compression.  The header is just the length of the data.
-    vtksys::auto_ptr<vtkXMLDataHeader>
+    std::auto_ptr<vtkXMLDataHeader>
       uh(vtkXMLDataHeader::New(this->HeaderType, 1));
     if (!uh->Set(0, data_size*outWordSize))
       {
@@ -1816,15 +1816,12 @@ inline ostream& vtkXMLWriteAsciiValue(ostream& os, const signed char &c)
 VTK_TEMPLATE_SPECIALIZE
 inline ostream& vtkXMLWriteAsciiValue(ostream& os, const vtkStdString& str)
 {
-  vtkStdString::const_iterator iter = str.begin();
-  vtkXMLWriteAsciiValue(os, *iter);
-  iter++;
-  for (; iter != str.end(); ++iter)
+  vtkStdString::const_iterator iter;
+  for (iter = str.begin(); iter != str.end(); ++iter)
     {
-    os << " ";
     vtkXMLWriteAsciiValue(os, *iter);
+    os << " ";
     }
-  os << " ";
   char delim = 0x0;
   return vtkXMLWriteAsciiValue(os, delim);
 }

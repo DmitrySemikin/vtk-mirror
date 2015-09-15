@@ -2,15 +2,9 @@ if(TARGET vtkRenderingOpenGL)
   message(FATAL_ERROR "vtkRenderingOpenGL2 cannot be built with vtkRenderingOpenGL, please disable one of them.")
 endif()
 
-find_package(OpenGL REQUIRED)
-include_directories(SYSTEM
-  ${OPENGL_INCLUDE_DIR})
-
-set(${vtk-module}_SYSTEM_INCLUDE_DIRS
-  ${OPENGL_INCLUDE_DIR})
-
+include(vtkOpenGL)
 include(vtkObjectFactory)
-include(vtkOpenGLMesaLogic)
+
 
 # The TDx support has not been moved, this header is here to define nothing,
 # and so allow classes in other modules to safely include it and keep going.
@@ -25,6 +19,7 @@ set(Module_SRCS
   vtkCompositePolyDataMapper2.cxx
   vtkDefaultPass.cxx
   vtkDepthPeelingPass.cxx
+  vtkFrameBufferObject.cxx
   vtkGaussianBlurPass.cxx
   vtkGenericCompositePolyDataMapper2.cxx
   vtkGenericOpenGLRenderWindow.cxx
@@ -74,7 +69,6 @@ set(Module_SRCS
 if (NOT DEFINED OPENGL_ES_VERSION)
   set(Module_SRCS ${Module_SRCS}
     vtkDataTransferHelper.cxx
-    vtkFrameBufferObject.cxx
     vtkFrameBufferObject2.cxx
     vtkPixelBufferObject.cxx
     vtkRenderbuffer.cxx
@@ -82,8 +76,8 @@ if (NOT DEFINED OPENGL_ES_VERSION)
 else()
   if (${OPENGL_ES_VERSION} MATCHES 3.0)
     set(Module_SRCS ${Module_SRCS}
-      vtkFrameBufferObject.cxx
       vtkFrameBufferObject2.cxx
+      vtkPixelBufferObject.cxx
       vtkRenderbuffer.cxx
       )
   endif()
@@ -221,12 +215,6 @@ if(VTK_USE_X)
     vtkXOpenGLRenderWindow.cxx
     )
 elseif(VTK_USE_OSMESA)
-  message(STATUS "VTK will be built with OSMesa support!")
-  find_package(OSMesa REQUIRED)
-  if(NOT OSMESA_FOUND)
-    message(FATAL_ERROR "The OSMesa library could not be found. REQUIRED for off screen rendering")
-  endif()
-  include_directories(${OSMESA_INCLUDE_DIR})
   list(APPEND vtk_module_overrides "vtkRenderWindow")
   set(vtk_module_vtkRenderWindow_override "vtkOSOpenGLRenderWindow")
   list(APPEND Module_SRCS vtkOSOpenGLRenderWindow.cxx)
@@ -262,16 +250,6 @@ elseif(VTK_USE_COCOA)
                                 PROPERTIES COMPILE_FLAGS "${VTK_REQUIRED_OBJCXX_FLAGS}")
   endif()
   set_source_files_properties(vtkCocoaGLView WRAP_EXCLUDE)
-elseif(VTK_USE_CARBON)
-  # Add some custom overrides
-  list(APPEND vtk_module_overrides "vtkRenderWindowInteractor")
-  set(vtk_module_vtkRenderWindowInteractor_override "vtkCarbonRenderWindowInteractor")
-  list(APPEND vtk_module_overrides "vtkRenderWindow")
-  set(vtk_module_vtkRenderWindow_override "vtkCarbonRenderWindow")
-  list(APPEND Module_SRCS
-    vtkCarbonRenderWindowInteractor.cxx
-    vtkCarbonRenderWindow.cxx
-    )
 elseif(ANDROID)
   # Add some custom overrides
   list(APPEND vtk_module_overrides "vtkRenderWindowInteractor")
@@ -324,17 +302,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkRenderingOpenGLConfigure.h.in
 set(${vtk-module}_EXPORT_CODE "#include \"vtkRenderingOpenGLConfigure.h\"")
 
 vtk_module_library(${vtk-module} ${Module_SRCS})
-vtk_module_link_libraries(${vtk-module}
-  LINK_PUBLIC  ${OPENGL_LIBRARIES})
+vtk_opengl_link(${vtk-module})
 if(VTK_USE_X)
   vtk_module_link_libraries(${vtk-module}
     LINK_PUBLIC ${X11_LIBRARIES} ${X11_Xt_LIB})
-elseif(VTK_USE_OSMESA)
-  vtk_module_link_libraries(${vtk-module} LINK_PUBLIC ${OSMESA_LIBRARY})
 elseif(VTK_USE_COCOA)
   vtk_module_link_libraries(${vtk-module} LINK_PUBLIC "-framework Cocoa")
-elseif(VTK_USE_CARBON)
-  vtk_module_link_libraries(${vtk-module} LINK_PUBLIC "-framework Carbon")
 endif()
 
 if(ANDROID)

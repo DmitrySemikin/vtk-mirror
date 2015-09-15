@@ -22,7 +22,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include <GL/gl.h>
 #include "vtkgl.h"
 
-#ifdef VTK_OPENGL_HAS_OSMESA
+#ifdef VTK_USE_OSMESA
 # include <GL/osmesa.h>
 #endif
 
@@ -33,7 +33,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkOpenGLExtensionManager.h"
 
 #include "vtksys/SystemTools.hxx"
-#include "vtksys/ios/sstream"
+#include <sstream>
 
 class vtkOSOpenGLRenderWindow;
 class vtkRenderWindow;

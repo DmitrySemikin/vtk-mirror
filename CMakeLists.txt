@@ -98,6 +98,10 @@ include(vtkVersion)
 set(VTK_VERSION
     "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}")
 
+#-----------------------------------------------------------------------------
+# Do we want examples built?
+OPTION(BUILD_EXAMPLES "Build VTK examples." OFF)
+
 option(VTK_IOS_BUILD "Build vtk.framework for iOS" OFF)
 if (VTK_IOS_BUILD)
   include(vtkiOS)
@@ -301,6 +305,10 @@ if(APPLE)
     CMAKE_OSX_DEPLOYMENT_TARGET
     CMAKE_OSX_SYSROOT
     )
+
+  if (CMAKE_OSX_DEPLOYMENT_TARGET AND CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.6)
+    message(FATAL_ERROR "Minimun OS X deployment target is 10.6, please update CMAKE_OSX_DEPLOYMENT_TARGET.")
+  endif ()
 endif()
 
 #-----------------------------------------------------------------------------
@@ -435,10 +443,6 @@ INCLUDE(vtkTestStreamsLibrary)
 SET(VTK_HAS_EXODUS 1)
 
 #-----------------------------------------------------------------------------
-# Provide a few configuration options.
-OPTION(BUILD_EXAMPLES "Build VTK examples." OFF)
-
-#-----------------------------------------------------------------------------
 # Configure files with settings for use by the build.
 
 # Include the sockets test.
@@ -448,7 +452,7 @@ include(VTKParallelCMakeTests)
 # Add the option for build the Python wrapping to VTK.
 option(VTK_WRAP_PYTHON "Should VTK Python wrapping be built?" OFF)
 set(VTK_PYTHON_VERSION 2 CACHE STRING
-    "Python version to use: 2, 2.x, or empty")
+    "Python version to use: 2, 2.x, 3, 3.x, or empty")
 
 # Add the option for build the Python wrapping to VTK.
 option(VTK_WRAP_JAVA "Should VTK Java wrapping be built?" OFF)

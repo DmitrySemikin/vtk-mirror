@@ -70,7 +70,6 @@ vtkOpenGLPolyDataMapper::vtkOpenGLPolyDataMapper()
 {
   this->InternalColorTexture = 0;
   this->PopulateSelectionSettings = 1;
-  this->LastLightComplexity = -1;
   this->LastSelectionState = vtkHardwareSelector::MIN_KNOWN_PASS - 1;
   this->LastDepthPeeling = 0;
   this->CurrentInput = 0;
@@ -97,6 +96,17 @@ vtkOpenGLPolyDataMapper::vtkOpenGLPolyDataMapper()
   this->AppleBugPrimIDBuffer = 0;
   this->HaveAppleBug = false;
   this->LastBoundBO = NULL;
+
+  this->VertexShaderCode = 0;
+  this->FragmentShaderCode = 0;
+  this->GeometryShaderCode = 0;
+
+  this->LastLightComplexity[&this->Points] = -1;
+  this->LastLightComplexity[&this->Lines] = -1;
+  this->LastLightComplexity[&this->Tris] = -1;
+  this->LastLightComplexity[&this->TriStrips] = -1;
+  this->LastLightComplexity[&this->TrisEdges] = -1;
+  this->LastLightComplexity[&this->TriStripsEdges] = -1;
 }
 
 
@@ -144,6 +154,10 @@ vtkOpenGLPolyDataMapper::~vtkOpenGLPolyDataMapper()
     {
     this->AppleBugPrimIDBuffer->Delete();
     }
+
+  this->SetVertexShaderCode(0);
+  this->SetFragmentShaderCode(0);
+  this->SetGeometryShaderCode(0);
 }
 
 //-----------------------------------------------------------------------------
@@ -184,10 +198,42 @@ void vtkOpenGLPolyDataMapper::ReleaseGraphicsResources(vtkWindow* win)
   this->Modified();
 }
 
-bool vtkOpenGLPolyDataMapper::IsShaderVariableUsed(const char *name)
+void vtkOpenGLPolyDataMapper::AddShaderReplacement(
+    vtkShader::Type shaderType, // vertex, fragment, etc
+    std::string originalValue,
+    bool replaceFirst,  // do this replacement before the default
+    std::string replacementValue,
+    bool replaceAll)
 {
-  return std::binary_search(this->ShaderVariablesUsed.begin(),
-        this->ShaderVariablesUsed.end(), name);
+  vtkOpenGLPolyDataMapper::ReplacementSpec spec;
+  spec.ShaderType = shaderType;
+  spec.OriginalValue = originalValue;
+  spec.ReplaceFirst = replaceFirst;
+
+  vtkOpenGLPolyDataMapper::ReplacementValue values;
+  values.Replacement = replacementValue;
+  values.ReplaceAll = replaceAll;
+
+  this->UserShaderReplacements[spec] = values;
+}
+
+void vtkOpenGLPolyDataMapper::ClearShaderReplacement(
+    vtkShader::Type shaderType, // vertex, fragment, etc
+    std::string originalValue,
+    bool replaceFirst)
+{
+  vtkOpenGLPolyDataMapper::ReplacementSpec spec;
+  spec.ShaderType = shaderType;
+  spec.OriginalValue = originalValue;
+  spec.ReplaceFirst = replaceFirst;
+
+  typedef std::map<const vtkOpenGLPolyDataMapper::ReplacementSpec,
+    vtkOpenGLPolyDataMapper::ReplacementValue>::iterator RIter;
+  RIter found = this->UserShaderReplacements.find(spec);
+  if (found == this->UserShaderReplacements.end())
+    {
+    this->UserShaderReplacements.erase(found);
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -195,10 +241,42 @@ void vtkOpenGLPolyDataMapper::BuildShaders(
     std::map<vtkShader::Type, vtkShader *> shaders,
     vtkRenderer *ren, vtkActor *actor)
 {
-  this->ShaderVariablesUsed.clear();
   this->GetShaderTemplate(shaders, ren, actor);
+
+  typedef std::map<const vtkOpenGLPolyDataMapper::ReplacementSpec,
+    vtkOpenGLPolyDataMapper::ReplacementValue>::const_iterator RIter;
+
+  // user specified pre replacements
+  for (RIter i = this->UserShaderReplacements.begin();
+    i != this->UserShaderReplacements.end(); i++)
+    {
+    if (i->first.ReplaceFirst)
+      {
+      std::string ssrc = shaders[i->first.ShaderType]->GetSource();
+      vtkShaderProgram::Substitute(ssrc,
+        i->first.OriginalValue,
+        i->second.Replacement,
+        i->second.ReplaceAll);
+      shaders[i->first.ShaderType]->SetSource(ssrc);
+      }
+    }
+
   this->ReplaceShaderValues(shaders, ren, actor);
-  std::sort(this->ShaderVariablesUsed.begin(),this->ShaderVariablesUsed.end());
+
+  // user specified post replacements
+  for (RIter i = this->UserShaderReplacements.begin();
+    i != this->UserShaderReplacements.end(); i++)
+    {
+    if (!i->first.ReplaceFirst)
+      {
+      std::string ssrc = shaders[i->first.ShaderType]->GetSource();
+      vtkShaderProgram::Substitute(ssrc,
+        i->first.OriginalValue,
+        i->second.Replacement,
+        i->second.ReplaceAll);
+      shaders[i->first.ShaderType]->SetSource(ssrc);
+      }
+    }
 }
 
 bool vtkOpenGLPolyDataMapper::HaveWideLines(
@@ -229,15 +307,38 @@ void vtkOpenGLPolyDataMapper::GetShaderTemplate(
     std::map<vtkShader::Type, vtkShader *> shaders,
     vtkRenderer *ren, vtkActor *actor)
 {
-  shaders[vtkShader::Vertex]->SetSource(vtkPolyDataVS);
-  shaders[vtkShader::Fragment]->SetSource(vtkPolyDataFS);
-  if (this->HaveWideLines(ren, actor))
+  if (this->VertexShaderCode && strcmp(this->VertexShaderCode,"") != 0)
     {
-    shaders[vtkShader::Geometry]->SetSource(vtkPolyDataWideLineGS);
+    shaders[vtkShader::Vertex]->SetSource(this->VertexShaderCode);
     }
   else
     {
-    shaders[vtkShader::Geometry]->SetSource("");
+    shaders[vtkShader::Vertex]->SetSource(vtkPolyDataVS);
+    }
+
+  if (this->FragmentShaderCode && strcmp(this->FragmentShaderCode,"") != 0)
+    {
+    shaders[vtkShader::Fragment]->SetSource(this->FragmentShaderCode);
+    }
+  else
+    {
+    shaders[vtkShader::Fragment]->SetSource(vtkPolyDataFS);
+    }
+
+  if (this->GeometryShaderCode && strcmp(this->GeometryShaderCode,"") != 0)
+    {
+    shaders[vtkShader::Geometry]->SetSource(this->GeometryShaderCode);
+    }
+  else
+    {
+    if (this->HaveWideLines(ren, actor))
+      {
+      shaders[vtkShader::Geometry]->SetSource(vtkPolyDataWideLineGS);
+      }
+    else
+      {
+      shaders[vtkShader::Geometry]->SetSource("");
+      }
     }
 }
 
@@ -264,7 +365,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       "uniform vec3 diffuseColorUniformBF; // intensity weighted color\n";
     }
   // add more for specular
-  if (this->LastLightComplexity)
+  if (this->LastLightComplexity[this->LastBoundBO])
     {
     colorDec +=
       "uniform vec3 specularColorUniform; // intensity weighted color\n"
@@ -277,7 +378,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       }
     }
   // add scalar vertex coloring
-  if (this->VBO->ColorComponents != 0)
+  if (this->VBO->ColorComponents != 0 && !this->DrawingEdges)
     {
     colorDec += "varying vec4 vertexColorVSOutput;\n";
     vtkShaderProgram::Substitute(VSSource,"//VTK::Color::Dec",
@@ -293,7 +394,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       "//VTK::Color::Impl",
       "vertexColorGSOutput = vertexColorVSOutput[i];");
     }
-  if (this->HaveCellScalars && !this->HavePickScalars)
+  if (this->HaveCellScalars && !this->HavePickScalars && !this->DrawingEdges)
     {
     colorDec += "uniform samplerBuffer textureC;\n";
     }
@@ -307,7 +408,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
     "vec3 ambientColor;\n"
     "  vec3 diffuseColor;\n"
     "  float opacity;\n";
-  if (this->LastLightComplexity)
+  if (this->LastLightComplexity[this->LastBoundBO])
     {
     colorImpl +=
       "  vec3 specularColor;\n"
@@ -315,7 +416,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
     }
   if (actor->GetBackfaceProperty())
     {
-    if (this->LastLightComplexity)
+    if (this->LastLightComplexity[this->LastBoundBO])
       {
       colorImpl +=
         "  if (int(gl_FrontFacing) == 0) {\n"
@@ -350,7 +451,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       "  ambientColor = ambientColorUniform;\n"
       "  diffuseColor = diffuseColorUniform;\n"
       "  opacity = opacityUniform;\n";
-    if (this->LastLightComplexity)
+    if (this->LastLightComplexity[this->LastBoundBO])
       {
       colorImpl +=
         "  specularColor = specularColorUniform;\n"
@@ -359,10 +460,11 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
     }
 
   // now handle scalar coloring
-  if (this->VBO->ColorComponents != 0)
+  if (this->VBO->ColorComponents != 0 && !this->DrawingEdges)
     {
     if (this->ScalarMaterialMode == VTK_MATERIALMODE_AMBIENT ||
-          (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT && actor->GetProperty()->GetAmbient() > actor->GetProperty()->GetDiffuse()))
+        (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT &&
+          actor->GetProperty()->GetAmbient() > actor->GetProperty()->GetDiffuse()))
       {
       vtkShaderProgram::Substitute(FSSource,"//VTK::Color::Impl",
         colorImpl +
@@ -370,7 +472,8 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
         "  opacity = opacity*vertexColorVSOutput.a;");
       }
     else if (this->ScalarMaterialMode == VTK_MATERIALMODE_DIFFUSE ||
-          (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT && actor->GetProperty()->GetAmbient() <= actor->GetProperty()->GetDiffuse()))
+        (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT &&
+          actor->GetProperty()->GetAmbient() <= actor->GetProperty()->GetDiffuse()))
       {
       vtkShaderProgram::Substitute(FSSource,"//VTK::Color::Impl", colorImpl +
         "  diffuseColor = vertexColorVSOutput.rgb;\n"
@@ -387,7 +490,9 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
   else
     {
     // are we doing scalar coloring by texture?
-    if (this->InterpolateScalarsBeforeMapping && this->ColorCoordinates)
+    if (this->InterpolateScalarsBeforeMapping &&
+        this->ColorCoordinates &&
+        !this->DrawingEdges)
       {
       if (this->ScalarMaterialMode == VTK_MATERIALMODE_AMBIENT ||
           (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT &&
@@ -421,7 +526,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       }
     else
       {
-      if (this->HaveCellScalars)
+      if (this->HaveCellScalars && !this->DrawingEdges)
         {
         if (this->ScalarMaterialMode == VTK_MATERIALMODE_AMBIENT ||
             (this->ScalarMaterialMode == VTK_MATERIALMODE_DEFAULT &&
@@ -501,30 +606,13 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
 //      "uniform sampler2DShadow shadowMaps[VTK_NUM_SHADOW_MAPS];\n"
       "uniform sampler2D shadowMaps[VTK_NUM_SHADOW_MAPS];\n"
       "uniform mat4 shadowTransforms[VTK_NUM_SHADOW_MAPS];\n"
-      "float computeShadowFactor(vec4 vc, int idx)\n"
-      "  {\n"
-      "  vec4 shadowCoord = shadowTransforms[idx]*vc;\n"
-      "  if(shadowCoord.w > 0.0)\n"
-      "    {\n"
-      "    vec2 projected = shadowCoord.xy/shadowCoord.w;\n"
-      "    if(projected.x >= 0.0 && projected.x <= 1.0\n"
-      "       && projected.y >= 0.0 && projected.y <= 1.0)\n"
-      "      {\n"
-      "      float result = 0.0;\n"
-      "      float zval = shadowCoord.z - 0.005;\n"
-      "      if (textureProjOffset(shadowMaps[idx],shadowCoord,ivec2( 0, 0)).r - zval > 0) { result += 0.34; }\n"
-      "      if (textureProjOffset(shadowMaps[idx],shadowCoord,ivec2( 0, 1)).r - zval > 0) { result += 0.33; }\n"
-      "      if (textureProjOffset(shadowMaps[idx],shadowCoord,ivec2( 1, 0)).r - zval > 0) { result += 0.33; }\n"
-      "      return result;\n"
-      "      }\n"
-      "    }\n"
-      "    return 1.0;\n"
-      "  }\n"
       , false);
 
     // build the code for the lighting factors
     std::string lfc =
-      "float factors[6];\n";
+      "float factors[6];\n"
+      "vec4 shadowCoord;\n"
+      "float result;\n";
     numSMT = 0;
     for (int i = 0; i < 6; i++)
       {
@@ -536,7 +624,22 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
         std::ostringstream toString2;
         toString2 << numSMT;
         lfc +=
-        "  factors[" + toString.str() + "] = computeShadowFactor(vertexVC," + toString2.str() + ");\n";
+        "  shadowCoord = shadowTransforms[" + toString2.str() + "]*vertexVC;\n"
+        "  result = 1.0;\n"
+        "  if(shadowCoord.w > 0.0)\n"
+        "    {\n"
+        "    vec2 projected = shadowCoord.xy/shadowCoord.w;\n"
+        "    if(projected.x >= 0.0 && projected.x <= 1.0\n"
+        "       && projected.y >= 0.0 && projected.y <= 1.0)\n"
+        "      {\n"
+        "      result = 0.0;\n"
+        "      float zval = shadowCoord.z - 0.005;\n"
+        "      if (textureProjOffset(shadowMaps[" + toString2.str() + "],shadowCoord,ivec2( 0, 0)).r - zval > 0) { result += 0.34; }\n"
+        "      if (textureProjOffset(shadowMaps[" + toString2.str() + "],shadowCoord,ivec2( 0, 1)).r - zval > 0) { result += 0.33; }\n"
+        "      if (textureProjOffset(shadowMaps[" + toString2.str() + "],shadowCoord,ivec2( 1, 0)).r - zval > 0) { result += 0.33; }\n"
+        "      }\n"
+        "    }\n"
+        "  factors[" + toString.str() + "] = result;\n";
         numSMT++;
         }
       else
@@ -551,7 +654,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
     shadowFactor = "*factors[lightNum]";
     }
 
-  switch (this->LastLightComplexity)
+  switch (this->LastLightComplexity[this->LastBoundBO])
     {
     case 0: // no lighting
       vtkShaderProgram::Substitute(FSSource,"//VTK::Light::Impl",
@@ -668,6 +771,11 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderTCoord(
   std::map<vtkShader::Type, vtkShader *> shaders,
   vtkRenderer *, vtkActor *actor)
 {
+  if (this->DrawingEdges)
+    {
+    return;
+    }
+
   std::string VSSource = shaders[vtkShader::Vertex]->GetSource();
   std::string GSSource = shaders[vtkShader::Geometry]->GetSource();
   std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
@@ -908,7 +1016,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderNormal(
   std::map<vtkShader::Type, vtkShader *> shaders,
   vtkRenderer *, vtkActor *actor)
 {
-  if (this->LastLightComplexity > 0)
+  if (this->LastLightComplexity[this->LastBoundBO] > 0)
     {
     std::string VSSource = shaders[vtkShader::Vertex]->GetSource();
     std::string GSSource = shaders[vtkShader::Geometry]->GetSource();
@@ -916,14 +1024,11 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderNormal(
 
     if (this->VBO->NormalOffset)
       {
-      if (vtkShaderProgram::Substitute(VSSource,
+      vtkShaderProgram::Substitute(VSSource,
         "//VTK::Normal::Dec",
         "attribute vec3 normalMC;\n"
         "uniform mat3 normalMatrix;\n"
-        "varying vec3 normalVCVSOutput;"))
-        {
-        this->ShaderVariablesUsed.push_back("normalMatrix");
-        }
+        "varying vec3 normalVCVSOutput;");
       vtkShaderProgram::Substitute(VSSource,
         "//VTK::Normal::Impl",
         "normalVCVSOutput = normalMatrix * normalMC;");
@@ -950,13 +1055,10 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderNormal(
       {
       if (this->HaveCellNormals)
         {
-        if (vtkShaderProgram::Substitute(FSSource,
-            "//VTK::Normal::Dec",
-            "uniform mat3 normalMatrix;\n"
-            "uniform samplerBuffer textureN;\n"))
-          {
-          this->ShaderVariablesUsed.push_back("normalMatrix");
-          }
+        vtkShaderProgram::Substitute(FSSource,
+          "//VTK::Normal::Dec",
+          "uniform mat3 normalMatrix;\n"
+          "uniform samplerBuffer textureN;\n");
         vtkShaderProgram::Substitute(FSSource,
           "//VTK::Normal::Impl",
           "vec3 normalVCVSOutput = normalize(normalMatrix *\n"
@@ -1002,7 +1104,6 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderNormal(
           vtkShaderProgram::Substitute(FSSource,
             "//VTK::Normal::Dec",
             "uniform int cameraParallel;");
-          this->ShaderVariablesUsed.push_back("cameraParallel");
 
           vtkShaderProgram::Substitute(FSSource,"//VTK::Normal::Impl",
             "vec3 fdx = normalize(vec3(dFdx(vertexVC.x),dFdx(vertexVC.y),dFdx(vertexVC.z)));\n"
@@ -1032,7 +1133,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderPositionVC(
   std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
 
  // do we need the vertex in the shader in View Coordinates
-  if (this->LastLightComplexity > 0)
+  if (this->LastLightComplexity[this->LastBoundBO] > 0)
     {
     vtkShaderProgram::Substitute(VSSource,
       "//VTK::PositionVC::Dec",
@@ -1041,13 +1142,10 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderPositionVC(
       "//VTK::PositionVC::Impl",
       "vertexVCVSOutput = MCVCMatrix * vertexMC;\n"
       "  gl_Position = MCDCMatrix * vertexMC;\n");
-    if (vtkShaderProgram::Substitute(VSSource,
-        "//VTK::Camera::Dec",
-        "uniform mat4 MCDCMatrix;\n"
-        "uniform mat4 MCVCMatrix;"))
-      {
-      this->ShaderVariablesUsed.push_back("MCVCMatrix");
-      }
+    vtkShaderProgram::Substitute(VSSource,
+      "//VTK::Camera::Dec",
+      "uniform mat4 MCDCMatrix;\n"
+      "uniform mat4 MCVCMatrix;");
     vtkShaderProgram::Substitute(GSSource,
       "//VTK::PositionVC::Dec",
       "in vec4 vertexVCVSOutput[];\n"
@@ -1200,10 +1298,10 @@ bool vtkOpenGLPolyDataMapper::GetNeedToRebuildShaders(
       }
     }
 
-  if (this->LastLightComplexity != lightComplexity)
+  if (this->LastLightComplexity[&cellBO] != lightComplexity)
     {
-    this->LightComplexityChanged.Modified();
-    this->LastLightComplexity = lightComplexity;
+    this->LightComplexityChanged[&cellBO].Modified();
+    this->LastLightComplexity[&cellBO] = lightComplexity;
     }
 
   if (this->LastDepthPeeling !=
@@ -1224,7 +1322,7 @@ bool vtkOpenGLPolyDataMapper::GetNeedToRebuildShaders(
       cellBO.ShaderSourceTime < this->CurrentInput->GetMTime() ||
       cellBO.ShaderSourceTime < this->SelectionStateChanged ||
       cellBO.ShaderSourceTime < this->DepthPeelingChanged ||
-      cellBO.ShaderSourceTime < this->LightComplexityChanged)
+      cellBO.ShaderSourceTime < this->LightComplexityChanged[&cellBO])
     {
     return true;
     }
@@ -1286,6 +1384,9 @@ void vtkOpenGLPolyDataMapper::UpdateShaders(
   this->SetCameraShaderParameters(cellBO, ren, actor);
   this->SetLightingShaderParameters(cellBO, ren, actor);
 
+  // allow the program to set what it wants
+  this->InvokeEvent(vtkCommand::UpdateShaderEvent,&cellBO);
+
   vtkOpenGLCheckErrorMacro("failed after UpdateShader");
 }
 
@@ -1306,7 +1407,7 @@ void vtkOpenGLPolyDataMapper::SetMapperShaderParameters(vtkOpenGLHelper &cellBO,
       {
       vtkErrorMacro(<< "Error setting 'vertexMC' in shader VAO.");
       }
-    if (this->VBO->NormalOffset && this->LastLightComplexity > 0)
+    if (this->VBO->NormalOffset && this->LastLightComplexity[&cellBO] > 0)
       {
       if (!cellBO.VAO->AddAttributeArray(cellBO.Program, this->VBO,
                                       "normalMC", this->VBO->NormalOffset,
@@ -1315,7 +1416,7 @@ void vtkOpenGLPolyDataMapper::SetMapperShaderParameters(vtkOpenGLHelper &cellBO,
         vtkErrorMacro(<< "Error setting 'normalMC' in shader VAO.");
         }
       }
-    if (this->VBO->TCoordComponents)
+    if (this->VBO->TCoordComponents && !this->DrawingEdges)
       {
       if (!cellBO.VAO->AddAttributeArray(cellBO.Program, this->VBO,
                                       "tcoordMC", this->VBO->TCoordOffset,
@@ -1324,7 +1425,7 @@ void vtkOpenGLPolyDataMapper::SetMapperShaderParameters(vtkOpenGLHelper &cellBO,
         vtkErrorMacro(<< "Error setting 'tcoordMC' in shader VAO.");
         }
       }
-    if (this->VBO->ColorComponents != 0)
+    if (this->VBO->ColorComponents != 0 && !this->DrawingEdges)
       {
       if (!cellBO.VAO->AddAttributeArray(cellBO.Program, this->VBO,
                                       "scalarColor", this->VBO->ColorOffset,
@@ -1483,7 +1584,7 @@ void vtkOpenGLPolyDataMapper::SetLightingShaderParameters(
   vtkActor *actor)
 {
   // for unlit and headlight there are no lighting parameters
-  if (this->LastLightComplexity < 2 || this->DrawingEdges)
+  if (this->LastLightComplexity[&cellBO] < 2 || this->DrawingEdges)
     {
     return;
     }
@@ -1492,7 +1593,6 @@ void vtkOpenGLPolyDataMapper::SetLightingShaderParameters(
 
   // check for shadow maps
   vtkInformation *info = actor->GetPropertyKeys();
-  std::string shadowFactor = "";
   if (info && info->Has(vtkShadowMapPass::ShadowMapTextures()))
     {
     int *shadowMapTextures = info->Get(vtkShadowMapPass::ShadowMapTextures());
@@ -1570,7 +1670,7 @@ void vtkOpenGLPolyDataMapper::SetLightingShaderParameters(
   program->SetUniformi("numberOfLights", numberOfLights);
 
   // we are done unless we have positional lights
-  if (this->LastLightComplexity < 3)
+  if (this->LastLightComplexity[&cellBO] < 3)
     {
     return;
     }
@@ -1631,12 +1731,12 @@ void vtkOpenGLPolyDataMapper::SetCameraShaderParameters(vtkOpenGLHelper &cellBO,
     ((vtkOpenGLActor *)actor)->GetKeyMatrices(mcwc,anorms);
     vtkMatrix4x4::Multiply4x4(mcwc, wcdc, this->TempMatrix4);
     program->SetUniformMatrix("MCDCMatrix", this->TempMatrix4);
-    if (this->IsShaderVariableUsed("MCVCMatrix"))
+    if (program->IsUniformUsed("MCVCMatrix"))
       {
       vtkMatrix4x4::Multiply4x4(mcwc, wcvc, this->TempMatrix4);
       program->SetUniformMatrix("MCVCMatrix", this->TempMatrix4);
       }
-    if (this->IsShaderVariableUsed("normalMatrix"))
+    if (program->IsUniformUsed("normalMatrix"))
       {
       vtkMatrix3x3::Multiply3x3(anorms, norms, this->TempMatrix3);
       program->SetUniformMatrix("normalMatrix", this->TempMatrix3);
@@ -1645,17 +1745,17 @@ void vtkOpenGLPolyDataMapper::SetCameraShaderParameters(vtkOpenGLHelper &cellBO,
   else
     {
     program->SetUniformMatrix("MCDCMatrix", wcdc);
-    if (this->IsShaderVariableUsed("MCVCMatrix"))
+    if (program->IsUniformUsed("MCVCMatrix"))
       {
       program->SetUniformMatrix("MCVCMatrix", wcvc);
       }
-    if (this->IsShaderVariableUsed("normalMatrix"))
+    if (program->IsUniformUsed("normalMatrix"))
       {
       program->SetUniformMatrix("normalMatrix", norms);
       }
     }
 
-  if (this->IsShaderVariableUsed("cameraParallel"))
+  if (program->IsUniformUsed("cameraParallel"))
     {
     program->SetUniformi("cameraParallel", cam->GetParallelProjection());
     }
@@ -1694,7 +1794,7 @@ void vtkOpenGLPolyDataMapper::SetPropertyShaderParameters(vtkOpenGLHelper &cellB
   program->SetUniform3f("ambientColorUniform", ambientColor);
   program->SetUniform3f("diffuseColorUniform", diffuseColor);
   // we are done unless we have lighting
-  if (this->LastLightComplexity < 1)
+  if (this->LastLightComplexity[&cellBO] < 1)
     {
     return;
     }
@@ -1729,7 +1829,7 @@ void vtkOpenGLPolyDataMapper::SetPropertyShaderParameters(vtkOpenGLHelper &cellB
     program->SetUniform3f("ambientColorUniformBF", ambientColor);
     program->SetUniform3f("diffuseColorUniformBF", diffuseColor);
     // we are done unless we have lighting
-    if (this->LastLightComplexity < 1)
+    if (this->LastLightComplexity[&cellBO] < 1)
       {
       return;
       }
@@ -1954,7 +2054,8 @@ void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
 }
 
 //-----------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper::RenderPieceFinish(vtkRenderer* ren, vtkActor *vtkNotUsed(actor))
+void vtkOpenGLPolyDataMapper::RenderPieceFinish(vtkRenderer* ren,
+  vtkActor *actor)
 {
   vtkHardwareSelector* selector = ren->GetSelector();
   if (selector && this->PopulateSelectionSettings)
@@ -1976,7 +2077,11 @@ void vtkOpenGLPolyDataMapper::RenderPieceFinish(vtkRenderer* ren, vtkActor *vtkN
 
   this->VBO->Release();
 
-  if ( this->GetResolveCoincidentTopology() )
+  vtkProperty *prop = actor->GetProperty();
+  bool surface_offset =
+    (this->GetResolveCoincidentTopology() || prop->GetEdgeVisibility())
+    && prop->GetRepresentation() == VTK_SURFACE;
+  if (surface_offset)
     {
     glDisable(GL_POLYGON_OFFSET_FILL);
     }
@@ -2580,9 +2685,14 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
      this->AppleBugPrimIDs, vtkOpenGLBufferObject::ArrayBuffer);
     this->AppleBugPrimIDBuffer->Release();
 
-    vtkWarningMacro("VTK is working around a bug in Apple-AMD hardware related to gl_PrimitiveID.  This may cause significant memory and performance impacts. Your hardware has been identified as vendor "
-      << (const char *)glGetString(GL_VENDOR) << " with renderer of "
-      << (const char *)glGetString(GL_RENDERER));
+    static bool warnedAboutBrokenAppleDriver = false;
+    if (!warnedAboutBrokenAppleDriver)
+      {
+      vtkWarningMacro("VTK is working around a bug in Apple-AMD hardware related to gl_PrimitiveID.  This may cause significant memory and performance impacts. Your hardware has been identified as vendor "
+        << (const char *)glGetString(GL_VENDOR) << " with renderer of "
+        << (const char *)glGetString(GL_RENDERER));
+      warnedAboutBrokenAppleDriver = true;
+      }
     if (n)
       {
       n = (act->GetProperty()->GetInterpolation() != VTK_FLAT) ?
