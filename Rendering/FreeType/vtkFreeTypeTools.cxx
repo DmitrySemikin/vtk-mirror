@@ -64,10 +64,10 @@ void rotateVector2i(vtkVector2i &vec, float sinTheta, float cosTheta)
 } // end anon namespace
 
 class vtkTextPropertyLookup
-    : public std::map<unsigned long, vtkSmartPointer<vtkTextProperty> >
+    : public std::map<size_t, vtkSmartPointer<vtkTextProperty> >
 {
 public:
-  bool contains(const unsigned long id) {return this->find(id) != this->end();}
+  bool contains(const size_t id) {return this->find(id) != this->end();}
 };
 
 class vtkFreeTypeTools::MetaData
@@ -75,8 +75,8 @@ class vtkFreeTypeTools::MetaData
 public:
   // Set by PrepareMetaData
   vtkTextProperty *textProperty;
-  unsigned long textPropertyCacheId;
-  unsigned long unrotatedTextPropertyCacheId;
+  size_t textPropertyCacheId;
+  size_t unrotatedTextPropertyCacheId;
   FTC_ScalerRec scaler;
   FTC_ScalerRec unrotatedScaler;
   FT_Face face;
@@ -602,7 +602,7 @@ vtkTypeUInt16 vtkFreeTypeTools::HashString(const char *str)
 
 //----------------------------------------------------------------------------
 void vtkFreeTypeTools::MapTextPropertyToId(vtkTextProperty *tprop,
-                                           unsigned long *id)
+                                           size_t *id)
 {
   if (!tprop || !id)
     {
@@ -624,11 +624,11 @@ void vtkFreeTypeTools::MapTextPropertyToId(vtkTextProperty *tprop,
   bits += 16;
 
   // Bold is in 1 bit (= 18 bits so far)
-  unsigned long bold = (tprop->GetBold() ? 1 : 0) << bits;
+  vtkIdType bold = (tprop->GetBold() ? 1 : 0) << bits;
   ++bits;
 
   // Italic is in 1 bit (= 19 bits so far)
-  unsigned long italic = (tprop->GetItalic() ? 1 : 0) << bits;
+  vtkIdType italic = (tprop->GetItalic() ? 1 : 0) << bits;
   ++bits;
 
   // Orientation (in degrees)
@@ -639,11 +639,11 @@ void vtkFreeTypeTools::MapTextPropertyToId(vtkTextProperty *tprop,
     {
     angle += 3600;
     }
+  // We really should not use more than 12 bits
+  assert(angle >= 0 && (angle & 0xfffff000) == 0);
   angle <<= bits;
 
-  // We really should not use more than 32 bits
-  unsigned long merged = (bold | italic | angle);
-  assert(merged <= std::numeric_limits<vtkTypeUInt32>::max());
+  vtkIdType merged = (bold | italic | angle);
 
   // Now final id
   *id |= merged;
@@ -654,7 +654,7 @@ void vtkFreeTypeTools::MapTextPropertyToId(vtkTextProperty *tprop,
 }
 
 //----------------------------------------------------------------------------
-void vtkFreeTypeTools::MapIdToTextProperty(unsigned long id,
+void vtkFreeTypeTools::MapIdToTextProperty(size_t id,
                                            vtkTextProperty *tprop)
 {
   if (!tprop)
@@ -676,7 +676,7 @@ void vtkFreeTypeTools::MapIdToTextProperty(unsigned long id,
 }
 
 //----------------------------------------------------------------------------
-bool vtkFreeTypeTools::GetSize(unsigned long tprop_cache_id,
+bool vtkFreeTypeTools::GetSize(size_t tprop_cache_id,
                                int font_size,
                                FT_Size *size)
 {
@@ -738,14 +738,14 @@ bool vtkFreeTypeTools::GetSize(vtkTextProperty *tprop,
     }
 
   // Map the text property to a unique id that will be used as face id
-  unsigned long tprop_cache_id;
+  size_t tprop_cache_id;
   this->MapTextPropertyToId(tprop, &tprop_cache_id);
 
   return this->GetSize(tprop_cache_id, tprop->GetFontSize(), size);
 }
 
 //----------------------------------------------------------------------------
-bool vtkFreeTypeTools::GetFace(unsigned long tprop_cache_id,
+bool vtkFreeTypeTools::GetFace(size_t tprop_cache_id,
                                FT_Face *face)
 {
 #if VTK_FTFC_DEBUG_CD
@@ -788,14 +788,14 @@ bool vtkFreeTypeTools::GetFace(vtkTextProperty *tprop,
     }
 
   // Map the text property to a unique id that will be used as face id
-  unsigned long tprop_cache_id;
+  size_t tprop_cache_id;
   this->MapTextPropertyToId(tprop, &tprop_cache_id);
 
   return this->GetFace(tprop_cache_id, face);
 }
 
 //----------------------------------------------------------------------------
-bool vtkFreeTypeTools::GetGlyphIndex(unsigned long tprop_cache_id,
+bool vtkFreeTypeTools::GetGlyphIndex(size_t tprop_cache_id,
                                      FT_UInt32 c,
                                      FT_UInt *gindex)
 {
@@ -837,14 +837,14 @@ bool vtkFreeTypeTools::GetGlyphIndex(vtkTextProperty *tprop,
     }
 
   // Map the text property to a unique id that will be used as face id
-  unsigned long tprop_cache_id;
+  size_t tprop_cache_id;
   this->MapTextPropertyToId(tprop, &tprop_cache_id);
 
   return this->GetGlyphIndex(tprop_cache_id, c, gindex);
 }
 
 //----------------------------------------------------------------------------
-bool vtkFreeTypeTools::GetGlyph(unsigned long tprop_cache_id,
+bool vtkFreeTypeTools::GetGlyph(size_t tprop_cache_id,
                                 int font_size,
                                 FT_UInt gindex,
                                 FT_Glyph *glyph,
@@ -1066,7 +1066,7 @@ bool vtkFreeTypeTools::GetGlyph(vtkTextProperty *tprop,
     }
 
   // Map the text property to a unique id that will be used as face id
-  unsigned long tprop_cache_id;
+  size_t tprop_cache_id;
   this->MapTextPropertyToId(tprop, &tprop_cache_id);
 
   // Get the character/glyph index
@@ -2291,7 +2291,7 @@ int vtkFreeTypeTools::FitStringToBBox(const T &str, MetaData &metaData,
 
 //----------------------------------------------------------------------------
 inline bool vtkFreeTypeTools::GetFace(vtkTextProperty *prop,
-                                      unsigned long &prop_cache_id,
+                                      size_t &prop_cache_id,
                                       FT_Face &face, bool &face_has_kerning)
 {
   this->MapTextPropertyToId(prop, &prop_cache_id);
@@ -2306,7 +2306,7 @@ inline bool vtkFreeTypeTools::GetFace(vtkTextProperty *prop,
 
 //----------------------------------------------------------------------------
 inline FT_Bitmap* vtkFreeTypeTools::GetBitmap(FT_UInt32 c,
-                                              unsigned long prop_cache_id,
+                                              size_t prop_cache_id,
                                               int prop_font_size,
                                               FT_UInt &gindex,
                                               FT_BitmapGlyph &bitmap_glyph)
@@ -2345,7 +2345,7 @@ FT_Bitmap *vtkFreeTypeTools::GetBitmap(FT_UInt32 c, FTC_Scaler scaler,
                                        FT_BitmapGlyph &bitmap_glyph)
 {
   // Get the glyph index
-  if (!this->GetGlyphIndex(reinterpret_cast<vtkTextProperty*>(scaler->face_id), c,
+  if (!this->GetGlyphIndex(reinterpret_cast<size_t>(scaler->face_id), c,
                            &gindex))
     {
     return 0;
@@ -2373,7 +2373,7 @@ FT_Bitmap *vtkFreeTypeTools::GetBitmap(FT_UInt32 c, FTC_Scaler scaler,
 
 //----------------------------------------------------------------------------
 inline FT_Outline *vtkFreeTypeTools::GetOutline(FT_UInt32 c,
-                                                unsigned long prop_cache_id,
+                                                size_t prop_cache_id,
                                                 int prop_font_size,
                                                 FT_UInt &gindex,
                                                 FT_OutlineGlyph &outline_glyph)
@@ -2407,7 +2407,7 @@ FT_Outline *vtkFreeTypeTools::GetOutline(FT_UInt32 c, FTC_Scaler scaler,
                                          FT_OutlineGlyph &outline_glyph)
 {
   // Get the glyph index
-  if (!this->GetGlyphIndex(reinterpret_cast<vtkTextProperty*>(scaler->face_id), c,
+  if (!this->GetGlyphIndex(reinterpret_cast<size_t>(scaler->face_id), c,
                            &gindex))
     {
     return 0;
