@@ -183,6 +183,13 @@ public:
   unsigned int GetFrontBuffer();
 
   // Description:
+  // @deprecated Replaced by
+  // vtkOpenGLCheckErrorMacro
+  VTK_LEGACY(virtual void CheckGraphicError());
+  VTK_LEGACY(virtual int HasGraphicError());
+  VTK_LEGACY(virtual const char *GetLastGraphicErrorString());
+
+  // Description:
   // Get the time when the OpenGL context was created.
   virtual unsigned long GetContextCreationTime();
 

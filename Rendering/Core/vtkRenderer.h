@@ -44,6 +44,7 @@ class vtkCamera;
 class vtkLightCollection;
 class vtkCullerCollection;
 class vtkLight;
+class vtkPainter;
 class vtkHardwareSelector;
 class vtkRendererDelegate;
 class vtkTexture;
