@@ -643,6 +643,10 @@ if(CMAKE_SYSTEM MATCHES "SunOS.*")
   set(KIT_LIBS ${KIT_LIBS} socket nsl)
 endif()
 
+if(MINGW)
+  set(VTK_SMP_IMPLEMENTATION_LIBRARIES ${VTK_SMP_IMPLEMENTATION_LIBRARIES} dbghelp)
+endif()
+
 vtk_module_library(vtkCommonCore ${Module_SRCS})
 
 vtk_module_link_libraries(vtkCommonCore LINK_PRIVATE ${CMAKE_THREAD_LIBS} LINK_PUBLIC ${VTK_SMP_IMPLEMENTATION_LIBRARIES})
