@@ -809,7 +809,8 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
       case 2: // light kit
       case 3: // positional
         vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
-          "  gl_FragData[0] = vec4(diffuse.x, specular.x, 0.0, 1.0);"
+          "  float ambientY = dot(vec3(0.2126, 0.7152, 0.0722), ambientColor);\n"
+          "  gl_FragData[0] = vec4(diffuse.x, specular.x, ambientY, 1.0);"
         );
         break;
     }
