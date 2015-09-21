@@ -14,12 +14,14 @@
 =========================================================================*/
 #include "vtkLightingMapPass.h"
 
+#include "vtkClearRGBPass.h"
 #include "vtkInformation.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkObjectFactory.h"
 #include "vtkProp.h"
 #include "vtkRenderer.h"
 #include "vtkRenderState.h"
+#include "vtkSmartPointer.h"
 
 #include <cassert>
 
@@ -64,6 +66,11 @@ void vtkLightingMapPass::Render(const vtkRenderState *s)
 void vtkLightingMapPass::RenderFilteredOpaqueGeometry(const vtkRenderState *s)
 {
   assert("pre: s_exists" && s!=0);
+
+  // Clear the RGB buffer first
+  vtkSmartPointer<vtkClearRGBPass> clear =
+    vtkSmartPointer<vtkClearRGBPass>::New();
+  clear->Render(s);
 
   // initialize to false
   this->SetLastRenderingUsedDepthPeeling(s->GetRenderer(), false);
