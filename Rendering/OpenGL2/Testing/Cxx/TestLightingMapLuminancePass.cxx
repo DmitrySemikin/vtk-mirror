@@ -78,11 +78,6 @@ int TestLightingMapLuminancePass(int argc, char *argv[])
   actor->GetProperty()->SetOpacity(1.0);
   //actor->GetProperty()->SetRepresentationToWireframe();
 
-  vtkSmartPointer<vtkInformation> keys =
-    vtkSmartPointer<vtkInformation>::New();
-  keys->Set(vtkLightingMapPass::RENDER_LUMINANCE(), 1);
-  actor->SetPropertyKeys(keys);
-
   // 1. Set up renderer, window, & interactor
   vtkSmartPointer<vtkRenderWindowInteractor> interactor =
     vtkSmartPointer<vtkRenderWindowInteractor>::New();
@@ -109,12 +104,13 @@ int TestLightingMapLuminancePass(int argc, char *argv[])
   renderer->AddActor(actor);
 
   // 2. Set up rendering passes
-  vtkSmartPointer<vtkLightingMapPass> values =
+  vtkSmartPointer<vtkLightingMapPass> lightingPass =
     vtkSmartPointer<vtkLightingMapPass>::New();
+  lightingPass->SetRenderType(vtkLightingMapPass::LUMINANCE);
 
   vtkSmartPointer<vtkRenderPassCollection> passes =
     vtkSmartPointer<vtkRenderPassCollection>::New();
-  passes->AddItem(values);
+  passes->AddItem(lightingPass);
 
   vtkSmartPointer<vtkSequencePass> sequence =
     vtkSmartPointer<vtkSequencePass>::New();

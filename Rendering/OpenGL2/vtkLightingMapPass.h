@@ -41,6 +41,12 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
+  // Set the type of lighting render to perform
+  enum RenderMode { LUMINANCE, NORMALS };
+  vtkSetMacro(RenderType, RenderMode);
+  vtkGetMacro(RenderType, RenderMode);
+
+  // Description:
   // If this key exists on the PropertyKeys of a prop, the active scalar array
   // on the prop will be rendered as its color. This key is mutually exclusive
   // with the RENDER_LUMINANCE key.
@@ -71,11 +77,13 @@ public:
   // Description:
   // Opaque pass with key checking.
   // \pre s_exists: s!=0
-  virtual void RenderFilteredOpaqueGeometry(const vtkRenderState *s);
+  virtual void RenderOpaqueGeometry(const vtkRenderState *s);
 
  private:
   vtkLightingMapPass(const vtkLightingMapPass&);  // Not implemented.
   void operator=(const vtkLightingMapPass&);  // Not implemented.
+
+  RenderMode RenderType;
 };
 
 #endif

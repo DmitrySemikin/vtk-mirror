@@ -56,14 +56,14 @@ void vtkLightingMapPass::Render(const vtkRenderState *s)
 
   // Render filtered geometry according to our keys
   this->NumberOfRenderedProps = 0;
-  this->RenderFilteredOpaqueGeometry(s);
+  this->RenderOpaqueGeometry(s);
 }
 
 // ----------------------------------------------------------------------------
 // Description:
 // Opaque pass with key checking.
 // \pre s_exists: s!=0
-void vtkLightingMapPass::RenderFilteredOpaqueGeometry(const vtkRenderState *s)
+void vtkLightingMapPass::RenderOpaqueGeometry(const vtkRenderState *s)
 {
   assert("pre: s_exists" && s!=0);
 
@@ -75,36 +75,48 @@ void vtkLightingMapPass::RenderFilteredOpaqueGeometry(const vtkRenderState *s)
   // initialize to false
   this->SetLastRenderingUsedDepthPeeling(s->GetRenderer(), false);
 
-  vtkInformation *luminanceKey = vtkInformation::New();
-  luminanceKey->Set(vtkLightingMapPass::RENDER_LUMINANCE(), 1);
-
-  vtkInformation *normalKey = vtkInformation::New();
-  normalKey->Set(vtkLightingMapPass::RENDER_NORMALS(), 1);
-
   int c = s->GetPropArrayCount();
   int i = 0;
   while (i < c)
     {
     vtkProp *p = s->GetPropArray()[i];
-
-    // Render luminance
-    if (p->HasKeys(luminanceKey))
+    vtkSmartPointer<vtkInformation> keys = p->GetPropertyKeys();
+    if (!keys)
       {
-      int rendered =
-        p->RenderFilteredOpaqueGeometry(s->GetRenderer(), luminanceKey);
-      this->NumberOfRenderedProps += rendered;
+      keys.TakeReference(vtkInformation::New());
       }
-
-    // Render normals
-    if (p->HasKeys(normalKey))
+    switch (this->GetRenderType())
       {
-      int rendered =
-        p->RenderFilteredOpaqueGeometry(s->GetRenderer(), normalKey);
-      this->NumberOfRenderedProps += rendered;
+      case LUMINANCE:
+        keys->Set(vtkLightingMapPass::RENDER_LUMINANCE(), 1);
+        break;
+      case NORMALS:
+        keys->Set(vtkLightingMapPass::RENDER_NORMALS(), 1);
+        break;
       }
+    p->SetPropertyKeys(keys);
+    int rendered =
+      p->RenderOpaqueGeometry(s->GetRenderer());
+    this->NumberOfRenderedProps += rendered;
     ++i;
     }
 
-  luminanceKey->Delete();
-  normalKey->Delete();
+  // Remove keys
+  i = 0;
+  while (i < c)
+    {
+    vtkProp *p = s->GetPropArray()[i];
+    vtkInformation *keys = p->GetPropertyKeys();
+    switch (this->GetRenderType())
+      {
+      case LUMINANCE:
+        keys->Remove(vtkLightingMapPass::RENDER_LUMINANCE());
+        break;
+      case NORMALS:
+        keys->Remove(vtkLightingMapPass::RENDER_NORMALS());
+        break;
+      }
+    p->SetPropertyKeys(keys);
+    ++i;
+    }
 }
