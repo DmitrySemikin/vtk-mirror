@@ -50,6 +50,7 @@
 #include "vtkTextureObject.h"
 #include "vtkTransform.h"
 #include "vtkUnsignedIntArray.h"
+#include "vtkValuePass.h"
 
 #include "vtkShadowMapPass.h"
 
@@ -677,9 +678,15 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderLight(
       );
     }
 
-  switch (this->LastLightComplexity[this->LastBoundBO])
+  int lastLightComplexity = this->LastLightComplexity[this->LastBoundBO];
+  if (info && info->Has(vtkValuePass::RENDER_VALUES()))
     {
-    case 0: // no lighting
+    lastLightComplexity = 0;
+    }
+
+  switch (lastLightComplexity)
+    {
+    case 0: // no lighting or RENDER_VALUES
       vtkShaderProgram::Substitute(FSSource, "//VTK::Light::Impl",
         "  gl_FragData[0] = vec4(ambientColor + diffuseColor, opacity);\n"
         "  //VTK::Light::Impl\n",
@@ -2645,6 +2652,21 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
   if (poly == NULL)
     {
     return;
+    }
+
+  vtkInformation *info = act->GetPropertyKeys();
+  if (info && info->Has(vtkValuePass::RENDER_VALUES()))
+    {
+    this->UseInvertibleColorFor(info->Get(vtkValuePass::SCALAR_MODE()),
+                                info->Get(vtkValuePass::ARRAY_MODE()),
+                                info->Get(vtkValuePass::ARRAY_ID()),
+                                info->Get(vtkValuePass::ARRAY_NAME()),
+                                info->Get(vtkValuePass::ARRAY_COMPONENT()),
+                                info->Get(vtkValuePass::SCALAR_RANGE()));
+    }
+  else
+    {
+    this->ClearInvertibleColor();
     }
 
   // For vertex coloring, this sets this->Colors as side effect.

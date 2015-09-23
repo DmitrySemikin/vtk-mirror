@@ -421,6 +421,14 @@ public:
   // can be handled if required.
   virtual int CanUseTextureMapForColoring(vtkDataObject* input);
 
+  void UseInvertibleColorFor(int scalarMode,
+    int arrayAccessMode,
+    int arrayId,
+    const char *arrayName,
+    int arrayComponent,
+    double *scalarRange);
+  void ClearInvertibleColor();
+
 protected:
   vtkMapper();
   ~vtkMapper();
@@ -434,6 +442,10 @@ protected:
   // 1D ColorMap used for the texture image.
   vtkImageData* ColorTextureMap;
   void MapScalarsToTexture(vtkAbstractArray* scalars, double alpha);
+
+  // Makes a lookup table that can be used for deferred colormaps
+  void CreateInvertibleLookupTable();
+  bool UseInvertibleColors;
 
   vtkScalarsToColors *LookupTable;
   int ScalarVisibility;
@@ -460,6 +472,8 @@ protected:
   int Static;
 
   int ForceCompileOnly;
+
+  vtkAbstractArray *InvertibleScalars;
 
 private:
   vtkMapper(const vtkMapper&);  // Not implemented.
