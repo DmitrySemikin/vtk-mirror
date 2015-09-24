@@ -453,6 +453,11 @@ protected:
   bool UseInvertibleColors;
   static vtkScalarsToColors *InvertibleLookupTable;
 
+  static void ValueToColor(double value, double min, double scale,
+    unsigned char *color);
+  static void ColorToValue(unsigned char *color, double min, double scale,
+    double &value);
+
   vtkScalarsToColors *LookupTable;
   int ScalarVisibility;
   vtkTimeStamp BuildTime;

@@ -41,23 +41,6 @@ static int vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces = 1;
 
 vtkScalarsToColors *vtkMapper::InvertibleLookupTable = NULL;
 
-namespace {
-//-----------------------------------------------------------------------------
-void ValueToColor(double value, double min, double scale,
-                                   unsigned char *color)
-{
-  //TODO: make this configurable
-  double valueS = (value - min)/scale;
-  valueS = (valueS<0.0?0.0:valueS); //prevent underflow
-  valueS = (valueS>1.0?1.0:valueS); //prevent overflow
-  int valueI = valueS * 0xfffffe + 0x1; //0 is reserved as "nothing"
-
-  color[0] = (unsigned char)((valueI & 0xff0000)>>16);
-  color[1] = (unsigned char)((valueI & 0x00ff00)>>8);
-  color[2] = (unsigned char)((valueI & 0x0000ff));
-}
-}
-
 // Construct with initial range (0,1).
 vtkMapper::vtkMapper()
 {
@@ -612,6 +595,29 @@ vtkScalarsToColors *vtkMapper::GetInvertibleLookupTable()
   }
   vtkMapper::InvertibleLookupTable->Register(this);
   return vtkMapper::InvertibleLookupTable;
+}
+
+void vtkMapper::ValueToColor(double value, double min, double scale,
+  unsigned char *color)
+{
+  //TODO: make this configurable
+  double valueS = (value - min)/scale;
+  valueS = (valueS<0.0?0.0:valueS); //prevent underflow
+  valueS = (valueS>1.0?1.0:valueS); //prevent overflow
+  int valueI = valueS * 0xfffffe + 0x1; //0 is reserved as "nothing"
+
+  color[0] = (unsigned char)((valueI & 0xff0000)>>16);
+  color[1] = (unsigned char)((valueI & 0x00ff00)>>8);
+  color[2] = (unsigned char)((valueI & 0x0000ff));
+}
+
+void vtkMapper::ColorToValue(unsigned char *color, double min, double scale,
+  double &value)
+{
+  //TODO: make this configurable
+  int valueI = ((int)(*(color+0)))<<16 | ((int)(*(color+1)))<<8 | ((int)(*(color+2)));
+  double valueS = (valueI-0x1)/(double)0xfffffe; // 0 is reserved as "nothing"
+  value = valueS * scale + min;
 }
 
 //-------------------------------------------------------------------
