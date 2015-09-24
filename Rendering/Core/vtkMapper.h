@@ -421,12 +421,17 @@ public:
   // can be handled if required.
   virtual int CanUseTextureMapForColoring(vtkDataObject* input);
 
+  // Description:
+  // Used internally by vtkValuePass
   void UseInvertibleColorFor(int scalarMode,
     int arrayAccessMode,
     int arrayId,
     const char *arrayName,
     int arrayComponent,
     double *scalarRange);
+
+  // Description:
+  // Used internally by vtkValuePass.
   void ClearInvertibleColor();
 
 protected:
