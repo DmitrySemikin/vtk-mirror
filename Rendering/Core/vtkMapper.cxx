@@ -78,10 +78,6 @@ vtkMapper::vtkMapper()
 
   this->UseInvertibleColors = false;
   this->InvertibleScalars = NULL;
-
-  // Creates invertible lookup table if it doesn't exist
-  // and registers to this instance.
-  this->GetInvertibleLookupTable();
 }
 
 vtkMapper::~vtkMapper()
@@ -105,10 +101,6 @@ vtkMapper::~vtkMapper()
   if (this->InvertibleScalars != NULL)
     {
     this->InvertibleScalars->UnRegister(this);
-    }
-  if (vtkMapper::InvertibleLookupTable)
-    {
-    vtkMapper::InvertibleLookupTable->UnRegister(this);
     }
 }
 
@@ -591,9 +583,10 @@ vtkScalarsToColors *vtkMapper::GetInvertibleLookupTable()
           (double)color[2] / 255.0,
           1);
       }
+    table->Register(this);
+    table->Delete();
     vtkMapper::InvertibleLookupTable = table;
   }
-  vtkMapper::InvertibleLookupTable->Register(this);
   return vtkMapper::InvertibleLookupTable;
 }
 
