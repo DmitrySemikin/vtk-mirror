@@ -39,6 +39,8 @@ static double vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor = 1.0;
 static double vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetUnits = 1.0;
 static int vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces = 1;
 
+vtkScalarsToColors *vtkMapper::InvertibleLookupTable = NULL;
+
 namespace {
 //-----------------------------------------------------------------------------
 void ValueToColor(double value, double min, double scale,
@@ -93,6 +95,10 @@ vtkMapper::vtkMapper()
 
   this->UseInvertibleColors = false;
   this->InvertibleScalars = NULL;
+
+  // Creates invertible lookup table if it doesn't exist
+  // and registers to this instance.
+  this->GetInvertibleLookupTable();
 }
 
 vtkMapper::~vtkMapper()
@@ -116,7 +122,11 @@ vtkMapper::~vtkMapper()
   if (this->InvertibleScalars != NULL)
     {
     this->InvertibleScalars->UnRegister(this);
-    };
+    }
+  if (vtkMapper::InvertibleLookupTable)
+    {
+    vtkMapper::InvertibleLookupTable->UnRegister(this);
+    }
 }
 
 // Get the bounds for the input of this mapper as
@@ -581,6 +591,29 @@ void vtkMapper::CreateDefaultLookupTable()
     }
 }
 
+vtkScalarsToColors *vtkMapper::GetInvertibleLookupTable()
+{
+  if (!vtkMapper::InvertibleLookupTable)
+  {
+    vtkLookupTable *table = vtkLookupTable::New();
+    const int MML = 0x1000;
+    table->SetNumberOfTableValues(MML);
+    unsigned char color[3] = { 0 };
+    for (int i = 0; i < MML; ++i)
+      {
+      ValueToColor(i, 0, MML, color);
+      table->SetTableValue(i,
+          (double)color[0] / 255.0,
+          (double)color[1] / 255.0,
+          (double)color[2] / 255.0,
+          1);
+      }
+    vtkMapper::InvertibleLookupTable = table;
+  }
+  vtkMapper::InvertibleLookupTable->Register(this);
+  return vtkMapper::InvertibleLookupTable;
+}
+
 //-------------------------------------------------------------------
 void vtkMapper::UseInvertibleColorFor(int scalarMode,
                                       int arrayAccessMode,
@@ -589,15 +622,25 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
                                       int arrayComponent,
                                       double *scalarRange)
 {
-  //todo: don't remake if unchanged
-  this->Modified();
-  this->UseInvertibleColors = true;
-
   //find and hold onto the array to use later
   int cellFlag = 0; // not used
   vtkAbstractArray* abstractArray = vtkAbstractMapper::
     GetAbstractScalars(this->GetInput(), scalarMode, arrayAccessMode,
                        arrayId, arrayName, cellFlag);
+  if (!abstractArray)
+  {
+    vtkErrorMacro(<< "Scalar array " << arrayName
+                  << "with Id = " << arrayId << " not found.");
+  }
+
+  // Check for a change
+  if (this->InvertibleScalars == abstractArray)
+    {
+      return;
+    }
+  this->Modified();
+
+  // Set the new array, if present
   if (this->InvertibleScalars)
     {
     this->InvertibleScalars->UnRegister(this);
@@ -608,38 +651,35 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
     this->InvertibleScalars->Register(this);
     }
 
+  // Determine whether to use invertible colors
+  this->UseInvertibleColors = this->InvertibleScalars != NULL;
+  if (!this->UseInvertibleColors)
+    {
+      return;
+    }
+
   //make up new table
   if (this->LookupTable)
     {
     this->LookupTable->UnRegister(this);
     this->LookupTable = NULL;
     }
-  vtkLookupTable* table = vtkLookupTable::New();
-  this->LookupTable = table;
-  this->LookupTable->Register(this);
-  this->LookupTable->SetRange(scalarRange);
-  this->LookupTable->Delete();
+
   vtkDataArray *dataArray = vtkDataArray::SafeDownCast(abstractArray);
-  if (abstractArray && !dataArray)
+  if (!dataArray)
     {
+    vtkLookupTable* table = vtkLookupTable::New();
+    this->LookupTable = table;
+    this->LookupTable->SetRange(scalarRange);
+    this->LookupTable->Register(this);
+    this->LookupTable->Delete();
     table->SetNumberOfTableValues(1);
     table->SetTableValue(0, 0.0, 0.0, 0.0, 1);
     }
   else
     {
-    //todo: this never changes so it should be a singleton made 1x and shared by all
-#define MML 0x1000
-    table->SetNumberOfTableValues(MML);
-    unsigned char color[3];
-    for (int i = 0; i < MML; i++)
-      {
-      ValueToColor(i, 0, MML, color);
-      table->SetTableValue(i,
-                           (double)color[0]/255.0,
-                           (double)color[1]/255.0,
-                           (double)color[2]/255.0,
-                           1);
-      }
+    // Just grab a reference to the invertible lookup table
+    this->LookupTable = this->GetInvertibleLookupTable();
     }
 }
 

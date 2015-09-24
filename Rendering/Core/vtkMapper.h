@@ -444,8 +444,9 @@ protected:
   void MapScalarsToTexture(vtkAbstractArray* scalars, double alpha);
 
   // Makes a lookup table that can be used for deferred colormaps
-  void CreateInvertibleLookupTable();
+  vtkScalarsToColors *GetInvertibleLookupTable();
   bool UseInvertibleColors;
+  static vtkScalarsToColors *InvertibleLookupTable;
 
   vtkScalarsToColors *LookupTable;
   int ScalarVisibility;
