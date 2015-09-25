@@ -445,7 +445,7 @@ vtkUnsignedCharArray *vtkMapper::MapScalars(vtkDataSet *input,
   double orig_alpha = this->LookupTable->GetAlpha();
   this->LookupTable->SetAlpha(alpha);
   this->Colors = this->LookupTable->
-    MapScalars(scalars, VTK_COLOR_MODE_MAP_SCALARS, 0);
+    MapScalars(scalars, this->ColorMode, this->ArrayComponent);
   this->LookupTable->SetAlpha(orig_alpha);
   // Consistent register and unregisters
   this->Colors->Register(this);
