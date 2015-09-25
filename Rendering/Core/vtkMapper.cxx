@@ -633,11 +633,15 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
   }
 
   // Check for a change
-  if (this->InvertibleScalars == abstractArray)
+  if (this->InvertibleScalars == abstractArray &&
+      this->ArrayComponent == arrayComponent)
     {
       return;
     }
+
   this->Modified();
+
+  this->ArrayComponent = arrayComponent;
 
   // Set the new array, if present
   if (this->InvertibleScalars)
