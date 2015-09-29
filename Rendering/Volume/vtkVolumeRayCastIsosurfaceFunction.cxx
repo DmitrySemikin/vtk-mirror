@@ -184,7 +184,6 @@ static void trilin_line_intersection( float start[3], float vec[3],
     }
 
   vtkPolynomialSolversUnivariate::SolveCubic( c0, c1, c2, c3, &r1, &r2, &r3, &num_roots );
-  assert(0 <= num_roots && num_roots < 3 && "invalid number of roots to cubic");
 
   /* Remove Negative Solutions And Store In Distance Array */
   pos_dist_num = 0;
@@ -209,6 +208,7 @@ static void trilin_line_intersection( float start[3], float vec[3],
         }
     }
 
+  assert(pos_dist_num <= 3);
   solution->num_intersections = pos_dist_num;
 
   /* Sort The Solutions Based On Distance */
