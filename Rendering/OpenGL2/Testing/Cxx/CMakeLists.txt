@@ -7,6 +7,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestUserShader.cxx
   TestUserShader2.cxx
   TestValuePass.cxx
+  TestValuePass2.cxx
   TestVBOPLYMapper.cxx
   TestVBOPointsLines.cxx
   TestGaussianBlurPass.cxx
