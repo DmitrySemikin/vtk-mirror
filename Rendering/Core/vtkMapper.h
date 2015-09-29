@@ -434,6 +434,16 @@ public:
   // Used internally by vtkValuePass.
   void ClearInvertibleColor();
 
+  // Description:
+  // Convert a floating point value to an RGB triplet.
+  static void ValueToColor(double value, double min, double scale,
+    unsigned char *color);
+
+  // Description:
+  // Convert an RGB triplet to a floating point value.
+  static void ColorToValue(unsigned char *color, double min, double scale,
+    double &value);
+
 protected:
   vtkMapper();
   ~vtkMapper();
@@ -449,14 +459,9 @@ protected:
   void MapScalarsToTexture(vtkAbstractArray* scalars, double alpha);
 
   // Makes a lookup table that can be used for deferred colormaps
-  vtkScalarsToColors *GetInvertibleLookupTable();
+  void AcquireInvertibleLookupTable();
   bool UseInvertibleColors;
   static vtkScalarsToColors *InvertibleLookupTable;
-
-  static void ValueToColor(double value, double min, double scale,
-    unsigned char *color);
-  static void ColorToValue(unsigned char *color, double min, double scale,
-    double &value);
 
   vtkScalarsToColors *LookupTable;
   int ScalarVisibility;

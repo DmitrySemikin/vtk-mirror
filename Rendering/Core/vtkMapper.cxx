@@ -78,6 +78,8 @@ vtkMapper::vtkMapper()
 
   this->UseInvertibleColors = false;
   this->InvertibleScalars = NULL;
+
+  this->AcquireInvertibleLookupTable();
 }
 
 vtkMapper::~vtkMapper()
@@ -86,6 +88,14 @@ vtkMapper::~vtkMapper()
     {
     this->LookupTable->UnRegister(this);
     }
+  assert(vtkMapper::InvertibleLookupTable);
+  bool clear = vtkMapper::InvertibleLookupTable->GetReferenceCount() == 1;
+  vtkMapper::InvertibleLookupTable->UnRegister(this);
+  if (clear)
+    {
+    vtkMapper::InvertibleLookupTable = NULL;
+    }
+
   if ( this->Colors != 0 )
     {
     this->Colors->UnRegister(this);
@@ -566,7 +576,7 @@ void vtkMapper::CreateDefaultLookupTable()
     }
 }
 
-vtkScalarsToColors *vtkMapper::GetInvertibleLookupTable()
+void vtkMapper::AcquireInvertibleLookupTable()
 {
   if (!vtkMapper::InvertibleLookupTable)
   {
@@ -587,7 +597,10 @@ vtkScalarsToColors *vtkMapper::GetInvertibleLookupTable()
     table->Delete();
     vtkMapper::InvertibleLookupTable = table;
   }
-  return vtkMapper::InvertibleLookupTable;
+  else
+  {
+    vtkMapper::InvertibleLookupTable->Register(this);
+  }
 }
 
 void vtkMapper::ValueToColor(double value, double min, double scale,
@@ -682,7 +695,8 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
   else
     {
     // Just grab a reference to the invertible lookup table
-    this->LookupTable = this->GetInvertibleLookupTable();
+    this->LookupTable = vtkMapper::InvertibleLookupTable;
+    this->LookupTable->Register(this);
     }
 }
 
