@@ -237,6 +237,7 @@ void vtkFixedPointMIPHelperGenerateImageIndependentNN(
       mapper->FixedPointIncrement( pos, dir );
       }
     VTKKWRCHelper_CroppingCheckNN( pos );
+    assert(components <= 4 && "unsupported number of components");
     VTKKWRCHelper_MIPSpaceLeapPopulateMulti( maxIdx,
                                              mapper->GetFlipMIPComparison() )
 
@@ -255,6 +256,7 @@ void vtkFixedPointMIPHelperGenerateImageIndependentNN(
       }
     else
       {
+      assert(c <= 4 && "unsupported number of components");                                                                \
       for ( c = 0; c < components; c++ )
         {
         if ( VTKKWRCHelper_MIPSpaceLeapCheckMulti( c, mapper->GetFlipMIPComparison() ) &&

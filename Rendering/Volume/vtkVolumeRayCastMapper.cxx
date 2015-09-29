@@ -1104,6 +1104,7 @@ VTK_THREAD_RETURN_TYPE VolumeRayCastMapper_CastRays( void *arg )
             // If we are maximizing the opacity, find the max Color[3]
             if ( staticInfo->MaximizeOpacity )
               {
+              assert(arrayCount < 10 && "OOB access on rgbaArray");
               for ( k = 0; k < arrayCount; k++ )
                 {
                 if ( rgbaArray[k*4+3] > dynamicInfo->Color[3] )
@@ -1118,6 +1119,7 @@ VTK_THREAD_RETURN_TYPE VolumeRayCastMapper_CastRays( void *arg )
             // Otherwise we are maximizing scalar value
             else
               {
+              assert(arrayCount < 10 && "OOB access on rgbaArray");
               for ( k = 0; k < arrayCount; k++ )
                 {
                 if ( scalarArray[k] > dynamicInfo->ScalarValue )

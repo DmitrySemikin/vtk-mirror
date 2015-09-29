@@ -184,6 +184,7 @@ static void trilin_line_intersection( float start[3], float vec[3],
     }
 
   vtkPolynomialSolversUnivariate::SolveCubic( c0, c1, c2, c3, &r1, &r2, &r3, &num_roots );
+  assert(0 <= num_roots && num_roots < 3 && "invalid number of roots to cubic");
 
   /* Remove Negative Solutions And Store In Distance Array */
   pos_dist_num = 0;
@@ -709,13 +710,14 @@ void vtkCastRay_Trilin ( vtkVolumeRayCastIsosurfaceFunction *cast_function,
         for (loop=0;  loop<line_info.num_intersections;
              loop++)
           {
-          point_x = line_info.local_position[loop][0] + voxel_x;
-          point_y = line_info.local_position[loop][1] + voxel_y;
-          point_z = line_info.local_position[loop][2] + voxel_z;
+          float* pos = line_info.local_position[loop];
+          point_x = pos[0] + voxel_x;
+          point_y = pos[1] + voxel_y;
+          point_z = pos[2] + voxel_z;
 
-          if ((VTK_In_Range(point_x, ((float)(voxel_x) - 0.001 ), ((float)(voxel_x) + 1.001))) &&
-              (VTK_In_Range(point_y, ((float)(voxel_y) - 0.001 ), ((float)(voxel_y) + 1.001))) &&
-              (VTK_In_Range(point_z, ((float)(voxel_z) - 0.001 ), ((float)(voxel_z) + 1.001))))
+          if ((VTK_In_Range(point_x, (static_cast<double>(voxel_x) - 0.001), (static_cast<double>(voxel_x) + 1.001))) &&
+              (VTK_In_Range(point_y, (static_cast<double>(voxel_y) - 0.001), (static_cast<double>(voxel_y) + 1.001))) &&
+              (VTK_In_Range(point_z, (static_cast<double>(voxel_z) - 0.001), (static_cast<double>(voxel_z) + 1.001))))
             {
             break;
             }

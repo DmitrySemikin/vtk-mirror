@@ -23,6 +23,8 @@
 #ifndef vtkFixedPointVolumeRayCastHelper_h
 #define vtkFixedPointVolumeRayCastHelper_h
 
+#include <cassert>
+
 //BTX
 #define VTKKWRCHelper_GetCellScalarValues( DATA, SCALE, SHIFT ) \
   A = static_cast<unsigned int >(SCALE*(*(DATA     ) + SHIFT)); \
@@ -431,6 +433,7 @@
     _totalAlpha += _alpha[_idx];                                                                                                \
     }}                                                                                                                          \
                                                                                                                                 \
+  assert(COMPONENTS <= 4 && "unsupported number of components");                                                                \
   if ( !_totalAlpha ) {continue;}                                                                                               \
   {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
     {                                                                                                                           \
@@ -611,6 +614,7 @@
   unsigned short _alpha[4] = {0,0,0,0};                                                                                         \
   unsigned int _totalAlpha = 0;                                                                                                 \
                                                                                                                                 \
+  assert(COMPONENTS <= 4 && "unsupported number of components");                                                                \
   {for ( int _idx = 0; _idx < COMPONENTS; _idx++ )                                                                              \
     {                                                                                                                           \
     _alpha[_idx] =  static_cast<unsigned short>(SOTABLE[_idx][SCALAR[_idx]]*WEIGHTS[_idx]);                                     \
