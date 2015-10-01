@@ -322,31 +322,33 @@ function(vtk_module_export sources)
 
     string(REGEX REPLACE "\\.(cxx|txx|mm)$" ".h" hdr "${src}")
     if("${hdr}" MATCHES "\\.h$")
-      if(EXISTS "${hdr}")
-        get_filename_component(_filename "${hdr}" NAME)
+      get_filename_component(_filename "${hdr}" NAME)
+
+      # Make sure header is in one of the expected locations
+      if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_filename}" OR
+         EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${_filename}")
+
         string(REGEX REPLACE "\\.h$" "" _cls "${_filename}")
 
         get_source_file_property(_wrap_exclude ${src} WRAP_EXCLUDE)
+        get_source_file_property(_wrap_exclude_python ${src} WRAP_EXCLUDE_PYTHON)
         get_source_file_property(_abstract ${src} ABSTRACT)
-        get_source_file_property(_wrap_special ${src} WRAP_SPECIAL)
 
-        if(_wrap_special OR NOT _wrap_exclude)
-          list(APPEND vtk-module-HEADERS ${_cls})
+        list(APPEND vtk-module-HEADERS ${_cls})
 
-          if(_abstract)
-            set(vtk-module-ABSTRACT
-              "${vtk-module-ABSTRACT}set(${vtk-module}_HEADER_${_cls}_ABSTRACT 1)\n")
-          endif()
+        if(_abstract)
+          set(vtk-module-ABSTRACT
+            "${vtk-module-ABSTRACT}set(${vtk-module}_HEADER_${_cls}_ABSTRACT 1)\n")
+        endif()
 
-          if(_wrap_exclude)
-            set(vtk-module-WRAP_EXCLUDE
-              "${vtk-module-WRAP_EXCLUDE}set(${vtk-module}_HEADER_${_cls}_WRAP_EXCLUDE 1)\n")
-          endif()
+        if(_wrap_exclude)
+          set(vtk-module-WRAP_EXCLUDE
+            "${vtk-module-WRAP_EXCLUDE}set(${vtk-module}_HEADER_${_cls}_WRAP_EXCLUDE 1)\n")
+        endif()
 
-          if(_wrap_special)
-            set(vtk-module-WRAP_SPECIAL
-              "${vtk-module-WRAP_SPECIAL}set(${vtk-module}_HEADER_${_cls}_WRAP_SPECIAL 1)\n")
-          endif()
+        if(_wrap_exclude_python)
+          set(vtk-module-WRAP_EXCLUDE_PYTHON
+            "${vtk-module-WRAP_EXCLUDE_PYTHON}set(${vtk-module}_HEADER_${_cls}_WRAP_EXCLUDE_PYTHON 1)\n")
         endif()
       endif()
     endif()
@@ -374,7 +376,8 @@ function(vtk_module_warnings_disable)
   foreach(lang IN LISTS ARGN)
     if(MSVC)
       string(REGEX REPLACE "(^| )[/-]W[0-4]( |$)" " "
-        CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w")
+        CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS}")
+      set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} /W0")
     elseif(BORLAND)
       set(CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS} -w-")
     else()
@@ -556,15 +559,15 @@ function(vtk_module_library name)
 
   set(vtk-module-HEADERS)
   set(vtk-module-ABSTRACT)
-  set(vtk-module-WRAP_SPECIAL)
 
   # Collect header files matching sources.
   set(_hdrs ${${vtk-module}_HDRS})
   foreach(arg ${ARGN})
     get_filename_component(src "${arg}" ABSOLUTE)
 
+    get_source_file_property(_skip_install ${src} SKIP_HEADER_INSTALL)
     string(REGEX REPLACE "\\.(cxx|mm)$" ".h" hdr "${src}")
-    if("${hdr}" MATCHES "\\.h$" AND EXISTS "${hdr}")
+    if("${hdr}" MATCHES "\\.h$" AND EXISTS "${hdr}" AND NOT _skip_install)
       list(APPEND _hdrs "${hdr}")
     elseif("${src}" MATCHES "\\.txx$" AND EXISTS "${src}")
       list(APPEND _hdrs "${src}")

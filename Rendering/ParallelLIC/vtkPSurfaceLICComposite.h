@@ -42,10 +42,7 @@ class vtkPPainterCommunicator;
 class vtkPPixelExtentOps;
 
 #ifdef VTK_OPENGL2
-namespace vtkgl
-{
-  class CellBO;
-}
+class vtkOpenGLHelper;
 #else
 class vtkShaderProgram2;
 #endif
@@ -191,7 +188,7 @@ private:
   vtkFrameBufferObject2 *FBO;                    // buffer object
 
 #ifdef VTK_OPENGL2
-  vtkgl::CellBO *CompositeShader;
+  vtkOpenGLHelper *CompositeShader;
 #else
   vtkShaderProgram2 *CompositeShader;            // shader program for compositing
 #endif
@@ -199,13 +196,14 @@ private:
   std::deque<vtkPPixelTransfer> GatherProgram;   // ordered steps required to move data to new decomp
   std::deque<vtkPPixelTransfer> ScatterProgram;  // ordered steps required to unmove data from new decomp
 
-  friend
+  friend VTKRENDERINGPARALLELLIC_EXPORT
   ostream &operator<<(ostream &os, vtkPSurfaceLICComposite &ss);
 
   vtkPSurfaceLICComposite(const vtkPSurfaceLICComposite&); // Not implemented
   void operator=(const vtkPSurfaceLICComposite&); // Not implemented
 };
 
+VTKRENDERINGPARALLELLIC_EXPORT
 ostream &operator<<(ostream &os, vtkPSurfaceLICComposite &ss);
 
 #endif

@@ -13,6 +13,7 @@
 
 =========================================================================*/
 
+#include "vtkArrayIteratorTemplate.h"
 #include "vtkIdList.h"
 #include "vtkVariant.h"
 
@@ -268,8 +269,10 @@ template <class Scalar> void vtkPeriodicDataArray<Scalar>
 template <class Scalar> vtkArrayIterator*
 vtkPeriodicDataArray<Scalar>::NewIterator()
 {
-  vtkErrorMacro(<< "Not implemented.");
-  return NULL;
+  vtkArrayIteratorTemplate<Scalar>* iter =
+    vtkArrayIteratorTemplate<Scalar>::New();
+  iter->Initialize(this);
+  return iter;
 }
 
 //------------------------------------------------------------------------------
@@ -525,6 +528,13 @@ template <class Scalar> void vtkPeriodicDataArray<Scalar>
 
 //------------------------------------------------------------------------------
 template <class Scalar> void vtkPeriodicDataArray<Scalar>
+::InsertVariantValue(vtkIdType, vtkVariant)
+{
+  vtkErrorMacro("Read only container.");
+}
+
+//------------------------------------------------------------------------------
+template <class Scalar> void vtkPeriodicDataArray<Scalar>
 ::RemoveTuple(vtkIdType)
 {
   vtkErrorMacro("Read only container.");
@@ -608,6 +618,7 @@ template <class Scalar> vtkPeriodicDataArray<Scalar>
   this->Size = 0;
 
   this->InvalidRange = true;
+  this->Normalize = false;
   this->PeriodicRange[0] = this->PeriodicRange[2] = this->PeriodicRange[4] =  VTK_DOUBLE_MAX;
   this->PeriodicRange[1] = this->PeriodicRange[3] = this->PeriodicRange[5] = -VTK_DOUBLE_MAX;
 }

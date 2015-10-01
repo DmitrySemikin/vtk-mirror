@@ -15,7 +15,6 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   BoxClipTetrahedra.cxx
   BoxClipTriangulateAndInterpolate.cxx
   BoxClipTriangulate.cxx,NO_VALID
-  TestAngularPeriodicFilter.cxx
   TestAppendPoints.cxx,NO_VALID
   TestBooleanOperationPolyDataFilter2.cxx
   TestBooleanOperationPolyDataFilter.cxx
@@ -52,3 +51,10 @@ set(all_tests
 
 vtk_test_cxx_executable(${vtk-module}CxxTests all_tests
   RENDERING_FACTORY)
+
+# On some machines this test takes some extra time
+if(NOT VTK_TEST_TIMEOUT_TestYoungsMaterialInterface)
+  set(VTK_TEST_TIMEOUT_TestYoungsMaterialInterface 300)
+endif()
+set_tests_properties(${vtk-module}Cxx-TestYoungsMaterialInterface
+  PROPERTIES TIMEOUT ${VTK_TEST_TIMEOUT_TestYoungsMaterialInterface})

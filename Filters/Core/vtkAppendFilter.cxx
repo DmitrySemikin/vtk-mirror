@@ -28,6 +28,7 @@
 #include "vtkPointData.h"
 #include "vtkSmartPointer.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 
 #include <set>
 #include <string>
@@ -316,10 +317,12 @@ int vtkAppendFilter::RequestData(
     ptOffset += dataSetNumPts;
     }
 
+
   // Now copy the array data
-  this->AppendArrays(vtkDataObject::POINT, inputVector, globalIndices, output);
+  this->AppendArrays(
+    vtkDataObject::POINT, inputVector, globalIndices, output, newPts->GetNumberOfPoints());
   this->UpdateProgress(0.75);
-  this->AppendArrays(vtkDataObject::CELL, inputVector, NULL, output);
+  this->AppendArrays(vtkDataObject::CELL, inputVector, NULL, output, output->GetNumberOfCells());
   this->UpdateProgress(1.0);
 
   // Update ourselves and release memory
@@ -361,7 +364,8 @@ vtkDataSetCollection* vtkAppendFilter::GetNonEmptyInputs(vtkInformationVector **
 void vtkAppendFilter::AppendArrays(int attributesType,
                                    vtkInformationVector **inputVector,
                                    vtkIdType* globalIds,
-                                   vtkUnstructuredGrid* output)
+                                   vtkUnstructuredGrid* output,
+                                   vtkIdType totalNumberOfElements)
 {
   // Check if attributesType is supported
   if (attributesType != vtkDataObject::POINT && attributesType != vtkDataObject::CELL)
@@ -388,15 +392,9 @@ void vtkAppendFilter::AppendArrays(int attributesType,
   vtkSmartPointer<vtkDataSetCollection> inputs;
   inputs.TakeReference(this->GetNonEmptyInputs(inputVector));
   int numInputs = inputs->GetNumberOfItems();
-  vtkIdType numPoints = 0;
-  vtkIdType numCells = 0;
   for (int inputIndex = 0; inputIndex < numInputs; ++inputIndex)
     {
     vtkDataSet* dataSet = inputs->GetItem(inputIndex);
-
-    numPoints += dataSet->GetNumberOfPoints();
-    numCells += dataSet->GetNumberOfCells();
-
     vtkDataSetAttributes* inputData = dataSet->GetAttributes(attributesType);
 
     if (isFirstInputData)
@@ -452,15 +450,7 @@ void vtkAppendFilter::AppendArrays(int attributesType,
         dstArray->SetComponentName(j, srcArray->GetComponentName(j));
         }
       }
-    if (attributesType == vtkDataObject::POINT)
-      {
-      dstArray->SetNumberOfTuples(numPoints);
-      }
-    else if (attributesType == vtkDataObject::CELL)
-      {
-      dstArray->SetNumberOfTuples(numCells);
-      }
-
+    dstArray->SetNumberOfTuples(totalNumberOfElements);
     outputData->AddArray(dstArray);
     dstArray->Delete();
     }
@@ -565,14 +555,7 @@ void vtkAppendFilter::AppendArrays(int attributesType,
           dstArray->SetComponentName(j, srcArray->GetComponentName(j));
           }
         }
-      if (attributesType == vtkDataObject::POINT)
-        {
-        dstArray->SetNumberOfTuples(numPoints);
-        }
-      else if (attributesType == vtkDataObject::CELL)
-        {
-        dstArray->SetNumberOfTuples(numCells);
-        }
+      dstArray->SetNumberOfTuples(totalNumberOfElements);
       outputData->SetAttribute(dstArray, attributeIndex);
       dstArray->Delete();
       }
@@ -639,6 +622,29 @@ void vtkAppendFilter::AppendArrays(int attributesType,
       offset += dataSet->GetNumberOfCells();
       }
     }
+}
+
+//----------------------------------------------------------------------------
+int vtkAppendFilter::RequestUpdateExtent(vtkInformation *vtkNotUsed(request),
+                                         vtkInformationVector **inputVector,
+                                         vtkInformationVector *vtkNotUsed(outputVector))
+{
+  int numInputConnections = this->GetNumberOfInputConnections(0);
+
+  // Let downstream request a subset of connection 0, for connections >= 1
+  // send their WHOLE_EXTENT as UPDATE_EXTENT.
+  for (int idx = 1; idx < numInputConnections; ++idx)
+    {
+    vtkInformation * inputInfo = inputVector[0]->GetInformationObject(idx);
+    if (inputInfo->Has(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT()))
+      {
+      int ext[6];
+      inputInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), ext);
+      inputInfo->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), ext, 6);
+      }
+    }
+
+  return 1;
 }
 
 //----------------------------------------------------------------------------

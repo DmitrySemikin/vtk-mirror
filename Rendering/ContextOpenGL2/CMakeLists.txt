@@ -1,7 +1,3 @@
-find_package(OpenGL REQUIRED)
-include_directories(SYSTEM
-  ${OPENGL_INCLUDE_DIR})
-
 include(vtkObjectFactory)
 
 set(module_SRCS
@@ -30,8 +26,15 @@ vtk_object_factory_configure("${vtk_module_overrides}")
 
 list(APPEND module_SRCS
   ${CMAKE_CURRENT_BINARY_DIR}/${vtk-module}ObjectFactory.cxx)
-set_source_files_properties(${vtk-module}ObjectFactory WRAP_EXCLUDE)
+set_source_files_properties(
+  ${vtk-module}ObjectFactory
+  PROPERTIES
+    WRAP_EXCLUDE 1
+    WRAP_EXCLUDE_PYTHON 1
+  )
 
 vtk_module_library(${vtk-module} ${module_SRCS})
 vtk_module_link_libraries(${vtk-module}
   LINK_PRIVATE ${GLEW_LIBRARY} ${OPENGL_LIBRARIES})
+include(vtkOpenGL)
+vtk_opengl_link(${vtk-module})

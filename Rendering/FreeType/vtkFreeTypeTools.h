@@ -51,6 +51,9 @@ class VTKRENDERINGFREETYPE_EXPORT vtkFreeTypeToolsCleanup
 public:
   vtkFreeTypeToolsCleanup();
   ~vtkFreeTypeToolsCleanup();
+private:
+  vtkFreeTypeToolsCleanup(const vtkFreeTypeToolsCleanup&);
+  vtkFreeTypeToolsCleanup& operator=(const vtkFreeTypeToolsCleanup&);
 };
 
 //----------------------------------------------------------------------------
@@ -160,8 +163,8 @@ public:
   // binary mask concatenating the attributes of the text property that are
   // relevant to our cache (Color, Opacity, Justification setting are not
   // stored).
-  void MapTextPropertyToId(vtkTextProperty *tprop, unsigned long *tprop_cache_id);
-  void MapIdToTextProperty(unsigned long tprop_cache_id, vtkTextProperty *tprop);
+  void MapTextPropertyToId(vtkTextProperty *tprop, size_t *tprop_cache_id);
+  void MapIdToTextProperty(size_t tprop_cache_id, vtkTextProperty *tprop);
 
   // Description:
   // Set whether the image produced should be scaled up to the nearest power of
@@ -252,12 +255,12 @@ protected:
                 FT_UInt32 c,
                 FT_Glyph *glyph,
                 int request = GLYPH_REQUEST_DEFAULT);
-  bool GetSize(unsigned long tprop_cache_id, int font_size, FT_Size *size);
+  bool GetSize(size_t tprop_cache_id, int font_size, FT_Size *size);
   bool GetSize(FTC_Scaler scaler, FT_Size *size);
-  bool GetFace(unsigned long tprop_cache_id, FT_Face *face);
-  bool GetGlyphIndex(unsigned long tprop_cache_id, FT_UInt32 c,
+  bool GetFace(size_t tprop_cache_id, FT_Face *face);
+  bool GetGlyphIndex(size_t tprop_cache_id, FT_UInt32 c,
                      FT_UInt *gindex);
-  bool GetGlyph(unsigned long tprop_cache_id,
+  bool GetGlyph(size_t tprop_cache_id,
                 int font_size,
                 FT_UInt gindex,
                 FT_Glyph *glyph,
@@ -276,12 +279,12 @@ protected:
 
   // Description:
   // Attempt to get the typeface of the specified font.
-  bool GetFace(vtkTextProperty *prop, unsigned long &prop_cache_id,
+  bool GetFace(vtkTextProperty *prop, size_t &prop_cache_id,
                FT_Face &face, bool &face_has_kerning);
 
   // Description:
   // Now attempt to get the bitmap for the specified character.
-  FT_Bitmap* GetBitmap(FT_UInt32 c, unsigned long prop_cache_id,
+  FT_Bitmap* GetBitmap(FT_UInt32 c, size_t prop_cache_id,
                        int prop_font_size, FT_UInt &gindex,
                        FT_BitmapGlyph &bitmap_glyph);
   FT_Bitmap* GetBitmap(FT_UInt32 c, FTC_Scaler scaler, FT_UInt &gindex,
@@ -289,20 +292,23 @@ protected:
 
   // Description:
   // Attempt to get the outline for the specified character.
-  FT_Outline* GetOutline(FT_UInt32 c, unsigned long prop_cache_id,
+  FT_Outline* GetOutline(FT_UInt32 c, size_t prop_cache_id,
                          int prop_font_size, FT_UInt &gindex,
                          FT_OutlineGlyph &outline_glyph);
   FT_Outline* GetOutline(FT_UInt32 c, FTC_Scaler scaler, FT_UInt &gindex,
                          FT_OutlineGlyph &outline_glyph);
 
   // Description:
-  // The singleton instance and the singleton cleanup instance
+  // The singleton instance
   static vtkFreeTypeTools* Instance;
-  static vtkFreeTypeToolsCleanup Cleanup;
 
   // Description:
   // Lookup table that maps free type font cache face ids to vtkTextProperties
   vtkTextPropertyLookup *TextPropertyLookup;
+
+  // Description:
+  // FreeType library instance.
+  FT_Library *Library;
 
   // Description:
   // The cache manager, image cache and charmap cache
@@ -390,5 +396,8 @@ private:
   void GetLineMetrics(T begin, T end, MetaData &metaData, int &width,
                       int bbox[4]);
 };
+
+// This is here to implement the Schwarz counter idiom.
+static vtkFreeTypeToolsCleanup vtkFreeTypeToolsCleanupInstance;
 
 #endif

@@ -15,24 +15,27 @@
 #include "vtk_glew.h"
 #include "vtkOpenGLRenderWindow.h"
 
-#include "vtkglVBOHelper.h"
+#include "vtkOpenGLHelper.h"
 
 #include <cassert>
+
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLActor.h"
+#include "vtkOpenGLBufferObject.h"
 #include "vtkOpenGLCamera.h"
+#include "vtkOpenGLError.h"
 #include "vtkOpenGLLight.h"
 #include "vtkOpenGLProperty.h"
 #include "vtkOpenGLRenderer.h"
-#include "vtkOpenGLError.h"
-#include "vtkUnsignedCharArray.h"
 #include "vtkOpenGLShaderCache.h"
+#include "vtkOpenGLVertexArrayObject.h"
+#include "vtkRendererCollection.h"
 #include "vtkStdString.h"
 #include "vtkTextureObject.h"
 #include "vtkTextureUnitManager.h"
-#include "vtkRendererCollection.h"
+#include "vtkUnsignedCharArray.h"
 
 #include <sstream>
 using std::ostringstream;
@@ -89,29 +92,30 @@ vtkOpenGLRenderWindow::vtkOpenGLRenderWindow()
 
   this->ShaderCache = vtkOpenGLShaderCache::New();
 
-  this->TextureUnitManager=0;
+  this->TextureUnitManager = 0;
 
   this->MultiSamples = vtkOpenGLRenderWindowGlobalMaximumNumberOfMultiSamples;
   delete [] this->WindowName;
   this->WindowName = new char[strlen("Visualization Toolkit - OpenGL")+1];
   strcpy( this->WindowName, "Visualization Toolkit - OpenGL" );
 
-  this->OffScreenUseFrameBuffer=0;
+  this->OffScreenUseFrameBuffer = 0;
 
-  this->BackLeftBuffer=static_cast<unsigned int>(GL_BACK_LEFT);
-  this->BackRightBuffer=static_cast<unsigned int>(GL_BACK_RIGHT);
-  this->FrontLeftBuffer=static_cast<unsigned int>(GL_FRONT_LEFT);
-  this->FrontRightBuffer=static_cast<unsigned int>(GL_FRONT_RIGHT);
-  this->BackBuffer=static_cast<unsigned int>(GL_BACK);
-  this->FrontBuffer=static_cast<unsigned int>(GL_FRONT);
+  this->BackLeftBuffer = static_cast<unsigned int>(GL_BACK_LEFT);
+  this->BackRightBuffer = static_cast<unsigned int>(GL_BACK_RIGHT);
+  this->FrontLeftBuffer = static_cast<unsigned int>(GL_FRONT_LEFT);
+  this->FrontRightBuffer = static_cast<unsigned int>(GL_FRONT_RIGHT);
+  this->BackBuffer = static_cast<unsigned int>(GL_BACK);
+  this->FrontBuffer = static_cast<unsigned int>(GL_FRONT);
 
   #ifndef VTK_LEGACY_REMOVE
-  this->LastGraphicError=static_cast<unsigned int>(GL_NO_ERROR);
+  this->LastGraphicError = static_cast<unsigned int>(GL_NO_ERROR);
   #endif
 
   this->DrawPixelsTextureObject = NULL;
 
-  this->OwnContext=1;
+  this->OwnContext = 1;
+  this->MaximumHardwareLineWidth = 1.0;
 }
 
 // free up memory & close the window
@@ -167,6 +171,7 @@ void vtkOpenGLRenderWindow::ReleaseGraphicsResources()
       vtkErrorMacro("Leaked for texture object: " << const_cast<vtkTextureObject *>(found->first));
       }
     }
+  this->Initialized = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -308,31 +313,6 @@ void vtkOpenGLRenderWindow::StereoUpdate(void)
     }
 }
 
-#ifndef VTK_LEGACY_REMOVE
-//----------------------------------------------------------------------------
-void vtkOpenGLRenderWindow::CheckGraphicError()
-{
-  VTK_LEGACY_BODY(vtkRenderWindow::CheckGraphicError, "VTK 6.1");
-  this->LastGraphicError=static_cast<unsigned int>(glGetError());
-}
-
-//----------------------------------------------------------------------------
-int vtkOpenGLRenderWindow::HasGraphicError()
-{
-  VTK_LEGACY_BODY(vtkRenderWindow::HasGraphics, "VTK 6.1");
-  return static_cast<GLenum>(this->LastGraphicError)!=GL_NO_ERROR;
-}
-
-//----------------------------------------------------------------------------
-const char *vtkOpenGLRenderWindow::GetLastGraphicErrorString()
-{
-  VTK_LEGACY_BODY(vtkRenderWindow::GetLastGraphicErrorString, "VTK 6.1");
-  const char *result="Unknown error";
-  return result;
-}
-#endif
-
-
 void vtkOpenGLRenderWindow::OpenGLInit()
 {
   OpenGLInitContext();
@@ -428,6 +408,30 @@ void vtkOpenGLRenderWindow::OpenGLInitContext()
       }
 #endif
     this->Initialized = true;
+
+    // get this system's supported maximum line width
+    // we do it here and store it to avoid repeated glGet
+    // calls when the result should not change
+    GLfloat lineWidthRange[2];
+    this->MaximumHardwareLineWidth = 1.0;
+#if defined(GL_SMOOTH_LINE_WIDTH_RANGE) && defined(GL_ALIASED_LINE_WIDTH_RANGE)
+    if (this->LineSmoothing)
+      {
+      glGetFloatv(GL_SMOOTH_LINE_WIDTH_RANGE,lineWidthRange);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        this->MaximumHardwareLineWidth = lineWidthRange[1];
+        }
+      }
+    else
+      {
+      glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE,lineWidthRange);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        this->MaximumHardwareLineWidth = lineWidthRange[1];
+        }
+      }
+#endif
     }
 }
 
@@ -516,19 +520,31 @@ int vtkOpenGLRenderWindow::GetColorBufferSizes(int *rgba)
       glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER,
         attachment,
         GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &size);
-      rgba[0] = static_cast<int>(size);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        rgba[0] = static_cast<int>(size);
+        }
       glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER,
         attachment,
         GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &size);
-      rgba[1] = static_cast<int>(size);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        rgba[1] = static_cast<int>(size);
+        }
       glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER,
         attachment,
         GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &size);
-      rgba[2] = static_cast<int>(size);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        rgba[2] = static_cast<int>(size);
+        }
       glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER,
         attachment,
         GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &size);
-      rgba[3] = static_cast<int>(size);
+      if (glGetError() == GL_NO_ERROR)
+        {
+        rgba[3] = static_cast<int>(size);
+        }
       }
     else
 #endif
@@ -739,73 +755,6 @@ int vtkOpenGLRenderWindow::SetPixelData(int x1, int y1, int x2, int y2,
     }
   return this->SetPixelData(x1, y1, x2, y2, data->GetPointer(0), front);
 
-}
-
-
-// ---------------------------------------------------------------------------
-// a program must be bound
-// a VAO must be bound
-void vtkOpenGLRenderWindow::RenderQuad(
-  float *verts,
-  float *tcoords,
-  vtkShaderProgram *program, vtkgl::VertexArrayObject *vao)
-{
-  GLuint iboData[] = {0, 1, 2, 0, 2, 3};
-  vtkOpenGLRenderWindow::RenderTriangles(verts, 4,
-    iboData, 6,
-    tcoords,
-    program, vao);
-}
-
-
-// ---------------------------------------------------------------------------
-// a program must be bound
-// a VAO must be bound
-void vtkOpenGLRenderWindow::RenderTriangles(
-  float *verts, unsigned int numVerts,
-  GLuint *iboData, unsigned int numIndices,
-  float *tcoords,
-  vtkShaderProgram *program, vtkgl::VertexArrayObject *vao)
-{
-  if (!program || !vao || !verts)
-    {
-    vtkGenericWarningMacro(<< "Error must have verts, program and vao");
-    }
-
-  vtkgl::BufferObject vbo;
-  vbo.Upload(verts, numVerts*3, vtkgl::BufferObject::ArrayBuffer);
-  vao->Bind();
-  if (!vao->AddAttributeArray(program, vbo, "vertexMC", 0,
-      sizeof(float)*3, VTK_FLOAT, 3, false))
-    {
-    vtkGenericWarningMacro(<< "Error setting 'vertexMC' in shader VAO.");
-    }
-
-  vtkgl::BufferObject tvbo;
-  if (tcoords)
-    {
-    tvbo.Upload(tcoords, numVerts*2, vtkgl::BufferObject::ArrayBuffer);
-    if (!vao->AddAttributeArray(program, tvbo, "tcoordMC", 0,
-        sizeof(float)*2, VTK_FLOAT, 2, false))
-      {
-      vtkGenericWarningMacro(<< "Error setting 'tcoordMC' in shader VAO.");
-      }
-    }
-
-  vtkgl::BufferObject ibo;
-  vao->Bind();
-  ibo.Upload(iboData, numIndices, vtkgl::BufferObject::ElementArrayBuffer);
-  glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT,
-    reinterpret_cast<const GLvoid *>(NULL));
-  ibo.Release();
-  vao->RemoveAttributeArray("vertexMC");
-  vao->RemoveAttributeArray("tcoordMC");
-  vao->Release();
-  vbo.Release();
-  if (tcoords)
-    {
-    tvbo.Release();
-    }
 }
 
 
@@ -1886,7 +1835,17 @@ void vtkOpenGLRenderWindow::SaveGLState()
   // For now just query the active texture unit
   if (this->Initialized)
     {
+    this->MakeCurrent();
     glGetIntegerv(GL_ACTIVE_TEXTURE, &this->GLStateIntegers["GL_ACTIVE_TEXTURE"]);
+
+    // GetTextureUnitManager() will create a new texture unit
+    // manager if one does not exist
+    if (this->GLStateIntegers["GL_ACTIVE_TEXTURE"] < 0 ||
+        this->GLStateIntegers["GL_ACTIVE_TEXTURE"] >
+        this->GetTextureUnitManager()->GetNumberOfTextureUnits())
+      {
+      this->GLStateIntegers["GL_ACTIVE_TEXTURE"] = 0;
+      }
     }
 }
 

@@ -14,6 +14,8 @@ set(Module_SRCS
 find_package(R)
 include_directories(${R_INCLUDE_DIR})
 
+add_definitions(-DVTK_BUILDING_FILTERS_STATISTICSGNUR)
+
 # Configure the module specific settings into a module configured header.
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkFiltersStatisticsGnuRConfigure.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/vtkFiltersStatisticsGnuRConfigure.h)
@@ -27,7 +29,9 @@ set(${vtk-module}_EXPORT_CODE "#include \"vtkFiltersStatisticsGnuRConfigure.h\""
 set_source_files_properties(
   vtkRAdapter.cxx
   ${vtk-module}ObjectFactory
-  WRAP_EXCLUDE
+  PROPERTIES
+    WRAP_EXCLUDE 1
+    WRAP_EXCLUDE_PYTHON 1
   )
 
 # Now to generate our object factory.

@@ -28,7 +28,13 @@ endif()
 # in for the first CMake invocation for modules that depend on the backend
 # chosen.
 if(NOT DEFINED VTK_RENDERING_BACKEND)
-  set(VTK_RENDERING_BACKEND "OpenGL")
+  # has the application defined a desired default for the backend?
+  # if not, use VTKs default of OpenGL2
+  if(DEFINED VTK_RENDERING_BACKEND_DEFAULT)
+    set(VTK_RENDERING_BACKEND ${VTK_RENDERING_BACKEND_DEFAULT})
+  else()
+    set(VTK_RENDERING_BACKEND "OpenGL2")
+  endif()
   set(_backend_set_for_first_cmake TRUE)
 endif()
 
@@ -496,7 +502,7 @@ if (NOT VTK_INSTALL_NO_DEVELOPMENT)
     DESTINATION ${VTK_INSTALL_PACKAGE_DIR})
   get_property(VTK_TARGETS GLOBAL PROPERTY VTK_TARGETS)
   if(VTK_TARGETS)
-    install(EXPORT ${VTK_INSTALL_EXPORT_NAME}  DESTINATION ${VTK_INSTALL_PACKAGE_DIR})
+    install(EXPORT ${VTK_INSTALL_EXPORT_NAME}  DESTINATION ${VTK_INSTALL_PACKAGE_DIR} FILE ${VTK_INSTALL_EXPORT_NAME}.cmake)
   else()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "# No targets!")
     configure_file(${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in

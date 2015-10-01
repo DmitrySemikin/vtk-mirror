@@ -233,6 +233,12 @@ vtkLabeledContourMapper::~vtkLabeledContourMapper()
 //------------------------------------------------------------------------------
 void vtkLabeledContourMapper::Render(vtkRenderer *ren, vtkActor *act)
 {
+  // Make sure input data is synced
+  if (vtkAlgorithm *inputAlgorithm = this->GetInputAlgorithm())
+    {
+    inputAlgorithm->Update();
+    }
+
   if (!this->CheckInputs(ren))
     {
     return;
@@ -592,6 +598,7 @@ bool vtkLabeledContourMapper::PrepareRender(vtkRenderer *ren, vtkActor *act)
       continue;
       }
     metric.Value = scalars->GetComponent(ids[0], 0);
+    metric.Value = std::fabs(metric.Value) > 1e-6 ? metric.Value : 0.0;
     std::ostringstream str;
     str << metric.Value;
     metric.Text = str.str();

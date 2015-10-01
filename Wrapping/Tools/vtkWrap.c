@@ -453,8 +453,9 @@ int vtkWrap_IsVTKObjectBaseType(
       }
     }
 
-  /* fallback if no HierarchyInfo */
-  if (strncmp("vtk", classname, 3) == 0)
+  /* fallback if no HierarchyInfo, but skip smart pointers */
+  if (strncmp("vtk", classname, 3) == 0 &&
+      strncmp("vtkSmartPointer", classname, 15) != 0)
     {
     return 1;
     }
@@ -463,7 +464,7 @@ int vtkWrap_IsVTKObjectBaseType(
 }
 
 /* -------------------------------------------------------------------- */
-/* Check if the WRAP_SPECIAL flag is set for the class. */
+/* Check if the class is not derived from vtkObjectBase. */
 
 int vtkWrap_IsSpecialType(
   HierarchyInfo *hinfo, const char *classname)
@@ -473,9 +474,12 @@ int vtkWrap_IsSpecialType(
   if (hinfo)
     {
     entry = vtkParseHierarchy_FindEntry(hinfo, classname);
-    if (entry && vtkParseHierarchy_GetProperty(entry, "WRAP_SPECIAL"))
+    if (entry)
       {
-      return 1;
+      if (!vtkParseHierarchy_IsTypeOf(hinfo, entry, "vtkObjectBase"))
+        {
+        return 1;
+        }
       }
     return 0;
     }
@@ -527,8 +531,7 @@ int vtkWrap_IsClassWrapped(
 
     if (entry)
       {
-      if (!vtkParseHierarchy_GetProperty(entry, "WRAP_EXCLUDE") ||
-          vtkParseHierarchy_GetProperty(entry, "WRAP_SPECIAL"))
+      if (!vtkParseHierarchy_GetProperty(entry, "WRAP_EXCLUDE_PYTHON"))
         {
         return 1;
         }

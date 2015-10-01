@@ -15,22 +15,10 @@ set(Module_SRCS
   vtkTuple.h
   )
 
-if(NOT VTK_LEGACY_REMOVE)
-  list(APPEND Module_SRCS
-    vtkFastNumericConversion.cxx
-    )
-endif()
-
 set_source_files_properties(
   vtkQuaternion
   vtkTuple
   WRAP_EXCLUDE
-  )
-
-set_source_files_properties(
-  vtkQuaternion.h
-  vtkTuple.h
-  PROPERTIES WRAP_SPECIAL 1
   )
 
 set(
