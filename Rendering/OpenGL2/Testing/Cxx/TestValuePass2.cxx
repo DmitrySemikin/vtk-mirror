@@ -273,14 +273,12 @@ int TestValuePass2(int argc, char* argv[])
       {
       for (int k = 0; k < fd->GetArray(j)->GetNumberOfComponents(); k++)
         {
-        actor->Modified();
         PrepArray(_byName, _drawCell, j, k, dataset, values, valuePass, minmax);
         renderWindow->Render();
         }
       }
     }
 
-  actor->Modified();
   PrepArray(byName, drawCell, arrayIndex, arrayComponent,
             dataset, values, valuePass,
             minmax);

@@ -583,6 +583,9 @@ void vtkMapper::AcquireInvertibleLookupTable()
     vtkLookupTable *table = vtkLookupTable::New();
     const int MML = 0x1000;
     table->SetNumberOfTableValues(MML);
+    table->SetBelowRangeColor(0.0, 0.0, 0.0, 1.0);
+    table->SetAboveRangeColor(0.0, 0.0, 0.0, 1.0);
+    table->SetNanColor(0.0, 0.0, 0.0, 1.0);
     unsigned char color[3] = { 0 };
     for (int i = 0; i < MML; ++i)
       {

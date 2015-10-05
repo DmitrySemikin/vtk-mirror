@@ -2294,6 +2294,23 @@ void vtkOpenGLPolyDataMapper::ComputeBounds()
 //-------------------------------------------------------------------------
 void vtkOpenGLPolyDataMapper::UpdateBufferObjects(vtkRenderer *ren, vtkActor *act)
 {
+  // First check if the color mapping needs to be changed
+  vtkInformation *info = act->GetPropertyKeys();
+  if (info && info->Has(vtkValuePass::RENDER_VALUES()))
+    {
+    this->UseInvertibleColorFor(info->Get(vtkValuePass::SCALAR_MODE()),
+                                info->Get(vtkValuePass::ARRAY_MODE()),
+                                info->Get(vtkValuePass::ARRAY_ID()),
+                                info->Get(vtkValuePass::ARRAY_NAME()),
+                                info->Get(vtkValuePass::ARRAY_COMPONENT()),
+                                info->Get(vtkValuePass::SCALAR_RANGE()));
+    }
+  else
+    {
+    this->ClearInvertibleColor();
+    }
+
+  // Rebuild buffers if needed
   if (this->GetNeedToRebuildBufferObjects(ren,act))
     {
     this->BuildBufferObjects(ren,act);
@@ -2652,21 +2669,6 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
   if (poly == NULL)
     {
     return;
-    }
-
-  vtkInformation *info = act->GetPropertyKeys();
-  if (info && info->Has(vtkValuePass::RENDER_VALUES()))
-    {
-    this->UseInvertibleColorFor(info->Get(vtkValuePass::SCALAR_MODE()),
-                                info->Get(vtkValuePass::ARRAY_MODE()),
-                                info->Get(vtkValuePass::ARRAY_ID()),
-                                info->Get(vtkValuePass::ARRAY_NAME()),
-                                info->Get(vtkValuePass::ARRAY_COMPONENT()),
-                                info->Get(vtkValuePass::SCALAR_RANGE()));
-    }
-  else
-    {
-    this->ClearInvertibleColor();
     }
 
   // For vertex coloring, this sets this->Colors as side effect.

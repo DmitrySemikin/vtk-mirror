@@ -140,12 +140,10 @@ int TestValuePass(int argc, char *argv[])
     if (i % 2 == 0)
       {
       glRenderer->SetPass(NULL);
-      actor->Modified();
       }
     else
       {
       glRenderer->SetPass(cameraPass);
-      actor->Modified();
       }
     window->Render();
     sleep(1);
