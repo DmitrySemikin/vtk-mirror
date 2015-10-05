@@ -404,6 +404,13 @@ vtkUnsignedCharArray *vtkMapper::MapScalars(vtkDataSet *input,
   else
     {
     scalars = this->InvertibleScalars;
+    double range[2] = { 0.0, 1.0 };
+    vtkDataArray *da = vtkDataArray::SafeDownCast(scalars);
+    if (da)
+      {
+        da->GetRange(range, this->ArrayComponent);
+      }
+    this->LookupTable->SetRange(range[0], range[1]);
     }
 
   // Decide betweeen texture color or vertex color.
