@@ -84,7 +84,7 @@ public:
   vtkPolyData *CurrentInput;
 
   // Description:
-  // By default, this painters uses the dataset's point and cell ids during
+  // By default, this class uses the dataset's point and cell ids during
   // rendering. However, one can override those by specifying cell and point
   // data arrays to use instead. Currently, only vtkIdType array is supported.
   // Set to NULL string (default) to use the point ids instead.
@@ -94,14 +94,14 @@ public:
   vtkGetStringMacro(CellIdArrayName);
 
   // Description:
-  // If the painter should override the process id using a data-array,
+  // If this class should override the process id using a data-array,
   // set this variable to the name of the array to use. It must be a
   // point-array.
   vtkSetStringMacro(ProcessIdArrayName);
   vtkGetStringMacro(ProcessIdArrayName);
 
   // Description:
-  // Generally, vtkCompositePainter can render the composite id when iterating
+  // Generally, this class can render the composite id when iterating
   // over composite datasets. However in some cases (as in AMR), the rendered
   // structure may not correspond to the input data, in which case we need
   // to provide a cell array that can be used to render in the composite id in
@@ -110,6 +110,36 @@ public:
   // The array *MUST* be a cell array and of type vtkUnsignedIntArray.
   vtkSetStringMacro(CompositeIdArrayName);
   vtkGetStringMacro(CompositeIdArrayName);
+
+
+  // Description:
+  // This function enables you to apply your own substitutions
+  // to the shader creation process. The shader code in this class
+  // is created by applying a bunch of string replacements to a
+  // shader template. Using this function you can apply your
+  // own string replacements to add features you desire.
+  void AddShaderReplacement(
+    vtkShader::Type shaderType, // vertex, fragment, etc
+    std::string originalValue,
+    bool replaceFirst,  // do this replacement before the default
+    std::string replacementValue,
+    bool replaceAll);
+  void ClearShaderReplacement(
+    vtkShader::Type shaderType, // vertex, fragment, etc
+    std::string originalValue,
+    bool replaceFirst);
+
+  // Description:
+  // Allow the program to set the shader codes used directly
+  // instead of using the built in templates. Be aware, if
+  // set, this template will be used for all cases,
+  // primitive types, picking etc.
+  vtkSetStringMacro(VertexShaderCode);
+  vtkGetStringMacro(VertexShaderCode);
+  vtkSetStringMacro(FragmentShaderCode);
+  vtkGetStringMacro(FragmentShaderCode);
+  vtkSetStringMacro(GeometryShaderCode);
+  vtkGetStringMacro(GeometryShaderCode);
 
   // the following is all extra stuff to work around the
   // fact that gl_PrimitiveID does not work correctly on
@@ -242,9 +272,12 @@ protected:
   vtkOpenGLHelper *LastBoundBO;
   bool DrawingEdges;
 
-  // values we use to determine if we need to rebuild
-  int LastLightComplexity;
-  vtkTimeStamp LightComplexityChanged;
+  // do we have wide lines that require special handling
+  virtual bool HaveWideLines(vtkRenderer *, vtkActor *);
+
+  // values we use to determine if we need to rebuild shaders
+  std::map<const vtkOpenGLHelper *, int> LastLightComplexity;
+  std::map<const vtkOpenGLHelper *, vtkTimeStamp> LightComplexityChanged;
 
   int LastSelectionState;
   vtkTimeStamp SelectionStateChanged;
@@ -261,19 +294,6 @@ protected:
 
   vtkMatrix4x4 *TempMatrix4;
   vtkMatrix3x3 *TempMatrix3;
-
-  // this vector can be used while building
-  // the shader program to record specific variables
-  // that are being used by the program. This is
-  // useful later on when setting uniforms. At
-  // that point IsShaderVariableUsed can be called
-  // to see if the uniform should be set or not.
-  std::vector<std::string> ShaderVariablesUsed;
-
-  // used to see if the shader building code indicated that
-  // a specific variable is being used. Only some variables
-  // are currently populated.
-  bool IsShaderVariableUsed(const char *);
 
   // if set to true, tcoords will be passed to the
   // VBO even if the mapper knows of no texture maps
@@ -311,6 +331,38 @@ protected:
   char* CompositeIdArrayName;
 
   int TextureComponents;
+
+  class ReplacementSpec
+    {
+    public:
+      std::string OriginalValue;
+      vtkShader::Type ShaderType;
+      bool ReplaceFirst;
+      bool operator<(const ReplacementSpec &v1) const
+        {
+        if (this->OriginalValue != v1.OriginalValue) { return this->OriginalValue < v1.OriginalValue; }
+        if (this->ShaderType != v1.ShaderType) { return this->ShaderType < v1.ShaderType; }
+        return (this->ReplaceFirst < v1.ReplaceFirst);
+        }
+      bool operator>(const ReplacementSpec &v1) const
+        {
+        if (this->OriginalValue != v1.OriginalValue) { return this->OriginalValue > v1.OriginalValue; }
+        if (this->ShaderType != v1.ShaderType) { return this->ShaderType > v1.ShaderType; }
+        return (this->ReplaceFirst > v1.ReplaceFirst);
+        }
+      };
+  class ReplacementValue
+    {
+    public:
+      std::string Replacement;
+      bool ReplaceAll;
+    };
+
+  std::map<const ReplacementSpec,ReplacementValue> UserShaderReplacements;
+
+  char *VertexShaderCode;
+  char *FragmentShaderCode;
+  char *GeometryShaderCode;
 
 private:
   vtkOpenGLPolyDataMapper(const vtkOpenGLPolyDataMapper&); // Not implemented.

@@ -37,6 +37,8 @@ vtkTIFFWriter::vtkTIFFWriter()
 //----------------------------------------------------------------------------
 void vtkTIFFWriter::Write()
 {
+  // make sure the latest input is available.
+  this->GetInputAlgorithm()->Update();
   this->SetErrorCode(vtkErrorCode::NoError);
   // Error checking
   if (this->GetInput() == NULL)
@@ -358,11 +360,7 @@ void vtkTIFFWriter::WriteVolume(T* buffer)
        TIFFSetField(tif, TIFFTAG_PREDICTOR, 2);
        }
 
-    if (bitsPerSample == 8 || bitsPerSample == 16)
-      {
-      TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
-      }
-    else
+    if (bitsPerSample == 32)
       {
       TIFFSetField(tif, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
       }
@@ -411,7 +409,7 @@ void vtkTIFFWriter::WriteFileTrailer(ofstream *, vtkImageData *)
     }
   else
     {
-    vtkErrorMacro("Problem writting trailer.");
+    vtkErrorMacro("Problem writing trailer.");
     this->SetErrorCode(vtkErrorCode::FileFormatError);
     }
 

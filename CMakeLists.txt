@@ -12,6 +12,7 @@ foreach(p
     CMP0022 # CMake 2.8.12
     CMP0025 # CMake 3.0
     CMP0053 # CMake 3.1
+    CMP0054 # CMake 3.1
     )
   if(POLICY ${p})
     cmake_policy(SET ${p} NEW)
@@ -43,6 +44,18 @@ set(CMAKE_MODULE_PATH ${VTK_CMAKE_DIR} ${CMAKE_MODULE_PATH})
 
 include(vtkModuleMacros)
 include(vtkExternalData)
+
+#-----------------------------------------------------------------------------
+# Forbid downloading resources from the network during a build. This helps
+# when building on systems without network connectivity to determine which
+# resources much be obtained manually and made available to the build.
+option(VTK_FORBID_DOWNLOADS "Do not download source code or data from the network" OFF)
+mark_as_advanced(VTK_FORBID_DOWNLOADS)
+macro(vtk_download_attempt_check _name)
+  if(VTK_FORBID_DOWNLOADS)
+    message(SEND_ERROR "Attempted to download ${_name} when VTK_FORBID_DOWNLOADS is ON")
+  endif()
+endmacro()
 
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -85,6 +98,10 @@ mark_as_advanced(CMAKE_RUNTIME_OUTPUT_DIRECTORY
 include(vtkVersion)
 set(VTK_VERSION
     "${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}")
+
+#-----------------------------------------------------------------------------
+# Do we want examples built?
+OPTION(BUILD_EXAMPLES "Build VTK examples." OFF)
 
 option(VTK_IOS_BUILD "Build vtk.framework for iOS" OFF)
 if (VTK_IOS_BUILD)
@@ -255,6 +272,10 @@ if (CMAKE_CROSSCOMPILING AND NOT COMPILE_TOOLS_IMPORTED)
 endif()
 
 #-----------------------------------------------------------------------------
+# Add the Remote Subdirectory
+add_subdirectory(Remote)
+
+#-----------------------------------------------------------------------------
 # Do we try to use system libraries by default?
 option(VTK_USE_SYSTEM_LIBRARIES "Use the system's libraries by default." OFF)
 mark_as_advanced(VTK_USE_SYSTEM_LIBRARIES)
@@ -285,7 +306,47 @@ if(APPLE)
     CMAKE_OSX_DEPLOYMENT_TARGET
     CMAKE_OSX_SYSROOT
     )
+
+  if (CMAKE_OSX_DEPLOYMENT_TARGET AND
+      CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.6)
+    message(FATAL_ERROR "Minimun OS X deployment target is 10.6, please update CMAKE_OSX_DEPLOYMENT_TARGET.")
+  endif ()
 endif()
+
+#-----------------------------------------------------------------------------
+# Minimum compiler version check: GCC >= 4.2
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
+  message(FATAL_ERROR "GCC 4.2 or later is required.")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Minimum compiler version check: LLVM Clang >= 2.8
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.8)
+  message(FATAL_ERROR "LLVM Clang 2.8 or later is required.")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Minimum compiler version check: Apple Clang >= 2.0 (Xcode 4.0.x)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.0)
+  message(FATAL_ERROR "Apple Clang 2.0 or later is required.")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Minimum compiler version check: Microsoft C/C++ >= 15.0 (aka VS 2008 aka VS 9.0)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 15.0)
+  message(FATAL_ERROR "Microsoft Visual Studio 2008 or later is required.")
+endif ()
+
+#-----------------------------------------------------------------------------
+# Minimum compiler version check: Intel C++ (ICC) >= 10.0
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND
+    CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
+  message(FATAL_ERROR "Intel C++ (ICC) 10.0 or later is required.")
+endif ()
 
 #-----------------------------------------------------------------------------
 # Does VTK require support for 64 bit file systems
@@ -419,10 +480,6 @@ INCLUDE(vtkTestStreamsLibrary)
 SET(VTK_HAS_EXODUS 1)
 
 #-----------------------------------------------------------------------------
-# Provide a few configuration options.
-OPTION(BUILD_EXAMPLES "Build VTK examples." OFF)
-
-#-----------------------------------------------------------------------------
 # Configure files with settings for use by the build.
 
 # Include the sockets test.
@@ -432,7 +489,7 @@ include(VTKParallelCMakeTests)
 # Add the option for build the Python wrapping to VTK.
 option(VTK_WRAP_PYTHON "Should VTK Python wrapping be built?" OFF)
 set(VTK_PYTHON_VERSION 2 CACHE STRING
-    "Python version to use: 2, 2.x, or empty")
+    "Python version to use: 2, 2.x, 3, 3.x, or empty")
 
 # Add the option for build the Python wrapping to VTK.
 option(VTK_WRAP_JAVA "Should VTK Java wrapping be built?" OFF)
@@ -460,7 +517,6 @@ endif()
 if(VTK_WRAP_PYTHON)
   set(VTK_WRAP_PYTHON_EXE vtkWrapPython)
   set(VTK_WRAP_PYTHON_INIT_EXE vtkWrapPythonInit)
-  set(VTK_PYTHON_EXE vtkpython)
   # Force the WrappingPythonCore module to on if wrapping is on
   set(Module_vtkWrappingPythonCore ON CACHE BOOL "Core Python wrapping library"
     FORCE)

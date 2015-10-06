@@ -108,6 +108,7 @@ protected:
   vtkOpenGLHelper Lines;
   vtkOpenGLHelper Tris;
   vtkOpenGLHelper TriStrips;
+  vtkOpenGLHelper *LastBoundBO;
 
   vtkTextureObject *CellScalarTexture;
   vtkOpenGLBufferObject *CellScalarBuffer;
@@ -116,6 +117,9 @@ protected:
 
   vtkTimeStamp VBOUpdateTime; // When was the VBO updated?
   vtkPoints *TransformedPoints;
+
+  // do we have wide lines that require special handling
+  virtual bool HaveWideLines(vtkViewport *, vtkActor2D *);
 
 private:
   vtkOpenGLPolyDataMapper2D(const vtkOpenGLPolyDataMapper2D&);  // Not implemented.

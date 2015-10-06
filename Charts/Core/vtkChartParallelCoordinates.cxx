@@ -104,10 +104,11 @@ void vtkChartParallelCoordinates::Update()
     return;
     }
 
-  if (table->GetMTime() < this->BuildTime && this->MTime < this->BuildTime)
-  {
+  if (table->GetMTime() < this->BuildTime && this->MTime < this->BuildTime &&
+      this->GetScene()->GetMTime() < this->BuildTime)
+    {
     return;
-  }
+    }
 
   // Now we have a table, set up the axes accordingly, clear and build.
   if (static_cast<int>(this->Storage->Axes.size()) !=
@@ -116,6 +117,7 @@ void vtkChartParallelCoordinates::Update()
     for (std::vector<vtkAxis *>::iterator it = this->Storage->Axes.begin();
          it != this->Storage->Axes.end(); ++it)
       {
+      this->RemoveItem(*it);
       (*it)->Delete();
       }
     this->Storage->Axes.clear();
@@ -125,6 +127,7 @@ void vtkChartParallelCoordinates::Update()
       {
       vtkAxis* axis = vtkAxis::New();
       axis->SetPosition(vtkAxis::PARALLEL);
+      this->AddItem(axis);
       this->Storage->Axes.push_back(axis);
       }
     this->Storage->AxesSelections.resize(this->Storage->Axes.size(),
@@ -188,7 +191,7 @@ bool vtkChartParallelCoordinates::Paint(vtkContext2D *painter)
     }
 
   painter->PushMatrix();
-  painter->SetTransform(this->Storage->Transform);
+  painter->AppendTransform(this->Storage->Transform);
   this->Storage->Plot->Paint(painter);
   painter->PopMatrix();
 
@@ -353,7 +356,10 @@ void vtkChartParallelCoordinates::UpdateGeometry()
     {
     // Take up the entire window right now, this could be made configurable
     this->SetGeometry(geometry.GetData());
-    this->SetBorders(60, 50, 60, 20);
+
+    vtkVector2i tileScale = this->Scene->GetLogicalTileScale();
+    this->SetBorders(60 * tileScale.GetX(), 50 * tileScale.GetY(),
+                     60 * tileScale.GetX(), 20 * tileScale.GetY());
 
     // Iterate through the axes and set them up to span the chart area.
     int xStep = (this->Point2[0] - this->Point1[0]) /

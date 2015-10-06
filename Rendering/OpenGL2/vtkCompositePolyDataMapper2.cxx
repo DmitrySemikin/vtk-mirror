@@ -12,6 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include "vtk_glew.h"
+
 #include "vtkCompositePolyDataMapper2.h"
 
 #include "vtkCellArray.h"
@@ -68,6 +70,28 @@ void vtkCompositePolyDataMapper2::FreeStructures()
   this->RenderValues.resize(0);
 }
 
+void vtkCompositePolyDataMapper2::ReplaceShaderColor(
+  std::map<vtkShader::Type, vtkShader *> shaders,
+  vtkRenderer *ren, vtkActor *actor)
+{
+  std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
+
+  vtkShaderProgram::Substitute(FSSource,"//VTK::Color::Dec",
+    "uniform bool OverridesColor;\n"
+    "//VTK::Color::Dec",false);
+
+  vtkShaderProgram::Substitute(FSSource,"//VTK::Color::Impl",
+    "//VTK::Color::Impl\n"
+    "  if (OverridesColor) {\n"
+    "    ambientColor = ambientColorUniform;\n"
+    "    diffuseColor = diffuseColorUniform; }\n",
+    false);
+
+  shaders[vtkShader::Fragment]->SetSource(FSSource);
+
+  this->Superclass::ReplaceShaderColor(shaders,ren,actor);
+}
+
 // ---------------------------------------------------------------------------
 // Description:
 // Method initiates the mapping process. Generally sent by the actor
@@ -80,8 +104,11 @@ void vtkCompositePolyDataMapper2::Render(
 
   // do we need to do a generic render?
   bool lastUseGeneric = this->UseGeneric;
-  if (this->GenericTestTime < this->GetInputDataObject(0, 0)->GetMTime())
+  bool foundNoScalars = false;
+  if (this->GenericTestTime < this->GetInputDataObject(0, 0)->GetMTime() ||
+      this->GenericTestTime < this->MTime)
     {
+    int cellFlag = 0;
     this->UseGeneric = false;
 
     // is the data not composite
@@ -104,13 +131,47 @@ void vtkCompositePolyDataMapper2::Render(
         if (!pd ||
             pd->GetVerts()->GetNumberOfCells() ||
             pd->GetLines()->GetNumberOfCells() ||
-            pd->GetStrips()->GetNumberOfCells())
+            pd->GetStrips()->GetNumberOfCells() ||
+            pd->GetPointData()->GetAttribute(
+                        vtkDataSetAttributes::EDGEFLAG))
           {
           this->UseGeneric = true;
           break;
           }
+        // is the scalar coloring OK?  If some blocks are missing
+        // the scalars we switch to generic
+        if (pd && this->ScalarVisibility)
+          {
+          vtkAbstractArray *scalars =
+            vtkAbstractMapper::GetAbstractScalars(
+              pd, this->ScalarMode, this->ArrayAccessMode,
+              this->ArrayId, this->ArrayName,
+              cellFlag);
+          if (!scalars)
+            {
+            foundNoScalars = true;
+            }
+          if (scalars && foundNoScalars)
+            {
+            this->UseGeneric = true;
+            break;
+            }
+          }
         }
       }
+
+    // check if this system is subject to the apple primID bug
+    // if so don't even try using the fast path, just go slow
+
+#ifdef __APPLE__
+    std::string vendor = (const char *)glGetString(GL_VENDOR);
+    if (vendor.find("ATI") != std::string::npos ||
+        vendor.find("AMD") != std::string::npos ||
+        vendor.find("amd") != std::string::npos)
+      {
+      this->UseGeneric = true;
+      }
+#endif
 
     // clear old structures if the render method changed
     if (lastUseGeneric != this->UseGeneric)
@@ -264,7 +325,8 @@ void vtkCompositePolyDataMapper2::BuildRenderValues(
     {
     double op = this->BlockState.Opacity.top();
     bool vis = this->BlockState.Visibility.top();
-    vtkColor3d color = this->BlockState.AmbientColor.top();
+    vtkColor3d acolor = this->BlockState.AmbientColor.top();
+    vtkColor3d dcolor = this->BlockState.DiffuseColor.top();
     if (this->RenderValues.size() == 0)
       {
       vtkCompositePolyDataMapper2::RenderValue rv;
@@ -273,15 +335,18 @@ void vtkCompositePolyDataMapper2::BuildRenderValues(
       rv.StartEdgeIndex = 0;
       rv.Opacity = op;
       rv.Visibility = vis;
-      rv.Color = color;
+      rv.AmbientColor = acolor;
+      rv.DiffuseColor = dcolor;
       rv.PickId = my_flat_index;
+      rv.OverridesColor = (this->BlockState.AmbientColor.size() > 1);
       this->RenderValues.push_back(rv);
       }
 
     // has something changed?
     if (this->RenderValues.back().Opacity != op ||
         this->RenderValues.back().Visibility != vis ||
-        this->RenderValues.back().Color != color ||
+        this->RenderValues.back().AmbientColor != acolor ||
+        this->RenderValues.back().DiffuseColor != dcolor ||
         selector)
       {
       // close old group
@@ -295,8 +360,10 @@ void vtkCompositePolyDataMapper2::BuildRenderValues(
       rv.StartEdgeIndex = lastEdgeIndex;
       rv.Opacity = op;
       rv.Visibility = vis;
-      rv.Color = color;
+      rv.AmbientColor = acolor;
+      rv.DiffuseColor = dcolor;
       rv.PickId = my_flat_index;
+      rv.OverridesColor = (this->BlockState.AmbientColor.size() > 1);
       this->RenderValues.push_back(rv);
       }
     lastVertex = this->VertexOffsets[my_flat_index];
@@ -338,6 +405,7 @@ void vtkCompositePolyDataMapper2::RenderPieceDraw(
 
   // rebuild the render values if needed
   if (this->RenderValuesBuildTime < this->GetMTime() ||
+      this->RenderValuesBuildTime < actor->GetProperty()->GetMTime() ||
       this->RenderValuesBuildTime < this->VBOBuildTime ||
       this->RenderValuesBuildTime < this->SelectionStateChanged)
     {
@@ -362,6 +430,10 @@ void vtkCompositePolyDataMapper2::RenderPieceDraw(
     {
     // First we do the triangles, update the shader, set uniforms, etc.
     this->UpdateShaders(this->Tris, ren, actor);
+    if (!this->HaveWideLines(ren,actor) && representation == VTK_WIREFRAME)
+      {
+      glLineWidth(actor->GetProperty()->GetLineWidth());
+      }
     this->Tris.IBO->Bind();
     GLenum mode = (representation == VTK_POINTS) ? GL_POINTS :
       (representation == VTK_WIREFRAME) ? GL_LINES : GL_TRIANGLES;
@@ -372,6 +444,31 @@ void vtkCompositePolyDataMapper2::RenderPieceDraw(
     double aIntensity = this->DrawingEdges ? 1.0 : ppty->GetAmbient();
     double dIntensity = this->DrawingEdges ? 0.0 : ppty->GetDiffuse();
     vtkShaderProgram *prog = this->Tris.Program;
+
+    vtkProperty *prop = actor->GetProperty();
+    bool surface_offset =
+      (this->GetResolveCoincidentTopology() || prop->GetEdgeVisibility())
+      && representation == VTK_SURFACE;
+
+    if (surface_offset)
+      {
+      glEnable(GL_POLYGON_OFFSET_FILL);
+      if ( this->GetResolveCoincidentTopology() == VTK_RESOLVE_SHIFT_ZBUFFER )
+        {
+        // do something rough is better than nothing
+        double zRes = this->GetResolveCoincidentTopologyZShift(); // 0 is no shift 1 is big shift
+        double f = zRes*4.0;
+        glPolygonOffset(f + (prop->GetEdgeVisibility() ? 1.0 : 0.0),
+          prop->GetEdgeVisibility() ? 1.0 : 0.0);  // supported on ES2/3/etc
+        }
+      else
+        {
+        double f, u;
+        this->GetResolveCoincidentTopologyPolygonOffsetParameters(f,u);
+        glPolygonOffset(f + (prop->GetEdgeVisibility() ? 1.0 : 0.0),
+          u + (prop->GetEdgeVisibility() ? 1.0 : 0.0));  // supported on ES2/3/etc
+        }
+      }
 
     std::vector<
       vtkCompositePolyDataMapper2::RenderValue>::iterator it;
@@ -390,11 +487,11 @@ void vtkCompositePolyDataMapper2::RenderPieceDraw(
           }
         // override the opacity and color
         prog->SetUniformf("opacityUniform", it->Opacity);
-        vtkColor3d &aColor = it->Color;
+        vtkColor3d &aColor = it->AmbientColor;
         float ambientColor[3] = {static_cast<float>(aColor[0] * aIntensity),
           static_cast<float>(aColor[1] * aIntensity),
           static_cast<float>(aColor[2] * aIntensity)};
-        vtkColor3d &dColor = it->Color;
+        vtkColor3d &dColor = it->DiffuseColor;
         float diffuseColor[3] = {static_cast<float>(dColor[0] * dIntensity),
           static_cast<float>(dColor[1] * dIntensity),
           static_cast<float>(dColor[2] * dIntensity)};
@@ -402,6 +499,7 @@ void vtkCompositePolyDataMapper2::RenderPieceDraw(
         prog->SetUniform3f("diffuseColorUniform", diffuseColor);
         prog->SetUniformi("PrimitiveIDOffset",
           this->PrimitiveIDOffset);
+        prog->SetUniformi("OverridesColor", it->OverridesColor);
         glDrawRangeElements(mode,
           static_cast<GLuint>(it->StartVertex),
           static_cast<GLuint>(it->EndVertex),
@@ -437,6 +535,10 @@ void vtkCompositePolyDataMapper2::RenderEdges(
     {
     // First we do the triangles, update the shader, set uniforms, etc.
     this->UpdateShaders(this->TrisEdges, ren, actor);
+    if (!this->HaveWideLines(ren,actor))
+      {
+      glLineWidth(actor->GetProperty()->GetLineWidth());
+      }
     this->TrisEdges.IBO->Bind();
     std::vector<
       vtkCompositePolyDataMapper2::RenderValue>::iterator it;

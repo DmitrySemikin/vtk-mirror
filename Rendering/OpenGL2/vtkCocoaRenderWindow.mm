@@ -17,6 +17,7 @@ PURPOSE.  See the above copyright notice for more information.
 #import <Cocoa/Cocoa.h>
 #import "vtkCocoaMacOSXSDKCompatibility.h" // Needed to support old SDKs
 
+#import "vtkOpenGL.h"
 #import "vtkCocoaRenderWindow.h"
 #import "vtkRenderWindowInteractor.h"
 #import "vtkCommand.h"
@@ -25,7 +26,7 @@ PURPOSE.  See the above copyright notice for more information.
 #import "vtkRendererCollection.h"
 #import "vtkCocoaGLView.h"
 
-#import <vtksys/ios/sstream>
+#import <sstream>
 
 vtkStandardNewMacro(vtkCocoaRenderWindow);
 
@@ -415,7 +416,7 @@ const char* vtkCocoaRenderWindow::ReportCapabilities()
   const char* glVersion = (const char*) glGetString(GL_VERSION);
   const char* glExtensions = (const char*) glGetString(GL_EXTENSIONS);
 
-  vtksys_ios::ostringstream strm;
+  std::ostringstream strm;
   strm << "OpenGL vendor string:  " << glVendor
        << "\nOpenGL renderer string:  " << glRenderer
        << "\nOpenGL version string:  " << glVersion
@@ -886,8 +887,10 @@ void vtkCocoaRenderWindow::CreateGLContext()
     int i = 0;
     NSOpenGLPixelFormatAttribute attribs[20];
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
     attribs[i++] = NSOpenGLPFAOpenGLProfile;
     attribs[i++] = NSOpenGLProfileVersion3_2Core;
+#endif
   //  OSX always preferrs an accelerated context
   //    attribs[i++] = NSOpenGLPFAAccelerated;
     attribs[i++] = NSOpenGLPFADepthSize;
@@ -933,7 +936,11 @@ void vtkCocoaRenderWindow::CreateGLContext()
       }
     else
       {
+#if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_6
       this->SetContextSupportsOpenGL32(true);
+#else
+      this->SetContextSupportsOpenGL32(false);
+#endif
       }
     }
 
@@ -1196,22 +1203,6 @@ void vtkCocoaRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "PixelFormat: " << this->GetPixelFormat() << endl;
   os << indent << "WindowCreated: " << (this->GetWindowCreated() ? "Yes" : "No") << endl;
   os << indent << "ViewCreated: " << (this->GetViewCreated() ? "Yes" : "No") << endl;
-}
-
-//----------------------------------------------------------------------------
-int vtkCocoaRenderWindow::GetDepthBufferSize()
-{
-  if ( this->Mapped )
-    {
-    GLint size = 0;
-    glGetIntegerv( GL_DEPTH_BITS, &size );
-    return (int) size;
-    }
-  else
-    {
-    vtkDebugMacro(<< "Window is not mapped yet!" );
-    return 24;
-    }
 }
 
 //----------------------------------------------------------------------------

@@ -32,7 +32,11 @@ foreach(file ${shader_files})
       --build-header VTKRENDERINGPARALLEL_EXPORT vtkRenderingParallelModule.h
     )
   list(APPEND Module_SRCS ${res})
-  set_source_files_properties(${file_we} WRAP_EXCLUDE)
+  set_source_files_properties(${file_we}
+    PROPERTIES
+      WRAP_EXCLUDE 1
+      WRAP_EXCLUDE_PYTHON 1
+    )
 endforeach()
 
 set_source_files_properties(
@@ -47,7 +51,9 @@ set_source_files_properties(
   )
 
 if("${VTK_RENDERING_BACKEND}" STREQUAL "OpenGL2")
-  add_definitions(-DVTKGL2)
+  add_definitions(-DVTK_OPENGL2)
 endif()
 
 vtk_module_library(vtkRenderingParallel ${Module_SRCS})
+include(vtkOpenGL)
+vtk_opengl_link(vtkRenderingParallel)

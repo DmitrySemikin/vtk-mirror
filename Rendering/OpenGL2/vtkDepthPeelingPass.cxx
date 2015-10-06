@@ -401,6 +401,7 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
   glClearColor(0.0,0.0,0.0,0.0); // always clear to black
  // glClearDepth(static_cast<GLclampf>(1.0));
 #ifdef GL_MULTISAMPLE
+  GLboolean multiSampleStatus = glIsEnabled(GL_MULTISAMPLE);
   glDisable(GL_MULTISAMPLE);
 #endif
   glDisable(GL_BLEND);
@@ -452,6 +453,7 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
   bool done = false;
   GLuint nbPixels = threshold + 1;
   int peelCount = 0;
+  glDepthFunc( GL_LEQUAL );
   while(!done)
     {
     glDepthMask(GL_TRUE);
@@ -529,6 +531,13 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
 
   // do the final blend
   this->BlendFinalPeel(renWin);
+
+#ifdef GL_MULTISAMPLE
+   if(multiSampleStatus)
+      {
+      glEnable(GL_MULTISAMPLE);
+      }
+#endif
 
   // unload the last two textures
   this->TranslucentRGBATexture->Deactivate();

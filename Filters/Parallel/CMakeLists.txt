@@ -1,4 +1,5 @@
 set(Module_SRCS
+  vtkAngularPeriodicFilter.cxx
   vtkCollectGraph.cxx
   vtkCollectPolyData.cxx
   vtkCollectTable.cxx
@@ -10,6 +11,7 @@ set(Module_SRCS
   vtkExtractUserDefinedPiece.cxx
   vtkPCellDataToPointData.cxx
   vtkPExtractArraysOverTime.cxx
+  vtkPeriodicFilter.cxx
   vtkPKdTree.cxx
   vtkPLinearExtrusionFilter.cxx
   vtkPMaskPoints.cxx
@@ -43,7 +45,9 @@ set_source_files_properties(
 set_source_files_properties(
   ${vtk-module}ObjectFactory.cxx
   vtkPOutlineFilterInternals.cxx
-  WRAP_EXCLUDE
+  PROPERTIES
+    WRAP_EXCLUDE 1
+    WRAP_EXCLUDE_PYTHON 1
   )
 
 vtk_module_library(vtkFiltersParallel ${Module_SRCS})

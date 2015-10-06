@@ -37,6 +37,7 @@
 #include "vtkOpenGLActor.h"
 #include "vtkOpenGLCamera.h"
 #include "vtkOpenGLError.h"
+#include "vtkOpenGLRenderUtilities.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLShaderCache.h"
 #include "vtkPainterCommunicator.h"
@@ -1170,12 +1171,12 @@ public:
       quadTCoords[0], quadTCoords[3]};
 
     float verts[] = {
-      quadTCoords[0]*2.0-1.0, quadTCoords[2]*2.0-1.0, 0.0f,
-      quadTCoords[1]*2.0-1.0, quadTCoords[2]*2.0-1.0, 0.0f,
-      quadTCoords[1]*2.0-1.0, quadTCoords[3]*2.0-1.0, 0.0f,
-      quadTCoords[0]*2.0-1.0, quadTCoords[3]*2.0-1.0, 0.0f};
+      quadTCoords[0]*2.0f-1.0f, quadTCoords[2]*2.0f-1.0f, 0.0f,
+      quadTCoords[1]*2.0f-1.0f, quadTCoords[2]*2.0f-1.0f, 0.0f,
+      quadTCoords[1]*2.0f-1.0f, quadTCoords[3]*2.0f-1.0f, 0.0f,
+      quadTCoords[0]*2.0f-1.0f, quadTCoords[3]*2.0f-1.0f, 0.0f};
 
-    vtkOpenGLRenderWindow::RenderQuad(verts, tcoords,
+    vtkOpenGLRenderUtilities::RenderQuad(verts, tcoords,
       cbo->Program, cbo->VAO);
     vtkOpenGLStaticCheckErrorMacro("failed at RenderQuad");
   }
@@ -2471,11 +2472,11 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(
   vtkShaderProgram::Substitute(VSSource,
     "//VTK::TCoord::Dec",
     "attribute vec3 tcoordMC;\n"
-    "varying vec3 tcoordVC;\n"
+    "varying vec3 tcoordVCVSOutput;\n"
     );
 
   vtkShaderProgram::Substitute(VSSource, "//VTK::TCoord::Impl",
-    "tcoordVC = tcoordMC;"
+    "tcoordVCVSOutput = tcoordMC;"
     );
 
   vtkShaderProgram::Substitute(FSSource,
@@ -2483,14 +2484,14 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(
     // 0/1, when 1 V is projected to surface for |V| computation.
     "uniform int uMaskOnSurface;\n"
     "uniform mat3 normalMatrix;\n"
-    "varying vec3 tcoordVC;"
+    "varying vec3 tcoordVCVSOutput;"
     );
 
   vtkShaderProgram::Substitute(FSSource,
     "//VTK::TCoord::Impl",
     // projected vectors
-    "  vec3 tcoordLIC = normalMatrix * tcoordVC;\n"
-    "  vec3 normN = normalize(normalVC);\n"
+    "  vec3 tcoordLIC = normalMatrix * tcoordVCVSOutput;\n"
+    "  vec3 normN = normalize(normalVCVSOutput);\n"
     "  float k = dot(tcoordLIC, normN);\n"
     "  tcoordLIC = (tcoordLIC - k*normN);\n"
     "  gl_FragData[1] = vec4(tcoordLIC.x, tcoordLIC.y, 0.0 , gl_FragCoord.z);\n"
@@ -2498,7 +2499,7 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(
     // vectors for fragment masking
     "  if (uMaskOnSurface == 0)\n"
     "    {\n"
-    "    gl_FragData[2] = vec4(tcoordVC, gl_FragCoord.z);\n"
+    "    gl_FragData[2] = vec4(tcoordVCVSOutput, gl_FragCoord.z);\n"
     "    }\n"
     "  else\n"
     "    {\n"
@@ -2506,8 +2507,6 @@ void vtkSurfaceLICMapper::ReplaceShaderValues(
     "    }\n"
  //   "  gl_FragData[2] = vec4(19.0, 19.0, tcoordVC.x, gl_FragCoord.z);\n"
     , false);
-
-  this->ShaderVariablesUsed.push_back("normalMatrix");
 
   shaders[vtkShader::Vertex]->SetSource(VSSource);
   shaders[vtkShader::Fragment]->SetSource(FSSource);
