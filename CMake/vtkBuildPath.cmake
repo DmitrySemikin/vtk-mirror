@@ -3,41 +3,44 @@
 # file can be sourced in the shell. You can also copy and paste the relevant
 # parts into other files if preferred.
 #
-# Note: on Windows Debug and Release are added, if another build type is
-# used, it would need to be added to the PATH too.
-
-set(VTK_LIBRARY_PATH "")
+# Note: Now only setting the path to the latest configuration used (for MSVC/Xcode)
 
 if(WIN32)
-  list(APPEND VTK_LIBRARY_PATH
-    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug"
-    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Release"
-#    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/RelWithDebInfo"
-#    "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/RelMinSize"
-  )
-  list(REMOVE_ITEM VTK_LIBRARY_PATH "")
+  set(VTK_PATH_SHELL_SCRIPT "windows_path.bat")
+  set(PATH_FORMAT "set \${path_var}=\${add_path};%\${path_var}%\r\n")
+  set(PATH_VARIABLE "PATH")
+  set(PATH_SEPARATOR ";")
 elseif(UNIX)
-  set(VTK_LIBRARY_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}")
-endif()
-
-set(VTK_PYTHONPATH
-  "${VTK_LIBRARY_PATH}")
-list(APPEND VTK_PYTHONPATH "${VTK_BINARY_DIR}/Wrapping/Python")
-
-if(WIN32)
-  file(WRITE "${VTK_BINARY_DIR}/windows_path.bat"
-    "set PATH=${VTK_LIBRARY_PATH};%PATH%
-    set PYTHONPATH=${VTK_PYTHONPATH};%PYTHONPATH%")
-elseif(UNIX)
-  # Replace the semicolons with colons for Unix operating systems
-  string(REPLACE ";" ":" VTK_LIBRARY_PATH "${VTK_LIBRARY_PATH}")
-  string(REPLACE ";" ":" VTK_PYTHONPATH "${VTK_PYTHONPATH}")
+  set(VTK_PATH_SHELL_SCRIPT "unix_path.sh")
   if(APPLE)
     set(DYLD "DYLD")
   else()
     set(DYLD "LD")
   endif()
-  file(WRITE "${VTK_BINARY_DIR}/unix_path.sh"
-    "export ${DYLD}_LIBRARY_PATH=${VTK_LIBRARY_PATH}:\${${DYLD}_LIBRARY_PATH}
-    export PYTHONPATH=${VTK_PYTHONPATH}:\${PYTHONPATH}\n")
+  set(PATH_VARIABLE "${DYLD}_LIBRARY_PATH")
+  set(PATH_SEPARATOR ":")
+  set(PATH_FORMAT "export \${path_var}=\${add_path}:\${\${path_var}}\n")
 endif()
+
+# set the script file name
+string(CONCAT PATH_FILENAME "${VTK_CURRENT_BINARY_DIR}/" VTK_PATH_SHELL_SCRIPT)
+
+# FOR THE PATH-VARIABLE
+# replace the path to the executables
+string(REPLACE "\${add_path}" "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}" PATH_TEMP PATH_FORMAT)
+# replace the name of the platform-specific path environment variable
+string(REPLACE "\${path_var}" PATH_VARIABLE PATH_LINES PATH_TEMP)
+
+if(VTK_WRAP_PYTHON)
+# FOR THE PYTHONPATH VARIABLE, if PYTHON is wrapped
+# replace the path to the python-specific files
+  string(CONCAT PATH_TEMP "${VTK_CURRENT_BINARY_DIR}/Wrapping/Python" PATH_SEPARATOR "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}")
+  string(REPLACE "\${add_path}" PATH_TEMP PATH_TEMP PATH_FORMAT)
+# replace pathvar by PYTHONPATH
+  string(REPLACE "\${path_var}" "PYTHONPATH" PATH_TEMP PATH_TEMP)
+# apped the line to the file
+  string(CONCAT PATH_LINES PATH_TEMP)
+endif()
+
+# write to file
+file(WRITE PATH_FILENAME PATH_LINES)
