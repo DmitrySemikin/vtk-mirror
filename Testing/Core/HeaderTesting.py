@@ -497,6 +497,8 @@ for a in os.listdir(dirname):
         test.CheckWeirdConstructors()
         test.CheckPrintSelf()
         test.CheckWindowsMangling()
+    elif stat.S_ISREG(mode):
+        test.CheckGuard()
 
 ## Summarize errors
 test.PrintWarnings()
