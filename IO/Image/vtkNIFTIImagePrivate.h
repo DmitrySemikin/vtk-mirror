@@ -1,5 +1,5 @@
-#ifndef _NIFTI_HEADER_
-#define _NIFTI_HEADER_
+#ifndef vtkNIFTIImagePrivate_h
+#define vtkNIFTIImagePrivate_h
 
 /*****************************************************************************
       ** This file defines the "NIFTI-1" header format.               **
@@ -273,5 +273,5 @@ typedef struct nifti_2_header nifti_2_header;
 #endif
 /*=================*/
 
-#endif /* __NIFTI2_HEADER */
+#endif /* vtkNIFTIImagePrivate_h */
 // VTK-HeaderTest-Exclude: vtkNIFTIImagePrivate.h
