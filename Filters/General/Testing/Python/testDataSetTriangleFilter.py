@@ -67,6 +67,9 @@ renWin.SetSize(450,450)
 ren1.SetBackground(1,1,1)
 renWin.Render()
 
+print(reader.GetOutputDataObject(0))
+print(clipper.GetOutputDataObject(0))
+print(tris.GetOutputDataObject(0))
 print(geom.GetOutputDataObject(0))
 
 # render the image
