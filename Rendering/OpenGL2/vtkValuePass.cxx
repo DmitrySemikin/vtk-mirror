@@ -19,6 +19,7 @@
 #include "vtkInformationDoubleVectorKey.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationStringKey.h"
+#include "vtkMapper.h"
 #include "vtkObjectFactory.h"
 #include "vtkProp.h"
 #include "vtkRenderer.h"
@@ -26,6 +27,7 @@
 #include "vtkSmartPointer.h"
 
 #include <cassert>
+#include <vector>
 
 vtkStandardNewMacro(vtkValuePass);
 
@@ -36,7 +38,6 @@ vtkInformationKeyMacro(vtkValuePass, ARRAY_MODE, Integer);
 vtkInformationKeyMacro(vtkValuePass, ARRAY_ID, Integer);
 vtkInformationKeyMacro(vtkValuePass, ARRAY_NAME, String);
 vtkInformationKeyMacro(vtkValuePass, ARRAY_COMPONENT, Integer);
-vtkInformationKeyMacro(vtkValuePass, SCALAR_RANGE, DoubleVector);
 
 class vtkValuePass::vtkInternals
 {
@@ -47,7 +48,6 @@ public:
   bool FieldNameSet;
   int Component;
   double ScalarRange[2];
-  bool ScalarRangeSet;
 
   vtkInternals()
     {
@@ -56,9 +56,6 @@ public:
     this->FieldName = "";
     this->FieldNameSet = false;
     this->Component = 0;
-    this->ScalarRange[0] = 0.0;
-    this->ScalarRange[1] = -1.0;
-    this->ScalarRangeSet = false;
     }
 };
 
@@ -121,19 +118,6 @@ void vtkValuePass::SetInputComponentToProcess(int component)
 }
 
 // ----------------------------------------------------------------------------
-void vtkValuePass::SetScalarRange(double min, double max)
-{
-  if (this->Internals->ScalarRange[0] != min ||
-      this->Internals->ScalarRange[1] != max)
-    {
-    this->Internals->ScalarRange[0] = min;
-    this->Internals->ScalarRange[1] = max;
-    this->Internals->ScalarRangeSet = (max > min);
-    this->Modified();
-    }
-}
-
-// ----------------------------------------------------------------------------
 // Description:
 // Perform rendering according to a render state \p s.
 // \pre s_exists: s!=0
@@ -160,11 +144,22 @@ void vtkValuePass::RenderOpaqueGeometry(const vtkRenderState *s)
   // initialize to false
   this->SetLastRenderingUsedDepthPeeling(s->GetRenderer(), false);
 
+  std::vector<int> scalarVisibilities;
+
   int c = s->GetPropArrayCount();
   int i = 0;
   while (i < c)
     {
     vtkProp *p = s->GetPropArray()[i];
+
+    // Cache scalar visibility state and turn it on
+    vtkActor *a = vtkActor::SafeDownCast(p);
+    if (a)
+      {
+      scalarVisibilities.push_back(a->GetMapper()->GetScalarVisibility());
+      a->GetMapper()->ScalarVisibilityOn();
+      }
+
     vtkSmartPointer<vtkInformation> keys = p->GetPropertyKeys();
     if (!keys)
       {
@@ -176,7 +171,6 @@ void vtkValuePass::RenderOpaqueGeometry(const vtkRenderState *s)
     keys->Set(vtkValuePass::ARRAY_ID(), this->Internals->FieldAttributeType);
     keys->Set(vtkValuePass::ARRAY_NAME(), this->Internals->FieldName.c_str());
     keys->Set(vtkValuePass::ARRAY_COMPONENT(), this->Internals->Component);
-    keys->Set(vtkValuePass::SCALAR_RANGE(), this->Internals->ScalarRange, 2);
     p->SetPropertyKeys(keys);
 
     int rendered =
@@ -190,6 +184,14 @@ void vtkValuePass::RenderOpaqueGeometry(const vtkRenderState *s)
   while (i < c)
     {
     vtkProp *p = s->GetPropArray()[i];
+
+    // Restore scalar visibility state
+    vtkActor *a = vtkActor::SafeDownCast(p);
+    if (a)
+      {
+      a->GetMapper()->SetScalarVisibility(scalarVisibilities[i]);
+      }
+
     vtkInformation *keys = p->GetPropertyKeys();
     keys->Remove(vtkValuePass::RENDER_VALUES());
     keys->Remove(vtkValuePass::SCALAR_MODE());
@@ -197,7 +199,6 @@ void vtkValuePass::RenderOpaqueGeometry(const vtkRenderState *s)
     keys->Remove(vtkValuePass::ARRAY_ID());
     keys->Remove(vtkValuePass::ARRAY_NAME());
     keys->Remove(vtkValuePass::ARRAY_COMPONENT());
-    keys->Remove(vtkValuePass::SCALAR_RANGE());
     p->SetPropertyKeys(keys);
     ++i;
     }

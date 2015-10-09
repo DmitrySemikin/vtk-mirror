@@ -641,14 +641,14 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
                                       int arrayAccessMode,
                                       int arrayId,
                                       const char *arrayName,
-                                      int arrayComponent,
-                                      double *scalarRange)
+                                      int arrayComponent)
 {
   //find and hold onto the array to use later
   int cellFlag = 0; // not used
   vtkAbstractArray* abstractArray = vtkAbstractMapper::
     GetAbstractScalars(this->GetInput(), scalarMode, arrayAccessMode,
                        arrayId, arrayName, cellFlag);
+
   if (!abstractArray)
   {
     vtkErrorMacro(<< "Scalar array " << arrayName
@@ -698,7 +698,6 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
     {
     vtkLookupTable* table = vtkLookupTable::New();
     this->LookupTable = table;
-    this->LookupTable->SetRange(scalarRange);
     this->LookupTable->Register(this);
     this->LookupTable->Delete();
     table->SetNumberOfTableValues(1);
