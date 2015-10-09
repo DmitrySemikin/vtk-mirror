@@ -66,6 +66,9 @@ ren1.AddActor(actor2)
 renWin.SetSize(450,450)
 ren1.SetBackground(1,1,1)
 renWin.Render()
+
+print geom.GetOutputDataObject(0)
+
 # render the image
 #
 iren.Initialize()
