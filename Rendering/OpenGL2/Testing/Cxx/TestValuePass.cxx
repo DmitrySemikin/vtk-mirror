@@ -145,7 +145,6 @@ int TestValuePass(int argc, char *argv[])
       glRenderer->SetPass(cameraPass);
       }
     window->Render();
-    sleep(1);
     }
 
   if (interactive)
