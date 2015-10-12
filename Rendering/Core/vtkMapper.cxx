@@ -655,14 +655,6 @@ void vtkMapper::UseInvertibleColorFor(int scalarMode,
                   << "with Id = " << arrayId << " not found.");
   }
 
-  // Check for a change
-  if (this->InvertibleScalars == abstractArray &&
-      this->ScalarMode == scalarMode &&
-      this->ArrayComponent == arrayComponent)
-    {
-      return;
-    }
-
   this->Modified();
 
   this->ScalarMode = scalarMode;
