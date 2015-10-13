@@ -24,6 +24,7 @@ import vtk
 import vtk.test.Testing
 from vtk.util.misc import vtkGetDataRoot
 VTK_DATA_ROOT = vtkGetDataRoot()
+VTK_TEMP_DIR = vtkGetTempDir()
 
 class cells(vtk.test.Testing.vtkTest):
 
@@ -668,8 +669,7 @@ class cells(vtk.test.Testing.vtkTest):
         ren.GetActiveCamera().Dolly(2.8)
         ren.ResetCameraClippingRange()
 
-        # write to the temp directory if possible, otherwise use .
-        dir = tempfile.gettempdir()
+        dir = VTK_TEMP_DIR
 
         atext = vtk.vtkTexture()
         pnmReader = vtk.vtkBMPReader()
