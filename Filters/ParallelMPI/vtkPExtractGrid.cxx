@@ -106,7 +106,7 @@ int vtkPExtractGrid::RequestData(
     return this->Superclass::RequestData(request, inputVector, outputVector);
     }
 
-  if (!this->Internal->IsValid())
+  if (this->Controller->GetNumberOfProcesses()>1 && !this->Internal->IsValid())
     {
     return 0;
     }
