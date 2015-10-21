@@ -16,17 +16,6 @@
 #include "vtkRegressionTestImage.h"
 #include "vtksys/SystemTools.hxx"
 
-namespace
-{
-int s_interactive = 0;
-
-bool bInteractive()
-{
-    return (s_interactive>0);
-}
-
-}
-
 int TestOBJImporter( int argc, char * argv [] )
 {
     // Files for testing demonstrate updated functionality for OBJ import:
@@ -67,7 +56,6 @@ int TestOBJImporter( int argc, char * argv [] )
 
     if(argc > 8)
     {
-      s_interactive = 1;
       importer->DebugOn();
     }
 
