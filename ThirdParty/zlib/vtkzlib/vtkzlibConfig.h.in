@@ -1,0 +1,7 @@
+#ifndef vtkzlibConfig_h
+#define vtkzlibConfig_h
+
+#cmakedefine ZLIB_DLL
+#cmakedefine Z_HAVE_UNISTD_H
+
+#endif

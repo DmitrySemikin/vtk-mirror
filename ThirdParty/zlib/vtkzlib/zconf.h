@@ -1,68 +1,159 @@
 /* zconf.h -- configuration of the zlib compression library
- * Copyright (C) 1995-2005 Jean-loup Gailly.
+ * Copyright (C) 1995-2013 Jean-loup Gailly.
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-/* @(#) Id */
+/* @(#) $Id$ */
 
 #ifndef ZCONF_H
 #define ZCONF_H
 
-/* KITWARE_ZLIB_CHANGE - Added to mangle function names */
-#include "vtk_zlib_mangle.h"
-
-/* KITWARE_ZLIB_CHANGE - Added to get the correct definition of ZLIB_DLL */
-#include "vtkzlib/zlibDllConfig.h"
+/* KITWARE_ZLIB_CHANGE - z_ prefix changed to vtk_zlib_ prefix */
+#define Z_PREFIX
+#include "vtkzlibConfig.h"
 
 /*
  * If you *really* need a unique prefix for all types and library functions,
  * compile with -DZ_PREFIX. The "standard" zlib should be compiled without it.
+ * Even better than compiling with -DZ_PREFIX would be to use configure to set
+ * this permanently in zconf.h using "./configure --zprefix".
  */
-#ifdef Z_PREFIX
-#  define deflateInit_          z_deflateInit_
-#  define deflate               z_deflate
-#  define deflateEnd            z_deflateEnd
-#  define inflateInit_          z_inflateInit_
-#  define inflate               z_inflate
-#  define inflateEnd            z_inflateEnd
-#  define deflateInit2_         z_deflateInit2_
-#  define deflateSetDictionary  z_deflateSetDictionary
-#  define deflateCopy           z_deflateCopy
-#  define deflateReset          z_deflateReset
-#  define deflateParams         z_deflateParams
-#  define deflateBound          z_deflateBound
-#  define deflatePrime          z_deflatePrime
-#  define inflateInit2_         z_inflateInit2_
-#  define inflateSetDictionary  z_inflateSetDictionary
-#  define inflateSync           z_inflateSync
-#  define inflateSyncPoint      z_inflateSyncPoint
-#  define inflateCopy           z_inflateCopy
-#  define inflateReset          z_inflateReset
-#  define inflateBack           z_inflateBack
-#  define inflateBackEnd        z_inflateBackEnd
-#  define compress              z_compress
-#  define compress2             z_compress2
-#  define compressBound         z_compressBound
-#  define uncompress            z_uncompress
-#  define adler32               z_adler32
-#  define crc32                 z_crc32
-#  define get_crc_table         z_get_crc_table
-#  define zError                z_zError
+#ifdef Z_PREFIX     /* may be set to #if 1 by ./configure */
+#  define Z_PREFIX_SET
 
-#  define alloc_func            z_alloc_func
-#  define free_func             z_free_func
-#  define in_func               z_in_func
-#  define out_func              z_out_func
-#  define Byte                  z_Byte
-#  define uInt                  z_uInt
-#  define uLong                 z_uLong
-#  define Bytef                 z_Bytef
-#  define charf                 z_charf
-#  define intf                  z_intf
-#  define uIntf                 z_uIntf
-#  define uLongf                z_uLongf
-#  define voidpf                z_voidpf
-#  define voidp                 z_voidp
+/* all linked symbols */
+#  define _dist_code            vtk_zlib__dist_code
+#  define _length_code          vtk_zlib__length_code
+#  define _tr_align             vtk_zlib__tr_align
+#  define _tr_flush_bits        vtk_zlib__tr_flush_bits
+#  define _tr_flush_block       vtk_zlib__tr_flush_block
+#  define _tr_init              vtk_zlib__tr_init
+#  define _tr_stored_block      vtk_zlib__tr_stored_block
+#  define _tr_tally             vtk_zlib__tr_tally
+#  define adler32               vtk_zlib_adler32
+#  define adler32_combine       vtk_zlib_adler32_combine
+#  define adler32_combine64     vtk_zlib_adler32_combine64
+#  ifndef Z_SOLO
+#    define compress              vtk_zlib_compress
+#    define compress2             vtk_zlib_compress2
+#    define compressBound         vtk_zlib_compressBound
+#  endif
+#  define crc32                 vtk_zlib_crc32
+#  define crc32_combine         vtk_zlib_crc32_combine
+#  define crc32_combine64       vtk_zlib_crc32_combine64
+#  define deflate               vtk_zlib_deflate
+#  define deflateBound          vtk_zlib_deflateBound
+#  define deflateCopy           vtk_zlib_deflateCopy
+#  define deflateEnd            vtk_zlib_deflateEnd
+#  define deflateInit2_         vtk_zlib_deflateInit2_
+#  define deflateInit_          vtk_zlib_deflateInit_
+#  define deflateParams         vtk_zlib_deflateParams
+#  define deflatePending        vtk_zlib_deflatePending
+#  define deflatePrime          vtk_zlib_deflatePrime
+#  define deflateReset          vtk_zlib_deflateReset
+#  define deflateResetKeep      vtk_zlib_deflateResetKeep
+#  define deflateSetDictionary  vtk_zlib_deflateSetDictionary
+#  define deflateSetHeader      vtk_zlib_deflateSetHeader
+#  define deflateTune           vtk_zlib_deflateTune
+#  define deflate_copyright     vtk_zlib_deflate_copyright
+#  define get_crc_table         vtk_zlib_get_crc_table
+#  ifndef Z_SOLO
+#    define gz_error              vtk_zlib_gz_error
+#    define gz_intmax             vtk_zlib_gz_intmax
+#    define gz_strwinerror        vtk_zlib_gz_strwinerror
+#    define gzbuffer              vtk_zlib_gzbuffer
+#    define gzclearerr            vtk_zlib_gzclearerr
+#    define gzclose               vtk_zlib_gzclose
+#    define gzclose_r             vtk_zlib_gzclose_r
+#    define gzclose_w             vtk_zlib_gzclose_w
+#    define gzdirect              vtk_zlib_gzdirect
+#    define gzdopen               vtk_zlib_gzdopen
+#    define gzeof                 vtk_zlib_gzeof
+#    define gzerror               vtk_zlib_gzerror
+#    define gzflush               vtk_zlib_gzflush
+#    define gzgetc                vtk_zlib_gzgetc
+#    define gzgetc_               vtk_zlib_gzgetc_
+#    define gzgets                vtk_zlib_gzgets
+#    define gzoffset              vtk_zlib_gzoffset
+#    define gzoffset64            vtk_zlib_gzoffset64
+#    define gzopen                vtk_zlib_gzopen
+#    define gzopen64              vtk_zlib_gzopen64
+#    ifdef _WIN32
+#      define gzopen_w              vtk_zlib_gzopen_w
+#    endif
+#    define gzprintf              vtk_zlib_gzprintf
+#    define gzvprintf             vtk_zlib_gzvprintf
+#    define gzputc                vtk_zlib_gzputc
+#    define gzputs                vtk_zlib_gzputs
+#    define gzread                vtk_zlib_gzread
+#    define gzrewind              vtk_zlib_gzrewind
+#    define gzseek                vtk_zlib_gzseek
+#    define gzseek64              vtk_zlib_gzseek64
+#    define gzsetparams           vtk_zlib_gzsetparams
+#    define gztell                vtk_zlib_gztell
+#    define gztell64              vtk_zlib_gztell64
+#    define gzungetc              vtk_zlib_gzungetc
+#    define gzwrite               vtk_zlib_gzwrite
+#  endif
+#  define inflate               vtk_zlib_inflate
+#  define inflateBack           vtk_zlib_inflateBack
+#  define inflateBackEnd        vtk_zlib_inflateBackEnd
+#  define inflateBackInit_      vtk_zlib_inflateBackInit_
+#  define inflateCopy           vtk_zlib_inflateCopy
+#  define inflateEnd            vtk_zlib_inflateEnd
+#  define inflateGetHeader      vtk_zlib_inflateGetHeader
+#  define inflateInit2_         vtk_zlib_inflateInit2_
+#  define inflateInit_          vtk_zlib_inflateInit_
+#  define inflateMark           vtk_zlib_inflateMark
+#  define inflatePrime          vtk_zlib_inflatePrime
+#  define inflateReset          vtk_zlib_inflateReset
+#  define inflateReset2         vtk_zlib_inflateReset2
+#  define inflateSetDictionary  vtk_zlib_inflateSetDictionary
+#  define inflateGetDictionary  vtk_zlib_inflateGetDictionary
+#  define inflateSync           vtk_zlib_inflateSync
+#  define inflateSyncPoint      vtk_zlib_inflateSyncPoint
+#  define inflateUndermine      vtk_zlib_inflateUndermine
+#  define inflateResetKeep      vtk_zlib_inflateResetKeep
+#  define inflate_copyright     vtk_zlib_inflate_copyright
+#  define inflate_fast          vtk_zlib_inflate_fast
+#  define inflate_table         vtk_zlib_inflate_table
+#  ifndef Z_SOLO
+#    define uncompress            vtk_zlib_uncompress
+#  endif
+#  define zError                vtk_zlib_zError
+#  ifndef Z_SOLO
+#    define zcalloc               vtk_zlib_zcalloc
+#    define zcfree                vtk_zlib_zcfree
+#  endif
+#  define zlibCompileFlags      vtk_zlib_zlibCompileFlags
+#  define zlibVersion           vtk_zlib_zlibVersion
+
+/* all zlib typedefs in zlib.h and zconf.h */
+#  define Byte                  vtk_zlib_Byte
+#  define Bytef                 vtk_zlib_Bytef
+#  define alloc_func            vtk_zlib_alloc_func
+#  define charf                 vtk_zlib_charf
+#  define free_func             vtk_zlib_free_func
+#  ifndef Z_SOLO
+#    define gzFile                vtk_zlib_gzFile
+#  endif
+#  define gz_header             vtk_zlib_gz_header
+#  define gz_headerp            vtk_zlib_gz_headerp
+#  define in_func               vtk_zlib_in_func
+#  define intf                  vtk_zlib_intf
+#  define out_func              vtk_zlib_out_func
+#  define uInt                  vtk_zlib_uInt
+#  define uIntf                 vtk_zlib_uIntf
+#  define uLong                 vtk_zlib_uLong
+#  define uLongf                vtk_zlib_uLongf
+#  define voidp                 vtk_zlib_voidp
+#  define voidpc                vtk_zlib_voidpc
+#  define voidpf                vtk_zlib_voidpf
+
+/* all zlib structs in zlib.h and zconf.h */
+#  define gz_header_s           vtk_zlib_gz_header_s
+#  define internal_state        vtk_zlib_internal_state
+
 #endif
 
 #if defined(__MSDOS__) && !defined(MSDOS)
@@ -131,6 +222,12 @@
 #  endif
 #endif
 
+#if defined(ZLIB_CONST) && !defined(z_const)
+#  define z_const const
+#else
+#  define z_const
+#endif
+
 /* Some Mac compilers merge all .h files incorrectly: */
 #if defined(__MWERKS__)||defined(applec)||defined(THINK_C)||defined(__SC__)
 #  define NO_DUMMY_DECL
@@ -174,6 +271,14 @@
 #    define OF(args)  args
 #  else
 #    define OF(args)  ()
+#  endif
+#endif
+
+#ifndef Z_ARG /* function prototypes for stdarg */
+#  if defined(STDC) || defined(Z_HAVE_STDARG_H)
+#    define Z_ARG(args)  args
+#  else
+#    define Z_ARG(args)  ()
 #  endif
 #endif
 
@@ -290,62 +395,121 @@ typedef uLong FAR uLongf;
    typedef Byte       *voidp;
 #endif
 
-/* KITWARE_ZLIB_CHANGE - Since VTK/ITK use CMake, not ./configure, we can go ahead and test HAVE_UNISTD_H */
-#ifdef HAVE_UNISTD_H
-#  include <sys/types.h> /* for off_t */
-#  include <unistd.h>    /* for SEEK_* and off_t */
-#  ifdef VMS
-#    include <unixio.h>   /* for off_t */
+#if !defined(Z_U4) && !defined(Z_SOLO) && defined(STDC)
+#  include <limits.h>
+#  if (UINT_MAX == 0xffffffffUL)
+#    define Z_U4 unsigned
+#  elif (ULONG_MAX == 0xffffffffUL)
+#    define Z_U4 unsigned long
+#  elif (USHRT_MAX == 0xffffffffUL)
+#    define Z_U4 unsigned short
 #  endif
-#  define z_off_t off_t
 #endif
-#ifndef SEEK_SET
+
+#ifdef Z_U4
+   typedef Z_U4 z_crc_t;
+#else
+   typedef unsigned long z_crc_t;
+#endif
+
+#ifdef HAVE_UNISTD_H    /* may be set to #if 1 by ./configure */
+#  define Z_HAVE_UNISTD_H
+#endif
+
+#ifdef HAVE_STDARG_H    /* may be set to #if 1 by ./configure */
+#  define Z_HAVE_STDARG_H
+#endif
+
+#ifdef STDC
+#  ifndef Z_SOLO
+#    include <sys/types.h>      /* for off_t */
+#  endif
+#endif
+
+#if defined(STDC) || defined(Z_HAVE_STDARG_H)
+#  ifndef Z_SOLO
+#    include <stdarg.h>         /* for va_list */
+#  endif
+#endif
+
+#ifdef _WIN32
+#  ifndef Z_SOLO
+#    include <stddef.h>         /* for wchar_t */
+#  endif
+#endif
+
+/* a little trick to accommodate both "#define _LARGEFILE64_SOURCE" and
+ * "#define _LARGEFILE64_SOURCE 1" as requesting 64-bit operations, (even
+ * though the former does not conform to the LFS document), but considering
+ * both "#undef _LARGEFILE64_SOURCE" and "#define _LARGEFILE64_SOURCE 0" as
+ * equivalently requesting no 64-bit operations
+ */
+#if defined(_LARGEFILE64_SOURCE) && -_LARGEFILE64_SOURCE - -1 == 1
+#  undef _LARGEFILE64_SOURCE
+#endif
+
+#if defined(__WATCOMC__) && !defined(Z_HAVE_UNISTD_H)
+#  define Z_HAVE_UNISTD_H
+#endif
+#ifndef Z_SOLO
+#  if defined(Z_HAVE_UNISTD_H) || defined(_LARGEFILE64_SOURCE)
+#    include <unistd.h>         /* for SEEK_*, off_t, and _LFS64_LARGEFILE */
+#    ifdef VMS
+#      include <unixio.h>       /* for off_t */
+#    endif
+#    ifndef z_off_t
+#      define z_off_t off_t
+#    endif
+#  endif
+#endif
+
+#if defined(_LFS64_LARGEFILE) && _LFS64_LARGEFILE-0
+#  define Z_LFS64
+#endif
+
+#if defined(_LARGEFILE64_SOURCE) && defined(Z_LFS64)
+#  define Z_LARGE64
+#endif
+
+#if defined(_FILE_OFFSET_BITS) && _FILE_OFFSET_BITS-0 == 64 && defined(Z_LFS64)
+#  define Z_WANT64
+#endif
+
+#if !defined(SEEK_SET) && !defined(Z_SOLO)
 #  define SEEK_SET        0       /* Seek from beginning of file.  */
 #  define SEEK_CUR        1       /* Seek from current position.  */
 #  define SEEK_END        2       /* Set file pointer to EOF plus "offset" */
 #endif
+
 #ifndef z_off_t
 #  define z_off_t long
 #endif
 
-#if defined(__OS400__)
-#  define NO_vsnprintf
-#endif
-
-#if defined(__MVS__)
-#  define NO_vsnprintf
-#  ifdef FAR
-#    undef FAR
+#if !defined(_WIN32) && defined(Z_LARGE64)
+#  define z_off64_t off64_t
+#else
+#  if defined(_WIN32) && !defined(__GNUC__) && !defined(Z_SOLO)
+#    define z_off64_t __int64
+#  else
+#    define z_off64_t z_off_t
 #  endif
 #endif
 
 /* MVS linker does not support external names larger than 8 bytes */
 #if defined(__MVS__)
-#   pragma map(deflateInit_,"DEIN")
-#   pragma map(deflateInit2_,"DEIN2")
-#   pragma map(deflateEnd,"DEEND")
-#   pragma map(deflateBound,"DEBND")
-#   pragma map(inflateInit_,"ININ")
-#   pragma map(inflateInit2_,"ININ2")
-#   pragma map(inflateEnd,"INEND")
-#   pragma map(inflateSync,"INSY")
-#   pragma map(inflateSetDictionary,"INSEDI")
-#   pragma map(compressBound,"CMBND")
-#   pragma map(inflate_table,"INTABL")
-#   pragma map(inflate_fast,"INFA")
-#   pragma map(inflate_copyright,"INCOPY")
-#endif
-
-/* KITWARE_ZLIB_CHANGE - Added to suppress complier warnings */
-#if defined(_MSC_VER)
-#pragma warning ( disable : 4127 ) /* cond expr is constant */
-#pragma warning ( disable : 4131 ) /* old style declaration */
-#pragma warning ( disable : 4244 ) /* conversion loss of data */
-#endif
-#if defined(__BORLANDC__)
-#pragma warn -8004 /* assigned a value that is never used */
-#pragma warn -8008 /* condition is always true */
-#pragma warn -8066 /* unreachable code */
+  #pragma map(deflateInit_,"DEIN")
+  #pragma map(deflateInit2_,"DEIN2")
+  #pragma map(deflateEnd,"DEEND")
+  #pragma map(deflateBound,"DEBND")
+  #pragma map(inflateInit_,"ININ")
+  #pragma map(inflateInit2_,"ININ2")
+  #pragma map(inflateEnd,"INEND")
+  #pragma map(inflateSync,"INSY")
+  #pragma map(inflateSetDictionary,"INSEDI")
+  #pragma map(compressBound,"CMBND")
+  #pragma map(inflate_table,"INTABL")
+  #pragma map(inflate_fast,"INFA")
+  #pragma map(inflate_copyright,"INCOPY")
 #endif
 
 #endif /* ZCONF_H */
