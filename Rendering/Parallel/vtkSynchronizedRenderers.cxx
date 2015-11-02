@@ -693,8 +693,8 @@ bool vtkSynchronizedRenderers::vtkRawImage::PushToFrameBuffer(vtkRenderer *ren)
   glGetIntegerv(GL_BLEND_SRC_RGB, &blendSrcC);
   glGetIntegerv(GL_BLEND_DST_RGB, &blendDstC);
   // framebuffers have their color premultiplied by alpha.
-  glBlendFuncSeparate(GL_ONE,GL_ONE_MINUS_SRC_ALPHA,
-    GL_ONE,GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+    GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   // always draw the entire image on the entire viewport
   vtkOpenGLRenderWindow *renWin = vtkOpenGLRenderWindow::SafeDownCast(ren->GetVTKWindow());
