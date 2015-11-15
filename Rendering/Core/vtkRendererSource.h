@@ -59,32 +59,32 @@ public:
   // Description:
   // Use the entire RenderWindow as a data source or just the Renderer.
   // The default is zero, just the Renderer.
-  vtkSetMacro(WholeWindow, int);
-  vtkGetMacro(WholeWindow, int);
-  vtkBooleanMacro(WholeWindow, int);
+  vtkSetMacro(WholeWindow, bool);
+  vtkGetMacro(WholeWindow, bool);
+  vtkBooleanMacro(WholeWindow, bool);
 
   // Description:
   // If this flag is on, the Executing causes a render first.
-  vtkSetMacro(RenderFlag, int);
-  vtkGetMacro(RenderFlag, int);
-  vtkBooleanMacro(RenderFlag, int);
+  vtkSetMacro(RenderFlag, bool);
+  vtkGetMacro(RenderFlag, bool);
+  vtkBooleanMacro(RenderFlag, bool);
 
   // Description:
   // A boolean value to control whether to grab z-buffer
   // (i.e., depth values) along with the image data. The z-buffer data
   // is placed into a field data attributes named "ZBuffer" .
-  vtkSetMacro(DepthValues, int);
-  vtkGetMacro(DepthValues, int);
-  vtkBooleanMacro(DepthValues, int);
+  vtkSetMacro(DepthValues, bool);
+  vtkGetMacro(DepthValues, bool);
+  vtkBooleanMacro(DepthValues, bool);
 
   // Description:
   // A boolean value to control whether to grab z-buffer
   // (i.e., depth values) along with the image data. The z-buffer data
   // is placed in the scalars as a fourth Z component (shift and scaled
   // to map the full 0..255 range).
-  vtkSetMacro(DepthValuesInScalars, int);
-  vtkGetMacro(DepthValuesInScalars, int);
-  vtkBooleanMacro(DepthValuesInScalars, int);
+  vtkSetMacro(DepthValuesInScalars, bool);
+  vtkGetMacro(DepthValuesInScalars, bool);
+  vtkBooleanMacro(DepthValuesInScalars, bool);
 
   // Description:
   // Get the output data object for a port on this algorithm.

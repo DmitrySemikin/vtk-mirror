@@ -53,9 +53,9 @@ public:
   // If on (the default), then 3D data with latitude/longitude dimensions
   // will be read in as curvilinear data shaped like spherical coordinates.
   // If false, then the data will always be read in Cartesian coordinates.
-  vtkGetMacro(SphericalCoordinates, int);
-  vtkSetMacro(SphericalCoordinates, int);
-  vtkBooleanMacro(SphericalCoordinates, int);
+  vtkSetMacro(SphericalCoordinates, bool);
+  vtkGetMacro(SphericalCoordinates, bool);
+  vtkBooleanMacro(SphericalCoordinates, bool);
 
   // Description:
   // The scale and bias of the vertical component of spherical coordinates.  It

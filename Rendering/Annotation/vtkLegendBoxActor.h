@@ -102,9 +102,9 @@ public:
   // Description:
   // Set/Get the flag that controls whether a border will be drawn
   // around the legend box.
-  vtkSetMacro(Border, int);
-  vtkGetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
+  vtkSetMacro(Border, bool);
+  vtkGetMacro(Border, bool);
+  vtkBooleanMacro(Border, bool);
 
   // Description:
   // Set/Get the flag that controls whether the border and legend
@@ -113,16 +113,16 @@ public:
   // fits nicely around the text and symbols. (The ivar is off by default.)
   // Note: the legend box is guaranteed to lie within the original border
   // definition.
-  vtkSetMacro(LockBorder, int);
-  vtkGetMacro(LockBorder, int);
-  vtkBooleanMacro(LockBorder, int);
+  vtkSetMacro(LockBorder, bool);
+  vtkGetMacro(LockBorder, bool);
+  vtkBooleanMacro(LockBorder, bool);
 
   // Description:
   // Set/Get the flag that controls whether a box will be drawn/filled
   // corresponding to the legend box.
-  vtkSetMacro(Box, int);
-  vtkGetMacro(Box, int);
-  vtkBooleanMacro(Box, int);
+  vtkSetMacro(Box, bool);
+  vtkGetMacro(Box, bool);
+  vtkBooleanMacro(Box, bool);
 
   // Description:
   // Get the box vtkProperty2D.
@@ -138,15 +138,15 @@ public:
   // Turn on/off flag to control whether the symbol's scalar data
   // is used to color the symbol. If off, the color of the
   // vtkLegendBoxActor is used.
-  vtkSetMacro(ScalarVisibility,int);
-  vtkGetMacro(ScalarVisibility,int);
-  vtkBooleanMacro(ScalarVisibility,int);
+  vtkSetMacro(ScalarVisibility, bool);
+  vtkGetMacro(ScalarVisibility, bool);
+  vtkBooleanMacro(ScalarVisibility, bool);
 
   // Description:
   // Turn on/off background.
-  vtkSetMacro(UseBackground, int);
-  vtkGetMacro(UseBackground, int);
-  vtkBooleanMacro(UseBackground, int);
+  vtkSetMacro(UseBackground, bool);
+  vtkGetMacro(UseBackground, bool);
+  vtkBooleanMacro(UseBackground, bool);
 
   // Description:
   // Set/Get background color.

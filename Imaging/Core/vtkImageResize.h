@@ -91,16 +91,16 @@ public:
   // This setting impacts how the resizing is done.  For example, if a
   // MagnificationFactor of two is applied to a 256x256 image, the output
   // image will be 512x512 if Border is On, or 511x511 if Border is Off.
-  vtkSetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
-  vtkGetMacro(Border, int);
+  vtkSetMacro(Border, bool);
+  vtkGetMacro(Border, bool);
+  vtkBooleanMacro(Border, bool);
 
   // Description:
   // Whether to crop the input image before resizing (Off by default).  If this
   // is On, then the CroppingRegion must be set.
-  vtkSetMacro(Cropping, int);
-  vtkBooleanMacro(Cropping, int);
-  vtkGetMacro(Cropping, int);
+  vtkSetMacro(Cropping, bool);
+  vtkGetMacro(Cropping, bool);
+  vtkBooleanMacro(Cropping, bool);
 
   // Description:
   // If Cropping is On, then the CroppingRegion will be used to crop the image
@@ -111,9 +111,9 @@ public:
 
   // Description:
   // Turn interpolation on or off (by default, interpolation is on).
-  vtkSetMacro(Interpolate, int);
-  vtkBooleanMacro(Interpolate, int);
-  vtkGetMacro(Interpolate, int);
+  vtkSetMacro(Interpolate, bool);
+  vtkGetMacro(Interpolate, bool);
+  vtkBooleanMacro(Interpolate, bool);
 
   // Description:
   // Set the interpolator for resampling the data.

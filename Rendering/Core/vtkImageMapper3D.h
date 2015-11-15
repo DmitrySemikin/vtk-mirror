@@ -70,34 +70,34 @@ public:
   // bounds, include a half-voxel border around the image.
   // Within this border, the image values will be extrapolated
   // rather than interpolated.
-  vtkSetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
-  vtkGetMacro(Border, int);
+  vtkSetMacro(Border, bool);
+  vtkGetMacro(Border, bool);
+  vtkBooleanMacro(Border, bool);
 
   // Description:
   // Instead of rendering only to the image border, render out
   // to the viewport boundary with the background color.  The
   // background color will be the lowest color on the lookup
   // table that is being used for the image.
-  vtkSetMacro(Background, int);
-  vtkBooleanMacro(Background, int);
-  vtkGetMacro(Background, int);
+  vtkSetMacro(Background, bool);
+  vtkGetMacro(Background, bool);
+  vtkBooleanMacro(Background, bool);
 
   // Description:
   // Automatically set the slice position to the camera focal point.
   // This provides a convenient way to interact with the image, since
   // most Interactors directly control the camera.
-  vtkSetMacro(SliceAtFocalPoint, int);
-  vtkBooleanMacro(SliceAtFocalPoint, int);
-  vtkGetMacro(SliceAtFocalPoint, int);
+  vtkSetMacro(SliceAtFocalPoint, bool);
+  vtkGetMacro(SliceAtFocalPoint, bool);
+  vtkBooleanMacro(SliceAtFocalPoint, bool);
 
   // Description:
   // Automatically set the slice orientation so that it faces the camera.
   // This provides a convenient way to interact with the image, since
   // most Interactors directly control the camera.
-  vtkSetMacro(SliceFacesCamera, int);
-  vtkBooleanMacro(SliceFacesCamera, int);
-  vtkGetMacro(SliceFacesCamera, int);
+  vtkSetMacro(SliceFacesCamera, bool);
+  vtkGetMacro(SliceFacesCamera, bool);
+  vtkBooleanMacro(SliceFacesCamera, bool);
 
   // Description:
   // A plane that describes what slice of the input is being
@@ -127,9 +127,9 @@ public:
   // the full 3D input extent through the input pipeline, but to do this
   // only when the input data changes.  The default behavior results in
   // much faster follow-up renders when the input data is static.
-  vtkSetMacro(Streaming, int);
-  vtkGetMacro(Streaming, int);
-  vtkBooleanMacro(Streaming, int);
+  vtkSetMacro(Streaming, bool);
+  vtkGetMacro(Streaming, bool);
+  vtkBooleanMacro(Streaming, bool);
 
 protected:
   vtkImageMapper3D();

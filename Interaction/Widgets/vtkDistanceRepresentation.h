@@ -96,9 +96,9 @@ public:
   // Enable or disable ruler mode. When enabled, the ticks on the distance widget
   // are separated by the amount specified by RulerDistance. Otherwise, the ivar
   // NumberOfRulerTicks is used to draw the tick marks.
-  vtkSetMacro(RulerMode,int);
-  vtkGetMacro(RulerMode,int);
-  vtkBooleanMacro(RulerMode,int);
+  vtkSetMacro(RulerMode, bool);
+  vtkGetMacro(RulerMode, bool);
+  vtkBooleanMacro(RulerMode, bool);
 
   // Description:
   // Specify the RulerDistance which indicates the spacing of the major ticks.

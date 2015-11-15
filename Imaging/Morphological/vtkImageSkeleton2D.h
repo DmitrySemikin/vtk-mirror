@@ -41,9 +41,9 @@ public:
 
   // Description:
   // When prune is on, only closed loops are left unchanged.
-  vtkSetMacro(Prune,int);
-  vtkGetMacro(Prune,int);
-  vtkBooleanMacro(Prune,int);
+  vtkSetMacro(Prune, bool);
+  vtkGetMacro(Prune, bool);
+  vtkBooleanMacro(Prune, bool);
 
   // Description:
   // Sets the number of cycles in the erosion.

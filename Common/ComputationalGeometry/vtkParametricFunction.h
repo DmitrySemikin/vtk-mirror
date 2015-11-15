@@ -123,48 +123,48 @@ public:
 
   // Description:
   // Set/Get the flag which joins the first triangle strip to the last one.
-  vtkSetClampMacro(JoinU,int,0,1);
-  vtkGetMacro(JoinU,int);
-  vtkBooleanMacro(JoinU,int);
+  vtkSetMacro(JoinU, bool);
+  vtkGetMacro(JoinU, bool);
+  vtkBooleanMacro(JoinU, bool);
 
   // Description:
   // Set/Get the flag which joins the the ends of the triangle strips.
-  vtkSetClampMacro(JoinV, int, 0, 1);
-  vtkGetMacro(JoinV, int);
-  vtkBooleanMacro(JoinV, int);
+  vtkSetMacro(JoinV, bool);
+  vtkGetMacro(JoinV, bool);
+  vtkBooleanMacro(JoinV, bool);
 
   // Description:
   // Set/Get the flag which joins the the ends of the triangle strips.
-  vtkSetClampMacro(JoinW, int, 0, 1);
-  vtkGetMacro(JoinW, int);
-  vtkBooleanMacro(JoinW, int);
+  vtkSetMacro(JoinW, bool);
+  vtkGetMacro(JoinW, bool);
+  vtkBooleanMacro(JoinW, bool);
 
   // Description:
   // Set/Get the flag which joins the first triangle strip to
   // the last one with a twist.
   // JoinU must also be set if this is set.
   // Used when building some non-orientable surfaces.
-  vtkSetClampMacro(TwistU,int,0,1);
-  vtkGetMacro(TwistU,int);
-  vtkBooleanMacro(TwistU,int);
+  vtkSetMacro(TwistU, bool);
+  vtkGetMacro(TwistU, bool);
+  vtkBooleanMacro(TwistU, bool);
 
   // Description:
   // Set/Get the flag which joins the ends of the
   // triangle strips with a twist.
   // JoinV must also be set if this is set.
   // Used when building some non-orientable surfaces.
-  vtkSetClampMacro(TwistV, int, 0, 1);
-  vtkGetMacro(TwistV, int);
-  vtkBooleanMacro(TwistV, int);
+  vtkSetMacro(TwistV, bool);
+  vtkGetMacro(TwistV, bool);
+  vtkBooleanMacro(TwistV, bool);
 
   // Description:
   // Set/Get the flag which joins the ends of the
   // triangle strips with a twist.
   // JoinW must also be set if this is set.
   // Used when building some non-orientable surfaces.
-  vtkSetClampMacro(TwistW, int, 0, 1);
-  vtkGetMacro(TwistW, int);
-  vtkBooleanMacro(TwistW, int);
+  vtkSetMacro(TwistW, bool);
+  vtkGetMacro(TwistW, bool);
+  vtkBooleanMacro(TwistW, bool);
 
   // Description:
   // Set/Get the flag which determines the ordering of the the
@@ -174,17 +174,17 @@ public:
   // lighting. If set, the ordering is clockwise, otherwise the
   // ordering is anti-clockwise. Default is true (i.e. clockwise
   // ordering).
-  vtkSetClampMacro(ClockwiseOrdering,int,0,1);
-  vtkGetMacro(ClockwiseOrdering,int);
-  vtkBooleanMacro(ClockwiseOrdering,int);
+  vtkSetMacro(ClockwiseOrdering, bool);
+  vtkGetMacro(ClockwiseOrdering, bool);
+  vtkBooleanMacro(ClockwiseOrdering, bool);
 
   // Description:
   // Set/Get the flag which determines whether derivatives are available
   // from the parametric function (i.e., whether the Evaluate() method
   // returns valid derivatives).
-  vtkSetClampMacro(DerivativesAvailable,int,0,1);
-  vtkGetMacro(DerivativesAvailable,int);
-  vtkBooleanMacro(DerivativesAvailable,int);
+  vtkSetMacro(DerivativesAvailable, bool);
+  vtkGetMacro(DerivativesAvailable, bool);
+  vtkBooleanMacro(DerivativesAvailable, bool);
 
 protected:
   vtkParametricFunction();

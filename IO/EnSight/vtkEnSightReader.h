@@ -101,9 +101,9 @@ public:
   // in the file) and regardless of the actual Id of of the point.
   // Warning, if the Points are listed in non sequential order
   // then setting this flag will reorder them.
-  vtkSetMacro(ParticleCoordinatesByIndex, int);
-  vtkGetMacro(ParticleCoordinatesByIndex, int);
-  vtkBooleanMacro(ParticleCoordinatesByIndex, int);
+  vtkSetMacro(ParticleCoordinatesByIndex, bool);
+  vtkGetMacro(ParticleCoordinatesByIndex, bool);
+  vtkBooleanMacro(ParticleCoordinatesByIndex, bool);
 
 protected:
   vtkEnSightReader();
@@ -307,14 +307,14 @@ protected:
   float MeasuredTimeValue;
 
   int UseTimeSets;
-  vtkSetMacro(UseTimeSets, int);
-  vtkGetMacro(UseTimeSets, int);
-  vtkBooleanMacro(UseTimeSets, int);
+  vtkSetMacro(UseTimeSets, bool);
+  vtkGetMacro(UseTimeSets, bool);
+  vtkBooleanMacro(UseTimeSets, bool);
 
   int UseFileSets;
-  vtkSetMacro(UseFileSets, int);
-  vtkGetMacro(UseFileSets, int);
-  vtkBooleanMacro(UseFileSets, int);
+  vtkSetMacro(UseFileSets, bool);
+  vtkGetMacro(UseFileSets, bool);
+  vtkBooleanMacro(UseFileSets, bool);
 
   int NumberOfGeometryParts;
 

@@ -75,15 +75,15 @@ public:
 
   // Description:
   // Turn on/off the splitting of sharp edges.
-  vtkSetMacro(Splitting,int);
-  vtkGetMacro(Splitting,int);
-  vtkBooleanMacro(Splitting,int);
+  vtkSetMacro(Splitting, bool);
+  vtkGetMacro(Splitting, bool);
+  vtkBooleanMacro(Splitting, bool);
 
   // Description:
   // Turn on/off the enforcement of consistent polygon ordering.
-  vtkSetMacro(Consistency,int);
-  vtkGetMacro(Consistency,int);
-  vtkBooleanMacro(Consistency,int);
+  vtkSetMacro(Consistency, bool);
+  vtkGetMacro(Consistency, bool);
+  vtkBooleanMacro(Consistency, bool);
 
   // Description:
   // Turn on/off the automatic determination of correct normal
@@ -95,38 +95,38 @@ public:
   // FlipNormals flag. However, this flag can work with the FlipNormals
   // flag, and if both are set, all the normals in the output will
   // point "inward".
-  vtkSetMacro(AutoOrientNormals, int);
-  vtkGetMacro(AutoOrientNormals, int);
-  vtkBooleanMacro(AutoOrientNormals, int);
+  vtkSetMacro(AutoOrientNormals, bool);
+  vtkGetMacro(AutoOrientNormals, bool);
+  vtkBooleanMacro(AutoOrientNormals, bool);
 
   // Description:
   // Turn on/off the computation of point normals.
-  vtkSetMacro(ComputePointNormals,int);
-  vtkGetMacro(ComputePointNormals,int);
-  vtkBooleanMacro(ComputePointNormals,int);
+  vtkSetMacro(ComputePointNormals, bool);
+  vtkGetMacro(ComputePointNormals, bool);
+  vtkBooleanMacro(ComputePointNormals, bool);
 
   // Description:
   // Turn on/off the computation of cell normals.
-  vtkSetMacro(ComputeCellNormals,int);
-  vtkGetMacro(ComputeCellNormals,int);
-  vtkBooleanMacro(ComputeCellNormals,int);
+  vtkSetMacro(ComputeCellNormals, bool);
+  vtkGetMacro(ComputeCellNormals, bool);
+  vtkBooleanMacro(ComputeCellNormals, bool);
 
   // Description:
   // Turn on/off the global flipping of normal orientation. Flipping
   // reverves the meaning of front and back for Frontface and Backface
   // culling in vtkProperty.  Flipping modifies both the normal
   // direction and the order of a cell's points.
-  vtkSetMacro(FlipNormals,int);
-  vtkGetMacro(FlipNormals,int);
-  vtkBooleanMacro(FlipNormals,int);
+  vtkSetMacro(FlipNormals, bool);
+  vtkGetMacro(FlipNormals, bool);
+  vtkBooleanMacro(FlipNormals, bool);
 
   // Description:
   // Turn on/off traversal across non-manifold edges. This will prevent
   // problems where the consistency of polygonal ordering is corrupted due
   // to topological loops.
-  vtkSetMacro(NonManifoldTraversal,int);
-  vtkGetMacro(NonManifoldTraversal,int);
-  vtkBooleanMacro(NonManifoldTraversal,int);
+  vtkSetMacro(NonManifoldTraversal, bool);
+  vtkGetMacro(NonManifoldTraversal, bool);
+  vtkBooleanMacro(NonManifoldTraversal, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

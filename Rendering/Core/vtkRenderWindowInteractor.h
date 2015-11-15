@@ -227,9 +227,9 @@ public:
   // Description:
   // Turn on/off the automatic repositioning of lights as the camera moves.
   // Default is On.
-  vtkSetMacro(LightFollowCamera,int);
-  vtkGetMacro(LightFollowCamera,int);
-  vtkBooleanMacro(LightFollowCamera,int);
+  vtkSetMacro(LightFollowCamera, bool);
+  vtkGetMacro(LightFollowCamera, bool);
+  vtkBooleanMacro(LightFollowCamera, bool);
 
   // Description:
   // Set/Get the desired update rate. This is used by vtkLODActor's to tell

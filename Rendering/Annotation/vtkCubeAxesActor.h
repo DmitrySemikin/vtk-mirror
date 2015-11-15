@@ -246,93 +246,93 @@ public:
 
   // Description:
   // Turn on and off the visibility of each axis.
-  vtkSetMacro(XAxisVisibility,int);
-  vtkGetMacro(XAxisVisibility,int);
-  vtkBooleanMacro(XAxisVisibility,int);
-  vtkSetMacro(YAxisVisibility,int);
-  vtkGetMacro(YAxisVisibility,int);
-  vtkBooleanMacro(YAxisVisibility,int);
-  vtkSetMacro(ZAxisVisibility,int);
-  vtkGetMacro(ZAxisVisibility,int);
-  vtkBooleanMacro(ZAxisVisibility,int);
+  vtkSetMacro(XAxisVisibility, bool);
+  vtkGetMacro(XAxisVisibility, bool);
+  vtkBooleanMacro(XAxisVisibility, bool);
+  vtkSetMacro(YAxisVisibility, bool);
+  vtkGetMacro(YAxisVisibility, bool);
+  vtkBooleanMacro(YAxisVisibility, bool);
+  vtkSetMacro(ZAxisVisibility, bool);
+  vtkGetMacro(ZAxisVisibility, bool);
+  vtkBooleanMacro(ZAxisVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of labels for each axis.
-  vtkSetMacro(XAxisLabelVisibility,int);
-  vtkGetMacro(XAxisLabelVisibility,int);
-  vtkBooleanMacro(XAxisLabelVisibility,int);
+  vtkSetMacro(XAxisLabelVisibility, bool);
+  vtkGetMacro(XAxisLabelVisibility, bool);
+  vtkBooleanMacro(XAxisLabelVisibility, bool);
 
-  vtkSetMacro(YAxisLabelVisibility,int);
-  vtkGetMacro(YAxisLabelVisibility,int);
-  vtkBooleanMacro(YAxisLabelVisibility,int);
+  vtkSetMacro(YAxisLabelVisibility, bool);
+  vtkGetMacro(YAxisLabelVisibility, bool);
+  vtkBooleanMacro(YAxisLabelVisibility, bool);
 
-  vtkSetMacro(ZAxisLabelVisibility,int);
-  vtkGetMacro(ZAxisLabelVisibility,int);
-  vtkBooleanMacro(ZAxisLabelVisibility,int);
+  vtkSetMacro(ZAxisLabelVisibility, bool);
+  vtkGetMacro(ZAxisLabelVisibility, bool);
+  vtkBooleanMacro(ZAxisLabelVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of ticks for each axis.
-  vtkSetMacro(XAxisTickVisibility,int);
-  vtkGetMacro(XAxisTickVisibility,int);
-  vtkBooleanMacro(XAxisTickVisibility,int);
+  vtkSetMacro(XAxisTickVisibility, bool);
+  vtkGetMacro(XAxisTickVisibility, bool);
+  vtkBooleanMacro(XAxisTickVisibility, bool);
 
-  vtkSetMacro(YAxisTickVisibility,int);
-  vtkGetMacro(YAxisTickVisibility,int);
-  vtkBooleanMacro(YAxisTickVisibility,int);
+  vtkSetMacro(YAxisTickVisibility, bool);
+  vtkGetMacro(YAxisTickVisibility, bool);
+  vtkBooleanMacro(YAxisTickVisibility, bool);
 
-  vtkSetMacro(ZAxisTickVisibility,int);
-  vtkGetMacro(ZAxisTickVisibility,int);
-  vtkBooleanMacro(ZAxisTickVisibility,int);
+  vtkSetMacro(ZAxisTickVisibility, bool);
+  vtkGetMacro(ZAxisTickVisibility, bool);
+  vtkBooleanMacro(ZAxisTickVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of minor ticks for each axis.
-  vtkSetMacro(XAxisMinorTickVisibility,int);
-  vtkGetMacro(XAxisMinorTickVisibility,int);
-  vtkBooleanMacro(XAxisMinorTickVisibility,int);
+  vtkSetMacro(XAxisMinorTickVisibility, bool);
+  vtkGetMacro(XAxisMinorTickVisibility, bool);
+  vtkBooleanMacro(XAxisMinorTickVisibility, bool);
 
-  vtkSetMacro(YAxisMinorTickVisibility,int);
-  vtkGetMacro(YAxisMinorTickVisibility,int);
-  vtkBooleanMacro(YAxisMinorTickVisibility,int);
+  vtkSetMacro(YAxisMinorTickVisibility, bool);
+  vtkGetMacro(YAxisMinorTickVisibility, bool);
+  vtkBooleanMacro(YAxisMinorTickVisibility, bool);
 
-  vtkSetMacro(ZAxisMinorTickVisibility,int);
-  vtkGetMacro(ZAxisMinorTickVisibility,int);
-  vtkBooleanMacro(ZAxisMinorTickVisibility,int);
+  vtkSetMacro(ZAxisMinorTickVisibility, bool);
+  vtkGetMacro(ZAxisMinorTickVisibility, bool);
+  vtkBooleanMacro(ZAxisMinorTickVisibility, bool);
 
-  vtkSetMacro(DrawXGridlines,int);
-  vtkGetMacro(DrawXGridlines,int);
-  vtkBooleanMacro(DrawXGridlines,int);
+  vtkSetMacro(DrawXGridlines, bool);
+  vtkGetMacro(DrawXGridlines, bool);
+  vtkBooleanMacro(DrawXGridlines, bool);
 
-  vtkSetMacro(DrawYGridlines,int);
-  vtkGetMacro(DrawYGridlines,int);
-  vtkBooleanMacro(DrawYGridlines,int);
+  vtkSetMacro(DrawYGridlines, bool);
+  vtkGetMacro(DrawYGridlines, bool);
+  vtkBooleanMacro(DrawYGridlines, bool);
 
-  vtkSetMacro(DrawZGridlines,int);
-  vtkGetMacro(DrawZGridlines,int);
-  vtkBooleanMacro(DrawZGridlines,int);
+  vtkSetMacro(DrawZGridlines, bool);
+  vtkGetMacro(DrawZGridlines, bool);
+  vtkBooleanMacro(DrawZGridlines, bool);
 
-  vtkSetMacro(DrawXInnerGridlines,int);
-  vtkGetMacro(DrawXInnerGridlines,int);
-  vtkBooleanMacro(DrawXInnerGridlines,int);
+  vtkSetMacro(DrawXInnerGridlines, bool);
+  vtkGetMacro(DrawXInnerGridlines, bool);
+  vtkBooleanMacro(DrawXInnerGridlines, bool);
 
-  vtkSetMacro(DrawYInnerGridlines,int);
-  vtkGetMacro(DrawYInnerGridlines,int);
-  vtkBooleanMacro(DrawYInnerGridlines,int);
+  vtkSetMacro(DrawYInnerGridlines, bool);
+  vtkGetMacro(DrawYInnerGridlines, bool);
+  vtkBooleanMacro(DrawYInnerGridlines, bool);
 
-  vtkSetMacro(DrawZInnerGridlines,int);
-  vtkGetMacro(DrawZInnerGridlines,int);
-  vtkBooleanMacro(DrawZInnerGridlines,int);
+  vtkSetMacro(DrawZInnerGridlines, bool);
+  vtkGetMacro(DrawZInnerGridlines, bool);
+  vtkBooleanMacro(DrawZInnerGridlines, bool);
 
-  vtkSetMacro(DrawXGridpolys,int);
-  vtkGetMacro(DrawXGridpolys,int);
-  vtkBooleanMacro(DrawXGridpolys,int);
+  vtkSetMacro(DrawXGridpolys, bool);
+  vtkGetMacro(DrawXGridpolys, bool);
+  vtkBooleanMacro(DrawXGridpolys, bool);
 
-  vtkSetMacro(DrawYGridpolys,int);
-  vtkGetMacro(DrawYGridpolys,int);
-  vtkBooleanMacro(DrawYGridpolys,int);
+  vtkSetMacro(DrawYGridpolys, bool);
+  vtkGetMacro(DrawYGridpolys, bool);
+  vtkBooleanMacro(DrawYGridpolys, bool);
 
-  vtkSetMacro(DrawZGridpolys,int);
-  vtkGetMacro(DrawZGridpolys,int);
-  vtkBooleanMacro(DrawZGridpolys,int);
+  vtkSetMacro(DrawZGridpolys, bool);
+  vtkGetMacro(DrawZGridpolys, bool);
+  vtkBooleanMacro(DrawZGridpolys, bool);
 
   // Description:
   // Returns the text property for the title on an axis.
@@ -454,9 +454,9 @@ public:
   // Enable/Disable axis stickiness. When on, the axes will be adjusted to always
   // be visible in the viewport unless the original bounds of the axes are entirely
   // outside the viewport. Defaults to off.
-  vtkSetMacro(StickyAxes,int);
-  vtkGetMacro(StickyAxes,int);
-  vtkBooleanMacro(StickyAxes,int);
+  vtkSetMacro(StickyAxes, bool);
+  vtkGetMacro(StickyAxes, bool);
+  vtkBooleanMacro(StickyAxes, bool);
 
   // Description:
   // Enable/Disable centering of axes when the Sticky option is
@@ -464,9 +464,9 @@ public:
   // viewport. Otherwise, the axes can move about the longer of the
   // horizontal or verical directions of the viewport to follow the
   // data. Defaults to on.
-  vtkSetMacro(CenterStickyAxes,int);
-  vtkGetMacro(CenterStickyAxes,int);
-  vtkBooleanMacro(CenterStickyAxes,int);
+  vtkSetMacro(CenterStickyAxes, bool);
+  vtkGetMacro(CenterStickyAxes, bool);
+  vtkBooleanMacro(CenterStickyAxes, bool);
 
 protected:
   vtkCubeAxesActor();

@@ -164,9 +164,9 @@ public:
   void SetColorSpaceToLab(){this->SetColorSpace(VTK_CTF_LAB);};
   void SetColorSpaceToDiverging(){this->SetColorSpace(VTK_CTF_DIVERGING);}
   vtkGetMacro( ColorSpace, int );
-  vtkSetMacro(HSVWrap, int);
-  vtkGetMacro(HSVWrap, int);
-  vtkBooleanMacro(HSVWrap, int);
+  vtkSetMacro(HSVWrap, bool);
+  vtkGetMacro(HSVWrap, bool);
+  vtkBooleanMacro(HSVWrap, bool);
 
   // Description:
   // Set the type of scale to use, linear or logarithmic.  The default
@@ -192,9 +192,9 @@ public:
 
   // Description:
   // Set whether the below range color should be used.
-  vtkSetMacro(UseBelowRangeColor, int);
-  vtkGetMacro(UseBelowRangeColor, int);
-  vtkBooleanMacro(UseBelowRangeColor, int);
+  vtkSetMacro(UseBelowRangeColor, bool);
+  vtkGetMacro(UseBelowRangeColor, bool);
+  vtkBooleanMacro(UseBelowRangeColor, bool);
 
   // Description:
   // Set the color to use when a value above the range is
@@ -204,9 +204,9 @@ public:
 
   // Description:
   // Set whether the below range color should be used.
-  vtkSetMacro(UseAboveRangeColor, int);
-  vtkGetMacro(UseAboveRangeColor, int);
-  vtkBooleanMacro(UseAboveRangeColor, int);
+  vtkSetMacro(UseAboveRangeColor, bool);
+  vtkGetMacro(UseAboveRangeColor, bool);
+  vtkBooleanMacro(UseAboveRangeColor, bool);
 
   // Description:
   // Returns a pointer to an array of all node values in an
@@ -231,9 +231,9 @@ public:
   // Description:
   // Toggle whether to allow duplicate scalar values in the color transfer
   // function (off by default).
-  vtkSetMacro(AllowDuplicateScalars, int);
-  vtkGetMacro(AllowDuplicateScalars, int);
-  vtkBooleanMacro(AllowDuplicateScalars, int);
+  vtkSetMacro(AllowDuplicateScalars, bool);
+  vtkGetMacro(AllowDuplicateScalars, bool);
+  vtkBooleanMacro(AllowDuplicateScalars, bool);
 
   // Description:
   // Get the number of available colors for mapping to.

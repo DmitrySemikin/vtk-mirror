@@ -54,9 +54,9 @@ public:
   // Description:
   // By default, this option is off.  When it is on, cell scalars are generated
   // based on which piece they are in.
-  vtkSetMacro(ColorByPiece, int);
-  vtkGetMacro(ColorByPiece, int);
-  vtkBooleanMacro(ColorByPiece, int);
+  vtkSetMacro(ColorByPiece, bool);
+  vtkGetMacro(ColorByPiece, bool);
+  vtkBooleanMacro(ColorByPiece, bool);
 
 
 protected:

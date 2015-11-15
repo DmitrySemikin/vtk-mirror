@@ -180,9 +180,9 @@ public:
   // point to be dropped. This may be useful for some interpolators, such as the
   // live-wire interpolator to see the shape of the contour that will be placed
   // as you move the mouse cursor.
-  vtkSetMacro( FollowCursor, int );
-  vtkGetMacro( FollowCursor, int );
-  vtkBooleanMacro( FollowCursor, int );
+  vtkSetMacro(FollowCursor, bool);
+  vtkGetMacro(FollowCursor, bool);
+  vtkBooleanMacro(FollowCursor, bool);
 
   // Description:
   // Define a contour by continuously drawing with the mouse cursor.
@@ -193,9 +193,9 @@ public:
   // opacity to 0 of the representation's property.  If you do not want to
   // see the last active node as it is being added, set the opacity to 0
   // of the representation's active property.
-  vtkSetMacro( ContinuousDraw, int );
-  vtkGetMacro( ContinuousDraw, int );
-  vtkBooleanMacro( ContinuousDraw, int );
+  vtkSetMacro(ContinuousDraw, bool);
+  vtkGetMacro(ContinuousDraw, bool);
+  vtkBooleanMacro(ContinuousDraw, bool);
 
   // Description:
   // Initialize the contour widget from a user supplied set of points. The

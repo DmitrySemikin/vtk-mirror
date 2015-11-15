@@ -85,15 +85,15 @@ public:
   // changes the direction of the normal vector. Contrast this with flipping
   // in vtkPolyDataNormals which flips both the normal and the cell point
   // order.
-  vtkSetMacro(FlipNormals,int);
-  vtkGetMacro(FlipNormals,int);
-  vtkBooleanMacro(FlipNormals,int);
+  vtkSetMacro(FlipNormals, bool);
+  vtkGetMacro(FlipNormals, bool);
+  vtkBooleanMacro(FlipNormals, bool);
 
   // Description:
   // Specify whether to read normals.
-  vtkSetMacro(Normals,int);
-  vtkGetMacro(Normals,int);
-  vtkBooleanMacro(Normals,int);
+  vtkSetMacro(Normals, bool);
+  vtkGetMacro(Normals, bool);
+  vtkBooleanMacro(Normals, bool);
 
   // Description:
   // These methods should be used instead of the SwapBytes methods.
@@ -115,9 +115,9 @@ public:
 
   // Description:
   // Turn on/off byte swapping.
-  vtkSetMacro(SwapBytes,int);
-  vtkGetMacro(SwapBytes,int);
-  vtkBooleanMacro(SwapBytes,int);
+  vtkSetMacro(SwapBytes, bool);
+  vtkGetMacro(SwapBytes, bool);
+  vtkBooleanMacro(SwapBytes, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By default,

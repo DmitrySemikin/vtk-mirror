@@ -74,9 +74,9 @@ public:
   // Description:
   // Turn On/Off orthogonal cropping. (Clipping planes are
   // perpendicular to the coordinate axes.)
-  vtkSetClampMacro(Cropping,int,0,1);
-  vtkGetMacro(Cropping,int);
-  vtkBooleanMacro(Cropping,int);
+  vtkSetMacro(Cropping, bool);
+  vtkGetMacro(Cropping, bool);
+  vtkBooleanMacro(Cropping, bool);
 
   // Description:
   // Set/Get the Cropping Region Planes ( xmin, xmax, ymin, ymax, zmin, zmax )

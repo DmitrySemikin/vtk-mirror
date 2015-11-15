@@ -142,9 +142,9 @@ public:
   //    the data according to region assignment.  See vtkPKdTree for
   //    more information about region assignment.
 
-  vtkBooleanMacro(RetainKdtree, int);
-  vtkGetMacro(RetainKdtree, int);
-  vtkSetMacro(RetainKdtree, int);
+  vtkSetMacro(RetainKdtree, bool);
+  vtkGetMacro(RetainKdtree, bool);
+  vtkBooleanMacro(RetainKdtree, bool);
 
   // Description:
   //   Each cell in the data set is associated with one of the
@@ -156,18 +156,18 @@ public:
   //   cells that intersect these regions, but have their centroid
   //   elsewhere, then set this variable on.  By default it is off.
 
-  vtkBooleanMacro(IncludeAllIntersectingCells, int);
-  vtkGetMacro(IncludeAllIntersectingCells, int);
-  vtkSetMacro(IncludeAllIntersectingCells, int);
+  vtkSetMacro(IncludeAllIntersectingCells, bool);
+  vtkGetMacro(IncludeAllIntersectingCells, bool);
+  vtkBooleanMacro(IncludeAllIntersectingCells, bool);
 
   // Description:
   //   Set this variable if you want the cells of the output
   //   vtkUnstructuredGrid to be clipped to the spatial region
   //   boundaries.  By default this is off.
 
-  vtkBooleanMacro(ClipCells, int);
-  vtkGetMacro(ClipCells, int);
-  vtkSetMacro(ClipCells, int);
+  vtkSetMacro(ClipCells, bool);
+  vtkGetMacro(ClipCells, bool);
+  vtkBooleanMacro(ClipCells, bool);
 
 //BTX
   enum BoundaryModes {
@@ -203,17 +203,17 @@ public:
   //  amount of memory, but these are slower.  Set this option
   //  ON to choose these latter routines.
 
-  vtkBooleanMacro(UseMinimalMemory, int);
-  vtkGetMacro(UseMinimalMemory, int);
-  vtkSetMacro(UseMinimalMemory, int);
+  vtkSetMacro(UseMinimalMemory, bool);
+  vtkGetMacro(UseMinimalMemory, bool);
+  vtkBooleanMacro(UseMinimalMemory, bool);
 
 
   // Description:
   //  Turn on collection of timing data
 
-  vtkBooleanMacro(Timing, int);
-  vtkSetMacro(Timing, int);
-  vtkGetMacro(Timing, int);
+  vtkSetMacro(Timing, bool);
+  vtkGetMacro(Timing, bool);
+  vtkBooleanMacro(Timing, bool);
 
   // Description:
   // You can set the k-d tree decomposition, rather than

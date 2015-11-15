@@ -69,9 +69,9 @@ public:
   // Set/get whether the field data of each dataset in the composite dataset is copied to the output.
   // If AppendFieldData is non-zero, then field data arrays from all the inputs are added
   // to the output. If there are duplicates, the array on the first input encountered is taken.
-  vtkSetMacro(AppendFieldData,int);
-  vtkGetMacro(AppendFieldData,int);
-  vtkBooleanMacro(AppendFieldData,int);
+  vtkSetMacro(AppendFieldData, bool);
+  vtkGetMacro(AppendFieldData, bool);
+  vtkBooleanMacro(AppendFieldData, bool);
 
 protected:
   vtkAppendCompositeDataLeaves();

@@ -120,23 +120,23 @@ public:
   // Description:
   // Set a boolean to control whether to use default normals.
   // DefaultNormalOn is set.
-  vtkSetMacro(UseDefaultNormal,int);
-  vtkGetMacro(UseDefaultNormal,int);
-  vtkBooleanMacro(UseDefaultNormal,int);
+  vtkSetMacro(UseDefaultNormal, bool);
+  vtkGetMacro(UseDefaultNormal, bool);
+  vtkBooleanMacro(UseDefaultNormal, bool);
 
   // Description:
   // Set a boolean to control whether tube sides should share vertices.
   // This creates independent strips, with constant normals so the
   // tube is always faceted in appearance.
-  vtkSetMacro(SidesShareVertices, int);
-  vtkGetMacro(SidesShareVertices, int);
-  vtkBooleanMacro(SidesShareVertices, int);
+  vtkSetMacro(SidesShareVertices, bool);
+  vtkGetMacro(SidesShareVertices, bool);
+  vtkBooleanMacro(SidesShareVertices, bool);
 
   // Description:
   // Turn on/off whether to cap the ends with polygons. Initial value is off.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Control the striping of the tubes. If OnRatio is greater than 1,

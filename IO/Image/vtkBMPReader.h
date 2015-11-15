@@ -78,9 +78,9 @@ public:
   // If this flag is set and the BMP reader encounters an 8bit file,
   // the data will be kept as unsigned chars and a lookuptable will be
   // exported
-  vtkSetMacro(Allow8BitBMP,int);
-  vtkGetMacro(Allow8BitBMP,int);
-  vtkBooleanMacro(Allow8BitBMP,int);
+  vtkSetMacro(Allow8BitBMP, bool);
+  vtkGetMacro(Allow8BitBMP, bool);
+  vtkBooleanMacro(Allow8BitBMP, bool);
 
   vtkGetObjectMacro(LookupTable, vtkLookupTable);
 

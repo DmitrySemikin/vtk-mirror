@@ -43,9 +43,9 @@ public:
   // Description:
   // Set/Get the Absolute ivar. Turning Absolute on causes scale factor
   // of the new position to be one unit away from Position.
-  vtkSetMacro(Absolute,int);
-  vtkGetMacro(Absolute,int);
-  vtkBooleanMacro(Absolute,int);
+  vtkSetMacro(Absolute, bool);
+  vtkGetMacro(Absolute, bool);
+  vtkBooleanMacro(Absolute, bool);
 
   int FillInputPortInformation(int port, vtkInformation *info);
 

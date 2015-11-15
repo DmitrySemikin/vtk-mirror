@@ -45,9 +45,9 @@ public:
   // Description:
   // Set/Get the computation of normals. If on, imported geometry will
   // be run through vtkPolyDataNormals.
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Return the file pointer to the open file.

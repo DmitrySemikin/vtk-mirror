@@ -53,9 +53,9 @@ public:
 
   // Description:
   // Controls whether or not a background is drawn with the text.
-  vtkSetMacro(Backing,int);
-  vtkGetMacro(Backing,int);
-  vtkBooleanMacro(Backing,int);
+  vtkSetMacro(Backing, bool);
+  vtkGetMacro(Backing, bool);
+  vtkBooleanMacro(Backing, bool);
 
   // Description:
   // Set/Get the foreground color. Default is white (1,1,1). ALpha is always 1.

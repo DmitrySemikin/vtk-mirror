@@ -148,9 +148,9 @@ public:
 
   // Description:
   // Even if there is an image actor, should `slice' and `image' be displayed?
-  vtkBooleanMacro(ShowSliceAndImage, int);
-  vtkSetMacro(ShowSliceAndImage, int);
-  vtkGetMacro(ShowSliceAndImage, int);
+  vtkSetMacro(ShowSliceAndImage, bool);
+  vtkGetMacro(ShowSliceAndImage, bool);
+  vtkBooleanMacro(ShowSliceAndImage, bool);
 
 protected:
   vtkCornerAnnotation();

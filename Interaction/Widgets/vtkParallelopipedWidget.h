@@ -84,9 +84,9 @@ public:
   // Description:
   // Enable/disable the creation of a chair on this widget. If off,
   // chairs cannot be created.
-  vtkSetMacro(EnableChairCreation,int);
-  vtkGetMacro(EnableChairCreation,int);
-  vtkBooleanMacro(EnableChairCreation,int);
+  vtkSetMacro(EnableChairCreation, bool);
+  vtkGetMacro(EnableChairCreation, bool);
+  vtkBooleanMacro(EnableChairCreation, bool);
 
   // Description:
   // Create the default widget representation if one is not set.

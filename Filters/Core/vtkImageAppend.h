@@ -79,9 +79,9 @@ public:
   // the union of the input whole extents.  Any portion of the
   // output not covered by the inputs is set to zero.  The origin and
   // spacing is taken from the first input.
-  vtkSetMacro(PreserveExtents, int);
-  vtkGetMacro(PreserveExtents, int);
-  vtkBooleanMacro(PreserveExtents, int);
+  vtkSetMacro(PreserveExtents, bool);
+  vtkGetMacro(PreserveExtents, bool);
+  vtkBooleanMacro(PreserveExtents, bool);
 
 protected:
   vtkImageAppend();

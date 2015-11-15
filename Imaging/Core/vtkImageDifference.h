@@ -77,18 +77,18 @@ public:
   // between input images will be used to determine the difference.
   // Otherwise, the difference is computed directly between pixels
   // of identical row/column values.
-  vtkSetMacro(AllowShift,int);
-  vtkGetMacro(AllowShift,int);
-  vtkBooleanMacro(AllowShift,int);
+  vtkSetMacro(AllowShift, bool);
+  vtkGetMacro(AllowShift, bool);
+  vtkBooleanMacro(AllowShift, bool);
 
   // Description:
   // Specify whether the comparison will include comparison of
   // averaged 3x3 data between the images. For graphics renderings
   // you normally would leave this on. For imaging operations it
   // should be off.
-  vtkSetMacro(Averaging,int);
-  vtkGetMacro(Averaging,int);
-  vtkBooleanMacro(Averaging,int);
+  vtkSetMacro(Averaging, bool);
+  vtkGetMacro(Averaging, bool);
+  vtkBooleanMacro(Averaging, bool);
 
 protected:
   vtkImageDifference();

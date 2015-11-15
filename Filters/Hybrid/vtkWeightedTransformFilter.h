@@ -147,9 +147,9 @@ public:
   // If AddInputValues is true, the output values of this filter will be
   // offset from the input values.  The effect is exactly equivalent to
   // having an identity transform of weight 1 added into each output point.
-  vtkBooleanMacro(AddInputValues, int);
-  vtkSetMacro(AddInputValues, int);
-  vtkGetMacro(AddInputValues, int);
+  vtkSetMacro(AddInputValues, bool);
+  vtkGetMacro(AddInputValues, bool);
+  vtkBooleanMacro(AddInputValues, bool);
 
 protected:
   vtkAbstractTransform **Transforms;

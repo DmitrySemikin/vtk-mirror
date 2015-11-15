@@ -131,9 +131,9 @@ public:
   // Description:
   // Set whether to automatically advance the buffer before each grab.
   // Default: on
-  vtkBooleanMacro(AutoAdvance,int);
-  vtkSetMacro(AutoAdvance,int)
-  vtkGetMacro(AutoAdvance,int);
+  vtkSetMacro(AutoAdvance, bool);
+  vtkGetMacro(AutoAdvance, bool);
+  vtkBooleanMacro(AutoAdvance, bool);
 
   // Description:
   // Set the clip rectangle for the frames.  The video will be clipped

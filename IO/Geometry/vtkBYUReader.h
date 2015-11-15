@@ -60,22 +60,22 @@ public:
 
   // Description:
   // Turn on/off the reading of the displacement file.
-  vtkSetMacro(ReadDisplacement,int);
-  vtkGetMacro(ReadDisplacement,int);
-  vtkBooleanMacro(ReadDisplacement,int);
+  vtkSetMacro(ReadDisplacement, bool);
+  vtkGetMacro(ReadDisplacement, bool);
+  vtkBooleanMacro(ReadDisplacement, bool);
 
   // Description:
   // Turn on/off the reading of the scalar file.
-  vtkSetMacro(ReadScalar,int);
-  vtkGetMacro(ReadScalar,int);
-  vtkBooleanMacro(ReadScalar,int);
+  vtkSetMacro(ReadScalar, bool);
+  vtkGetMacro(ReadScalar, bool);
+  vtkBooleanMacro(ReadScalar, bool);
 
   // Description:
   // Turn on/off the reading of the texture coordinate file.
   // Specify name of geometry FileName.
-  vtkSetMacro(ReadTexture,int);
-  vtkGetMacro(ReadTexture,int);
-  vtkBooleanMacro(ReadTexture,int);
+  vtkSetMacro(ReadTexture, bool);
+  vtkGetMacro(ReadTexture, bool);
+  vtkBooleanMacro(ReadTexture, bool);
 
   // Description:
   // Set/Get the part number to be read.

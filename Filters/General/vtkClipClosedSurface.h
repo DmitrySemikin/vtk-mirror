@@ -79,23 +79,23 @@ public:
   // Description:
   // Pass the point data to the output.  Point data will be interpolated
   // when new points are generated.  This is off by default.
-  vtkSetMacro(PassPointData, int);
-  vtkBooleanMacro(PassPointData, int);
-  vtkGetMacro(PassPointData, int);
+  vtkSetMacro(PassPointData, bool);
+  vtkGetMacro(PassPointData, bool);
+  vtkBooleanMacro(PassPointData, bool);
 
   // Description:
   // Set whether to generate an outline wherever an input face was
   // cut by a plane.  This is off by default.
-  vtkSetMacro(GenerateOutline, int);
-  vtkBooleanMacro(GenerateOutline, int);
-  vtkGetMacro(GenerateOutline, int);
+  vtkSetMacro(GenerateOutline, bool);
+  vtkGetMacro(GenerateOutline, bool);
+  vtkBooleanMacro(GenerateOutline, bool);
 
   // Description:
   // Set whether to generate polygonal faces for the output.  This is
   // on by default.  If it is off, then the output will have no polys.
-  vtkSetMacro(GenerateFaces, int);
-  vtkBooleanMacro(GenerateFaces, int);
-  vtkGetMacro(GenerateFaces, int);
+  vtkSetMacro(GenerateFaces, bool);
+  vtkGetMacro(GenerateFaces, bool);
+  vtkBooleanMacro(GenerateFaces, bool);
 
   // Description:
   // Set whether to add cell scalars, so that new faces and outlines
@@ -150,9 +150,9 @@ public:
   // triangulation errors are too small to see, but they result in
   // a surface that is not watertight.  This option has no impact
   // on performance.
-  vtkSetMacro(TriangulationErrorDisplay, int);
-  vtkBooleanMacro(TriangulationErrorDisplay, int);
-  vtkGetMacro(TriangulationErrorDisplay, int);
+  vtkSetMacro(TriangulationErrorDisplay, bool);
+  vtkGetMacro(TriangulationErrorDisplay, bool);
+  vtkBooleanMacro(TriangulationErrorDisplay, bool);
 
 protected:
   vtkClipClosedSurface();

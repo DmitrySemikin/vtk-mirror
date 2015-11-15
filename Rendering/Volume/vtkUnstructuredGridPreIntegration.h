@@ -85,9 +85,9 @@ public:
   // on).  Incremental pre-integration is much faster but can introduce
   // error due to numerical imprecision.  Under most circumstances, the
   // error is not noticeable.
-  vtkGetMacro(IncrementalPreIntegration, int);
-  vtkSetMacro(IncrementalPreIntegration, int);
-  vtkBooleanMacro(IncrementalPreIntegration, int);
+  vtkSetMacro(IncrementalPreIntegration, bool);
+  vtkGetMacro(IncrementalPreIntegration, bool);
+  vtkBooleanMacro(IncrementalPreIntegration, bool);
 
   // Description:
   // Get the partial pre-integration table for the given scalar component.

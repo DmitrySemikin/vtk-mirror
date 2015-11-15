@@ -114,9 +114,9 @@ public:
   //   data sets.  If for some reason you don't want it to do this,
   //   than MergeDuplicatePointsOff().
 
-  vtkSetMacro(MergeDuplicatePoints, int);
-  vtkGetMacro(MergeDuplicatePoints, int);
-  vtkBooleanMacro(MergeDuplicatePoints, int);
+  vtkSetMacro(MergeDuplicatePoints, bool);
+  vtkGetMacro(MergeDuplicatePoints, bool);
+  vtkBooleanMacro(MergeDuplicatePoints, bool);
 
   // Description:
   //    We need to know the number of different data sets that will

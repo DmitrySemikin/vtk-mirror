@@ -53,9 +53,9 @@ public:
   // This defaults to true, so that leaf nodes are scaled according to
   // the size specification provided, and the parent node sizes are
   // calculated by the algorithm.
-  vtkSetMacro(SizeLeafNodesOnly,int);
-  vtkGetMacro(SizeLeafNodesOnly,int);
-  vtkBooleanMacro(SizeLeafNodesOnly,int);
+  vtkSetMacro(SizeLeafNodesOnly, bool);
+  vtkGetMacro(SizeLeafNodesOnly, bool);
+  vtkBooleanMacro(SizeLeafNodesOnly, bool);
 
   // Description:
   // How many levels of the tree should be laid out?

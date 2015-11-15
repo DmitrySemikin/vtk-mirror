@@ -174,9 +174,9 @@ public:
   // Turn on / off automatic selection of LOD.
   // This is on by default. If it is off, then the SelectedLODID is
   // rendered regardless of rendering time or desired update rate.
-  vtkSetClampMacro(AutomaticLODSelection, int, 0, 1);
-  vtkGetMacro(AutomaticLODSelection, int);
-  vtkBooleanMacro(AutomaticLODSelection, int);
+  vtkSetMacro(AutomaticLODSelection, bool);
+  vtkGetMacro(AutomaticLODSelection, bool);
+  vtkBooleanMacro(AutomaticLODSelection, bool);
 
   // Description:
   // Set the id of the LOD that is to be drawn when automatic LOD selection
@@ -209,9 +209,9 @@ public:
   // Turn on / off automatic selection of picking LOD.
   // This is on by default. If it is off, then the SelectedLODID is
   // rendered regardless of rendering time or desired update rate.
-  vtkSetClampMacro(AutomaticPickLODSelection, int, 0, 1);
-  vtkGetMacro(AutomaticPickLODSelection, int);
-  vtkBooleanMacro(AutomaticPickLODSelection, int);
+  vtkSetMacro(AutomaticPickLODSelection, bool);
+  vtkGetMacro(AutomaticPickLODSelection, bool);
+  vtkBooleanMacro(AutomaticPickLODSelection, bool);
 
   // Description:
   // Shallow copy of this vtkLODProp3D.

@@ -60,15 +60,15 @@ public:
 
   // Description:
   // Boolean controls whether tensor data is passed through to output.
-  vtkSetMacro(PassTensorsToOutput,int);
-  vtkGetMacro(PassTensorsToOutput,int);
-  vtkBooleanMacro(PassTensorsToOutput,int);
+  vtkSetMacro(PassTensorsToOutput, bool);
+  vtkGetMacro(PassTensorsToOutput, bool);
+  vtkBooleanMacro(PassTensorsToOutput, bool);
 
   // Description:
   // Boolean controls whether scalar data is extracted from tensor.
-  vtkSetMacro(ExtractScalars,int);
-  vtkGetMacro(ExtractScalars,int);
-  vtkBooleanMacro(ExtractScalars,int);
+  vtkSetMacro(ExtractScalars, bool);
+  vtkGetMacro(ExtractScalars, bool);
+  vtkBooleanMacro(ExtractScalars, bool);
 
   // Description:
   // Specify the (row,column) tensor component to extract as a scalar.
@@ -97,9 +97,9 @@ public:
 
   // Description:
   // Boolean controls whether vector data is extracted from tensor.
-  vtkSetMacro(ExtractVectors,int);
-  vtkGetMacro(ExtractVectors,int);
-  vtkBooleanMacro(ExtractVectors,int);
+  vtkSetMacro(ExtractVectors, bool);
+  vtkGetMacro(ExtractVectors, bool);
+  vtkBooleanMacro(ExtractVectors, bool);
 
   // Description:
   // Specify the ((row,column)0,(row,column)1,(row,column)2) tensor
@@ -110,16 +110,16 @@ public:
 
   // Description:
   // Boolean controls whether normal data is extracted from tensor.
-  vtkSetMacro(ExtractNormals,int);
-  vtkGetMacro(ExtractNormals,int);
-  vtkBooleanMacro(ExtractNormals,int);
+  vtkSetMacro(ExtractNormals, bool);
+  vtkGetMacro(ExtractNormals, bool);
+  vtkBooleanMacro(ExtractNormals, bool);
 
   // Description:
   // Boolean controls whether normal vector is converted to unit normal
   // after extraction.
-  vtkSetMacro(NormalizeNormals,int);
-  vtkGetMacro(NormalizeNormals,int);
-  vtkBooleanMacro(NormalizeNormals,int);
+  vtkSetMacro(NormalizeNormals, bool);
+  vtkGetMacro(NormalizeNormals, bool);
+  vtkBooleanMacro(NormalizeNormals, bool);
 
   // Description:
   // Specify the ((row,column)0,(row,column)1,(row,column)2) tensor
@@ -129,9 +129,9 @@ public:
 
   // Description:
   // Boolean controls whether texture coordinates are extracted from tensor.
-  vtkSetMacro(ExtractTCoords,int);
-  vtkGetMacro(ExtractTCoords,int);
-  vtkBooleanMacro(ExtractTCoords,int);
+  vtkSetMacro(ExtractTCoords, bool);
+  vtkGetMacro(ExtractTCoords, bool);
+  vtkBooleanMacro(ExtractTCoords, bool);
 
   // Description:
   // Set the dimension of the texture coordinates to extract.

@@ -63,9 +63,9 @@ public:
 
   // Description:
   // Generate solid faces for the box. This is off by default.
-  vtkSetMacro(GenerateFaces, int);
-  vtkBooleanMacro(GenerateFaces, int);
-  vtkGetMacro(GenerateFaces, int);
+  vtkSetMacro(GenerateFaces, bool);
+  vtkGetMacro(GenerateFaces, bool);
+  vtkBooleanMacro(GenerateFaces, bool);
 
   // Description:
   // Set/get the desired precision for the output points.

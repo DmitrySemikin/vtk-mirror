@@ -94,16 +94,16 @@ public:
   // Description:
   // Set/Get the flag that determines which buffer to read from.
   // The default is to read from the front buffer.
-  vtkBooleanMacro(ReadFrontBuffer, int);
-  vtkGetMacro(ReadFrontBuffer, int);
-  vtkSetMacro(ReadFrontBuffer, int);
+  vtkSetMacro(ReadFrontBuffer, bool);
+  vtkGetMacro(ReadFrontBuffer, bool);
+  vtkBooleanMacro(ReadFrontBuffer, bool);
 
   // Description:
   // Set/get whether to re-render the input window. Initial value is true.
   // (This option makes no difference if Magnification > 1.)
-  vtkBooleanMacro(ShouldRerender, int);
-  vtkSetMacro(ShouldRerender, int);
-  vtkGetMacro(ShouldRerender, int);
+  vtkSetMacro(ShouldRerender, bool);
+  vtkGetMacro(ShouldRerender, bool);
+  vtkBooleanMacro(ShouldRerender, bool);
 
   // Description:
   // Set/get the extents to be used to generate the image. Initial value is

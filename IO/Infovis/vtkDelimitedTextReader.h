@@ -94,9 +94,9 @@ public:
   // Description:
   // Enable reading from an InputString or InputArray instead of the default,
   // a file.
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  vtkSetMacro(ReadFromInputString, bool);
+  vtkGetMacro(ReadFromInputString, bool);
+  vtkBooleanMacro(ReadFromInputString, bool);
 
   // Description:
   // Specifies the character set used in the input file.  Valid character set

@@ -50,9 +50,9 @@ public:
 
   // Description:
   // Set/Get Reader caching property
-  vtkSetMacro( EnableCaching, int );
-  vtkGetMacro( EnableCaching, int );
-  vtkBooleanMacro( EnableCaching, int );
+  vtkSetMacro(EnableCaching, bool);
+  vtkGetMacro(EnableCaching, bool);
+  vtkBooleanMacro(EnableCaching, bool);
   bool IsCachingEnabled() const
      {
      return( (this->EnableCaching)?true:false);

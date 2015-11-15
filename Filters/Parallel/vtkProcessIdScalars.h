@@ -51,9 +51,9 @@ public:
   // This option uses a random mapping between pieces and scalar values.
   // The scalar values are chosen between 0 and 1.  By default, random
   // mode is off.
-  vtkSetMacro(RandomMode, int);
-  vtkGetMacro(RandomMode, int);
-  vtkBooleanMacro(RandomMode, int);
+  vtkSetMacro(RandomMode, bool);
+  vtkGetMacro(RandomMode, bool);
+  vtkBooleanMacro(RandomMode, bool);
 
   // Description:
   // By defualt this filter uses the global controller,

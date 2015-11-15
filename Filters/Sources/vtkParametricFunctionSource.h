@@ -88,18 +88,18 @@ public:
   // Note that this is only applicable to parametric surfaces
   // whose parametric dimension is 2.
   // Note that texturing may fail in some cases.
-  vtkBooleanMacro(GenerateTextureCoordinates,int);
-  vtkSetClampMacro(GenerateTextureCoordinates,int,0,1);
-  vtkGetMacro(GenerateTextureCoordinates,int);
+  vtkSetMacro(GenerateTextureCoordinates, bool);
+  vtkGetMacro(GenerateTextureCoordinates, bool);
+  vtkBooleanMacro(GenerateTextureCoordinates, bool);
 
   // Description:
   // Set/Get the generation of normals. This is on by
   // default.
   // Note that this is only applicable to parametric surfaces
   // whose parametric dimension is 2.
-  vtkBooleanMacro(GenerateNormals,int);
-  vtkSetClampMacro(GenerateNormals,int,0,1);
-  vtkGetMacro(GenerateNormals,int);
+  vtkSetMacro(GenerateNormals, bool);
+  vtkGetMacro(GenerateNormals, bool);
+  vtkBooleanMacro(GenerateNormals, bool);
 
   // Description:
   // Enumerate the supported scalar generation modes.<br>

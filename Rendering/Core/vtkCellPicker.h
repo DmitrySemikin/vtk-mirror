@@ -107,9 +107,9 @@ public:
   // computing the opacity isovalue, instead of just using the scalar
   // opacity. This parameter is only relevant to volume picking and
   // is off by default.
-  vtkSetMacro(UseVolumeGradientOpacity, int);
-  vtkBooleanMacro(UseVolumeGradientOpacity, int);
-  vtkGetMacro(UseVolumeGradientOpacity, int);
+  vtkSetMacro(UseVolumeGradientOpacity, bool);
+  vtkGetMacro(UseVolumeGradientOpacity, bool);
+  vtkBooleanMacro(UseVolumeGradientOpacity, bool);
 
   // Description:
   // The PickClippingPlanes setting controls how clipping planes are
@@ -122,9 +122,9 @@ public:
   // GetClippingPlaneId() method will return the index of the clipping
   // plane so that you can retrieve it from the mapper, or -1 if no
   // clipping plane was picked.
-  vtkSetMacro(PickClippingPlanes, int);
-  vtkBooleanMacro(PickClippingPlanes, int);
-  vtkGetMacro(PickClippingPlanes, int);
+  vtkSetMacro(PickClippingPlanes, bool);
+  vtkGetMacro(PickClippingPlanes, bool);
+  vtkBooleanMacro(PickClippingPlanes, bool);
 
   // Description:
   // Get the index of the clipping plane that was intersected during
@@ -191,9 +191,9 @@ public:
   // mapper's data instead and GetPointId() etc. will return information
   // related to the mapper's data.  The default value of PickTextureData
   // is "Off".
-  vtkSetMacro(PickTextureData, int);
-  vtkBooleanMacro(PickTextureData, int);
-  vtkGetMacro(PickTextureData, int);
+  vtkSetMacro(PickTextureData, bool);
+  vtkGetMacro(PickTextureData, bool);
+  vtkBooleanMacro(PickTextureData, bool);
 
 protected:
   vtkCellPicker();

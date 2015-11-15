@@ -137,9 +137,9 @@ public:
   // This is useful for the vtkPolygonalSurfaceContourLineInterpolator, when
   // drawing contours along the edges of a surface mesh.
   // OFF by default.
-  vtkSetMacro( SnapToClosestPoint, int );
-  vtkGetMacro( SnapToClosestPoint, int );
-  vtkBooleanMacro( SnapToClosestPoint, int );
+  vtkSetMacro(SnapToClosestPoint, bool);
+  vtkGetMacro(SnapToClosestPoint, bool);
+  vtkBooleanMacro(SnapToClosestPoint, bool);
 
 //BTX
   // Description:

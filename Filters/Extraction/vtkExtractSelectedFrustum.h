@@ -92,15 +92,15 @@ public:
   // Description:
   // When On, this returns an unstructured grid that outlines selection area.
   // Off is the default.
-  vtkSetMacro(ShowBounds,int);
-  vtkGetMacro(ShowBounds,int);
-  vtkBooleanMacro(ShowBounds,int);
+  vtkSetMacro(ShowBounds, bool);
+  vtkGetMacro(ShowBounds, bool);
+  vtkBooleanMacro(ShowBounds, bool);
 
   // Description:
   // When on, extracts cells outside the frustum instead of inside.
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
 protected:
   vtkExtractSelectedFrustum(vtkPlanes *f=NULL);

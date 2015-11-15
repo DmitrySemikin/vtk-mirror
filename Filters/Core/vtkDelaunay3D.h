@@ -122,27 +122,27 @@ public:
 
   // Description:
   // Boolean controls whether tetrahedra are output for non-zero alpha values.
-  vtkSetMacro(AlphaTets,int);
-  vtkGetMacro(AlphaTets,int);
-  vtkBooleanMacro(AlphaTets,int);
+  vtkSetMacro(AlphaTets, bool);
+  vtkGetMacro(AlphaTets, bool);
+  vtkBooleanMacro(AlphaTets, bool);
 
   // Description:
   // Boolean controls whether triangles are output for non-zero alpha values.
-  vtkSetMacro(AlphaTris,int);
-  vtkGetMacro(AlphaTris,int);
-  vtkBooleanMacro(AlphaTris,int);
+  vtkSetMacro(AlphaTris, bool);
+  vtkGetMacro(AlphaTris, bool);
+  vtkBooleanMacro(AlphaTris, bool);
 
   // Description:
   // Boolean controls whether lines are output for non-zero alpha values.
-  vtkSetMacro(AlphaLines,int);
-  vtkGetMacro(AlphaLines,int);
-  vtkBooleanMacro(AlphaLines,int);
+  vtkSetMacro(AlphaLines, bool);
+  vtkGetMacro(AlphaLines, bool);
+  vtkBooleanMacro(AlphaLines, bool);
 
   // Description:
   // Boolean controls whether vertices are output for non-zero alpha values.
-  vtkSetMacro(AlphaVerts,int);
-  vtkGetMacro(AlphaVerts,int);
-  vtkBooleanMacro(AlphaVerts,int);
+  vtkSetMacro(AlphaVerts, bool);
+  vtkGetMacro(AlphaVerts, bool);
+  vtkBooleanMacro(AlphaVerts, bool);
 
   // Description:
   // Specify a tolerance to control discarding of closely spaced points.
@@ -162,9 +162,9 @@ public:
   // triangles) are included in the output. (These are introduced as an
   // initial triangulation to begin the triangulation process. This feature
   // is nice for debugging output.)
-  vtkSetMacro(BoundingTriangulation,int);
-  vtkGetMacro(BoundingTriangulation,int);
-  vtkBooleanMacro(BoundingTriangulation,int);
+  vtkSetMacro(BoundingTriangulation, bool);
+  vtkGetMacro(BoundingTriangulation, bool);
+  vtkBooleanMacro(BoundingTriangulation, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By default,

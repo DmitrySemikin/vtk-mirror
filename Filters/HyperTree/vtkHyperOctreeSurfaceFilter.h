@@ -41,9 +41,9 @@ public:
   // Turn on/off merging of coincident points. Note that is merging is
   // on, points with different point attributes (e.g., normals) are merged,
   // which may cause rendering artifacts.
-  vtkSetMacro(Merging,int);
-  vtkGetMacro(Merging,int);
-  vtkBooleanMacro(Merging,int);
+  vtkSetMacro(Merging, bool);
+  vtkGetMacro(Merging, bool);
+  vtkBooleanMacro(Merging, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By
@@ -60,9 +60,9 @@ public:
   // holds the cell index of the original 3D cell that produced each output
   // cell. This is useful for cell picking. The default is off to conserve
   // memory.
-  vtkSetMacro(PassThroughCellIds,int);
-  vtkGetMacro(PassThroughCellIds,int);
-  vtkBooleanMacro(PassThroughCellIds,int);
+  vtkSetMacro(PassThroughCellIds, bool);
+  vtkGetMacro(PassThroughCellIds, bool);
+  vtkBooleanMacro(PassThroughCellIds, bool);
 
 protected:
   vtkHyperOctreeSurfaceFilter();

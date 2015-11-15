@@ -96,9 +96,9 @@ public:
   // Turn on/off capping. If capping is on, then the outer boundaries of the
   // structured point set are set to cap value. This can be used to insure
   // surfaces are closed.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Set the cap value.
@@ -107,9 +107,9 @@ public:
 
   // Description:
   // Turn on/off the computation of normals (normals are float values).
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Set/get the scalar array name for this data set. Initial value is

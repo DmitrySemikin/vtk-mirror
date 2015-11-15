@@ -110,9 +110,9 @@ public:
   // ignored by calculations like finding the range of the values.  That said,
   // this option should be used with caution as VTK does not fully support NaN
   // values and therefore odd calculations may occur.  By default this is off.
-  vtkGetMacro(ReplaceFillValueWithNan, int);
-  vtkSetMacro(ReplaceFillValueWithNan, int);
-  vtkBooleanMacro(ReplaceFillValueWithNan, int);
+  vtkSetMacro(ReplaceFillValueWithNan, bool);
+  vtkGetMacro(ReplaceFillValueWithNan, bool);
+  vtkBooleanMacro(ReplaceFillValueWithNan, bool);
 
   // Description:
   // Access to the time dimensions units.

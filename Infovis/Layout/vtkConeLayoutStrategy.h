@@ -72,9 +72,9 @@ public:
   // sub-trees to overlap.  This is useful if the tree is
   // actually the spanning tree of a graph.  For "real" trees,
   // non-compressed layout is best, and is the default.
-  vtkSetMacro(Compression, int);
-  vtkGetMacro(Compression, int);
-  vtkBooleanMacro(Compression, int);
+  vtkSetMacro(Compression, bool);
+  vtkGetMacro(Compression, bool);
+  vtkBooleanMacro(Compression, bool);
 
   // Description:
   // Set the spacing parameter that affects space between

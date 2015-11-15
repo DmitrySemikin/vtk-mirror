@@ -52,9 +52,9 @@ public:
 
   // Description:
   // Set/Get whether to use 4 or 8 neighbors
-  vtkSetMacro(SquareNeighborhood, int);
-  vtkGetMacro(SquareNeighborhood, int);
-  vtkBooleanMacro(SquareNeighborhood, int);
+  vtkSetMacro(SquareNeighborhood, bool);
+  vtkGetMacro(SquareNeighborhood, bool);
+  vtkBooleanMacro(SquareNeighborhood, bool);
 
   // Description:
   // Set/Get the value to remove.

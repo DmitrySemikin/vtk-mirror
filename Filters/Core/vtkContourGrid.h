@@ -86,9 +86,9 @@ public:
   // expensive in both time and storage. If the output data will be
   // processed by filters that modify topology or geometry, it may be
   // wise to turn Normals and Gradients off.
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Set/Get the computation of gradients. Gradient computation is
@@ -99,21 +99,21 @@ public:
   // may be wise to turn Normals and Gradients off.  @deprecated
   // ComputeGradients is not used so these methods don't affect
   // anything (VTK 6.0).
-  vtkSetMacro(ComputeGradients,int);
-  vtkGetMacro(ComputeGradients,int);
-  vtkBooleanMacro(ComputeGradients,int);
+  vtkSetMacro(ComputeGradients, bool);
+  vtkGetMacro(ComputeGradients, bool);
+  vtkBooleanMacro(ComputeGradients, bool);
 
   // Description:
   // Set/Get the computation of scalars.
-  vtkSetMacro(ComputeScalars,int);
-  vtkGetMacro(ComputeScalars,int);
-  vtkBooleanMacro(ComputeScalars,int);
+  vtkSetMacro(ComputeScalars, bool);
+  vtkGetMacro(ComputeScalars, bool);
+  vtkBooleanMacro(ComputeScalars, bool);
 
   // Description:
   // Enable the use of a scalar tree to accelerate contour extraction.
-  vtkSetMacro(UseScalarTree,int);
-  vtkGetMacro(UseScalarTree,int);
-  vtkBooleanMacro(UseScalarTree,int);
+  vtkSetMacro(UseScalarTree, bool);
+  vtkGetMacro(UseScalarTree, bool);
+  vtkBooleanMacro(UseScalarTree, bool);
 
   // Description:
   // Specify the instance of vtkScalarTree to use. If not specified
@@ -133,9 +133,9 @@ public:
   // WARNING: if the cutting function is not a plane, the output
   // will be 3D poygons, which might be nice to look at but hard
   // to compute with downstream.
-  vtkSetMacro(GenerateTriangles,int);
-  vtkGetMacro(GenerateTriangles,int);
-  vtkBooleanMacro(GenerateTriangles,int);
+  vtkSetMacro(GenerateTriangles, bool);
+  vtkGetMacro(GenerateTriangles, bool);
+  vtkBooleanMacro(GenerateTriangles, bool);
 
   // Description:
   // Create default locator. Used to create one when none is

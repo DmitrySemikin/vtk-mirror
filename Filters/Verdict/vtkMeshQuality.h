@@ -108,9 +108,9 @@ public:
   // cell data in the resulting mesh or discarded (leaving only the
   // aggregate quality average of the entire mesh, recorded in the
   // FieldData).
-  vtkSetMacro(SaveCellQuality,int);
-  vtkGetMacro(SaveCellQuality,int);
-  vtkBooleanMacro(SaveCellQuality,int);
+  vtkSetMacro(SaveCellQuality, bool);
+  vtkGetMacro(SaveCellQuality, bool);
+  vtkBooleanMacro(SaveCellQuality, bool);
 
   // Description:
   // Set/Get the particular estimator used to function the quality of triangles.

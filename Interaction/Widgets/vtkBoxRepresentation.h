@@ -80,9 +80,9 @@ public:
   // with the GetPlanes() method. When off, the normals point out of the
   // box. When on, the normals point into the hexahedron.  InsideOut is off
   // by default.
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description:
   // Retrieve a linear transform characterizing the transformation of the

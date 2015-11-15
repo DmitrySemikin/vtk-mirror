@@ -77,9 +77,9 @@ public:
   // By default ToleranceIsAbsolute is false and Tolerance is
   // a fraction of Bounding box diagonal, if true, AbsoluteTolerance is
   // used when adding points to locator (merging)
-  vtkSetMacro(ToleranceIsAbsolute,int);
-  vtkBooleanMacro(ToleranceIsAbsolute,int);
-  vtkGetMacro(ToleranceIsAbsolute,int);
+  vtkSetMacro(ToleranceIsAbsolute, bool);
+  vtkGetMacro(ToleranceIsAbsolute, bool);
+  vtkBooleanMacro(ToleranceIsAbsolute, bool);
 
   // Description:
   // Specify tolerance in terms of fraction of bounding box length.
@@ -94,30 +94,30 @@ public:
 
   // Description:
   // Turn on/off conversion of degenerate lines to points. Default is On.
-  vtkSetMacro(ConvertLinesToPoints,int);
-  vtkBooleanMacro(ConvertLinesToPoints,int);
-  vtkGetMacro(ConvertLinesToPoints,int);
+  vtkSetMacro(ConvertLinesToPoints, bool);
+  vtkGetMacro(ConvertLinesToPoints, bool);
+  vtkBooleanMacro(ConvertLinesToPoints, bool);
 
   // Description:
   // Turn on/off conversion of degenerate polys to lines. Default is On.
-  vtkSetMacro(ConvertPolysToLines,int);
-  vtkBooleanMacro(ConvertPolysToLines,int);
-  vtkGetMacro(ConvertPolysToLines,int);
+  vtkSetMacro(ConvertPolysToLines, bool);
+  vtkGetMacro(ConvertPolysToLines, bool);
+  vtkBooleanMacro(ConvertPolysToLines, bool);
 
   // Description:
   // Turn on/off conversion of degenerate strips to polys. Default is On.
-  vtkSetMacro(ConvertStripsToPolys,int);
-  vtkBooleanMacro(ConvertStripsToPolys,int);
-  vtkGetMacro(ConvertStripsToPolys,int);
+  vtkSetMacro(ConvertStripsToPolys, bool);
+  vtkGetMacro(ConvertStripsToPolys, bool);
+  vtkBooleanMacro(ConvertStripsToPolys, bool);
 
   // Description:
   // Set/Get a boolean value that controls whether point merging is
   // performed. If on, a locator will be used, and points laying within
   // the appropriate tolerance may be merged. If off, points are never
   // merged. By default, merging is on.
-  vtkSetMacro(PointMerging,int);
-  vtkGetMacro(PointMerging,int);
-  vtkBooleanMacro(PointMerging,int);
+  vtkSetMacro(PointMerging, bool);
+  vtkGetMacro(PointMerging, bool);
+  vtkBooleanMacro(PointMerging, bool);
 
   // Description:
   // Set/Get a spatial locator for speeding the search process. By
@@ -150,9 +150,9 @@ public:
   // This flag allows the user to select whether strict piece invariance
   // is required.  By default it is on.  When off, the filter can stream,
   // but results may change.
-  vtkSetMacro(PieceInvariant, int);
-  vtkGetMacro(PieceInvariant, int);
-  vtkBooleanMacro(PieceInvariant, int);
+  vtkSetMacro(PieceInvariant, bool);
+  vtkGetMacro(PieceInvariant, bool);
+  vtkBooleanMacro(PieceInvariant, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

@@ -37,9 +37,9 @@ public:
   // Description:
   // Enable/Disable vtkHardwareSelector class. Useful when using this painter as
   // an internal painter. Default is enabled.
-  vtkSetMacro(EnableSelection, int);
-  vtkGetMacro(EnableSelection, int);
-  vtkBooleanMacro(EnableSelection, int);
+  vtkSetMacro(EnableSelection, bool);
+  vtkGetMacro(EnableSelection, bool);
+  vtkBooleanMacro(EnableSelection, bool);
 
   // Description:
   // By default, this painters uses the dataset's point and cell ids during

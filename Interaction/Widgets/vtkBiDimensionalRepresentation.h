@@ -91,12 +91,12 @@ public:
   // measure. Generally these methods are used by the vtkBiDimensionalWidget to
   // control the appearance of the widget. Note: turning off Line1 actually turns
   // off Line1 and Line2.
-  vtkSetMacro(Line1Visibility,int);
-  vtkGetMacro(Line1Visibility,int);
-  vtkBooleanMacro(Line1Visibility,int);
-  vtkSetMacro(Line2Visibility,int);
-  vtkGetMacro(Line2Visibility,int);
-  vtkBooleanMacro(Line2Visibility,int);
+  vtkSetMacro(Line1Visibility, bool);
+  vtkGetMacro(Line1Visibility, bool);
+  vtkBooleanMacro(Line1Visibility, bool);
+  vtkSetMacro(Line2Visibility, bool);
+  vtkGetMacro(Line2Visibility, bool);
+  vtkBooleanMacro(Line2Visibility, bool);
 
   // Description:
   // This method is used to specify the type of handle representation to use
@@ -141,9 +141,9 @@ public:
   // Description:
   // Toggle whether to display the label above or below the widget.
   // Defaults to 1.
-  vtkSetMacro(ShowLabelAboveWidget, int);
-  vtkGetMacro(ShowLabelAboveWidget, int);
-  vtkBooleanMacro(ShowLabelAboveWidget, int);
+  vtkSetMacro(ShowLabelAboveWidget, bool);
+  vtkGetMacro(ShowLabelAboveWidget, bool);
+  vtkBooleanMacro(ShowLabelAboveWidget, bool);
 
   // Description:
   // Set/get the id to display in the label.

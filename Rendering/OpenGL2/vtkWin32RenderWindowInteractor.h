@@ -65,9 +65,9 @@ public:
   // intercepts windows messages to the window and controls interactions.
   // MFC or BCB programs can prevent this and instead directly route any mouse/key
   // messages into the event bindings by setting InstallMessgeProc to false.
-  vtkSetMacro(InstallMessageProc,int);
-  vtkGetMacro(InstallMessageProc,int);
-  vtkBooleanMacro(InstallMessageProc,int);
+  vtkSetMacro(InstallMessageProc, bool);
+  vtkGetMacro(InstallMessageProc, bool);
+  vtkBooleanMacro(InstallMessageProc, bool);
 
   // Description:
   // Win32 specific application terminate, calls ClassExitMethod then

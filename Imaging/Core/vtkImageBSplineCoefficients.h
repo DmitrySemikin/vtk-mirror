@@ -99,9 +99,9 @@ public:
   // and the output type will be the same as the input type.  This
   // is useful a downstream filter sometimes uses b-spline interpolation
   // and sometimes uses other forms of interpolation.
-  vtkSetMacro(Bypass, int);
-  vtkBooleanMacro(Bypass, int);
-  vtkGetMacro(Bypass, int);
+  vtkSetMacro(Bypass, bool);
+  vtkGetMacro(Bypass, bool);
+  vtkBooleanMacro(Bypass, bool);
 
   // Description:
   // Check a point against the image bounds.  Return 0 if out of bounds,

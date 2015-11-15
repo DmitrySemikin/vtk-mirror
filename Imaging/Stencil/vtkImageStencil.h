@@ -49,9 +49,9 @@ public:
 
   // Description:
   // Reverse the stencil.
-  vtkSetMacro(ReverseStencil, int);
-  vtkBooleanMacro(ReverseStencil, int);
-  vtkGetMacro(ReverseStencil, int);
+  vtkSetMacro(ReverseStencil, bool);
+  vtkGetMacro(ReverseStencil, bool);
+  vtkBooleanMacro(ReverseStencil, bool);
 
   // Description:
   // Set the second input.  This image will be used for the 'outside' of the

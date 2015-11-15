@@ -44,9 +44,9 @@ public:
   // Description:
   // When set, the lines painter is used for drawing wireframes (off by
   // default, except on Mac, where it's on by default).
-  vtkSetMacro(UseLinesPainterForWireframes, int);
-  vtkGetMacro(UseLinesPainterForWireframes, int);
-  vtkBooleanMacro(UseLinesPainterForWireframes, int);
+  vtkSetMacro(UseLinesPainterForWireframes, bool);
+  vtkGetMacro(UseLinesPainterForWireframes, bool);
+  vtkBooleanMacro(UseLinesPainterForWireframes, bool);
 
   // Description:
   // Release any graphics resources that are being consumed by this mapper.

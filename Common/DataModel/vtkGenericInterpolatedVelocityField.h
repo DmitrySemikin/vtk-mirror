@@ -89,9 +89,9 @@ public:
 
   // Description:
   // Turn caching on/off.
-  vtkGetMacro(Caching, int);
-  vtkSetMacro(Caching, int);
-  vtkBooleanMacro(Caching, int);
+  vtkSetMacro(Caching, bool);
+  vtkGetMacro(Caching, bool);
+  vtkBooleanMacro(Caching, bool);
 
   // Description:
   // Caching statistics.

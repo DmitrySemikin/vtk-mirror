@@ -124,9 +124,9 @@ public:
   // EnhancedLIC mean compute the LIC twice with the second pass using
   // the edge-enhanced result of the first pass as a noise texture. Edge
   // enhancedment is made by a simple Laplace convolution.
-  vtkSetClampMacro(EnhancedLIC, int, 0, 1);
-  vtkGetMacro(EnhancedLIC, int);
-  vtkBooleanMacro(EnhancedLIC, int);
+  vtkSetMacro(EnhancedLIC, bool);
+  vtkGetMacro(EnhancedLIC, bool);
+  vtkBooleanMacro(EnhancedLIC, bool);
 
   // Description:
   // Enable/Disable contrast and dynamic range correction stages. Stage 1 is applied

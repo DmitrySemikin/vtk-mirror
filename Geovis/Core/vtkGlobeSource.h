@@ -93,9 +93,9 @@ public:
   // longitude lines. If on, quadrilaterals are generated everywhere
   // except at the poles. This can be useful for generating a wireframe
   // sphere with natural latitude and longitude lines.
-  vtkSetMacro(QuadrilateralTessellation,int);
-  vtkGetMacro(QuadrilateralTessellation,int);
-  vtkBooleanMacro(QuadrilateralTessellation,int);
+  vtkSetMacro(QuadrilateralTessellation, bool);
+  vtkGetMacro(QuadrilateralTessellation, bool);
+  vtkBooleanMacro(QuadrilateralTessellation, bool);
 
   // Description:
   // Construct sphere with radius=0.5 and default resolution 8 in both latitude

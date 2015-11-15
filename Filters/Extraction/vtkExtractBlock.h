@@ -51,18 +51,18 @@ public:
   // Description:
   // When set, the output mutliblock dataset will be pruned to remove empty
   // nodes. On by default.
-  vtkSetMacro(PruneOutput, int);
-  vtkGetMacro(PruneOutput, int);
-  vtkBooleanMacro(PruneOutput, int);
+  vtkSetMacro(PruneOutput, bool);
+  vtkGetMacro(PruneOutput, bool);
+  vtkBooleanMacro(PruneOutput, bool);
 
   // Description:
   // This is used only when PruneOutput is ON. By default, when pruning the
   // output i.e. remove empty blocks, if node has only 1 non-null child block,
   // then that node is removed. To preserve these parent nodes, set this flag to
   // true. Off by default.
-  vtkSetMacro(MaintainStructure, int);
-  vtkGetMacro(MaintainStructure, int);
-  vtkBooleanMacro(MaintainStructure, int);
+  vtkSetMacro(MaintainStructure, bool);
+  vtkGetMacro(MaintainStructure, bool);
+  vtkBooleanMacro(MaintainStructure, bool);
 
 //BTX
 protected:

@@ -63,9 +63,9 @@ public:
 
   // Description:
   // Turn on/off flag to control whether scalar data is used to color objects.
-  vtkSetMacro(ScalarVisibility, int);
-  vtkGetMacro(ScalarVisibility, int);
-  vtkBooleanMacro(ScalarVisibility, int);
+  vtkSetMacro(ScalarVisibility, bool);
+  vtkGetMacro(ScalarVisibility, bool);
+  vtkBooleanMacro(ScalarVisibility, bool);
 
   // Description:
   // Control how the scalar data is mapped to colors.  By default
@@ -96,9 +96,9 @@ public:
   // the LookupTable range, but users who are sharing LookupTables between
   // mappers/actors will probably wish to force the mapper to use the
   // LookupTable unchanged.
-  vtkSetMacro(UseLookupTableScalarRange, int);
-  vtkGetMacro(UseLookupTableScalarRange, int);
-  vtkBooleanMacro(UseLookupTableScalarRange, int);
+  vtkSetMacro(UseLookupTableScalarRange, bool);
+  vtkGetMacro(UseLookupTableScalarRange, bool);
+  vtkBooleanMacro(UseLookupTableScalarRange, bool);
 
   // Description:
   // Specify range in terms of scalar minimum and maximum (smin,smax). These

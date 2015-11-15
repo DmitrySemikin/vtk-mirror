@@ -80,16 +80,16 @@ public:
   // parameter has no effect when performing the gradient of cell data.
   // This only applies if the input grid is a vtkUnstructuredGrid or a
   // vtkPolyData.
-  vtkGetMacro(FasterApproximation, int);
-  vtkSetMacro(FasterApproximation, int);
-  vtkBooleanMacro(FasterApproximation, int);
+  vtkSetMacro(FasterApproximation, bool);
+  vtkGetMacro(FasterApproximation, bool);
+  vtkBooleanMacro(FasterApproximation, bool);
 
   // Description:
   // Set the resultant array to be vorticity/curl of the input
   // array.  The input array must have 3 components.
-  vtkSetMacro(ComputeVorticity, int);
-  vtkGetMacro(ComputeVorticity, int);
-  vtkBooleanMacro(ComputeVorticity, int);
+  vtkSetMacro(ComputeVorticity, bool);
+  vtkGetMacro(ComputeVorticity, bool);
+  vtkBooleanMacro(ComputeVorticity, bool);
 
   // Description:
   // Add Q-criterion to the output field data.  The name of the array
@@ -97,9 +97,9 @@ public:
   // array.  The input array must have 3 components in order to
   // compute this.  Note that Q-citerion is a balance of the rate
   // of vorticity and the rate of strain.
-  vtkSetMacro(ComputeQCriterion, int);
-  vtkGetMacro(ComputeQCriterion, int);
-  vtkBooleanMacro(ComputeQCriterion, int);
+  vtkSetMacro(ComputeQCriterion, bool);
+  vtkGetMacro(ComputeQCriterion, bool);
+  vtkBooleanMacro(ComputeQCriterion, bool);
 
 protected:
   vtkGradientFilter();

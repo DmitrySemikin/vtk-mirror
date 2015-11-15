@@ -128,9 +128,9 @@ public:
   // ignored.  Outputing as coordinates is only valid with vector results and
   // if the AttributeMode is AttributeModeToUsePointData.
   // If a valid output can't be made, an error will occur.
-  vtkGetMacro(CoordinateResults, int);
-  vtkSetMacro(CoordinateResults, int);
-  vtkBooleanMacro(CoordinateResults, int);
+  vtkSetMacro(CoordinateResults, bool);
+  vtkGetMacro(CoordinateResults, bool);
+  vtkBooleanMacro(CoordinateResults, bool);
 
   // Description:
   // Set whether to output results as point/cell normals. Outputing as
@@ -211,9 +211,9 @@ public:
   // sqrt(-2), note that function parser does not handle complex
   // numbers) will be replaced by ReplacementValue. Otherwise an
   // error will be reported
-  vtkSetMacro(ReplaceInvalidValues,int);
-  vtkGetMacro(ReplaceInvalidValues,int);
-  vtkBooleanMacro(ReplaceInvalidValues,int);
+  vtkSetMacro(ReplaceInvalidValues, bool);
+  vtkGetMacro(ReplaceInvalidValues, bool);
+  vtkBooleanMacro(ReplaceInvalidValues, bool);
   vtkSetMacro(ReplacementValue,double);
   vtkGetMacro(ReplacementValue,double);
 

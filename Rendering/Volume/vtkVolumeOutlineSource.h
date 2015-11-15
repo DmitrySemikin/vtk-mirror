@@ -51,24 +51,24 @@ public:
   // Set whether to generate color scalars for the output.  By default,
   // the output has no scalars and the color must be set in the
   // property of the actor.
-  vtkSetMacro(GenerateScalars, int);
-  vtkBooleanMacro(GenerateScalars, int);
-  vtkGetMacro(GenerateScalars, int);
+  vtkSetMacro(GenerateScalars, bool);
+  vtkGetMacro(GenerateScalars, bool);
+  vtkBooleanMacro(GenerateScalars, bool);
 
   // Description:
   // Set whether to generate an outline wherever an input face was
   // cut by a plane.  This is on by default.
-  vtkSetMacro(GenerateOutline, int);
-  vtkBooleanMacro(GenerateOutline, int);
-  vtkGetMacro(GenerateOutline, int);
+  vtkSetMacro(GenerateOutline, bool);
+  vtkGetMacro(GenerateOutline, bool);
+  vtkBooleanMacro(GenerateOutline, bool);
 
   // Description:
   // Set whether to generate polygonal faces for the output.  By default,
   // only lines are generated.  The faces will form a closed, watertight
   // surface.
-  vtkSetMacro(GenerateFaces, int);
-  vtkBooleanMacro(GenerateFaces, int);
-  vtkGetMacro(GenerateFaces, int);
+  vtkSetMacro(GenerateFaces, bool);
+  vtkGetMacro(GenerateFaces, bool);
+  vtkBooleanMacro(GenerateFaces, bool);
 
   // Description:
   // Set the color of the outline.  This has no effect unless GenerateScalars

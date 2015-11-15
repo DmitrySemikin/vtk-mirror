@@ -87,9 +87,9 @@ public:
   // Vertex picking (using the method GetVertexId()), required
   // additional resources and can slow down still render time by
   // 5-10%. Enabled by default.
-  vtkSetMacro(EnableVertexPicking, int);
-  vtkGetMacro(EnableVertexPicking, int);
-  vtkBooleanMacro(EnableVertexPicking, int);
+  vtkSetMacro(EnableVertexPicking, bool);
+  vtkGetMacro(EnableVertexPicking, bool);
+  vtkBooleanMacro(EnableVertexPicking, bool);
 
 protected:
   vtkScenePicker();

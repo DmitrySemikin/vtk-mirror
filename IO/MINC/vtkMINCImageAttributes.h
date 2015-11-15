@@ -216,9 +216,9 @@ public:
   // Description:
   // Set this to Off if you do not want to automatically validate
   // every attribute that is set.
-  vtkSetMacro(ValidateAttributes, int);
-  vtkBooleanMacro(ValidateAttributes, int);
-  vtkGetMacro(ValidateAttributes, int);
+  vtkSetMacro(ValidateAttributes, bool);
+  vtkGetMacro(ValidateAttributes, bool);
+  vtkBooleanMacro(ValidateAttributes, bool);
 
   // Description:
   // Do a shallow copy.  This will copy all the attributes

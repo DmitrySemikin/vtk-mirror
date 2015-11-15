@@ -200,9 +200,9 @@ public:
   // Description:
   // Set the default Normalize() flag for those methods setting a default
   // Normalize value (e.g., SetPointComponent).
-  vtkSetMacro(DefaultNormalize,int);
-  vtkGetMacro(DefaultNormalize,int);
-  vtkBooleanMacro(DefaultNormalize,int);
+  vtkSetMacro(DefaultNormalize, bool);
+  vtkGetMacro(DefaultNormalize, bool);
+  vtkBooleanMacro(DefaultNormalize, bool);
 
   // Description:
   // Specify the dimensions to use if generating a dataset that requires

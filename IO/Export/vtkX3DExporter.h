@@ -67,9 +67,9 @@ public:
 
   // Description:
   // Enable writing to an OutputString instead of the default, a file.
-  vtkSetMacro(WriteToOutputString,int);
-  vtkGetMacro(WriteToOutputString,int);
-  vtkBooleanMacro(WriteToOutputString,int);
+  vtkSetMacro(WriteToOutputString, bool);
+  vtkGetMacro(WriteToOutputString, bool);
+  vtkBooleanMacro(WriteToOutputString, bool);
 
   // Description:
   // When WriteToOutputString in on, then a string is allocated, written to,

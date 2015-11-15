@@ -83,9 +83,9 @@ public:
   // Flag controls whether the widget becomes visible when the mouse pointer
   // moves close to it (i.e., the widget becomes active). By default,
   // ActiveRepresentation is off and the representation is always visible.
-  vtkSetMacro(ActiveRepresentation,int);
-  vtkGetMacro(ActiveRepresentation,int);
-  vtkBooleanMacro(ActiveRepresentation,int);
+  vtkSetMacro(ActiveRepresentation, bool);
+  vtkGetMacro(ActiveRepresentation, bool);
+  vtkBooleanMacro(ActiveRepresentation, bool);
 
 //BTX
   // Enums define the state of the representation relative to the mouse pointer
@@ -109,9 +109,9 @@ public:
   // Specify whether any motions (such as scale, translate, etc.) are
   // constrained in some way (along an axis, etc.) Widgets can use this
   // to control the resulting motion.
-  vtkSetMacro(Constrained,int);
-  vtkGetMacro(Constrained,int);
-  vtkBooleanMacro(Constrained,int);
+  vtkSetMacro(Constrained, bool);
+  vtkGetMacro(Constrained, bool);
+  vtkBooleanMacro(Constrained, bool);
 
   // Description:
   // Method has to be overridden in the subclasses which has

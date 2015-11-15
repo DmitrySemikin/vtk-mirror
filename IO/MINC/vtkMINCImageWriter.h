@@ -137,9 +137,9 @@ public:
   // Description:
   // Set whether to validate that all variable attributes that
   // have been set are ones that are listed in the MINC standard.
-  vtkSetMacro(StrictValidation, int);
-  vtkBooleanMacro(StrictValidation, int);
-  vtkGetMacro(StrictValidation, int);
+  vtkSetMacro(StrictValidation, bool);
+  vtkGetMacro(StrictValidation, bool);
+  vtkBooleanMacro(StrictValidation, bool);
 
   // Description:
   // Set a string value to append to the history of the file.  This

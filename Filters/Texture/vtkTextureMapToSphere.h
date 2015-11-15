@@ -63,18 +63,18 @@ public:
   // Description:
   // Turn on/off automatic sphere generation. This means it automatically
   // finds the sphere center.
-  vtkSetMacro(AutomaticSphereGeneration,int);
-  vtkGetMacro(AutomaticSphereGeneration,int);
-  vtkBooleanMacro(AutomaticSphereGeneration,int);
+  vtkSetMacro(AutomaticSphereGeneration, bool);
+  vtkGetMacro(AutomaticSphereGeneration, bool);
+  vtkBooleanMacro(AutomaticSphereGeneration, bool);
 
   // Description:
   // Control how the texture coordinates are generated. If PreventSeam is
   // set, the s-coordinate ranges from 0->1 and 1->0 corresponding to the
   // theta angle variation between 0->180 and 180->0 degrees. Otherwise, the
   // s-coordinate ranges from 0->1 between 0->360 degrees.
-  vtkSetMacro(PreventSeam,int);
-  vtkGetMacro(PreventSeam,int);
-  vtkBooleanMacro(PreventSeam,int);
+  vtkSetMacro(PreventSeam, bool);
+  vtkGetMacro(PreventSeam, bool);
+  vtkBooleanMacro(PreventSeam, bool);
 
 protected:
   vtkTextureMapToSphere();

@@ -76,9 +76,9 @@ public:
 
   // Description:
   // Also perform window level ?
-  vtkSetMacro( ManageWindowLevel, int );
-  vtkGetMacro( ManageWindowLevel, int );
-  vtkBooleanMacro( ManageWindowLevel, int );
+  vtkSetMacro(ManageWindowLevel, bool);
+  vtkGetMacro(ManageWindowLevel, bool);
+  vtkBooleanMacro(ManageWindowLevel, bool);
 
   // Description:
   // Events

@@ -66,33 +66,33 @@ public:
   // Set/get whether the unbiased estimator for the variance should be used, or if
   // the population variance will be calculated.
   // The default is that the unbiased estimator will be used.
-  vtkSetMacro(UnbiasedVariance,int);
-  vtkGetMacro(UnbiasedVariance,int);
-  vtkBooleanMacro(UnbiasedVariance,int);
+  vtkSetMacro(UnbiasedVariance, bool);
+  vtkGetMacro(UnbiasedVariance, bool);
+  vtkBooleanMacro(UnbiasedVariance, bool);
 
   // Description:
   // Set/get whether the G1 estimator for the skewness should be used, or if
   // the g1 skewness will be calculated.
   // The default is that the g1 skewness estimator will be used.
-  vtkSetMacro(G1Skewness,int);
-  vtkGetMacro(G1Skewness,int);
-  vtkBooleanMacro(G1Skewness,int);
+  vtkSetMacro(G1Skewness, bool);
+  vtkGetMacro(G1Skewness, bool);
+  vtkBooleanMacro(G1Skewness, bool);
 
   // Description:
   // Set/get whether the G2 estimator for the kurtosis should be used, or if
   // the g2 kurtosis will be calculated.
   // The default is that the g2 kurtosis estimator will be used.
-  vtkSetMacro(G2Kurtosis,int);
-  vtkGetMacro(G2Kurtosis,int);
-  vtkBooleanMacro(G2Kurtosis,int);
+  vtkSetMacro(G2Kurtosis, bool);
+  vtkGetMacro(G2Kurtosis, bool);
+  vtkBooleanMacro(G2Kurtosis, bool);
 
   // Description:
   // Set/get whether the deviations returned should be signed, or should
   // only have their magnitude reported.
   // The default is that signed deviations will be computed.
-  vtkSetMacro(SignedDeviations,int);
-  vtkGetMacro(SignedDeviations,int);
-  vtkBooleanMacro(SignedDeviations,int);
+  vtkSetMacro(SignedDeviations, bool);
+  vtkGetMacro(SignedDeviations, bool);
+  vtkBooleanMacro(SignedDeviations, bool);
 
   // Description:
   // Given a collection of models, calculate aggregate model

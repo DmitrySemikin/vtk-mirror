@@ -90,22 +90,22 @@ public:
 
   // Description:
   // Enable/disable the placement of a border around the text.
-  vtkSetMacro(Border,int);
-  vtkGetMacro(Border,int);
-  vtkBooleanMacro(Border,int);
+  vtkSetMacro(Border, bool);
+  vtkGetMacro(Border, bool);
+  vtkBooleanMacro(Border, bool);
 
   // Description:
   // Enable/disable drawing a "line" from the caption to the
   // attachment point.
-  vtkSetMacro(Leader,int);
-  vtkGetMacro(Leader,int);
-  vtkBooleanMacro(Leader,int);
+  vtkSetMacro(Leader, bool);
+  vtkGetMacro(Leader, bool);
+  vtkBooleanMacro(Leader, bool);
 
   // Description:
   // Indicate whether the leader is 2D (no hidden line) or 3D (z-buffered).
-  vtkSetMacro(ThreeDimensionalLeader,int);
-  vtkGetMacro(ThreeDimensionalLeader,int);
-  vtkBooleanMacro(ThreeDimensionalLeader,int);
+  vtkSetMacro(ThreeDimensionalLeader, bool);
+  vtkGetMacro(ThreeDimensionalLeader, bool);
+  vtkBooleanMacro(ThreeDimensionalLeader, bool);
 
   // Description:
   // Specify a glyph to be used as the leader "head". This could be something
@@ -158,9 +158,9 @@ public:
   // Description:
   // Enable/disable whether to attach the arrow only to the edge,
   // NOT the vertices of the caption border.
-  vtkSetMacro(AttachEdgeOnly,int);
-  vtkGetMacro(AttachEdgeOnly,int);
-  vtkBooleanMacro(AttachEdgeOnly,int);
+  vtkSetMacro(AttachEdgeOnly, bool);
+  vtkGetMacro(AttachEdgeOnly, bool);
+  vtkBooleanMacro(AttachEdgeOnly, bool);
 
 //BTX
   // Description:

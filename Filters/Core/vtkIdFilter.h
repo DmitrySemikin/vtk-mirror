@@ -43,23 +43,23 @@ public:
 
   // Description:
   // Enable/disable the generation of point ids. Default is on.
-  vtkSetMacro(PointIds,int);
-  vtkGetMacro(PointIds,int);
-  vtkBooleanMacro(PointIds,int);
+  vtkSetMacro(PointIds, bool);
+  vtkGetMacro(PointIds, bool);
+  vtkBooleanMacro(PointIds, bool);
 
   // Description:
   // Enable/disable the generation of point ids. Default is on.
-  vtkSetMacro(CellIds,int);
-  vtkGetMacro(CellIds,int);
-  vtkBooleanMacro(CellIds,int);
+  vtkSetMacro(CellIds, bool);
+  vtkGetMacro(CellIds, bool);
+  vtkBooleanMacro(CellIds, bool);
 
   // Description:
   // Set/Get the flag which controls whether to generate scalar data
   // or field data. If this flag is off, scalar data is generated.
   // Otherwise, field data is generated. Default is off.
-  vtkSetMacro(FieldData,int);
-  vtkGetMacro(FieldData,int);
-  vtkBooleanMacro(FieldData,int);
+  vtkSetMacro(FieldData, bool);
+  vtkGetMacro(FieldData, bool);
+  vtkBooleanMacro(FieldData, bool);
 
   // Description:
   // Set/Get the name of the Ids array if generated. By default the Ids

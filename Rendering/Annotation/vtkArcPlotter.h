@@ -112,9 +112,9 @@ public:
   // Set a boolean to control whether to use default normals.
   // By default, normals are automatically computed from the generating
   // polyline and camera.
-  vtkSetMacro(UseDefaultNormal,int);
-  vtkGetMacro(UseDefaultNormal,int);
-  vtkBooleanMacro(UseDefaultNormal,int);
+  vtkSetMacro(UseDefaultNormal, bool);
+  vtkGetMacro(UseDefaultNormal, bool);
+  vtkBooleanMacro(UseDefaultNormal, bool);
 
   // Description:
   // Set the default normal to use if you do not wish automatic normal

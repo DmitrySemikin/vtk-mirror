@@ -55,9 +55,9 @@ public:
   // Description:
   // These methods can make the positioning look for a target scalar value
   // instead of looking for a maximum.
-  vtkSetMacro(TargetFlag, int);
-  vtkGetMacro(TargetFlag, int);
-  vtkBooleanMacro(TargetFlag, int);
+  vtkSetMacro(TargetFlag, bool);
+  vtkGetMacro(TargetFlag, bool);
+  vtkBooleanMacro(TargetFlag, bool);
   vtkSetMacro(TargetValue, double);
   vtkGetMacro(TargetValue, double);
 

@@ -53,9 +53,9 @@ public:
   // refers to (0,0,0) in the coordinate system associated with the image,
   // it does not refer to the Origin ivar that is associated with a
   // vtkImageData.
-  vtkSetMacro(FlipAboutOrigin, int);
-  vtkGetMacro(FlipAboutOrigin, int);
-  vtkBooleanMacro(FlipAboutOrigin, int);
+  vtkSetMacro(FlipAboutOrigin, bool);
+  vtkGetMacro(FlipAboutOrigin, bool);
+  vtkBooleanMacro(FlipAboutOrigin, bool);
 
   // Description:
   // Keep the mis-named Axes variations around for compatibility with old
@@ -67,9 +67,9 @@ public:
   // PreserveImageExtentOff wasn't covered by test scripts and its
   // implementation was broken.  It is deprecated now and it has
   // no effect (i.e. the ImageExtent is always preserved).
-  vtkSetMacro(PreserveImageExtent, int);
-  vtkGetMacro(PreserveImageExtent, int);
-  vtkBooleanMacro(PreserveImageExtent, int);
+  vtkSetMacro(PreserveImageExtent, bool);
+  vtkGetMacro(PreserveImageExtent, bool);
+  vtkBooleanMacro(PreserveImageExtent, bool);
 
 protected:
   vtkImageFlip();

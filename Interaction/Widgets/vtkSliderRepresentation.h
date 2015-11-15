@@ -117,9 +117,9 @@ public:
   // Description:
   // Indicate whether the slider text label should be displayed. This is
   // a number corresponding to the current Value of this widget.
-  vtkSetMacro(ShowSliderLabel,int);
-  vtkGetMacro(ShowSliderLabel,int);
-  vtkBooleanMacro(ShowSliderLabel,int);
+  vtkSetMacro(ShowSliderLabel, bool);
+  vtkGetMacro(ShowSliderLabel, bool);
+  vtkBooleanMacro(ShowSliderLabel, bool);
 
   // Description:
   // Methods to interface with the vtkSliderWidget. Subclasses of this class

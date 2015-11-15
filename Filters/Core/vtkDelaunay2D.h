@@ -192,9 +192,9 @@ public:
   // triangles) are included in the output. (These are introduced as an
   // initial triangulation to begin the triangulation process. This feature
   // is nice for debugging output.)
-  vtkSetMacro(BoundingTriangulation,int);
-  vtkGetMacro(BoundingTriangulation,int);
-  vtkBooleanMacro(BoundingTriangulation,int);
+  vtkSetMacro(BoundingTriangulation, bool);
+  vtkGetMacro(BoundingTriangulation, bool);
+  vtkBooleanMacro(BoundingTriangulation, bool);
 
   // Description:
   // Set / get the transform which is applied to points to generate a

@@ -173,15 +173,15 @@ public:
   // normalization on.  If normalization is on, the coordinates will
   // be rescaled to the original coordinate system after smoothing has
   // completed.
-  vtkSetMacro(NormalizeCoordinates, int);
-  vtkGetMacro(NormalizeCoordinates, int);
-  vtkBooleanMacro(NormalizeCoordinates, int);
+  vtkSetMacro(NormalizeCoordinates, bool);
+  vtkGetMacro(NormalizeCoordinates, bool);
+  vtkBooleanMacro(NormalizeCoordinates, bool);
 
   // Description:
   // Turn on/off smoothing along sharp interior edges.
-  vtkSetMacro(FeatureEdgeSmoothing,int);
-  vtkGetMacro(FeatureEdgeSmoothing,int);
-  vtkBooleanMacro(FeatureEdgeSmoothing,int);
+  vtkSetMacro(FeatureEdgeSmoothing, bool);
+  vtkGetMacro(FeatureEdgeSmoothing, bool);
+  vtkBooleanMacro(FeatureEdgeSmoothing, bool);
 
   // Description:
   // Specify the feature angle for sharp edge identification.
@@ -196,27 +196,27 @@ public:
 
   // Description:
   // Turn on/off the smoothing of vertices on the boundary of the mesh.
-  vtkSetMacro(BoundarySmoothing,int);
-  vtkGetMacro(BoundarySmoothing,int);
-  vtkBooleanMacro(BoundarySmoothing,int);
+  vtkSetMacro(BoundarySmoothing, bool);
+  vtkGetMacro(BoundarySmoothing, bool);
+  vtkBooleanMacro(BoundarySmoothing, bool);
 
   // Description:
   // Smooth non-manifold vertices.
-  vtkSetMacro(NonManifoldSmoothing,int);
-  vtkGetMacro(NonManifoldSmoothing,int);
-  vtkBooleanMacro(NonManifoldSmoothing,int);
+  vtkSetMacro(NonManifoldSmoothing, bool);
+  vtkGetMacro(NonManifoldSmoothing, bool);
+  vtkBooleanMacro(NonManifoldSmoothing, bool);
 
   // Description:
   // Turn on/off the generation of scalar distance values.
-  vtkSetMacro(GenerateErrorScalars,int);
-  vtkGetMacro(GenerateErrorScalars,int);
-  vtkBooleanMacro(GenerateErrorScalars,int);
+  vtkSetMacro(GenerateErrorScalars, bool);
+  vtkGetMacro(GenerateErrorScalars, bool);
+  vtkBooleanMacro(GenerateErrorScalars, bool);
 
   // Description:
   // Turn on/off the generation of error vectors.
-  vtkSetMacro(GenerateErrorVectors,int);
-  vtkGetMacro(GenerateErrorVectors,int);
-  vtkBooleanMacro(GenerateErrorVectors,int);
+  vtkSetMacro(GenerateErrorVectors, bool);
+  vtkGetMacro(GenerateErrorVectors, bool);
+  vtkBooleanMacro(GenerateErrorVectors, bool);
 
  protected:
   vtkWindowedSincPolyDataFilter();

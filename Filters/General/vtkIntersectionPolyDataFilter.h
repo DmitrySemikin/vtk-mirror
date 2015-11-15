@@ -44,16 +44,16 @@ public:
   // Description:
   // If on, the second output will be the first input mesh split by the
   // intersection with the second input mesh. Defaults to on.
-  vtkGetMacro(SplitFirstOutput, int);
-  vtkSetMacro(SplitFirstOutput, int);
-  vtkBooleanMacro(SplitFirstOutput, int);
+  vtkSetMacro(SplitFirstOutput, bool);
+  vtkGetMacro(SplitFirstOutput, bool);
+  vtkBooleanMacro(SplitFirstOutput, bool);
 
   // Description:
   // If on, the third output will be the second input mesh split by the
   // intersection with the first input mesh. Defaults to on.
-  vtkGetMacro(SplitSecondOutput, int);
-  vtkSetMacro(SplitSecondOutput, int);
-  vtkBooleanMacro(SplitSecondOutput, int);
+  vtkSetMacro(SplitSecondOutput, bool);
+  vtkGetMacro(SplitSecondOutput, bool);
+  vtkBooleanMacro(SplitSecondOutput, bool);
 
   // Description:
   // Given two triangles defined by points (p1, q1, r1) and (p2, q2,

@@ -75,9 +75,9 @@ public:
 
   // Description:
   // Recurse into subdirectories.
-  vtkSetMacro(Recurse, int);
-  vtkBooleanMacro(Recurse, int);
-  vtkGetMacro(Recurse, int);
+  vtkSetMacro(Recurse, bool);
+  vtkGetMacro(Recurse, bool);
+  vtkBooleanMacro(Recurse, bool);
 
   // Description:
   // Return the number of files found.

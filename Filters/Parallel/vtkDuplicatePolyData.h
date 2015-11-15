@@ -48,9 +48,9 @@ public:
   // When this flag is off, two sends occur then two receives.
   // I want to see if it makes a difference in performance.
   // The flag is on by default.
-  vtkSetMacro(Synchronous, int);
-  vtkGetMacro(Synchronous, int);
-  vtkBooleanMacro(Synchronous, int);
+  vtkSetMacro(Synchronous, bool);
+  vtkGetMacro(Synchronous, bool);
+  vtkBooleanMacro(Synchronous, bool);
 
   // Description:
   // This duplicate filter works in client server mode when this

@@ -186,9 +186,9 @@ public:
 
   // Description:
   // Set whether the below range color should be used.
-  vtkSetMacro(UseBelowRangeColor, int);
-  vtkGetMacro(UseBelowRangeColor, int);
-  vtkBooleanMacro(UseBelowRangeColor, int);
+  vtkSetMacro(UseBelowRangeColor, bool);
+  vtkGetMacro(UseBelowRangeColor, bool);
+  vtkBooleanMacro(UseBelowRangeColor, bool);
 
   // Description:
   // Set the color to use when a value above the range is
@@ -198,9 +198,9 @@ public:
 
   // Description:
   // Set whether the below range color should be used.
-  vtkSetMacro(UseAboveRangeColor, int);
-  vtkGetMacro(UseAboveRangeColor, int);
-  vtkBooleanMacro(UseAboveRangeColor, int);
+  vtkSetMacro(UseAboveRangeColor, bool);
+  vtkGetMacro(UseAboveRangeColor, bool);
+  vtkBooleanMacro(UseAboveRangeColor, bool);
 
   // Description:
   // Map one value through the lookup table.

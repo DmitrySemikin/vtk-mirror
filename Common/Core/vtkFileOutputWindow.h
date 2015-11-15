@@ -47,18 +47,18 @@ public:
   // Description:
   // Turns on buffer flushing for the output
   // to the log file.
-  vtkSetMacro(Flush, int);
-  vtkGetMacro(Flush, int);
-  vtkBooleanMacro(Flush, int);
+  vtkSetMacro(Flush, bool);
+  vtkGetMacro(Flush, bool);
+  vtkBooleanMacro(Flush, bool);
 
   // Description:
   // Setting append will cause the log file to be
   // opened in append mode.  Otherwise, if the log file exists,
   // it will be overwritten each time the vtkFileOutputWindow
   // is created.
-  vtkSetMacro(Append, int);
-  vtkGetMacro(Append, int);
-  vtkBooleanMacro(Append, int);
+  vtkSetMacro(Append, bool);
+  vtkGetMacro(Append, bool);
+  vtkBooleanMacro(Append, bool);
 
 protected:
   vtkFileOutputWindow();

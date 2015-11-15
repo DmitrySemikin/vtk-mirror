@@ -56,9 +56,9 @@ public:
 
   // Description:
   // Special flag causes randomization of point selection.
-  vtkSetMacro(RandomMode,int);
-  vtkGetMacro(RandomMode,int);
-  vtkBooleanMacro(RandomMode,int);
+  vtkSetMacro(RandomMode, bool);
+  vtkGetMacro(RandomMode, bool);
+  vtkBooleanMacro(RandomMode, bool);
 
   // Description:
   // Special mode selector that switches between random mode types.
@@ -95,25 +95,25 @@ public:
   // the total number of points = maximum number of points *
   // number of processors.  In the second case, the total number of
   // points = maximum number of points.
-  vtkSetMacro(ProportionalMaximumNumberOfPoints, int);
-  vtkGetMacro(ProportionalMaximumNumberOfPoints, int);
-  vtkBooleanMacro(ProportionalMaximumNumberOfPoints, int);
+  vtkSetMacro(ProportionalMaximumNumberOfPoints, bool);
+  vtkGetMacro(ProportionalMaximumNumberOfPoints, bool);
+  vtkBooleanMacro(ProportionalMaximumNumberOfPoints, bool);
 
   // Description:
   // Generate output polydata vertices as well as points. A useful
   // convenience method because vertices are drawn (they are topology) while
   // points are not (they are geometry). By default this method is off.
-  vtkSetMacro(GenerateVertices,int);
-  vtkGetMacro(GenerateVertices,int);
-  vtkBooleanMacro(GenerateVertices,int);
+  vtkSetMacro(GenerateVertices, bool);
+  vtkGetMacro(GenerateVertices, bool);
+  vtkBooleanMacro(GenerateVertices, bool);
 
   // Description:
   // When vertex generation is enabled, by default vertices are produced
   // as multi-vertex cells (more than one per cell), if you wish to have
   // a single vertex per cell, enable this flag.
-  vtkSetMacro(SingleVertexPerCell,int);
-  vtkGetMacro(SingleVertexPerCell,int);
-  vtkBooleanMacro(SingleVertexPerCell,int);
+  vtkSetMacro(SingleVertexPerCell, bool);
+  vtkGetMacro(SingleVertexPerCell, bool);
+  vtkBooleanMacro(SingleVertexPerCell, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

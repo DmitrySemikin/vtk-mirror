@@ -77,9 +77,9 @@ public:
   // behavior (and may crash) if the type conversion is out of range
   // of the data type.  On the other hand, clamping is slower.
   // By default, ClampOverflow is off.
-  vtkSetMacro(ClampOverflow, int);
-  vtkGetMacro(ClampOverflow, int);
-  vtkBooleanMacro(ClampOverflow, int);
+  vtkSetMacro(ClampOverflow, bool);
+  vtkGetMacro(ClampOverflow, bool);
+  vtkBooleanMacro(ClampOverflow, bool);
 
 protected:
   vtkImageShiftScale();

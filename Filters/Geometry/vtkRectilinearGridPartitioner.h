@@ -53,9 +53,9 @@ public:
   vtkSetMacro(NumberOfGhostLayers,int);
 
   // Description:
-  vtkGetMacro(DuplicateNodes,int);
-  vtkSetMacro(DuplicateNodes,int);
-  vtkBooleanMacro(DuplicateNodes,int);
+  vtkSetMacro(DuplicateNodes, bool);
+  vtkGetMacro(DuplicateNodes, bool);
+  vtkBooleanMacro(DuplicateNodes, bool);
 
 protected:
   vtkRectilinearGridPartitioner();

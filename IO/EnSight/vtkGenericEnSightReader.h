@@ -135,9 +135,9 @@ public:
 
   // Description:
   // Set/get the flag for whether to read all the variables
-  vtkBooleanMacro(ReadAllVariables, int);
-  vtkSetMacro(ReadAllVariables, int);
-  vtkGetMacro(ReadAllVariables, int);
+  vtkSetMacro(ReadAllVariables, bool);
+  vtkGetMacro(ReadAllVariables, bool);
+  vtkBooleanMacro(ReadAllVariables, bool);
 
   // Description:
   // Get the data array selection tables used to configure which data
@@ -211,9 +211,9 @@ public:
   // in the file) and regardless of the actual Id of of the point.
   // Warning, if the Points are listed in non sequential order
   // then setting this flag will reorder them.
-  vtkSetMacro(ParticleCoordinatesByIndex, int);
-  vtkGetMacro(ParticleCoordinatesByIndex, int);
-  vtkBooleanMacro(ParticleCoordinatesByIndex, int);
+  vtkSetMacro(ParticleCoordinatesByIndex, bool);
+  vtkGetMacro(ParticleCoordinatesByIndex, bool);
+  vtkBooleanMacro(ParticleCoordinatesByIndex, bool);
 
   // Description:
   // Returns true if the file pointed to by casefilename appears to be a

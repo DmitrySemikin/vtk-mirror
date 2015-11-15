@@ -76,9 +76,9 @@ public:
   // Description:
   // Set/Get ClampValue. If On, results of the interpolation will be
   // clamped to the min/max of the input data.
-  vtkSetMacro(ClampValue,int);
-  vtkGetMacro(ClampValue,int);
-  vtkBooleanMacro(ClampValue,int);
+  vtkSetMacro(ClampValue, bool);
+  vtkGetMacro(ClampValue, bool);
+  vtkBooleanMacro(ClampValue, bool);
 
   // Description:
   // Compute the coefficients for the spline.
@@ -108,9 +108,9 @@ public:
   // Control whether the spline is open or closed. A closed spline forms
   // a continuous loop: the first and last points are the same, and
   // derivatives are continuous.
-  vtkSetMacro(Closed,int);
-  vtkGetMacro(Closed,int);
-  vtkBooleanMacro(Closed,int);
+  vtkSetMacro(Closed, bool);
+  vtkGetMacro(Closed, bool);
+  vtkBooleanMacro(Closed, bool);
 
   // Description:
   // Set the type of constraint of the left(right) end points. Four

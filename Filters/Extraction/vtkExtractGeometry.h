@@ -63,19 +63,19 @@ public:
   // Boolean controls whether to extract cells that are inside of implicit
   // function (ExtractInside == 1) or outside of implicit function
   // (ExtractInside == 0).
-  vtkSetMacro(ExtractInside,int);
-  vtkGetMacro(ExtractInside,int);
-  vtkBooleanMacro(ExtractInside,int);
+  vtkSetMacro(ExtractInside, bool);
+  vtkGetMacro(ExtractInside, bool);
+  vtkBooleanMacro(ExtractInside, bool);
 
   // Description:
   // Boolean controls whether to extract cells that are partially inside.
   // By default, ExtractBoundaryCells is off.
-  vtkSetMacro(ExtractBoundaryCells,int);
-  vtkGetMacro(ExtractBoundaryCells,int);
-  vtkBooleanMacro(ExtractBoundaryCells,int);
-  vtkSetMacro(ExtractOnlyBoundaryCells,int);
-  vtkGetMacro(ExtractOnlyBoundaryCells,int);
-  vtkBooleanMacro(ExtractOnlyBoundaryCells,int);
+  vtkSetMacro(ExtractBoundaryCells, bool);
+  vtkGetMacro(ExtractBoundaryCells, bool);
+  vtkBooleanMacro(ExtractBoundaryCells, bool);
+  vtkSetMacro(ExtractOnlyBoundaryCells, bool);
+  vtkGetMacro(ExtractOnlyBoundaryCells, bool);
+  vtkBooleanMacro(ExtractOnlyBoundaryCells, bool);
 
 protected:
   vtkExtractGeometry(vtkImplicitFunction *f=NULL);

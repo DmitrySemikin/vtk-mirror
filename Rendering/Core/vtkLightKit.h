@@ -199,9 +199,9 @@ public:
   // If MaintainLuminance is set, the LightKit will attempt to maintain
   // the apparent intensity of lights based on their perceptual brightnesses.
   // By default, MaintainLuminance is off.
-  vtkBooleanMacro(MaintainLuminance, int);
-  vtkGetMacro(MaintainLuminance, int);
-  vtkSetMacro(MaintainLuminance, int);
+  vtkSetMacro(MaintainLuminance, bool);
+  vtkGetMacro(MaintainLuminance, bool);
+  vtkBooleanMacro(MaintainLuminance, bool);
 
   // Description:
   // Get/Set the position of the key, fill, and back lights

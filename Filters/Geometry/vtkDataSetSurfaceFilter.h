@@ -56,9 +56,9 @@ public:
   // When input is structured data, this flag will generate faces with
   // triangle strips.  This should render faster and use less memory, but no
   // cell data is copied.  By default, UseStrips is Off.
-  vtkSetMacro(UseStrips, int);
-  vtkGetMacro(UseStrips, int);
-  vtkBooleanMacro(UseStrips, int);
+  vtkSetMacro(UseStrips, bool);
+  vtkGetMacro(UseStrips, bool);
+  vtkBooleanMacro(UseStrips, bool);
 
   // Description:
   // If PieceInvariant is true, vtkDataSetSurfaceFilter requests
@@ -74,12 +74,12 @@ public:
   // memory. Note that PassThroughCellIds will be ignored if UseStrips is on,
   // since in that case each tringle strip can represent more than on of the
   // input cells.
-  vtkSetMacro(PassThroughCellIds,int);
-  vtkGetMacro(PassThroughCellIds,int);
-  vtkBooleanMacro(PassThroughCellIds,int);
-  vtkSetMacro(PassThroughPointIds,int);
-  vtkGetMacro(PassThroughPointIds,int);
-  vtkBooleanMacro(PassThroughPointIds,int);
+  vtkSetMacro(PassThroughCellIds, bool);
+  vtkGetMacro(PassThroughCellIds, bool);
+  vtkBooleanMacro(PassThroughCellIds, bool);
+  vtkSetMacro(PassThroughPointIds, bool);
+  vtkGetMacro(PassThroughPointIds, bool);
+  vtkBooleanMacro(PassThroughPointIds, bool);
 
   // Description:
   // If PassThroughCellIds or PassThroughPointIds is on, then these ivars

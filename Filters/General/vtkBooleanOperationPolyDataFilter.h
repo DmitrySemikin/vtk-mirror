@@ -72,9 +72,9 @@ public:
   // Description:
   // Turn on/off cell reorientation of the intersection portion of the
   // surface when the operation is set to DIFFERENCE. Defaults to on.
-  vtkSetMacro( ReorientDifferenceCells, int );
-  vtkGetMacro( ReorientDifferenceCells, int );
-  vtkBooleanMacro( ReorientDifferenceCells, int );
+  vtkSetMacro(ReorientDifferenceCells, bool);
+  vtkGetMacro(ReorientDifferenceCells, bool);
+  vtkBooleanMacro(ReorientDifferenceCells, bool);
 
   // Description:
   // Set/get the tolerance used to determine when a point's absolute

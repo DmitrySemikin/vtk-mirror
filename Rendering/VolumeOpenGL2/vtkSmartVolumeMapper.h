@@ -219,9 +219,9 @@ public:
   // along with InteractiveUpdateRate is useful to adjust volume mapper sample
   // distance based on whether the render is interactive or still.
   // By default, InteractiveAdjustSampleDistances is enabled.
-  vtkSetClampMacro( InteractiveAdjustSampleDistances, int, 0, 1);
-  vtkGetMacro( InteractiveAdjustSampleDistances, int);
-  vtkBooleanMacro( InteractiveAdjustSampleDistances, int);
+  vtkSetMacro( InteractiveAdjustSampleDistances, bool);
+  vtkGetMacro( InteractiveAdjustSampleDistances, bool);
+  vtkBooleanMacro( InteractiveAdjustSampleDistances, bool);
 
   // Description:
   // If AutoAdjustSampleDistances is on, the ImageSampleDistance

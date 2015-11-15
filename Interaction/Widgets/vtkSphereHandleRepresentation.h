@@ -64,9 +64,9 @@ public:
   // the cursor focal point moves, which is constrained by the bounds of the
   // point representation. (Note that the bounds can be scaled up using the
   // right mouse button.)
-  vtkSetMacro(TranslationMode,int);
-  vtkGetMacro(TranslationMode,int);
-  vtkBooleanMacro(TranslationMode,int);
+  vtkSetMacro(TranslationMode, bool);
+  vtkGetMacro(TranslationMode, bool);
+  vtkBooleanMacro(TranslationMode, bool);
 
   void SetSphereRadius(double);
   double GetSphereRadius();

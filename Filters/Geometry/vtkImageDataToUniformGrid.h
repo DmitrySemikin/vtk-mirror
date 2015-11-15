@@ -44,9 +44,9 @@ class VTKFILTERSGEOMETRY_EXPORT vtkImageDataToUniformGrid
   // result in that point or cell to be blanked. Set Reverse to
   // 1 to make points or cells to not be blanked for array values
   // of 0.
-  vtkSetClampMacro(Reverse, int, 0, 1);
-  vtkGetMacro(Reverse, int);
-  vtkBooleanMacro(Reverse, int);
+  vtkSetMacro(Reverse, bool);
+  vtkGetMacro(Reverse, bool);
+  vtkBooleanMacro(Reverse, bool);
 
 protected:
   vtkImageDataToUniformGrid();

@@ -80,9 +80,9 @@ public:
   // Description:
   // Specify whether the button should always face the camera. If enabled,
   // the button rotates as the camera moves.
-  vtkSetMacro(FollowCamera,int);
-  vtkGetMacro(FollowCamera,int);
-  vtkBooleanMacro(FollowCamera,int);
+  vtkSetMacro(FollowCamera, bool);
+  vtkGetMacro(FollowCamera, bool);
+  vtkBooleanMacro(FollowCamera, bool);
 
   // Description:
   // Specify the property to use when the button is to appear "normal"

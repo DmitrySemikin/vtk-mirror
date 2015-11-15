@@ -80,9 +80,9 @@ public:
   // Description:
   // If enabled, this will flip the sense of inside and outside the implicit
   // function (i.e., a rotation around the r-s-t=0.5 axis).
-  vtkSetMacro(FlipTexture,int);
-  vtkGetMacro(FlipTexture,int);
-  vtkBooleanMacro(FlipTexture,int);
+  vtkSetMacro(FlipTexture, bool);
+  vtkGetMacro(FlipTexture, bool);
+  vtkBooleanMacro(FlipTexture, bool);
 
 protected:
   vtkImplicitTextureCoords();

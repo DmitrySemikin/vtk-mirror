@@ -129,9 +129,9 @@ public:
   // Description:
   // To get around problems with the Paraview Animation controls
   // we can just animate the time step and ignore the TIME_ requests
-  vtkSetMacro(IgnorePipelineTime, int);
-  vtkGetMacro(IgnorePipelineTime, int);
-  vtkBooleanMacro(IgnorePipelineTime, int);
+  vtkSetMacro(IgnorePipelineTime, bool);
+  vtkGetMacro(IgnorePipelineTime, bool);
+  vtkBooleanMacro(IgnorePipelineTime, bool);
 
   // Description:
   // When animating particles, it is nice to inject new ones every Nth step
@@ -205,17 +205,17 @@ public:
   // Description:
   // Set/Get the filename to be used with the particle writer when
   // dumping particles to disk
-  vtkSetMacro(EnableParticleWriting,int);
-  vtkGetMacro(EnableParticleWriting,int);
-  vtkBooleanMacro(EnableParticleWriting,int);
+  vtkSetMacro(EnableParticleWriting, bool);
+  vtkGetMacro(EnableParticleWriting, bool);
+  vtkBooleanMacro(EnableParticleWriting, bool);
 
   // Description:
   // Set/Get the flag to disable cache
   // This is off by default and turned on in special circumstances
   // such as in a coprocessing workflow
-  vtkSetMacro(DisableResetCache,int);
-  vtkGetMacro(DisableResetCache,int);
-  vtkBooleanMacro(DisableResetCache,int);
+  vtkSetMacro(DisableResetCache, bool);
+  vtkGetMacro(DisableResetCache, bool);
+  vtkBooleanMacro(DisableResetCache, bool);
 
   // Description:
   // Provide support for multiple seed sources

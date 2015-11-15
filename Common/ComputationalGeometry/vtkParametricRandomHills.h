@@ -109,9 +109,9 @@ public:
   // Any other value means that the hills will be placed randomly on the
   // surface.
   // Default is 1.
-  vtkSetClampMacro(AllowRandomGeneration,int,0,1);
-  vtkGetMacro(AllowRandomGeneration,int);
-  vtkBooleanMacro(AllowRandomGeneration,int);
+  vtkSetMacro(AllowRandomGeneration, bool);
+  vtkGetMacro(AllowRandomGeneration, bool);
+  vtkBooleanMacro(AllowRandomGeneration, bool);
 
   // Description:
   // Set/Get the scaling factor for the variance in the x-direction.

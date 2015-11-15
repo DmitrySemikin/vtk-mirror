@@ -62,23 +62,23 @@ public:
   // Description:
   // Specify/retrieve a boolean flag indicating whether cell vertex points should
   // be output.
-  vtkGetMacro(GenerateVertexPoints,int);
-  vtkSetMacro(GenerateVertexPoints,int);
-  vtkBooleanMacro(GenerateVertexPoints,int);
+  vtkSetMacro(GenerateVertexPoints, bool);
+  vtkGetMacro(GenerateVertexPoints, bool);
+  vtkBooleanMacro(GenerateVertexPoints, bool);
 
   // Description:
   // Specify/retrieve a boolean flag indicating whether cell edges should
   // be sampled to produce output points. The default is true.
-  vtkGetMacro(GenerateEdgePoints,int);
-  vtkSetMacro(GenerateEdgePoints,int);
-  vtkBooleanMacro(GenerateEdgePoints,int);
+  vtkSetMacro(GenerateEdgePoints, bool);
+  vtkGetMacro(GenerateEdgePoints, bool);
+  vtkBooleanMacro(GenerateEdgePoints, bool);
 
   // Description:
   // Specify/retrieve a boolean flag indicating whether cell interiors should
   // be sampled to produce output points. The default is true.
-  vtkGetMacro(GenerateInteriorPoints,int);
-  vtkSetMacro(GenerateInteriorPoints,int);
-  vtkBooleanMacro(GenerateInteriorPoints,int);
+  vtkSetMacro(GenerateInteriorPoints, bool);
+  vtkGetMacro(GenerateInteriorPoints, bool);
+  vtkBooleanMacro(GenerateInteriorPoints, bool);
 
   // Description:
   // Specify/retrieve a boolean flag indicating whether cell vertices should
@@ -86,9 +86,9 @@ public:
   // the points (that is, for each point generated, a vertex is generated).
   // Recall that VTK only renders vertices and not points.
   // The default is true.
-  vtkGetMacro(GenerateVertices,int);
-  vtkSetMacro(GenerateVertices,int);
-  vtkBooleanMacro(GenerateVertices,int);
+  vtkSetMacro(GenerateVertices, bool);
+  vtkGetMacro(GenerateVertices, bool);
+  vtkBooleanMacro(GenerateVertices, bool);
 
 protected:
   vtkPolyDataPointSampler();

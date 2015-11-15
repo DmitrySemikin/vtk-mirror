@@ -79,9 +79,9 @@ public:
   // Set this to Off to disable interaction. On by default.
   // Subclasses must overide SetProcessEvents() to make sure
   // that they pass on the flag to all component widgets.
-  vtkSetClampMacro(ProcessEvents, int, 0, 1);
-  vtkGetMacro(ProcessEvents, int);
-  vtkBooleanMacro(ProcessEvents, int);
+  vtkSetMacro(ProcessEvents, bool);
+  vtkGetMacro(ProcessEvents, bool);
+  vtkBooleanMacro(ProcessEvents, bool);
 
   // Description:
   // Get the event translator. Careful manipulation of this class enables
@@ -128,9 +128,9 @@ public:
   // created. For example, vtkHandleWidgets are often used to create
   // composite widgets, and the parent widget takes over the cursor
   // management.
-  vtkSetMacro(ManagesCursor,int);
-  vtkGetMacro(ManagesCursor,int);
-  vtkBooleanMacro(ManagesCursor,int);
+  vtkSetMacro(ManagesCursor, bool);
+  vtkGetMacro(ManagesCursor, bool);
+  vtkBooleanMacro(ManagesCursor, bool);
 
   // Description:
   // Override the superclass method. This will automatically change the

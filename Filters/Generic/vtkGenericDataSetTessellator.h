@@ -54,18 +54,18 @@ public:
   // original cells (as an input cell is tessellated into several linear
   // cells).
   // The name of the data array is "OriginalIds". It is true by default.
-  vtkSetMacro(KeepCellIds, int);
-  vtkGetMacro(KeepCellIds, int);
-  vtkBooleanMacro(KeepCellIds, int);
+  vtkSetMacro(KeepCellIds, bool);
+  vtkGetMacro(KeepCellIds, bool);
+  vtkBooleanMacro(KeepCellIds, bool);
 
 
   // Description:
   // Turn on/off merging of coincident points. Note that is merging is
   // on, points with different point attributes (e.g., normals) are merged,
   // which may cause rendering artifacts.
-  vtkSetMacro(Merging,int);
-  vtkGetMacro(Merging,int);
-  vtkBooleanMacro(Merging,int);
+  vtkSetMacro(Merging, bool);
+  vtkGetMacro(Merging, bool);
+  vtkBooleanMacro(Merging, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By

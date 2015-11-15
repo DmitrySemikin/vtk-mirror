@@ -79,9 +79,9 @@ public:
   // Description:
   // Force the algorithm to check the mean distance between two iterations.
   // Default is Off.
-  vtkSetMacro(CheckMeanDistance, int);
-  vtkGetMacro(CheckMeanDistance, int);
-  vtkBooleanMacro(CheckMeanDistance, int);
+  vtkSetMacro(CheckMeanDistance, bool);
+  vtkGetMacro(CheckMeanDistance, bool);
+  vtkBooleanMacro(CheckMeanDistance, bool);
 
   // Description:
   // Specify the mean distance mode. This mode expresses how the mean
@@ -119,9 +119,9 @@ public:
   // Description:
   // Starts the process by translating source centroid to target centroid.
   // The default is Off.
-  vtkSetMacro(StartByMatchingCentroids, int);
-  vtkGetMacro(StartByMatchingCentroids, int);
-  vtkBooleanMacro(StartByMatchingCentroids, int);
+  vtkSetMacro(StartByMatchingCentroids, bool);
+  vtkGetMacro(StartByMatchingCentroids, bool);
+  vtkBooleanMacro(StartByMatchingCentroids, bool);
 
   // Description:
   // Get the internal landmark transform. Use it to constrain the number of

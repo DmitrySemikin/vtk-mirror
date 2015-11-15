@@ -85,9 +85,9 @@ public:
   // automatically from average number of entities in bucket. If not set,
   // there will be an explicit method to control the construction of the
   // locator (found in the subclass).
-  vtkSetMacro(Automatic,int);
-  vtkGetMacro(Automatic,int);
-  vtkBooleanMacro(Automatic,int);
+  vtkSetMacro(Automatic, bool);
+  vtkGetMacro(Automatic, bool);
+  vtkBooleanMacro(Automatic, bool);
 
   // Description:
   // Specify absolute tolerance (in world coordinates) for performing

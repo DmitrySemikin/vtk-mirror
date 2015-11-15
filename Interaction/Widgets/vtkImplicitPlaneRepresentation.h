@@ -112,9 +112,9 @@ public:
   // Description:
   // Turn on/off tubing of the wire outline of the plane. The tube thickens
   // the line by wrapping with a vtkTubeFilter.
-  vtkSetMacro(Tubing,int);
-  vtkGetMacro(Tubing,int);
-  vtkBooleanMacro(Tubing,int);
+  vtkSetMacro(Tubing, bool);
+  vtkGetMacro(Tubing, bool);
+  vtkBooleanMacro(Tubing, bool);
 
   // Description:
   // Enable/disable the drawing of the plane. In some cases the plane
@@ -128,22 +128,22 @@ public:
   // Description:
   // Turn on/off the ability to translate the bounding box by grabbing it
   // with the left mouse button.
-  vtkSetMacro(OutlineTranslation,int);
-  vtkGetMacro(OutlineTranslation,int);
-  vtkBooleanMacro(OutlineTranslation,int);
+  vtkSetMacro(OutlineTranslation, bool);
+  vtkGetMacro(OutlineTranslation, bool);
+  vtkBooleanMacro(OutlineTranslation, bool);
 
   // Description:
   // Turn on/off the ability to move the widget outside of the bounds
   // specified in the initial PlaceWidget() invocation.
-  vtkSetMacro(OutsideBounds,int);
-  vtkGetMacro(OutsideBounds,int);
-  vtkBooleanMacro(OutsideBounds,int);
+  vtkSetMacro(OutsideBounds, bool);
+  vtkGetMacro(OutsideBounds, bool);
+  vtkBooleanMacro(OutsideBounds, bool);
 
   // Description:
   // Turn on/off the ability to scale the widget with the mouse.
-  vtkSetMacro(ScaleEnabled,int);
-  vtkGetMacro(ScaleEnabled,int);
-  vtkBooleanMacro(ScaleEnabled,int);
+  vtkSetMacro(ScaleEnabled, bool);
+  vtkGetMacro(ScaleEnabled, bool);
+  vtkBooleanMacro(ScaleEnabled, bool);
 
   // Description:
   // Grab the polydata that defines the plane. The polydata contains a single

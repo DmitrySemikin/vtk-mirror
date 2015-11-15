@@ -73,9 +73,9 @@ public:
   // on, the subsampling will always include the boundary of the grid even
   // though the sample rate is not an even multiple of the grid
   // dimensions. (By default IncludeBoundary is off.)
-  vtkSetMacro(IncludeBoundary,int);
-  vtkGetMacro(IncludeBoundary,int);
-  vtkBooleanMacro(IncludeBoundary,int);
+  vtkSetMacro(IncludeBoundary, bool);
+  vtkGetMacro(IncludeBoundary, bool);
+  vtkBooleanMacro(IncludeBoundary, bool);
 
 protected:
   vtkExtractGrid();

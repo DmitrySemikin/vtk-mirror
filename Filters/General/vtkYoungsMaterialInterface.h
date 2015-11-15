@@ -50,44 +50,44 @@ public:
 
   // Description:
   // Set/Get wether the normal vector has to be flipped.
-  vtkSetMacro(InverseNormal,int);
-  vtkGetMacro(InverseNormal,int);
-  vtkBooleanMacro(InverseNormal,int);
+  vtkSetMacro(InverseNormal, bool);
+  vtkGetMacro(InverseNormal, bool);
+  vtkBooleanMacro(InverseNormal, bool);
 
   // Description:
   // If this flag is on, material order in reversed.
   // Otherwise, materials are sorted in ascending order depending on the given ordering array.
-  vtkSetMacro(ReverseMaterialOrder,int);
-  vtkGetMacro(ReverseMaterialOrder,int);
-  vtkBooleanMacro(ReverseMaterialOrder,int);
+  vtkSetMacro(ReverseMaterialOrder, bool);
+  vtkGetMacro(ReverseMaterialOrder, bool);
+  vtkBooleanMacro(ReverseMaterialOrder, bool);
 
   // Description:
   // Set/Get OnionPeel flag. if this flag is on, the normal vector of the first
   // material (which depends on material ordering) is used for all materials.
-  vtkSetMacro(OnionPeel,int);
-  vtkGetMacro(OnionPeel,int);
-  vtkBooleanMacro(OnionPeel,int);
+  vtkSetMacro(OnionPeel, bool);
+  vtkGetMacro(OnionPeel, bool);
+  vtkBooleanMacro(OnionPeel, bool);
 
   // Description:
   // Turns on/off AxisSymetric computation of 2D interfaces.
   // in axis symetric mode, 2D meshes are understood as volumes of revolution.
-  vtkSetMacro(AxisSymetric,int);
-  vtkGetMacro(AxisSymetric,int);
-  vtkBooleanMacro(AxisSymetric,int);
+  vtkSetMacro(AxisSymetric, bool);
+  vtkGetMacro(AxisSymetric, bool);
+  vtkBooleanMacro(AxisSymetric, bool);
 
   // Description:
   // when UseFractionAsDistance is true, the volume fraction is interpreted as the distance
   // of the cutting plane from the origin.
   // in axis symetric mode, 2D meshes are understood as volumes of revolution.
-  vtkSetMacro(UseFractionAsDistance,int);
-  vtkGetMacro(UseFractionAsDistance,int);
-  vtkBooleanMacro(UseFractionAsDistance,int);
+  vtkSetMacro(UseFractionAsDistance, bool);
+  vtkGetMacro(UseFractionAsDistance, bool);
+  vtkBooleanMacro(UseFractionAsDistance, bool);
 
   // Description:
   // When FillMaterial is set to 1, the volume containing material is output and not only the interface surface.
-  vtkSetMacro(FillMaterial,int);
-  vtkGetMacro(FillMaterial,int);
-  vtkBooleanMacro(FillMaterial,int);
+  vtkSetMacro(FillMaterial, bool);
+  vtkGetMacro(FillMaterial, bool);
+  vtkBooleanMacro(FillMaterial, bool);
 
   // Description:
   // Set/Get minimum and maximum volume fraction value. if a material fills a volume above the minimum value, the material is considered to be void. if a material fills a volume fraction beyond the maximum value it is considered as filling the whole volume.

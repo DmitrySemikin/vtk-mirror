@@ -58,9 +58,9 @@ public:
   // Set ThresholdCells to true if you wish to skip any voxel/pixels which have scalar
   // values less than the specified threshold.
   // Currently this functionality is only implemented for 2D imagedata
-  vtkSetMacro(ThresholdCells,int);
-  vtkGetMacro(ThresholdCells,int);
-  vtkBooleanMacro(ThresholdCells,int);
+  vtkSetMacro(ThresholdCells, bool);
+  vtkGetMacro(ThresholdCells, bool);
+  vtkBooleanMacro(ThresholdCells, bool);
 
   // Description:
   // Set ThresholdValue to the scalar value by which to threshold cells when extracting geometry
@@ -73,9 +73,9 @@ public:
   // Set OutputTriangles to true if you wish to generate triangles instead of quads
   // when extracting cells from 2D imagedata
   // Currently this functionality is only implemented for 2D imagedata
-  vtkSetMacro(OutputTriangles,int);
-  vtkGetMacro(OutputTriangles,int);
-  vtkBooleanMacro(OutputTriangles,int);
+  vtkSetMacro(OutputTriangles, bool);
+  vtkGetMacro(OutputTriangles, bool);
+  vtkBooleanMacro(OutputTriangles, bool);
 
 protected:
   vtkImageDataGeometryFilter();

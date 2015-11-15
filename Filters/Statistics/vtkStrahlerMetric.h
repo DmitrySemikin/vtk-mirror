@@ -63,9 +63,9 @@ public:
   // Set/get setting of normalize flag.  If this is set, the
   // Strahler values are scaled into the range [0..1].
   // Default is for normalization to be OFF.
-  vtkSetMacro(Normalize, int);
-  vtkGetMacro(Normalize, int);
-  vtkBooleanMacro(Normalize, int);
+  vtkSetMacro(Normalize, bool);
+  vtkGetMacro(Normalize, bool);
+  vtkBooleanMacro(Normalize, bool);
 
   // Description:
   // Get the maximum strahler value for the tree.

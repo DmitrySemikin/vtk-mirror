@@ -56,9 +56,9 @@ public:
 
   // Specify whether to normalize scalar values. If the data is normalized,
   // then it will fall in the range [0,1].
-  vtkSetMacro(Normalize,int);
-  vtkGetMacro(Normalize,int);
-  vtkBooleanMacro(Normalize,int);
+  vtkSetMacro(Normalize, bool);
+  vtkGetMacro(Normalize, bool);
+  vtkBooleanMacro(Normalize, bool);
 
   // Description:
   // Control how the filter works to generate scalar data from the

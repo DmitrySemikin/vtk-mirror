@@ -127,9 +127,9 @@ public:
   // not aligned.  The normal in SetProjectionNormal is 0,1,2 for YZ,XZ,XY
   // planes respectively and 3 for arbitrary oblique planes when the widget
   // is tied to a vtkPlaneSource.
-  vtkSetMacro(ProjectToPlane,int);
-  vtkGetMacro(ProjectToPlane,int);
-  vtkBooleanMacro(ProjectToPlane,int);
+  vtkSetMacro(ProjectToPlane, bool);
+  vtkGetMacro(ProjectToPlane, bool);
+  vtkBooleanMacro(ProjectToPlane, bool);
 
   // Description:
   // Set up a reference to a vtkPlaneSource that could be from another widget

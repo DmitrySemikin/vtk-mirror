@@ -109,9 +109,9 @@ public:
 
   // Description:
   // Should the data with value 0 be ignored? Initial value is false.
-  vtkSetClampMacro(IgnoreZero, int, 0, 1);
-  vtkGetMacro(IgnoreZero, int);
-  vtkBooleanMacro(IgnoreZero, int);
+  vtkSetMacro(IgnoreZero, bool);
+  vtkGetMacro(IgnoreZero, bool);
+  vtkBooleanMacro(IgnoreZero, bool);
 
 protected:
   vtkImageAccumulate();

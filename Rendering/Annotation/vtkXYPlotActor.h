@@ -256,13 +256,13 @@ public:
   // Allow per-curve specification of line and point rendering.  These override
   // global settings PlotPoints and PlotLines.  If not on, the default behavior
   // is governed by PlotPoints and PlotLines ivars.
-  vtkGetMacro(PlotCurvePoints, int);
-  vtkSetMacro(PlotCurvePoints, int);
-  vtkBooleanMacro(PlotCurvePoints, int);
+  vtkSetMacro(PlotCurvePoints, bool);
+  vtkGetMacro(PlotCurvePoints, bool);
+  vtkBooleanMacro(PlotCurvePoints, bool);
 
-  vtkGetMacro(PlotCurveLines, int);
-  vtkSetMacro(PlotCurveLines, int);
-  vtkBooleanMacro(PlotCurveLines, int);
+  vtkSetMacro(PlotCurveLines, bool);
+  vtkGetMacro(PlotCurveLines, bool);
+  vtkBooleanMacro(PlotCurveLines, bool);
 
   void SetPlotLines(int i, int);
   int GetPlotLines(int i);
@@ -274,25 +274,25 @@ public:
   // Description:
   // Enable/Disable exchange of the x-y axes (i.e., what was x becomes y, and
   // vice-versa). Exchanging axes affects the labeling as well.
-  vtkSetMacro(ExchangeAxes, int);
-  vtkGetMacro(ExchangeAxes, int);
-  vtkBooleanMacro(ExchangeAxes, int);
+  vtkSetMacro(ExchangeAxes, bool);
+  vtkGetMacro(ExchangeAxes, bool);
+  vtkBooleanMacro(ExchangeAxes, bool);
 
   // Description:
   // Normally the x-axis is plotted from minimum to maximum. Setting this instance
   // variable causes the x-axis to be plotted from maximum to minimum. Note that
   // boolean always applies to the x-axis even if ExchangeAxes is set.
-  vtkSetMacro(ReverseXAxis, int);
-  vtkGetMacro(ReverseXAxis, int);
-  vtkBooleanMacro(ReverseXAxis, int);
+  vtkSetMacro(ReverseXAxis, bool);
+  vtkGetMacro(ReverseXAxis, bool);
+  vtkBooleanMacro(ReverseXAxis, bool);
 
   // Description:
   // Normally the y-axis is plotted from minimum to maximum. Setting this instance
   // variable causes the y-axis to be plotted from maximum to minimum. Note that
   // boolean always applies to the y-axis even if ExchangeAxes is set.
-  vtkSetMacro(ReverseYAxis, int);
-  vtkGetMacro(ReverseYAxis, int);
-  vtkBooleanMacro(ReverseYAxis, int);
+  vtkSetMacro(ReverseYAxis, bool);
+  vtkGetMacro(ReverseYAxis, bool);
+  vtkBooleanMacro(ReverseYAxis, bool);
 
   // Description:
   // Retrieve handles to the legend box and glyph source. This is useful
@@ -377,9 +377,9 @@ public:
   // Enable/Disable the creation of a legend. If on, the legend labels will
   // be created automatically unless the per plot legend symbol has been
   // set.
-  vtkSetMacro(Legend, int);
-  vtkGetMacro(Legend, int);
-  vtkBooleanMacro(Legend, int);
+  vtkSetMacro(Legend, bool);
+  vtkGetMacro(Legend, bool);
+  vtkBooleanMacro(Legend, bool);
 
   // Description:
   // Set/Get the position of the title. This has no effect if
@@ -390,9 +390,9 @@ public:
   // Description:
   // If true, the xyplot actor will adjust the position of the title
   // automatically to be upper-middle. Default is true.
-  vtkSetMacro(AdjustTitlePosition, int);
-  vtkGetMacro(AdjustTitlePosition, int);
-  vtkBooleanMacro(AdjustTitlePosition, int);
+  vtkSetMacro(AdjustTitlePosition, bool);
+  vtkGetMacro(AdjustTitlePosition, bool);
+  vtkBooleanMacro(AdjustTitlePosition, bool);
 
 //BTX
 enum Alignment {
@@ -450,9 +450,9 @@ enum Alignment {
 
   // Description:
   // Enable/Disable plotting of Log of x-values.
-  vtkSetMacro(Logx, int);
-  vtkGetMacro(Logx, int);
-  vtkBooleanMacro(Logx, int);
+  vtkSetMacro(Logx, bool);
+  vtkGetMacro(Logx, bool);
+  vtkBooleanMacro(Logx, bool);
 
   // Description:
   // Set/Get the format with which to print the labels . This sets both X
@@ -483,16 +483,16 @@ enum Alignment {
   // Set/Get whether the points are rendered.  The point size can be set in
   // the property object. This is a global flag which affects the plot only
   // if per curve symbols are not defined.
-  vtkGetMacro(PlotPoints, int);
-  vtkSetMacro(PlotPoints, int);
-  vtkBooleanMacro(PlotPoints, int);
+  vtkSetMacro(PlotPoints, bool);
+  vtkGetMacro(PlotPoints, bool);
+  vtkBooleanMacro(PlotPoints, bool);
 
   // Description:
   // Set/Get whether the lines are rendered.  The line width can be set in
   // the property object.
-  vtkGetMacro(PlotLines, int);
-  vtkSetMacro(PlotLines, int);
-  vtkBooleanMacro(PlotLines, int);
+  vtkSetMacro(PlotLines, bool);
+  vtkGetMacro(PlotLines, bool);
+  vtkBooleanMacro(PlotLines, bool);
 
   // Description:
   // Set/Get the factor that controls how big glyphs are in the plot.
@@ -535,16 +535,16 @@ enum Alignment {
   // Description:
   // Set/Get the flag that controls whether a box will be drawn/filled
   // corresponding to the chart box.
-  vtkSetMacro(ChartBox, int);
-  vtkGetMacro(ChartBox, int);
-  vtkBooleanMacro(ChartBox, int);
+  vtkSetMacro(ChartBox, bool);
+  vtkGetMacro(ChartBox, bool);
+  vtkBooleanMacro(ChartBox, bool);
 
   // Description:
   // Set/Get the flag that controls whether a box will be drawn/filled
   // corresponding to the legend box.
-  vtkSetMacro(ChartBorder, int);
-  vtkGetMacro(ChartBorder, int);
-  vtkBooleanMacro(ChartBorder, int);
+  vtkSetMacro(ChartBorder, bool);
+  vtkGetMacro(ChartBorder, bool);
+  vtkBooleanMacro(ChartBorder, bool);
 
   // Description:
   // Get the box vtkProperty2D.
@@ -552,9 +552,9 @@ enum Alignment {
 
   // Description:
   // Set/Get if the X reference line is visible. hidden by default
-  vtkSetMacro(ShowReferenceXLine, int);
-  vtkGetMacro(ShowReferenceXLine, int);
-  vtkBooleanMacro(ShowReferenceXLine, int);
+  vtkSetMacro(ShowReferenceXLine, bool);
+  vtkGetMacro(ShowReferenceXLine, bool);
+  vtkBooleanMacro(ShowReferenceXLine, bool);
 
   // Description
   // Set/Get the value for the X reference line
@@ -563,9 +563,9 @@ enum Alignment {
 
   // Description:
   // Set/Get if the Y reference line is visible. hidden by default
-  vtkSetMacro(ShowReferenceYLine, int);
-  vtkGetMacro(ShowReferenceYLine, int);
-  vtkBooleanMacro(ShowReferenceYLine, int);
+  vtkSetMacro(ShowReferenceYLine, bool);
+  vtkGetMacro(ShowReferenceYLine, bool);
+  vtkBooleanMacro(ShowReferenceYLine, bool);
 
   // Description
   // Set/Get the value for the Y reference line

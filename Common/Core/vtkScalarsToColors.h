@@ -313,9 +313,9 @@ public:
   //
   // When categorical data is present, only values in the lookup table will be
   // considered valid; all other values will be assigned \a NanColor.
-  vtkSetMacro(IndexedLookup,int);
-  vtkGetMacro(IndexedLookup,int);
-  vtkBooleanMacro(IndexedLookup,int);
+  vtkSetMacro(IndexedLookup, bool);
+  vtkGetMacro(IndexedLookup, bool);
+  vtkBooleanMacro(IndexedLookup, bool);
 
 
   // Description:

@@ -117,9 +117,9 @@ public:
   // Should automatic reconnection be enabled?
   // This defaults to true.
   // If you change its value, you must do so before any call to Open().
-  vtkSetMacro(Reconnect,int);
-  vtkGetMacro(Reconnect,int);
-  vtkBooleanMacro(Reconnect,int);
+  vtkSetMacro(Reconnect, bool);
+  vtkGetMacro(Reconnect, bool);
+  vtkBooleanMacro(Reconnect, bool);
 
   // Description:
   // The port used for connecting to the database.

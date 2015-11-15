@@ -45,15 +45,15 @@ public:
 
   // Description:
   // If Symetric is on, the the axis continue to negative values.
-  vtkSetMacro(Symmetric,int);
-  vtkGetMacro(Symmetric,int);
-  vtkBooleanMacro(Symmetric,int);
+  vtkSetMacro(Symmetric, bool);
+  vtkGetMacro(Symmetric, bool);
+  vtkBooleanMacro(Symmetric, bool);
 
   // Description:
   // Option for computing normals.  By default they are computed.
-  vtkSetMacro(ComputeNormals, int);
-  vtkGetMacro(ComputeNormals, int);
-  vtkBooleanMacro(ComputeNormals, int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
 protected:
   vtkAxes();

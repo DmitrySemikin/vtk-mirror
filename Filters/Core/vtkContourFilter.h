@@ -92,9 +92,9 @@ public:
   // vtkStructuredGrid, and vtkUnstructuredGrid inputs, and Off for all others.
   // This default behavior is to preserve the behavior of an older version of
   // this filter, which would ignore this setting for certain inputs.
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Set/Get the computation of gradients. Gradient computation is
@@ -103,21 +103,21 @@ public:
   // will not be stored in the output dataset.  If the output data
   // will be processed by filters that modify topology or geometry, it
   // may be wise to turn Normals and Gradients off.
-  vtkSetMacro(ComputeGradients,int);
-  vtkGetMacro(ComputeGradients,int);
-  vtkBooleanMacro(ComputeGradients,int);
+  vtkSetMacro(ComputeGradients, bool);
+  vtkGetMacro(ComputeGradients, bool);
+  vtkBooleanMacro(ComputeGradients, bool);
 
   // Description:
   // Set/Get the computation of scalars.
-  vtkSetMacro(ComputeScalars,int);
-  vtkGetMacro(ComputeScalars,int);
-  vtkBooleanMacro(ComputeScalars,int);
+  vtkSetMacro(ComputeScalars, bool);
+  vtkGetMacro(ComputeScalars, bool);
+  vtkBooleanMacro(ComputeScalars, bool);
 
   // Description:
   // Enable the use of a scalar tree to accelerate contour extraction.
-  vtkSetMacro(UseScalarTree,int);
-  vtkGetMacro(UseScalarTree,int);
-  vtkBooleanMacro(UseScalarTree,int);
+  vtkSetMacro(UseScalarTree, bool);
+  vtkGetMacro(UseScalarTree, bool);
+  vtkBooleanMacro(UseScalarTree, bool);
 
   // Description:
   // Enable the use of a scalar tree to accelerate contour extraction.
@@ -148,9 +148,9 @@ public:
   // WARNING: if the contour surface is not planar, the output
   // polygon will not be planar, which might be nice to look at but hard
   // to compute with downstream.
-  vtkSetMacro(GenerateTriangles,int);
-  vtkGetMacro(GenerateTriangles,int);
-  vtkBooleanMacro(GenerateTriangles,int);
+  vtkSetMacro(GenerateTriangles, bool);
+  vtkGetMacro(GenerateTriangles, bool);
+  vtkBooleanMacro(GenerateTriangles, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

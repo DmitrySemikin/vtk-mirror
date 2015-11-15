@@ -37,18 +37,18 @@ public:
   // If this is on, then the input vertex cells will be broken
   // into individual vertex cells (one point per cell).  If it
   // is off, the input vertex cells will be ignored.
-  vtkBooleanMacro(PassVerts,int);
-  vtkSetMacro(PassVerts,int);
-  vtkGetMacro(PassVerts,int);
+  vtkSetMacro(PassVerts, bool);
+  vtkGetMacro(PassVerts, bool);
+  vtkBooleanMacro(PassVerts, bool);
 
   // Description:
   // Turn on/off passing lines through filter (default: on).
   // If this is on, then the input polylines will be broken
   // into line segments.  If it is off, then the input lines
   // will be ignored and the output will have no lines.
-  vtkBooleanMacro(PassLines,int);
-  vtkSetMacro(PassLines,int);
-  vtkGetMacro(PassLines,int);
+  vtkSetMacro(PassLines, bool);
+  vtkGetMacro(PassLines, bool);
+  vtkBooleanMacro(PassLines, bool);
 
 protected:
   vtkTriangleFilter() : PassVerts(1), PassLines(1) {}

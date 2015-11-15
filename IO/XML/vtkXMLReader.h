@@ -50,9 +50,9 @@ public:
 
   // Description:
   // Enable writing to an InputString instead of the default, a file.
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  vtkSetMacro(ReadFromInputString, bool);
+  vtkGetMacro(ReadFromInputString, bool);
+  vtkBooleanMacro(ReadFromInputString, bool);
   void SetInputString(std::string s) { this->InputString = s; }
 
   // Description:

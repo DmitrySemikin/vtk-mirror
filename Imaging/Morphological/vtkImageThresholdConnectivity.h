@@ -66,9 +66,9 @@ public:
 
   // Description:
   // Replace the filled region by the value set by SetInValue().
-  vtkSetMacro(ReplaceIn, int);
-  vtkGetMacro(ReplaceIn, int);
-  vtkBooleanMacro(ReplaceIn, int);
+  vtkSetMacro(ReplaceIn, bool);
+  vtkGetMacro(ReplaceIn, bool);
+  vtkBooleanMacro(ReplaceIn, bool);
 
   // Description:
   // If ReplaceIn is set, the filled region will be replaced by this value.
@@ -77,9 +77,9 @@ public:
 
   // Description:
   // Replace the filled region by the value set by SetInValue().
-  vtkSetMacro(ReplaceOut, int);
-  vtkGetMacro(ReplaceOut, int);
-  vtkBooleanMacro(ReplaceOut, int);
+  vtkSetMacro(ReplaceOut, bool);
+  vtkGetMacro(ReplaceOut, bool);
+  vtkBooleanMacro(ReplaceOut, bool);
 
   // Description:
   // If ReplaceOut is set, outside the fill will be replaced by this value.

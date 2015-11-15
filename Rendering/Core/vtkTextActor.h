@@ -112,9 +112,9 @@ public:
   // Turn on or off the UseBorderAlign option.
   // When UseBorderAlign is on, the bounding rectangle is used to align the text,
   // which is the proper behavior when using vtkTextRepresentation
-  vtkSetMacro(UseBorderAlign,int);
-  vtkGetMacro(UseBorderAlign,int);
-  vtkBooleanMacro(UseBorderAlign,int);
+  vtkSetMacro(UseBorderAlign, bool);
+  vtkGetMacro(UseBorderAlign, bool);
+  vtkBooleanMacro(UseBorderAlign, bool);
 
   // Description:
   // This method is being depricated.  Use SetJustification and

@@ -76,9 +76,9 @@ public:
   // The fourth component will be passed through the first scalar opacity
   // transfer function for opacity. Normals will be generated from the fourth
   // component.
-  vtkSetClampMacro(IndependentComponents, int, 0, 1);
-  vtkGetMacro(IndependentComponents, int);
-  vtkBooleanMacro(IndependentComponents, int);
+  vtkSetMacro(IndependentComponents, bool);
+  vtkGetMacro(IndependentComponents, bool);
+  vtkBooleanMacro(IndependentComponents, bool);
 
   // Description:
   // Set the interpolation type for sampling a volume. Initial value is

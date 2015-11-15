@@ -99,9 +99,9 @@ public:
   // Use these methods to control whether to limit the picking to this list
   // (rather than renderer's actors). Make sure that the pick list contains
   // actors that referred to by the picker's renderer.
-  vtkSetMacro(PickFromList,int);
-  vtkGetMacro(PickFromList,int);
-  vtkBooleanMacro(PickFromList,int);
+  vtkSetMacro(PickFromList, bool);
+  vtkGetMacro(PickFromList, bool);
+  vtkBooleanMacro(PickFromList, bool);
 
   // Description:
   // Initialize list of actors in pick list.

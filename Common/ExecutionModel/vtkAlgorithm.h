@@ -176,9 +176,9 @@ public:
   // Description:
   // Set/Get the AbortExecute flag for the process object. Process objects
   // may handle premature termination of execution in different ways.
-  vtkSetMacro(AbortExecute,int);
-  vtkGetMacro(AbortExecute,int);
-  vtkBooleanMacro(AbortExecute,int);
+  vtkSetMacro(AbortExecute, bool);
+  vtkGetMacro(AbortExecute, bool);
+  vtkBooleanMacro(AbortExecute, bool);
 
   // Description:
   // Set/Get the execution progress of a process object.

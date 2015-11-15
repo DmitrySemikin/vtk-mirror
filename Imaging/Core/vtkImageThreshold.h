@@ -47,9 +47,9 @@ public:
 
   // Description:
   // Determines whether to replace the pixel in range with InValue
-  vtkSetMacro(ReplaceIn, int);
-  vtkGetMacro(ReplaceIn, int);
-  vtkBooleanMacro(ReplaceIn, int);
+  vtkSetMacro(ReplaceIn, bool);
+  vtkGetMacro(ReplaceIn, bool);
+  vtkBooleanMacro(ReplaceIn, bool);
 
   // Description:
   // Replace the in range pixels with this value.
@@ -58,9 +58,9 @@ public:
 
   // Description:
   // Determines whether to replace the pixel out of range with OutValue
-  vtkSetMacro(ReplaceOut, int);
-  vtkGetMacro(ReplaceOut, int);
-  vtkBooleanMacro(ReplaceOut, int);
+  vtkSetMacro(ReplaceOut, bool);
+  vtkGetMacro(ReplaceOut, bool);
+  vtkBooleanMacro(ReplaceOut, bool);
 
   // Description:
   // Replace the in range pixels with this value.

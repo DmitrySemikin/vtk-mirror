@@ -116,95 +116,95 @@ public:
   // Description:
   // Indicate that point scalars are to be generated. Note that the specified
   // number of components is used to create the scalar.
-  vtkSetMacro(GeneratePointScalars,int);
-  vtkGetMacro(GeneratePointScalars,int);
-  vtkBooleanMacro(GeneratePointScalars,int);
+  vtkSetMacro(GeneratePointScalars, bool);
+  vtkGetMacro(GeneratePointScalars, bool);
+  vtkBooleanMacro(GeneratePointScalars, bool);
 
   // Description:
   // Indicate that point vectors are to be generated. Note that the
   // number of components is always equal to three.
-  vtkSetMacro(GeneratePointVectors,int);
-  vtkGetMacro(GeneratePointVectors,int);
-  vtkBooleanMacro(GeneratePointVectors,int);
+  vtkSetMacro(GeneratePointVectors, bool);
+  vtkGetMacro(GeneratePointVectors, bool);
+  vtkBooleanMacro(GeneratePointVectors, bool);
 
   // Description:
   // Indicate that point normals are to be generated. Note that the
   // number of components is always equal to three.
-  vtkSetMacro(GeneratePointNormals,int);
-  vtkGetMacro(GeneratePointNormals,int);
-  vtkBooleanMacro(GeneratePointNormals,int);
+  vtkSetMacro(GeneratePointNormals, bool);
+  vtkGetMacro(GeneratePointNormals, bool);
+  vtkBooleanMacro(GeneratePointNormals, bool);
 
   // Description:
   // Indicate that point tensors are to be generated. Note that the
   // number of components is always equal to nine.
-  vtkSetMacro(GeneratePointTensors,int);
-  vtkGetMacro(GeneratePointTensors,int);
-  vtkBooleanMacro(GeneratePointTensors,int);
+  vtkSetMacro(GeneratePointTensors, bool);
+  vtkGetMacro(GeneratePointTensors, bool);
+  vtkBooleanMacro(GeneratePointTensors, bool);
 
   // Description:
   // Indicate that point texture coordinates are to be generated. Note that
   // the specified number of components is used to create the texture
   // coordinates (but must range between one and three).
-  vtkSetMacro(GeneratePointTCoords,int);
-  vtkGetMacro(GeneratePointTCoords,int);
-  vtkBooleanMacro(GeneratePointTCoords,int);
+  vtkSetMacro(GeneratePointTCoords, bool);
+  vtkGetMacro(GeneratePointTCoords, bool);
+  vtkBooleanMacro(GeneratePointTCoords, bool);
 
   // Description:
   // Indicate that an arbitrary point array is to be generated. Note that the
   // specified number of components is used to create the array.
-  vtkSetMacro(GeneratePointArray,int);
-  vtkGetMacro(GeneratePointArray,int);
-  vtkBooleanMacro(GeneratePointArray,int);
+  vtkSetMacro(GeneratePointArray, bool);
+  vtkGetMacro(GeneratePointArray, bool);
+  vtkBooleanMacro(GeneratePointArray, bool);
 
   // Description:
   // Indicate that cell scalars are to be generated. Note that the specified
   // number of components is used to create the scalar.
-  vtkSetMacro(GenerateCellScalars,int);
-  vtkGetMacro(GenerateCellScalars,int);
-  vtkBooleanMacro(GenerateCellScalars,int);
+  vtkSetMacro(GenerateCellScalars, bool);
+  vtkGetMacro(GenerateCellScalars, bool);
+  vtkBooleanMacro(GenerateCellScalars, bool);
 
   // Description:
   // Indicate that cell vectors are to be generated. Note that the
   // number of components is always equal to three.
-  vtkSetMacro(GenerateCellVectors,int);
-  vtkGetMacro(GenerateCellVectors,int);
-  vtkBooleanMacro(GenerateCellVectors,int);
+  vtkSetMacro(GenerateCellVectors, bool);
+  vtkGetMacro(GenerateCellVectors, bool);
+  vtkBooleanMacro(GenerateCellVectors, bool);
 
   // Description:
   // Indicate that cell normals are to be generated. Note that the
   // number of components is always equal to three.
-  vtkSetMacro(GenerateCellNormals,int);
-  vtkGetMacro(GenerateCellNormals,int);
-  vtkBooleanMacro(GenerateCellNormals,int);
+  vtkSetMacro(GenerateCellNormals, bool);
+  vtkGetMacro(GenerateCellNormals, bool);
+  vtkBooleanMacro(GenerateCellNormals, bool);
 
   // Description:
   // Indicate that cell tensors are to be generated. Note that the
   // number of components is always equal to nine.
-  vtkSetMacro(GenerateCellTensors,int);
-  vtkGetMacro(GenerateCellTensors,int);
-  vtkBooleanMacro(GenerateCellTensors,int);
+  vtkSetMacro(GenerateCellTensors, bool);
+  vtkGetMacro(GenerateCellTensors, bool);
+  vtkBooleanMacro(GenerateCellTensors, bool);
 
   // Description:
   // Indicate that cell texture coordinates are to be generated. Note that
   // the specified number of components is used to create the texture
   // coordinates (but must range between one and three).
-  vtkSetMacro(GenerateCellTCoords,int);
-  vtkGetMacro(GenerateCellTCoords,int);
-  vtkBooleanMacro(GenerateCellTCoords,int);
+  vtkSetMacro(GenerateCellTCoords, bool);
+  vtkGetMacro(GenerateCellTCoords, bool);
+  vtkBooleanMacro(GenerateCellTCoords, bool);
 
   // Description:
   // Indicate that an arbitrary cell array is to be generated. Note that the
   // specified number of components is used to create the array.
-  vtkSetMacro(GenerateCellArray,int);
-  vtkGetMacro(GenerateCellArray,int);
-  vtkBooleanMacro(GenerateCellArray,int);
+  vtkSetMacro(GenerateCellArray, bool);
+  vtkGetMacro(GenerateCellArray, bool);
+  vtkBooleanMacro(GenerateCellArray, bool);
 
   // Description:
   // Indicate that an arbitrary field data array is to be generated. Note
   // that the specified number of components is used to create the scalar.
-  vtkSetMacro(GenerateFieldArray,int);
-  vtkGetMacro(GenerateFieldArray,int);
-  vtkBooleanMacro(GenerateFieldArray,int);
+  vtkSetMacro(GenerateFieldArray, bool);
+  vtkGetMacro(GenerateFieldArray, bool);
+  vtkBooleanMacro(GenerateFieldArray, bool);
 
   // Description:
   // Indicate that the generated attributes are

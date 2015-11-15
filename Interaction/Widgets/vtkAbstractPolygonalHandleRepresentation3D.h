@@ -97,9 +97,9 @@ public:
   // Description:
   // A label may be associated with the seed. The string can be set via
   // SetLabelText. The visibility of the label can be turned on / off.
-  vtkSetMacro( LabelVisibility, int );
-  vtkGetMacro( LabelVisibility, int );
-  vtkBooleanMacro( LabelVisibility, int );
+  vtkSetMacro(LabelVisibility, bool);
+  vtkGetMacro(LabelVisibility, bool);
+  vtkBooleanMacro(LabelVisibility, bool);
   virtual void SetLabelText( const char * label );
   virtual char * GetLabelText();
 
@@ -125,9 +125,9 @@ public:
 
   // Description:
   // Toogle the visibility of the handle on and off
-  vtkSetMacro( HandleVisibility, int );
-  vtkGetMacro( HandleVisibility, int );
-  vtkBooleanMacro( HandleVisibility, int );
+  vtkSetMacro(HandleVisibility, bool);
+  vtkGetMacro(HandleVisibility, bool);
+  vtkBooleanMacro(HandleVisibility, bool);
 
   void Highlight(int highlight);
 
@@ -141,9 +141,9 @@ public:
   // which constrains the widget to the surface of a mesh. In such cases,
   // inherent restrictions on handle placement might conflict with a request
   // for smooth motion of the handles.
-  vtkSetMacro( SmoothMotion, int );
-  vtkGetMacro( SmoothMotion, int );
-  vtkBooleanMacro( SmoothMotion, int );
+  vtkSetMacro(SmoothMotion, bool);
+  vtkGetMacro(SmoothMotion, bool);
+  vtkBooleanMacro(SmoothMotion, bool);
 
 protected:
   vtkAbstractPolygonalHandleRepresentation3D();

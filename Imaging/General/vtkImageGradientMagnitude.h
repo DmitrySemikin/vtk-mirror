@@ -39,9 +39,9 @@ public:
   // Description:
   // If "HandleBoundariesOn" then boundary pixels are duplicated
   // So central differences can get values.
-  vtkSetMacro(HandleBoundaries, int);
-  vtkGetMacro(HandleBoundaries, int);
-  vtkBooleanMacro(HandleBoundaries, int);
+  vtkSetMacro(HandleBoundaries, bool);
+  vtkGetMacro(HandleBoundaries, bool);
+  vtkBooleanMacro(HandleBoundaries, bool);
 
   // Description:
   // Determines how the input is interpreted (set of 2d slices ...)

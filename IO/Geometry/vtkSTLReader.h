@@ -57,15 +57,15 @@ public:
 
   // Description:
   // Turn on/off merging of points/triangles.
-  vtkSetMacro(Merging,int);
-  vtkGetMacro(Merging,int);
-  vtkBooleanMacro(Merging,int);
+  vtkSetMacro(Merging, bool);
+  vtkGetMacro(Merging, bool);
+  vtkBooleanMacro(Merging, bool);
 
   // Description:
   // Turn on/off tagging of solids with scalars.
-  vtkSetMacro(ScalarTags,int);
-  vtkGetMacro(ScalarTags,int);
-  vtkBooleanMacro(ScalarTags,int);
+  vtkSetMacro(ScalarTags, bool);
+  vtkGetMacro(ScalarTags, bool);
+  vtkBooleanMacro(ScalarTags, bool);
 
   // Description:
   // Specify a spatial locator for merging points. By

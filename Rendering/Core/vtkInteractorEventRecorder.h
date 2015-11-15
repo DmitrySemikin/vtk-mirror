@@ -72,9 +72,9 @@ public:
   // Description:
   // Enable reading from an InputString as compared to the default
   // behavior, which is to read from a file.
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  vtkSetMacro(ReadFromInputString, bool);
+  vtkGetMacro(ReadFromInputString, bool);
+  vtkBooleanMacro(ReadFromInputString, bool);
 
   // Description:
   // Set/Get the string to read from.

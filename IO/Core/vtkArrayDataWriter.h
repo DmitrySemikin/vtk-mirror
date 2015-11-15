@@ -70,9 +70,9 @@ public:
 
   // Description:
   // Get / set whether data will be written in binary format (when used as a filter).
-  vtkSetMacro(Binary, int);
-  vtkGetMacro(Binary, int);
-  vtkBooleanMacro(Binary, int);
+  vtkSetMacro(Binary, bool);
+  vtkGetMacro(Binary, bool);
+  vtkBooleanMacro(Binary, bool);
 
   // Description:
   // The output string. This is only set when WriteToOutputString is set.

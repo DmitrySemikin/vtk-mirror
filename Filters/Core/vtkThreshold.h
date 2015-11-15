@@ -120,9 +120,9 @@ public:
   // must satisfy the threshold criterion if AllScalars is set. Otherwise,
   // just a single scalar value satisfying the threshold criterion enables
   // will extract the cell.
-  vtkSetMacro(AllScalars,int);
-  vtkGetMacro(AllScalars,int);
-  vtkBooleanMacro(AllScalars,int);
+  vtkSetMacro(AllScalars, bool);
+  vtkGetMacro(AllScalars, bool);
+  vtkBooleanMacro(AllScalars, bool);
 
   // Description:
   // If this is on (default is off), we will use the continuous interval
@@ -131,9 +131,9 @@ public:
   // *WARNING*: For higher order cells, the scalar range of the cell is
   // not the same as the vertex scalar interval used here, so the
   // result will not be accurate.
-  vtkSetMacro(UseContinuousCellRange,int);
-  vtkGetMacro(UseContinuousCellRange,int);
-  vtkBooleanMacro(UseContinuousCellRange,int);
+  vtkSetMacro(UseContinuousCellRange, bool);
+  vtkGetMacro(UseContinuousCellRange, bool);
+  vtkBooleanMacro(UseContinuousCellRange, bool);
 
   // Description:
   // Set the data type of the output points (See the data types defined in

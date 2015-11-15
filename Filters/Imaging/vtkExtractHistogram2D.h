@@ -85,9 +85,9 @@ public:
   // Description:
   // Use the extents in CustomHistogramExtents when computing the
   // histogram, rather than the simple range of the input columns.
-  vtkSetMacro(UseCustomHistogramExtents,int);
-  vtkGetMacro(UseCustomHistogramExtents,int);
-  vtkBooleanMacro(UseCustomHistogramExtents,int);
+  vtkSetMacro(UseCustomHistogramExtents, bool);
+  vtkGetMacro(UseCustomHistogramExtents, bool);
+  vtkBooleanMacro(UseCustomHistogramExtents, bool);
 
   // Description:
   // Control the scalar type of the output histogram.  If the input
@@ -138,9 +138,9 @@ public:
   // or set by the user.
   double* GetHistogramExtents();
 
-  vtkSetMacro(SwapColumns,int);
-  vtkGetMacro(SwapColumns,int);
-  vtkBooleanMacro(SwapColumns,int);
+  vtkSetMacro(SwapColumns, bool);
+  vtkGetMacro(SwapColumns, bool);
+  vtkBooleanMacro(SwapColumns, bool);
 
   // Description:
   // Get/Set an optional mask that can ignore rows of the table

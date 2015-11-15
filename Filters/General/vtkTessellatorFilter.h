@@ -110,9 +110,9 @@ public:
   // among cells, even where they should be. This can be corrected to
   // some extents with a vtkMergeFilter.
   // By default, the filter is off and vertices will not be shared.
-  vtkGetMacro(MergePoints,int);
-  vtkSetMacro(MergePoints,int);
-  vtkBooleanMacro(MergePoints,int);
+  vtkSetMacro(MergePoints, bool);
+  vtkGetMacro(MergePoints, bool);
+  vtkBooleanMacro(MergePoints, bool);
 
 protected:
   vtkTessellatorFilter();

@@ -180,9 +180,9 @@ public:
   // Turn on/off the visibility of edges. On some renderers it is
   // possible to render the edges of geometric primitives separately
   // from the interior.
-  vtkGetMacro(EdgeVisibility, int);
-  vtkSetMacro(EdgeVisibility, int);
-  vtkBooleanMacro(EdgeVisibility, int);
+  vtkSetMacro(EdgeVisibility, bool);
+  vtkGetMacro(EdgeVisibility, bool);
+  vtkBooleanMacro(EdgeVisibility, bool);
 
   // Description:
   // Set/Get the color of primitive edges (if edge visibility is enabled).
@@ -219,17 +219,17 @@ public:
   // Turn on/off fast culling of polygons based on orientation of normal
   // with respect to camera. If backface culling is on, polygons facing
   // away from camera are not drawn.
-  vtkGetMacro(BackfaceCulling, int);
-  vtkSetMacro(BackfaceCulling, int);
-  vtkBooleanMacro(BackfaceCulling, int);
+  vtkSetMacro(BackfaceCulling, bool);
+  vtkGetMacro(BackfaceCulling, bool);
+  vtkBooleanMacro(BackfaceCulling, bool);
 
   // Description:
   // Turn on/off fast culling of polygons based on orientation of normal
   // with respect to camera. If frontface culling is on, polygons facing
   // towards camera are not drawn.
-  vtkGetMacro(FrontfaceCulling, int);
-  vtkSetMacro(FrontfaceCulling, int);
-  vtkBooleanMacro(FrontfaceCulling, int);
+  vtkSetMacro(FrontfaceCulling, bool);
+  vtkGetMacro(FrontfaceCulling, bool);
+  vtkBooleanMacro(FrontfaceCulling, bool);
 
   // Description:
   // Returns the name of the material currently loaded, if any.
@@ -238,9 +238,9 @@ public:
   // Description:
   // Enable/Disable shading. When shading is enabled, the
   // Material must be set.
-  vtkSetMacro(Shading, int);
-  vtkGetMacro(Shading, int);
-  vtkBooleanMacro(Shading, int);
+  vtkSetMacro(Shading, bool);
+  vtkGetMacro(Shading, bool);
+  vtkBooleanMacro(Shading, bool);
 
   // Description:
   // Get the vtkShaderDeviceAdapter2 if set, returns null otherwise.

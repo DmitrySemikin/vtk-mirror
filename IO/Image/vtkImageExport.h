@@ -86,9 +86,9 @@ public:
   // before it is exported.
   // WARNING: this flag is used only with the Export() method,
   // it is ignored by GetPointerToData().
-  vtkBooleanMacro(ImageLowerLeft, int);
-  vtkGetMacro(ImageLowerLeft, int);
-  vtkSetMacro(ImageLowerLeft, int);
+  vtkSetMacro(ImageLowerLeft, bool);
+  vtkGetMacro(ImageLowerLeft, bool);
+  vtkBooleanMacro(ImageLowerLeft, bool);
 
   // Description:
   // Set the void pointer of the C array to export the data to.

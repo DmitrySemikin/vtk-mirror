@@ -104,9 +104,9 @@ public:
   // Specify whether this axis should act like a measuring tape (or ruler) with
   // specified major tick spacing. If enabled, the distance between major ticks
   // is controlled by the RulerDistance ivar.
-  vtkSetMacro(RulerMode,int);
-  vtkGetMacro(RulerMode,int);
-  vtkBooleanMacro(RulerMode,int);
+  vtkSetMacro(RulerMode, bool);
+  vtkGetMacro(RulerMode, bool);
+  vtkBooleanMacro(RulerMode, bool);
 
   // Description:
   // Specify the RulerDistance which indicates the spacing of the major ticks.
@@ -134,9 +134,9 @@ public:
   // Call GetAdjustedRange and GetAdjustedNumberOfLabels to get the adjusted
   // range and number of labels. Note that if RulerMode is on, then the
   // number of labels is a function of the range and ruler distance.
-  vtkSetMacro(AdjustLabels, int);
-  vtkGetMacro(AdjustLabels, int);
-  vtkBooleanMacro(AdjustLabels, int);
+  vtkSetMacro(AdjustLabels, bool);
+  vtkGetMacro(AdjustLabels, bool);
+  vtkBooleanMacro(AdjustLabels, bool);
   virtual double *GetAdjustedRange()
     {
       this->UpdateAdjustedRange();
@@ -200,27 +200,27 @@ public:
 
   // Description:
   // Set/Get visibility of the axis line.
-  vtkSetMacro(AxisVisibility, int);
-  vtkGetMacro(AxisVisibility, int);
-  vtkBooleanMacro(AxisVisibility, int);
+  vtkSetMacro(AxisVisibility, bool);
+  vtkGetMacro(AxisVisibility, bool);
+  vtkBooleanMacro(AxisVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis tick marks.
-  vtkSetMacro(TickVisibility, int);
-  vtkGetMacro(TickVisibility, int);
-  vtkBooleanMacro(TickVisibility, int);
+  vtkSetMacro(TickVisibility, bool);
+  vtkGetMacro(TickVisibility, bool);
+  vtkBooleanMacro(TickVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis labels.
-  vtkSetMacro(LabelVisibility, int);
-  vtkGetMacro(LabelVisibility, int);
-  vtkBooleanMacro(LabelVisibility, int);
+  vtkSetMacro(LabelVisibility, bool);
+  vtkGetMacro(LabelVisibility, bool);
+  vtkBooleanMacro(LabelVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis title.
-  vtkSetMacro(TitleVisibility, int);
-  vtkGetMacro(TitleVisibility, int);
-  vtkBooleanMacro(TitleVisibility, int);
+  vtkSetMacro(TitleVisibility, bool);
+  vtkGetMacro(TitleVisibility, bool);
+  vtkBooleanMacro(TitleVisibility, bool);
 
   // Description:
   // Set/Get position of the axis title. 0 is at the start of the
@@ -289,9 +289,9 @@ public:
   // Description:
   // Specify whether to size the fonts relative to the viewport or relative to
   // length of the axis. By default, fonts are resized relative to the axis.
-  vtkSetMacro(SizeFontRelativeToAxis,int);
-  vtkGetMacro(SizeFontRelativeToAxis,int);
-  vtkBooleanMacro(SizeFontRelativeToAxis,int);
+  vtkSetMacro(SizeFontRelativeToAxis, bool);
+  vtkGetMacro(SizeFontRelativeToAxis, bool);
+  vtkBooleanMacro(SizeFontRelativeToAxis, bool);
 
   // Description:
   // Shallow copy of an axis actor. Overloads the virtual vtkProp method.

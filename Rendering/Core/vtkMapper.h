@@ -116,18 +116,18 @@ public:
 
   // Description:
   // Turn on/off flag to control whether scalar data is used to color objects.
-  vtkSetMacro(ScalarVisibility, int);
-  vtkGetMacro(ScalarVisibility, int);
-  vtkBooleanMacro(ScalarVisibility, int);
+  vtkSetMacro(ScalarVisibility, bool);
+  vtkGetMacro(ScalarVisibility, bool);
+  vtkBooleanMacro(ScalarVisibility, bool);
 
   // Description:
   // Turn on/off flag to control whether the mapper's data is static. Static data
   // means that the mapper does not propagate updates down the pipeline, greatly
   // decreasing the time it takes to update many mappers. This should only be
   // used if the data never changes.
-  vtkSetMacro(Static, int);
-  vtkGetMacro(Static, int);
-  vtkBooleanMacro(Static, int);
+  vtkSetMacro(Static, bool);
+  vtkGetMacro(Static, bool);
+  vtkBooleanMacro(Static, bool);
 
   // Description: Control how the scalar data is mapped to colors.  By
   // default (ColorModeToDefault), unsigned char scalars are treated
@@ -158,9 +158,9 @@ public:
   // Colors are interpolated after being mapped.
   // This option avoids color interpolation by using a one dimensional
   // texture map for the colors.
-  vtkSetMacro(InterpolateScalarsBeforeMapping, int);
-  vtkGetMacro(InterpolateScalarsBeforeMapping, int);
-  vtkBooleanMacro(InterpolateScalarsBeforeMapping, int);
+  vtkSetMacro(InterpolateScalarsBeforeMapping, bool);
+  vtkGetMacro(InterpolateScalarsBeforeMapping, bool);
+  vtkBooleanMacro(InterpolateScalarsBeforeMapping, bool);
 
   // Description:
   // Control whether the mapper sets the lookuptable range based on its
@@ -169,9 +169,9 @@ public:
   // the LookupTable range, but users who are sharing LookupTables between
   // mappers/actors will probably wish to force the mapper to use the
   // LookupTable unchanged.
-  vtkSetMacro(UseLookupTableScalarRange, int);
-  vtkGetMacro(UseLookupTableScalarRange, int);
-  vtkBooleanMacro(UseLookupTableScalarRange, int);
+  vtkSetMacro(UseLookupTableScalarRange, bool);
+  vtkGetMacro(UseLookupTableScalarRange, bool);
+  vtkBooleanMacro(UseLookupTableScalarRange, bool);
 
   // Description:
   // Specify range in terms of scalar minimum and maximum (smin,smax). These
@@ -187,9 +187,9 @@ public:
   // The default value is immediate mode off. If you are
   // having problems rendering a large dataset you might
   // want to consider using immediate more rendering.
-  vtkSetMacro(ImmediateModeRendering, int);
-  vtkGetMacro(ImmediateModeRendering, int);
-  vtkBooleanMacro(ImmediateModeRendering, int);
+  vtkSetMacro(ImmediateModeRendering, bool);
+  vtkGetMacro(ImmediateModeRendering, bool);
+  vtkBooleanMacro(ImmediateModeRendering, bool);
 
   // Description:
   // Turn on/off flag to control whether data is rendered using

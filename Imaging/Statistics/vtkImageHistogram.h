@@ -67,9 +67,9 @@ public:
   // For float data, the MaximumNumberOfBins will always be used.
   // The BinOrigin and BinSpacing will be set so that they provide a mapping
   // from bin index to scalar value.
-  vtkSetMacro(AutomaticBinning, int);
-  vtkBooleanMacro(AutomaticBinning, int);
-  vtkGetMacro(AutomaticBinning, int);
+  vtkSetMacro(AutomaticBinning, bool);
+  vtkGetMacro(AutomaticBinning, bool);
+  vtkBooleanMacro(AutomaticBinning, bool);
 
   // Description:
   // The maximum number of bins to use when AutomaticBinning is On.
@@ -112,9 +112,9 @@ public:
   // If this is On, then a histogram image will be produced as the output.
   // Regardless of this setting, the histogram is always available as a
   // vtkIdTypeArray from the GetHistogram method.
-  vtkSetMacro(GenerateHistogramImage, int);
-  vtkBooleanMacro(GenerateHistogramImage, int);
-  vtkGetMacro(GenerateHistogramImage, int);
+  vtkSetMacro(GenerateHistogramImage, bool);
+  vtkGetMacro(GenerateHistogramImage, bool);
+  vtkBooleanMacro(GenerateHistogramImage, bool);
 
   // Description:
   // Set the size of the histogram image that is produced as output.

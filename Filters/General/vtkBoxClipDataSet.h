@@ -89,16 +89,16 @@ public:
   // Description:
   // If this flag is enabled, then the output scalar values will be
   // interpolated, and not the input scalar data.
-  vtkSetMacro(GenerateClipScalars,int);
-  vtkGetMacro(GenerateClipScalars,int);
-  vtkBooleanMacro(GenerateClipScalars,int);
+  vtkSetMacro(GenerateClipScalars, bool);
+  vtkGetMacro(GenerateClipScalars, bool);
+  vtkBooleanMacro(GenerateClipScalars, bool);
 
   // Description:
   // Control whether a second output is generated. The second output
   // contains the polygonal data that's been clipped away.
-  vtkSetMacro(GenerateClippedOutput,int);
-  vtkGetMacro(GenerateClippedOutput,int);
-  vtkBooleanMacro(GenerateClippedOutput,int);
+  vtkSetMacro(GenerateClippedOutput, bool);
+  vtkGetMacro(GenerateClippedOutput, bool);
+  vtkBooleanMacro(GenerateClippedOutput, bool);
 
   // Description:
   // Set the tolerance for merging clip intersection points that are near

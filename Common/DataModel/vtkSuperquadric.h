@@ -96,9 +96,9 @@ public:
 
   // Description:
   // Set/Get whether or not the superquadric is toroidal (1) or ellipsoidal (0).
-  vtkBooleanMacro(Toroidal,int);
-  vtkGetMacro(Toroidal,int);
-  vtkSetMacro(Toroidal,int);
+  vtkSetMacro(Toroidal, bool);
+  vtkGetMacro(Toroidal, bool);
+  vtkBooleanMacro(Toroidal, bool);
 
 protected:
   vtkSuperquadric();

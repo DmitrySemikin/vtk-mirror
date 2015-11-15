@@ -120,18 +120,18 @@ public:
   // (default is through right mouse button) while face movement refers to
   // scaling of the widget one face (axis) at a time (default through grabbing
   // one of the representation spherical handles).
-  vtkSetMacro(TranslationEnabled,int);
-  vtkGetMacro(TranslationEnabled,int);
-  vtkBooleanMacro(TranslationEnabled,int);
-  vtkSetMacro(ScalingEnabled,int);
-  vtkGetMacro(ScalingEnabled,int);
-  vtkBooleanMacro(ScalingEnabled,int);
-  vtkSetMacro(RotationEnabled,int);
-  vtkGetMacro(RotationEnabled,int);
-  vtkBooleanMacro(RotationEnabled,int);
-  vtkSetMacro(MoveFacesEnabled,int);
-  vtkGetMacro(MoveFacesEnabled,int);
-  vtkBooleanMacro(MoveFacesEnabled,int);
+  vtkSetMacro(TranslationEnabled, bool);
+  vtkGetMacro(TranslationEnabled, bool);
+  vtkBooleanMacro(TranslationEnabled, bool);
+  vtkSetMacro(ScalingEnabled, bool);
+  vtkGetMacro(ScalingEnabled, bool);
+  vtkBooleanMacro(ScalingEnabled, bool);
+  vtkSetMacro(RotationEnabled, bool);
+  vtkGetMacro(RotationEnabled, bool);
+  vtkBooleanMacro(RotationEnabled, bool);
+  vtkSetMacro(MoveFacesEnabled, bool);
+  vtkGetMacro(MoveFacesEnabled, bool);
+  vtkBooleanMacro(MoveFacesEnabled, bool);
 
   // Description:
   // Create the default widget representation if one is not set. By default,

@@ -146,9 +146,9 @@ public:
   // of the data. The bounding box is defined from the last PlaceWidget()
   // invocation, and includes the effect of the PlaceFactor which is used
   // to gram/shrink the bounding box.
-  vtkSetMacro(ClampToBounds,int);
-  vtkGetMacro(ClampToBounds,int);
-  vtkBooleanMacro(ClampToBounds,int);
+  vtkSetMacro(ClampToBounds, bool);
+  vtkGetMacro(ClampToBounds, bool);
+  vtkBooleanMacro(ClampToBounds, bool);
 
   // Description:
   // Grab the polydata (including points) that defines the line.  The

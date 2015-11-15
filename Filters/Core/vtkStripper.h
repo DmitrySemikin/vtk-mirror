@@ -76,35 +76,35 @@ public:
   // Description:
   // Enable/Disable passing of the CellData in the input to
   // the output as FieldData. Note the field data is transformed.
-  vtkBooleanMacro(PassCellDataAsFieldData, int);
-  vtkSetMacro(PassCellDataAsFieldData, int);
-  vtkGetMacro(PassCellDataAsFieldData, int);
+  vtkSetMacro(PassCellDataAsFieldData, bool);
+  vtkGetMacro(PassCellDataAsFieldData, bool);
+  vtkBooleanMacro(PassCellDataAsFieldData, bool);
 
   // Description:
   // If on, the output polygonal dataset will have a celldata array that
   // holds the cell index of the original 3D cell that produced each output
   // cell. This is useful for picking. The default is off to conserve
   // memory.
-  vtkSetMacro(PassThroughCellIds,int);
-  vtkGetMacro(PassThroughCellIds,int);
-  vtkBooleanMacro(PassThroughCellIds,int);
+  vtkSetMacro(PassThroughCellIds, bool);
+  vtkGetMacro(PassThroughCellIds, bool);
+  vtkBooleanMacro(PassThroughCellIds, bool);
 
   // Description:
   // If on, the output polygonal dataset will have a pointdata array that
   // holds the point index of the original vertex that produced each output
   // vertex. This is useful for picking. The default is off to conserve
   // memory.
-  vtkSetMacro(PassThroughPointIds,int);
-  vtkGetMacro(PassThroughPointIds,int);
-  vtkBooleanMacro(PassThroughPointIds,int);
+  vtkSetMacro(PassThroughPointIds, bool);
+  vtkGetMacro(PassThroughPointIds, bool);
+  vtkBooleanMacro(PassThroughPointIds, bool);
 
   // Description:
   // If on, the output polygonal segments will be joined if they are
   // contiguous. This is useful after slicing a surface. The default
   // is off.
-  vtkSetMacro(JoinContiguousSegments,int);
-  vtkGetMacro(JoinContiguousSegments,int);
-  vtkBooleanMacro(JoinContiguousSegments,int);
+  vtkSetMacro(JoinContiguousSegments, bool);
+  vtkGetMacro(JoinContiguousSegments, bool);
+  vtkBooleanMacro(JoinContiguousSegments, bool);
 
 protected:
   vtkStripper();

@@ -92,18 +92,18 @@ public:
   // not. If not, then events (such as left mouse down) allow the user to
   // "move" the widget, and no selection is possible. Otherwise the
   // SelectRegion() method is invoked.
-  vtkSetMacro(Selectable,int);
-  vtkGetMacro(Selectable,int);
-  vtkBooleanMacro(Selectable,int);
+  vtkSetMacro(Selectable, bool);
+  vtkGetMacro(Selectable, bool);
+  vtkBooleanMacro(Selectable, bool);
 
 
   // Description:
   // Indicate whether the boundary of the widget can be resized.
   // If not, the cursor will not change to "resize" type when mouse
   // over the boundary.
-  vtkSetMacro(Resizable,int);
-  vtkGetMacro(Resizable,int);
-  vtkBooleanMacro(Resizable,int);
+  vtkSetMacro(Resizable, bool);
+  vtkGetMacro(Resizable, bool);
+  vtkBooleanMacro(Resizable, bool);
 
 
   // Description:

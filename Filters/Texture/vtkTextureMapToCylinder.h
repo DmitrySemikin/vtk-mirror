@@ -71,18 +71,18 @@ public:
   // Description:
   // Turn on/off automatic cylinder generation. This means it automatically
   // finds the cylinder center and axis.
-  vtkSetMacro(AutomaticCylinderGeneration,int);
-  vtkGetMacro(AutomaticCylinderGeneration,int);
-  vtkBooleanMacro(AutomaticCylinderGeneration,int);
+  vtkSetMacro(AutomaticCylinderGeneration, bool);
+  vtkGetMacro(AutomaticCylinderGeneration, bool);
+  vtkBooleanMacro(AutomaticCylinderGeneration, bool);
 
   // Description:
   // Control how the texture coordinates are generated. If PreventSeam is
   // set, the s-coordinate ranges from 0->1 and 1->0 corresponding to the
   // angle variation from 0->180 and 180->0. Otherwise, the s-coordinate
   // ranges from 0->1 from 0->360 degrees.
-  vtkSetMacro(PreventSeam,int);
-  vtkGetMacro(PreventSeam,int);
-  vtkBooleanMacro(PreventSeam,int);
+  vtkSetMacro(PreventSeam, bool);
+  vtkGetMacro(PreventSeam, bool);
+  vtkBooleanMacro(PreventSeam, bool);
 
 protected:
   vtkTextureMapToCylinder();

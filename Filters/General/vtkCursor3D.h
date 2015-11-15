@@ -65,49 +65,49 @@ public:
 
   // Description:
   // Turn on/off the wireframe bounding box.
-  vtkSetMacro(Outline,int);
-  vtkGetMacro(Outline,int);
-  vtkBooleanMacro(Outline,int);
+  vtkSetMacro(Outline, bool);
+  vtkGetMacro(Outline, bool);
+  vtkBooleanMacro(Outline, bool);
 
   // Description:
   // Turn on/off the wireframe axes.
-  vtkSetMacro(Axes,int);
-  vtkGetMacro(Axes,int);
-  vtkBooleanMacro(Axes,int);
+  vtkSetMacro(Axes, bool);
+  vtkGetMacro(Axes, bool);
+  vtkBooleanMacro(Axes, bool);
 
   // Description:
   // Turn on/off the wireframe x-shadows.
-  vtkSetMacro(XShadows,int);
-  vtkGetMacro(XShadows,int);
-  vtkBooleanMacro(XShadows,int);
+  vtkSetMacro(XShadows, bool);
+  vtkGetMacro(XShadows, bool);
+  vtkBooleanMacro(XShadows, bool);
 
   // Description:
   // Turn on/off the wireframe y-shadows.
-  vtkSetMacro(YShadows,int);
-  vtkGetMacro(YShadows,int);
-  vtkBooleanMacro(YShadows,int);
+  vtkSetMacro(YShadows, bool);
+  vtkGetMacro(YShadows, bool);
+  vtkBooleanMacro(YShadows, bool);
 
   // Description:
   // Turn on/off the wireframe z-shadows.
-  vtkSetMacro(ZShadows,int);
-  vtkGetMacro(ZShadows,int);
-  vtkBooleanMacro(ZShadows,int);
+  vtkSetMacro(ZShadows, bool);
+  vtkGetMacro(ZShadows, bool);
+  vtkBooleanMacro(ZShadows, bool);
 
   // Description:
   // Enable/disable the translation mode. If on, changes in cursor position
   // cause the entire widget to translate along with the cursor.
   // By default, translation mode is off.
-  vtkSetMacro(TranslationMode,int);
-  vtkGetMacro(TranslationMode,int);
-  vtkBooleanMacro(TranslationMode,int);
+  vtkSetMacro(TranslationMode, bool);
+  vtkGetMacro(TranslationMode, bool);
+  vtkBooleanMacro(TranslationMode, bool);
 
   // Description:
   // Turn on/off cursor wrapping. If the cursor focus moves outside the
   // specified bounds, the cursor will either be restrained against the
   // nearest "wall" (Wrap=off), or it will wrap around (Wrap=on).
-  vtkSetMacro(Wrap,int);
-  vtkGetMacro(Wrap,int);
-  vtkBooleanMacro(Wrap,int);
+  vtkSetMacro(Wrap, bool);
+  vtkGetMacro(Wrap, bool);
+  vtkBooleanMacro(Wrap, bool);
 
   // Description:
   // Get the focus for this filter.

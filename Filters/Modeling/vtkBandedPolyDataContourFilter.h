@@ -81,9 +81,9 @@ public:
   // (The range is contour value[0] to contour value[numContours-1].)
   // Clipping means all cells outside of the range specified are not
   // sent to the output.
-  vtkSetMacro(Clipping,int);
-  vtkGetMacro(Clipping,int);
-  vtkBooleanMacro(Clipping,int);
+  vtkSetMacro(Clipping, bool);
+  vtkGetMacro(Clipping, bool);
+  vtkBooleanMacro(Clipping, bool);
 
   // Description:
   // Control whether the cell scalars are output as an integer index or
@@ -102,9 +102,9 @@ public:
   // Contour edges are the edges between bands. If enabled, they are
   // generated from polygons/triangle strips and placed into the second
   // output (the ContourEdgesOutput).
-  vtkSetMacro(GenerateContourEdges,int);
-  vtkGetMacro(GenerateContourEdges,int);
-  vtkBooleanMacro(GenerateContourEdges,int);
+  vtkSetMacro(GenerateContourEdges, bool);
+  vtkGetMacro(GenerateContourEdges, bool);
+  vtkBooleanMacro(GenerateContourEdges, bool);
 
   // Description:
   // Set/Get the clip tolerance. Warning: setting this too large will

@@ -109,17 +109,17 @@ public:
   // do want normals for shading) this can be used. Be careful - if
   // if you a non-constant gradient magnitude transfer function and
   // you turn this on, it may crash
-  vtkSetMacro( ComputeGradientMagnitudes, int );
-  vtkGetMacro( ComputeGradientMagnitudes, int );
-  vtkBooleanMacro( ComputeGradientMagnitudes, int );
+  vtkSetMacro(ComputeGradientMagnitudes, bool);
+  vtkGetMacro(ComputeGradientMagnitudes, bool);
+  vtkBooleanMacro(ComputeGradientMagnitudes, bool);
 
   // Description:
   // If the data in each slice is only contained within a circle circumscribed
   // within the slice, and the slice is square, then don't compute anything
   // outside the circle. This circle through the slices forms a cylinder.
-  vtkSetMacro( CylinderClip, int );
-  vtkGetMacro( CylinderClip, int );
-  vtkBooleanMacro( CylinderClip, int );
+  vtkSetMacro(CylinderClip, bool);
+  vtkGetMacro(CylinderClip, bool);
+  vtkBooleanMacro(CylinderClip, bool);
 
   // Description:
   // Get the time required for the last update in seconds or cpu seconds

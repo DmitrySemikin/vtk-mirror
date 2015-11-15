@@ -52,9 +52,9 @@ public:
 
   // Description:
   // Set whether to close the poly line by connecting the last and first points.
-  vtkSetMacro(Closed, int);
-  vtkGetMacro(Closed, int);
-  vtkBooleanMacro(Closed, int);
+  vtkSetMacro(Closed, bool);
+  vtkGetMacro(Closed, bool);
+  vtkBooleanMacro(Closed, bool);
 
 protected:
   vtkPolyLineSource();

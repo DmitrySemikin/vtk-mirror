@@ -67,9 +67,9 @@ public:
   // lies at the Center of the data set.  This will override
   // SetOutputOrigin.  This is often a useful operation to apply
   // before using vtkImageReslice to apply a transformation to an image.
-  vtkSetMacro(CenterImage, int);
-  vtkBooleanMacro(CenterImage, int);
-  vtkGetMacro(CenterImage, int);
+  vtkSetMacro(CenterImage, bool);
+  vtkGetMacro(CenterImage, bool);
+  vtkBooleanMacro(CenterImage, bool);
 
   // Description:
   // Apply a translation to the extent.

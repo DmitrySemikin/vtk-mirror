@@ -144,9 +144,9 @@ public:
   // the data space so that ColumnRanges[1]-ColumnRanges[0] = 1.0 and
   // ColumnRanges[3]-ColumnRanges[2] = 1.0.  Used for scatter plot distance
   // calculations.  Be sure to set DistanceThreshold accordingly, when used.
-  vtkSetMacro(UseNormalizedDistance,int);
-  vtkGetMacro(UseNormalizedDistance,int);
-  vtkBooleanMacro(UseNormalizedDistance,int);
+  vtkSetMacro(UseNormalizedDistance, bool);
+  vtkGetMacro(UseNormalizedDistance, bool);
+  vtkBooleanMacro(UseNormalizedDistance, bool);
 
   // Description:
   // Convert the two-point line formula to implicit form.

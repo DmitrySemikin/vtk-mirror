@@ -199,82 +199,82 @@ public:
   // Description:
   // Turn on/off compression when generating PostScript or PDF
   // output. By default compression is on.
-  vtkSetMacro(Compress, int);
-  vtkGetMacro(Compress, int);
-  vtkBooleanMacro(Compress, int);
+  vtkSetMacro(Compress, bool);
+  vtkGetMacro(Compress, bool);
+  vtkBooleanMacro(Compress, bool);
 
   // Description:
   // Turn on/off drawing the background frame.  If off the background
   // is treated as white.  By default the background is drawn.
-  vtkSetMacro(DrawBackground, int);
-  vtkGetMacro(DrawBackground, int);
-  vtkBooleanMacro(DrawBackground, int);
+  vtkSetMacro(DrawBackground, bool);
+  vtkGetMacro(DrawBackground, bool);
+  vtkBooleanMacro(DrawBackground, bool);
 
   // Description:
   // Turn on/off the GL2PS_SIMPLE_LINE_OFFSET option.  When enabled a
   // small offset is added in the z-buffer to all the lines in the
   // plot.  This results in an anti-aliasing like solution.  Defaults to
   // on.
-  vtkSetMacro(SimpleLineOffset, int);
-  vtkGetMacro(SimpleLineOffset, int);
-  vtkBooleanMacro(SimpleLineOffset, int);
+  vtkSetMacro(SimpleLineOffset, bool);
+  vtkGetMacro(SimpleLineOffset, bool);
+  vtkBooleanMacro(SimpleLineOffset, bool);
 
   // Description:
   // Turn on/off GL2PS messages sent to stderr (GL2PS_SILENT).  When
   // enabled GL2PS messages are suppressed.  Defaults to off.
-  vtkSetMacro(Silent, int);
-  vtkGetMacro(Silent, int);
-  vtkBooleanMacro(Silent, int);
+  vtkSetMacro(Silent, bool);
+  vtkGetMacro(Silent, bool);
+  vtkBooleanMacro(Silent, bool);
 
   // Description:
   // Turn on/off the GL2PS_BEST_ROOT option.  When enabled the
   // construction of the BSP tree is optimized by choosing the root
   // primitives leading to the minimum number of splits.  Defaults to
   // on.
-  vtkSetMacro(BestRoot, int);
-  vtkGetMacro(BestRoot, int);
-  vtkBooleanMacro(BestRoot, int);
+  vtkSetMacro(BestRoot, bool);
+  vtkGetMacro(BestRoot, bool);
+  vtkBooleanMacro(BestRoot, bool);
 
   // Description:
   // Turn on/off drawing the text.  If on (default) the text is drawn.
   // If the FileFormat is set to TeX output then a LaTeX picture is
   // generated with the text strings.  If off text output is
   // suppressed.
-  vtkSetMacro(Text, int);
-  vtkGetMacro(Text, int);
-  vtkBooleanMacro(Text, int);
+  vtkSetMacro(Text, bool);
+  vtkGetMacro(Text, bool);
+  vtkBooleanMacro(Text, bool);
 
   // Description:
   // Turn on/off landscape orientation.  If off (default) the
   // orientation is set to portrait.
-  vtkSetMacro(Landscape, int);
-  vtkGetMacro(Landscape, int);
-  vtkBooleanMacro(Landscape, int);
+  vtkSetMacro(Landscape, bool);
+  vtkGetMacro(Landscape, bool);
+  vtkBooleanMacro(Landscape, bool);
 
   // Description:
   // Turn on/off the GL2PS_PS3_SHADING option.  When enabled the
   // shfill PostScript level 3 operator is used.  Read the GL2PS
   // documentation for more details.  Defaults to on.
-  vtkSetMacro(PS3Shading, int);
-  vtkGetMacro(PS3Shading, int);
-  vtkBooleanMacro(PS3Shading, int);
+  vtkSetMacro(PS3Shading, bool);
+  vtkGetMacro(PS3Shading, bool);
+  vtkBooleanMacro(PS3Shading, bool);
 
   // Description:
   // Turn on/off culling of occluded polygons (GL2PS_OCCLUSION_CULL).
   // When enabled hidden polygons are removed.  This reduces file size
   // considerably.  Defaults to on.
-  vtkSetMacro(OcclusionCull, int);
-  vtkGetMacro(OcclusionCull, int);
-  vtkBooleanMacro(OcclusionCull, int);
+  vtkSetMacro(OcclusionCull, bool);
+  vtkGetMacro(OcclusionCull, bool);
+  vtkBooleanMacro(OcclusionCull, bool);
 
   // Description:
   // Turn on/off writing 3D props as raster images.  2D props are
   // rendered using vector graphics primitives.  If you have hi-res
   // actors and are using transparency you probably need to turn this
   // on.  Defaults to Off.
-  vtkSetMacro(Write3DPropsAsRasterImage, int);
-  vtkGetMacro(Write3DPropsAsRasterImage, int);
-  vtkBooleanMacro(Write3DPropsAsRasterImage, int);
+  vtkSetMacro(Write3DPropsAsRasterImage, bool);
+  vtkGetMacro(Write3DPropsAsRasterImage, bool);
+  vtkBooleanMacro(Write3DPropsAsRasterImage, bool);
 
   // Description:
   // Turn on/off exporting text as path information, rather than character data.

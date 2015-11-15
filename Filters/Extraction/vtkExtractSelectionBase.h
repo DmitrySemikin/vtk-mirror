@@ -42,9 +42,9 @@ public:
   // This flag tells the extraction filter not to convert the selected
   // output into an unstructured grid, but instead to produce a vtkInsidedness
   // array and add it to the input dataset. Default value is false(0).
-  vtkSetMacro(PreserveTopology, int);
-  vtkGetMacro(PreserveTopology, int);
-  vtkBooleanMacro(PreserveTopology, int);
+  vtkSetMacro(PreserveTopology, bool);
+  vtkGetMacro(PreserveTopology, bool);
+  vtkBooleanMacro(PreserveTopology, bool);
 
 //BTX
 protected:

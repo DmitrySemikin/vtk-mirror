@@ -85,9 +85,9 @@ public:
 
   // Description:
   // Turn on/off automatic plane generation.
-  vtkSetMacro(AutomaticPlaneGeneration,int);
-  vtkGetMacro(AutomaticPlaneGeneration,int);
-  vtkBooleanMacro(AutomaticPlaneGeneration,int);
+  vtkSetMacro(AutomaticPlaneGeneration, bool);
+  vtkGetMacro(AutomaticPlaneGeneration, bool);
+  vtkBooleanMacro(AutomaticPlaneGeneration, bool);
 
 protected:
   vtkTextureMapToPlane();

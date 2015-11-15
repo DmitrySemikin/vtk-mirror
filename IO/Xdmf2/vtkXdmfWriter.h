@@ -96,9 +96,9 @@ public:
   //Controls whether writer automatically writes all input time steps, or
   //just the timestep that is currently on the input.
   //Default is OFF.
-  vtkSetMacro(WriteAllTimeSteps, int);
-  vtkGetMacro(WriteAllTimeSteps, int);
-  vtkBooleanMacro(WriteAllTimeSteps, int);
+  vtkSetMacro(WriteAllTimeSteps, bool);
+  vtkGetMacro(WriteAllTimeSteps, bool);
+  vtkBooleanMacro(WriteAllTimeSteps, bool);
 
   // Description:
   // Set of get the flag that specify if input mesh is static over time.

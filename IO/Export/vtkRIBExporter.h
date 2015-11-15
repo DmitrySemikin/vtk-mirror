@@ -104,9 +104,9 @@ public:
   // rules: If you are using Pixar's Renderman, leave the Background
   // off. Otherwise, try setting BackGroundOn and see if you get the
   // desired results.
-  vtkSetMacro(Background,int);
-  vtkGetMacro(Background,int);
-  vtkBooleanMacro(Background,int);
+  vtkSetMacro(Background, bool);
+  vtkGetMacro(Background, bool);
+  vtkBooleanMacro(Background, bool);
 
   // Description:
   // Set or get the ExportArrays. If ExportArrays is set, then

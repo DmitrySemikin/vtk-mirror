@@ -75,9 +75,9 @@ public:
   // the breakup of the probe operation to be much more efficient.  When piece
   // m of n is requested for update by the user, then only n of m needs to
   // be requested of the source.
-  vtkSetMacro(SpatialMatch, int);
-  vtkGetMacro(SpatialMatch, int);
-  vtkBooleanMacro(SpatialMatch, int);
+  vtkSetMacro(SpatialMatch, bool);
+  vtkGetMacro(SpatialMatch, bool);
+  vtkBooleanMacro(SpatialMatch, bool);
 
   // Description:
   // Get the list of point ids in the output that contain attribute data
@@ -94,23 +94,23 @@ public:
   // Description:
   // Shallow copy the input cell data arrays to the output.
   // Off by default.
-  vtkSetMacro(PassCellArrays, int);
-  vtkBooleanMacro(PassCellArrays, int);
-  vtkGetMacro(PassCellArrays, int);
+  vtkSetMacro(PassCellArrays, bool);
+  vtkGetMacro(PassCellArrays, bool);
+  vtkBooleanMacro(PassCellArrays, bool);
   // Description:
   // Shallow copy the input point data arrays to the output
   // Off by default.
-  vtkSetMacro(PassPointArrays, int);
-  vtkBooleanMacro(PassPointArrays, int);
-  vtkGetMacro(PassPointArrays, int);
+  vtkSetMacro(PassPointArrays, bool);
+  vtkGetMacro(PassPointArrays, bool);
+  vtkBooleanMacro(PassPointArrays, bool);
 
 
   // Description:
   // Set whether to pass the field-data arrays from the Input i.e. the input
   // providing the geometry to the output. On by default.
-  vtkSetMacro(PassFieldArrays, int);
-  vtkBooleanMacro(PassFieldArrays, int);
-  vtkGetMacro(PassFieldArrays, int);
+  vtkSetMacro(PassFieldArrays, bool);
+  vtkGetMacro(PassFieldArrays, bool);
+  vtkBooleanMacro(PassFieldArrays, bool);
 
   // Description:
   // Set the tolerance used to compute whether a point in the

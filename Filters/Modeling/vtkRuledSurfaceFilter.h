@@ -97,9 +97,9 @@ public:
   // that closes the surface. (Note: to close the surface in the other
   // direction, repeat the first point in the polyline as the last
   // point in the polyline.)
-  vtkSetMacro(CloseSurface,int);
-  vtkGetMacro(CloseSurface,int);
-  vtkBooleanMacro(CloseSurface,int);
+  vtkSetMacro(CloseSurface, bool);
+  vtkGetMacro(CloseSurface, bool);
+  vtkBooleanMacro(CloseSurface, bool);
 
   // Description:
   // Set the mode by which to create the ruled surface. (Dramatically
@@ -128,18 +128,18 @@ public:
   // Description:
   // Indicate whether the generating lines are to be passed to the output.
   // By defualt lines are not passed to the output.
-  vtkSetMacro(PassLines,int);
-  vtkGetMacro(PassLines,int);
-  vtkBooleanMacro(PassLines,int);
+  vtkSetMacro(PassLines, bool);
+  vtkGetMacro(PassLines, bool);
+  vtkBooleanMacro(PassLines, bool);
 
   // Description:
   // Indicate whether the starting points of the loops need to be determined.
   // If set to 0, then its assumes that the 0th point of each loop should be
   // always connected
   // By defualt the loops are not oriented.
-  vtkSetMacro(OrientLoops,int);
-  vtkGetMacro(OrientLoops,int);
-  vtkBooleanMacro(OrientLoops,int);
+  vtkSetMacro(OrientLoops, bool);
+  vtkGetMacro(OrientLoops, bool);
+  vtkBooleanMacro(OrientLoops, bool);
 
 protected:
   vtkRuledSurfaceFilter();

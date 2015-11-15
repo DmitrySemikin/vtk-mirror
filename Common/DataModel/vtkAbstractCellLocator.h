@@ -64,26 +64,26 @@ public:
   // calling any of the Intersect/Find routines and the extra memory
   // won't cause disk caching (24 extra bytes per cell are required to
   // save the bounds).
-  vtkSetMacro(CacheCellBounds,int);
-  vtkGetMacro(CacheCellBounds,int);
-  vtkBooleanMacro(CacheCellBounds,int);
+  vtkSetMacro(CacheCellBounds, bool);
+  vtkGetMacro(CacheCellBounds, bool);
+  vtkBooleanMacro(CacheCellBounds, bool);
 
   // Description:
   // Boolean controls whether to maintain list of cells in each node.
   // not applicable to all implementations, but if the locator is being used
   // as a geometry simplification technique, there is no need to keep them.
-  vtkSetMacro(RetainCellLists,int);
-  vtkGetMacro(RetainCellLists,int);
-  vtkBooleanMacro(RetainCellLists,int);
+  vtkSetMacro(RetainCellLists, bool);
+  vtkGetMacro(RetainCellLists, bool);
+  vtkBooleanMacro(RetainCellLists, bool);
 
   // Description:
   // Most Locators build their search structures during BuildLocator
   // but some may delay construction until it is actually needed.
   // If LazyEvaluation is supported, this turns on/off the feature.
   // if not supported, it is ignored.
-  vtkSetMacro(LazyEvaluation,int);
-  vtkGetMacro(LazyEvaluation,int);
-  vtkBooleanMacro(LazyEvaluation,int);
+  vtkSetMacro(LazyEvaluation, bool);
+  vtkGetMacro(LazyEvaluation, bool);
+  vtkBooleanMacro(LazyEvaluation, bool);
 
   // Description:
   // Some locators support querying a new dataset without rebuilding
@@ -91,9 +91,9 @@ public:
   // changes due to a time update, but is actually the same topology)
   // Turning on this flag enables some locators to skip the rebuilding
   // phase
-  vtkSetMacro(UseExistingSearchStructure,int);
-  vtkGetMacro(UseExistingSearchStructure,int);
-  vtkBooleanMacro(UseExistingSearchStructure,int);
+  vtkSetMacro(UseExistingSearchStructure, bool);
+  vtkGetMacro(UseExistingSearchStructure, bool);
+  vtkBooleanMacro(UseExistingSearchStructure, bool);
 
   // Description:
   // Return intersection point (if any) of finite line with cells contained

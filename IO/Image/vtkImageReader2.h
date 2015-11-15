@@ -202,9 +202,9 @@ public:
   // Description:
   // Set/Get whether the data comes from the file starting in the lower left
   // corner or upper left corner.
-  vtkBooleanMacro(FileLowerLeft, int);
-  vtkGetMacro(FileLowerLeft, int);
-  vtkSetMacro(FileLowerLeft, int);
+  vtkSetMacro(FileLowerLeft, bool);
+  vtkGetMacro(FileLowerLeft, bool);
+  vtkBooleanMacro(FileLowerLeft, bool);
 
   // Description:
   // Set/Get the internal file name

@@ -73,9 +73,9 @@ public:
   // Description:
   // If on (the default), copy the input geometry to the output. If off,
   // the output will only contain the rotation.
-  vtkSetMacro(CopyInput, int);
-  vtkGetMacro(CopyInput, int);
-  vtkBooleanMacro(CopyInput, int);
+  vtkSetMacro(CopyInput, bool);
+  vtkGetMacro(CopyInput, bool);
+  vtkBooleanMacro(CopyInput, bool);
 
 
 protected:

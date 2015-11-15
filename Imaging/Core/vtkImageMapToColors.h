@@ -61,9 +61,9 @@ public:
   // Description:
   // Use the alpha component of the input when computing the alpha component
   // of the output (useful when converting monochrome+alpha data to RGBA)
-  vtkSetMacro(PassAlphaToOutput,int);
-  vtkBooleanMacro(PassAlphaToOutput,int);
-  vtkGetMacro(PassAlphaToOutput,int);
+  vtkSetMacro(PassAlphaToOutput, bool);
+  vtkGetMacro(PassAlphaToOutput, bool);
+  vtkBooleanMacro(PassAlphaToOutput, bool);
 
   // Description:
   // We need to check the modified time of the lookup table too.

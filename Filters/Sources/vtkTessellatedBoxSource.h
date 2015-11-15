@@ -70,16 +70,16 @@ public:
   // (vertices of the box and internal edge points). Initial value is false.
   // Implementation note: duplicating points is an easier method to implement
   // than a minimal number of points.
-  vtkSetMacro(DuplicateSharedPoints, int);
-  vtkGetMacro(DuplicateSharedPoints, int);
-  vtkBooleanMacro(DuplicateSharedPoints, int);
+  vtkSetMacro(DuplicateSharedPoints, bool);
+  vtkGetMacro(DuplicateSharedPoints, bool);
+  vtkBooleanMacro(DuplicateSharedPoints, bool);
 
   // Description:
   // Flag to tell the source to generate either a quad or two triangle for a
   // set of four points. Initial value is false (generate triangles).
-  vtkSetMacro(Quads, int);
-  vtkGetMacro(Quads, int);
-  vtkBooleanMacro(Quads, int);
+  vtkSetMacro(Quads, bool);
+  vtkGetMacro(Quads, bool);
+  vtkBooleanMacro(Quads, bool);
 
   // Description:
   // Set/get the desired precision for the output points.

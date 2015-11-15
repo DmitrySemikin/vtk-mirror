@@ -67,9 +67,9 @@ public:
   // Description:
   // Specify whether the button should always face the camera. If enabled,
   // the button reorients itself towards the camera as the camera moves.
-  vtkSetMacro(FollowCamera,int);
-  vtkGetMacro(FollowCamera,int);
-  vtkBooleanMacro(FollowCamera,int);
+  vtkSetMacro(FollowCamera, bool);
+  vtkGetMacro(FollowCamera, bool);
+  vtkBooleanMacro(FollowCamera, bool);
 
   // Description:
   // Extend the vtkButtonRepresentation::SetState() method.

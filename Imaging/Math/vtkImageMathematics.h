@@ -171,9 +171,9 @@ public:
 
   // Description:
   // How to handle divide by zero. Default is 0.
-  vtkSetMacro(DivideByZeroToC,int);
-  vtkGetMacro(DivideByZeroToC,int);
-  vtkBooleanMacro(DivideByZeroToC,int);
+  vtkSetMacro(DivideByZeroToC, bool);
+  vtkGetMacro(DivideByZeroToC, bool);
+  vtkBooleanMacro(DivideByZeroToC, bool);
 
   // Description:
   // Set the two inputs to this filter. For some operations, the second input

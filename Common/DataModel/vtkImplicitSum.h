@@ -76,9 +76,9 @@ public:
   // final result by the total weight of the component functions.
   // This process does not otherwise normalize the gradient vector.
   // By default, NormalizeByWeight is off.
-  vtkSetMacro(NormalizeByWeight, int);
-  vtkGetMacro(NormalizeByWeight, int);
-  vtkBooleanMacro(NormalizeByWeight, int);
+  vtkSetMacro(NormalizeByWeight, bool);
+  vtkGetMacro(NormalizeByWeight, bool);
+  vtkBooleanMacro(NormalizeByWeight, bool);
 
 protected:
   vtkImplicitSum();

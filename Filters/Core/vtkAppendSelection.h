@@ -44,9 +44,9 @@ public:
   // using the AddInput/RemoveInput functions. Calls to
   // SetNumberOfInputs/SetInputByNumber should not be mixed with calls
   // to AddInput/RemoveInput. By default, UserManagedInputs is false.
-  vtkSetMacro(UserManagedInputs,int);
-  vtkGetMacro(UserManagedInputs,int);
-  vtkBooleanMacro(UserManagedInputs,int);
+  vtkSetMacro(UserManagedInputs, bool);
+  vtkGetMacro(UserManagedInputs, bool);
+  vtkBooleanMacro(UserManagedInputs, bool);
 
   // Description:
   // Add a dataset to the list of data to append. Should not be
@@ -80,9 +80,9 @@ public:
   // input selections as the children of the composite selection. This allows
   // for selections with different content types and properties. Default is
   // true.
-  vtkSetMacro(AppendByUnion, int);
-  vtkGetMacro(AppendByUnion, int);
-  vtkBooleanMacro(AppendByUnion, int);
+  vtkSetMacro(AppendByUnion, bool);
+  vtkGetMacro(AppendByUnion, bool);
+  vtkBooleanMacro(AppendByUnion, bool);
 
 protected:
   vtkAppendSelection();

@@ -177,15 +177,15 @@ public:
   // Remember that when the state changes, a ModifiedEvent is invoked.
   // This can be used to snap the plane to the axes if it is originally
   // not aligned.
-  vtkSetMacro(NormalToXAxis,int);
-  vtkGetMacro(NormalToXAxis,int);
-  vtkBooleanMacro(NormalToXAxis,int);
-  vtkSetMacro(NormalToYAxis,int);
-  vtkGetMacro(NormalToYAxis,int);
-  vtkBooleanMacro(NormalToYAxis,int);
-  vtkSetMacro(NormalToZAxis,int);
-  vtkGetMacro(NormalToZAxis,int);
-  vtkBooleanMacro(NormalToZAxis,int);
+  vtkSetMacro(NormalToXAxis, bool);
+  vtkGetMacro(NormalToXAxis, bool);
+  vtkBooleanMacro(NormalToXAxis, bool);
+  vtkSetMacro(NormalToYAxis, bool);
+  vtkGetMacro(NormalToYAxis, bool);
+  vtkBooleanMacro(NormalToYAxis, bool);
+  vtkSetMacro(NormalToZAxis, bool);
+  vtkGetMacro(NormalToZAxis, bool);
+  vtkBooleanMacro(NormalToZAxis, bool);
 
   // Description:
   // Grab the polydata (including points) that defines the plane.  The

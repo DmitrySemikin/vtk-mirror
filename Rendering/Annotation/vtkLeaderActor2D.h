@@ -141,9 +141,9 @@ public:
   // based on distance (in world coordinates) between the two end points; or
   // if a curved leader is being generated, the angle in degrees between the
   // two points.
-  vtkSetMacro(AutoLabel,int);
-  vtkGetMacro(AutoLabel,int);
-  vtkBooleanMacro(AutoLabel,int);
+  vtkSetMacro(AutoLabel, bool);
+  vtkGetMacro(AutoLabel, bool);
+  vtkBooleanMacro(AutoLabel, bool);
 
   // Description:
   // Specify the format to use for auto-labelling.

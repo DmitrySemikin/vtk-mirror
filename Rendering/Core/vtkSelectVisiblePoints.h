@@ -76,9 +76,9 @@ public:
   // Description:
   // Set/Get the flag which enables selection in a rectangular display
   // region.
-  vtkSetMacro(SelectionWindow, int);
-  vtkGetMacro(SelectionWindow, int);
-  vtkBooleanMacro(SelectionWindow, int);
+  vtkSetMacro(SelectionWindow, bool);
+  vtkGetMacro(SelectionWindow, bool);
+  vtkBooleanMacro(SelectionWindow, bool);
 
   // Description:
   // Specify the selection window in display coordinates. You must specify
@@ -89,9 +89,9 @@ public:
   // Description:
   // Set/Get the flag which enables inverse selection; i.e., invisible points
   // are selected.
-  vtkSetMacro(SelectInvisible, int);
-  vtkGetMacro(SelectInvisible, int);
-  vtkBooleanMacro(SelectInvisible, int);
+  vtkSetMacro(SelectInvisible, bool);
+  vtkGetMacro(SelectInvisible, bool);
+  vtkBooleanMacro(SelectInvisible, bool);
 
   // Description:
   // Set/Get a tolerance to use to determine whether a point is visible. A

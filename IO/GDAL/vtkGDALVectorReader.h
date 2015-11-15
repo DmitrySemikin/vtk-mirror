@@ -74,9 +74,9 @@ public:
   // vtkPolyData. Turning the option on is useful when a shapefile has
   // a number of features which could otherwise lead to a huge
   // multiblock structure.
-  vtkSetMacro(AppendFeatures, int);
-  vtkGetMacro(AppendFeatures, int);
-  vtkBooleanMacro(AppendFeatures, int);
+  vtkSetMacro(AppendFeatures, bool);
+  vtkGetMacro(AppendFeatures, bool);
+  vtkBooleanMacro(AppendFeatures, bool);
 
   //BTX
   // Description:
@@ -97,9 +97,9 @@ public:
   // off by default for backwards compatibility.
   // The array of feature IDs will be the active
   // cell-data pedigree IDs.
-  vtkSetMacro(AddFeatureIds,int);
-  vtkGetMacro(AddFeatureIds,int);
-  vtkBooleanMacro(AddFeatureIds,int);
+  vtkSetMacro(AddFeatureIds, bool);
+  vtkGetMacro(AddFeatureIds, bool);
+  vtkBooleanMacro(AddFeatureIds, bool);
 
 protected:
   vtkGDALVectorReader();

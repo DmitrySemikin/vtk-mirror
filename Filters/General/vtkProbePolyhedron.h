@@ -81,9 +81,9 @@ public:
   // Specify whether to probe (and hence produce) point data. The
   // interpolated point data of the source will produce the output
   // point data (output points are passed from the input points).
-  vtkSetMacro(ProbePointData, int);
-  vtkGetMacro(ProbePointData, int);
-  vtkBooleanMacro(ProbePointData, int);
+  vtkSetMacro(ProbePointData, bool);
+  vtkGetMacro(ProbePointData, bool);
+  vtkBooleanMacro(ProbePointData, bool);
 
   // Description:
   // Specify whether to probe (and hence produce) cell data. The
@@ -91,9 +91,9 @@ public:
   // cell data (output cells are passed from the input cells). Note
   // that the probing of the input uses the centers of the cells as
   // the probe position.
-  vtkSetMacro(ProbeCellData, int);
-  vtkGetMacro(ProbeCellData, int);
-  vtkBooleanMacro(ProbeCellData, int);
+  vtkSetMacro(ProbeCellData, bool);
+  vtkGetMacro(ProbeCellData, bool);
+  vtkBooleanMacro(ProbeCellData, bool);
 
 protected:
   vtkProbePolyhedron();

@@ -62,16 +62,16 @@ public:
 
   // Description:
   // Show the resliced image ?
-  vtkSetMacro( ShowReslicedImage, int );
-  vtkGetMacro( ShowReslicedImage, int );
-  vtkBooleanMacro( ShowReslicedImage, int );
+  vtkSetMacro(ShowReslicedImage, bool);
+  vtkGetMacro(ShowReslicedImage, bool);
+  vtkBooleanMacro(ShowReslicedImage, bool);
 
   // Description:
   // Make sure that the resliced image remains within the volume.
   // Default is On.
-  vtkSetMacro(RestrictPlaneToVolume,int);
-  vtkGetMacro(RestrictPlaneToVolume,int);
-  vtkBooleanMacro(RestrictPlaneToVolume,int);
+  vtkSetMacro(RestrictPlaneToVolume, bool);
+  vtkGetMacro(RestrictPlaneToVolume, bool);
+  vtkBooleanMacro(RestrictPlaneToVolume, bool);
 
   // Description:
   // Specify the format to use for labelling the distance. Note that an empty
@@ -141,9 +141,9 @@ public:
   // Description:
   // Enable/disable text display of window-level, image coordinates and
   // scalar values in a render window.
-  vtkSetMacro(DisplayText,int);
-  vtkGetMacro(DisplayText,int);
-  vtkBooleanMacro(DisplayText,int);
+  vtkSetMacro(DisplayText, bool);
+  vtkGetMacro(DisplayText, bool);
+  vtkBooleanMacro(DisplayText, bool);
 
   // Description:
   // Set/Get the text property for the image data and window-level annotation.
@@ -153,9 +153,9 @@ public:
   // Description:
   // Render as a 2D image, or render as a plane with a texture in physical
   // space.
-  vtkSetMacro( UseImageActor, int );
-  vtkGetMacro( UseImageActor, int );
-  vtkBooleanMacro( UseImageActor, int );
+  vtkSetMacro(UseImageActor, bool);
+  vtkGetMacro(UseImageActor, bool);
+  vtkBooleanMacro(UseImageActor, bool);
 
   // Description:
   // INTERNAL - Do not use

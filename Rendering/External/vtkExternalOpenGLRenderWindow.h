@@ -73,9 +73,9 @@ public:
   // provided to disable automatic window resize.
   // (Turn AutomaticWindowPositionAndResize off if you do not want the viewport
   // to be queried from the OpenGL state.)
-  vtkGetMacro(AutomaticWindowPositionAndResize,int);
-  vtkSetMacro(AutomaticWindowPositionAndResize,int);
-  vtkBooleanMacro(AutomaticWindowPositionAndResize,int);
+  vtkSetMacro(AutomaticWindowPositionAndResize, bool);
+  vtkGetMacro(AutomaticWindowPositionAndResize, bool);
+  vtkBooleanMacro(AutomaticWindowPositionAndResize, bool);
 
 protected:
   vtkExternalOpenGLRenderWindow();

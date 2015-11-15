@@ -39,9 +39,9 @@ public:
 
   // Description:
   // Set/Get whether data should be converted to CGS
-  vtkSetMacro( ConvertToCGS, int );
-  vtkGetMacro( ConvertToCGS, int );
-  vtkBooleanMacro( ConvertToCGS, int );
+  vtkSetMacro(ConvertToCGS, bool);
+  vtkGetMacro(ConvertToCGS, bool);
+  vtkBooleanMacro(ConvertToCGS, bool);
 
   // Description:
   // See vtkAMRBaseReader::GetNumberOfBlocks

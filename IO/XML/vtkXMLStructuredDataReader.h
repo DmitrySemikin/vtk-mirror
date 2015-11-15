@@ -47,9 +47,9 @@ public:
   // a rectangle inside it is needed.  This mode reads more data than
   // necessary, but prevents many short reads from interacting poorly
   // with the compression and encoding schemes.
-  vtkSetMacro(WholeSlices, int);
-  vtkGetMacro(WholeSlices, int);
-  vtkBooleanMacro(WholeSlices, int);
+  vtkSetMacro(WholeSlices, bool);
+  vtkGetMacro(WholeSlices, bool);
+  vtkBooleanMacro(WholeSlices, bool);
 
   // Description:
   // For the specified port, copy the information this reader sets up in

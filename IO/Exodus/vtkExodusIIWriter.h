@@ -126,35 +126,35 @@ public:
   //   cells is not included when the new Exodus II file is written out.  If
   //   you do want to include this array, set WriteOutBlockIdArray to ON.
 
-  vtkSetMacro(WriteOutBlockIdArray, int);
-  vtkGetMacro(WriteOutBlockIdArray, int);
-  vtkBooleanMacro(WriteOutBlockIdArray, int);
+  vtkSetMacro(WriteOutBlockIdArray, bool);
+  vtkGetMacro(WriteOutBlockIdArray, bool);
+  vtkBooleanMacro(WriteOutBlockIdArray, bool);
 
   // Description:
   //   By default, the integer array containing the global Node Ids
   //   is not included when the new Exodus II file is written out.  If
   //   you do want to include this array, set WriteOutGlobalNodeIdArray to ON.
 
-  vtkSetMacro(WriteOutGlobalNodeIdArray, int);
-  vtkGetMacro(WriteOutGlobalNodeIdArray, int);
-  vtkBooleanMacro(WriteOutGlobalNodeIdArray, int);
+  vtkSetMacro(WriteOutGlobalNodeIdArray, bool);
+  vtkGetMacro(WriteOutGlobalNodeIdArray, bool);
+  vtkBooleanMacro(WriteOutGlobalNodeIdArray, bool);
 
   // Description:
   //   By default, the integer array containing the global Element Ids
   //   is not included when the new Exodus II file is written out.  If you
   //   do want to include this array, set WriteOutGlobalElementIdArray to ON.
 
-  vtkSetMacro(WriteOutGlobalElementIdArray, int);
-  vtkGetMacro(WriteOutGlobalElementIdArray, int);
-  vtkBooleanMacro(WriteOutGlobalElementIdArray, int);
+  vtkSetMacro(WriteOutGlobalElementIdArray, bool);
+  vtkGetMacro(WriteOutGlobalElementIdArray, bool);
+  vtkBooleanMacro(WriteOutGlobalElementIdArray, bool);
 
   // Description:
   //   When WriteAllTimeSteps is turned ON, the writer is executed once for
   //    each timestep available from the reader.
 
-  vtkSetMacro(WriteAllTimeSteps, int);
-  vtkGetMacro(WriteAllTimeSteps, int);
-  vtkBooleanMacro(WriteAllTimeSteps, int);
+  vtkSetMacro(WriteAllTimeSteps, bool);
+  vtkGetMacro(WriteAllTimeSteps, bool);
+  vtkBooleanMacro(WriteAllTimeSteps, bool);
 
   vtkSetStringMacro(BlockIdArrayName);
   vtkGetStringMacro(BlockIdArrayName);

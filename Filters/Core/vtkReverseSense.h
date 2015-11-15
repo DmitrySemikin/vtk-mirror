@@ -44,15 +44,15 @@ public:
 
   // Description:
   // Flag controls whether to reverse cell ordering.
-  vtkSetMacro(ReverseCells,int);
-  vtkGetMacro(ReverseCells,int);
-  vtkBooleanMacro(ReverseCells,int);
+  vtkSetMacro(ReverseCells, bool);
+  vtkGetMacro(ReverseCells, bool);
+  vtkBooleanMacro(ReverseCells, bool);
 
   // Description:
   // Flag controls whether to reverse normal orientation.
-  vtkSetMacro(ReverseNormals,int);
-  vtkGetMacro(ReverseNormals,int);
-  vtkBooleanMacro(ReverseNormals,int);
+  vtkSetMacro(ReverseNormals, bool);
+  vtkGetMacro(ReverseNormals, bool);
+  vtkBooleanMacro(ReverseNormals, bool);
 
 
 protected:

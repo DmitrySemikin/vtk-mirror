@@ -80,25 +80,25 @@ public:
   // Description:
   // Set/Get the flags that control which of the four axes to display (top,
   // bottom, left and right). By default, all the axes are displayed.
-  vtkSetMacro(RightAxisVisibility,int);
-  vtkGetMacro(RightAxisVisibility,int);
-  vtkBooleanMacro(RightAxisVisibility,int);
-  vtkSetMacro(TopAxisVisibility,int);
-  vtkGetMacro(TopAxisVisibility,int);
-  vtkBooleanMacro(TopAxisVisibility,int);
-  vtkSetMacro(LeftAxisVisibility,int);
-  vtkGetMacro(LeftAxisVisibility,int);
-  vtkBooleanMacro(LeftAxisVisibility,int);
-  vtkSetMacro(BottomAxisVisibility,int);
-  vtkGetMacro(BottomAxisVisibility,int);
-  vtkBooleanMacro(BottomAxisVisibility,int);
+  vtkSetMacro(RightAxisVisibility, bool);
+  vtkGetMacro(RightAxisVisibility, bool);
+  vtkBooleanMacro(RightAxisVisibility, bool);
+  vtkSetMacro(TopAxisVisibility, bool);
+  vtkGetMacro(TopAxisVisibility, bool);
+  vtkBooleanMacro(TopAxisVisibility, bool);
+  vtkSetMacro(LeftAxisVisibility, bool);
+  vtkGetMacro(LeftAxisVisibility, bool);
+  vtkBooleanMacro(LeftAxisVisibility, bool);
+  vtkSetMacro(BottomAxisVisibility, bool);
+  vtkGetMacro(BottomAxisVisibility, bool);
+  vtkBooleanMacro(BottomAxisVisibility, bool);
 
   // Description:
   // Indicate whether the legend scale should be displayed or not.
   // The default is On.
-  vtkSetMacro(LegendVisibility,int);
-  vtkGetMacro(LegendVisibility,int);
-  vtkBooleanMacro(LegendVisibility,int);
+  vtkSetMacro(LegendVisibility, bool);
+  vtkGetMacro(LegendVisibility, bool);
+  vtkBooleanMacro(LegendVisibility, bool);
 
   // Description:
   // Convenience method that turns all the axes either on or off.

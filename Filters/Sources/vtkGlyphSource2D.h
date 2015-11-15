@@ -87,25 +87,25 @@ public:
   // Specify whether the glyph is filled (a polygon) or not (a
   // closed polygon defined by line segments). This only applies
   // to 2D closed glyphs.
-  vtkSetMacro(Filled,int);
-  vtkGetMacro(Filled,int);
-  vtkBooleanMacro(Filled,int);
+  vtkSetMacro(Filled, bool);
+  vtkGetMacro(Filled, bool);
+  vtkBooleanMacro(Filled, bool);
 
   // Description:
   // Specify whether a short line segment is drawn through the
   // glyph. (This is in addition to the glyph. If the glyph type
   // is set to "Dash" there is no need to enable this flag.)
-  vtkSetMacro(Dash,int);
-  vtkGetMacro(Dash,int);
-  vtkBooleanMacro(Dash,int);
+  vtkSetMacro(Dash, bool);
+  vtkGetMacro(Dash, bool);
+  vtkBooleanMacro(Dash, bool);
 
   // Description:
   // Specify whether a cross is drawn as part of the glyph. (This
   // is in addition to the glyph. If the glyph type is set to
   // "Cross" there is no need to enable this flag.)
-  vtkSetMacro(Cross,int);
-  vtkGetMacro(Cross,int);
-  vtkBooleanMacro(Cross,int);
+  vtkSetMacro(Cross, bool);
+  vtkGetMacro(Cross, bool);
+  vtkBooleanMacro(Cross, bool);
 
   // Description:
   // Specify an angle (in degrees) to rotate the glyph around

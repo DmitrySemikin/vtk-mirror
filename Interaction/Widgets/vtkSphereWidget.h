@@ -148,21 +148,21 @@ public:
   // Description:
   // Enable translation and scaling of the widget. By default, the widget
   // can be translated and rotated.
-  vtkSetMacro(Translation,int);
-  vtkGetMacro(Translation,int);
-  vtkBooleanMacro(Translation,int);
-  vtkSetMacro(Scale,int);
-  vtkGetMacro(Scale,int);
-  vtkBooleanMacro(Scale,int);
+  vtkSetMacro(Translation, bool);
+  vtkGetMacro(Translation, bool);
+  vtkBooleanMacro(Translation, bool);
+  vtkSetMacro(Scale, bool);
+  vtkGetMacro(Scale, bool);
+  vtkBooleanMacro(Scale, bool);
 
   // Description:
   // The handle sits on the surface of the sphere and may be moved around
   // the surface by picking (left mouse) and then moving. The position
   // of the handle can be retrieved, this is useful for positioning cameras
   // and lights. By default, the handle is turned off.
-  vtkSetMacro(HandleVisibility,int);
-  vtkGetMacro(HandleVisibility,int);
-  vtkBooleanMacro(HandleVisibility,int);
+  vtkSetMacro(HandleVisibility, bool);
+  vtkGetMacro(HandleVisibility, bool);
+  vtkBooleanMacro(HandleVisibility, bool);
 
   // Description:
   // Set/Get the direction vector of the handle relative to the center of

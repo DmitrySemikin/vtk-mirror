@@ -55,22 +55,22 @@ public:
 
   // Description:
   // Compute gradient opacity ?
-  vtkSetMacro( ComputeGradientOpacity, int );
-  vtkGetMacro( ComputeGradientOpacity, int );
-  vtkBooleanMacro( ComputeGradientOpacity, int );
+  vtkSetMacro(ComputeGradientOpacity, bool);
+  vtkGetMacro(ComputeGradientOpacity, bool);
+  vtkBooleanMacro(ComputeGradientOpacity, bool);
 
   // Description:
   // Compute the min max structure ?.
-  vtkSetMacro( ComputeMinMax, int );
-  vtkGetMacro( ComputeMinMax, int );
-  vtkBooleanMacro( ComputeMinMax, int );
+  vtkSetMacro(ComputeMinMax, bool);
+  vtkGetMacro(ComputeMinMax, bool);
+  vtkBooleanMacro(ComputeMinMax, bool);
 
   // Description:
   // Update the gradient opacity flags. (The scalar opacity flags are always
   // updated upon execution of this filter.)
-  vtkSetMacro( UpdateGradientOpacityFlags, int );
-  vtkGetMacro( UpdateGradientOpacityFlags, int );
-  vtkBooleanMacro( UpdateGradientOpacityFlags, int );
+  vtkSetMacro(UpdateGradientOpacityFlags, bool);
+  vtkGetMacro(UpdateGradientOpacityFlags, bool);
+  vtkBooleanMacro(UpdateGradientOpacityFlags, bool);
 
   // Description:
   // Get the last execution time. This is updated every

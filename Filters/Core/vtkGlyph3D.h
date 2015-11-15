@@ -137,9 +137,9 @@ public:
 
   // Description:
   // Turn on/off scaling of source geometry.
-  vtkSetMacro(Scaling,int);
-  vtkBooleanMacro(Scaling,int);
-  vtkGetMacro(Scaling,int);
+  vtkSetMacro(Scaling, bool);
+  vtkGetMacro(Scaling, bool);
+  vtkBooleanMacro(Scaling, bool);
 
   // Description:
   // Either scale by scalar or by vector/normal magnitude.
@@ -179,16 +179,16 @@ public:
 
   // Description:
   // Turn on/off orienting of input geometry along vector/normal.
-  vtkSetMacro(Orient,int);
-  vtkBooleanMacro(Orient,int);
-  vtkGetMacro(Orient,int);
+  vtkSetMacro(Orient, bool);
+  vtkGetMacro(Orient, bool);
+  vtkBooleanMacro(Orient, bool);
 
   // Description:
   // Turn on/off clamping of "scalar" values to range. (Scalar value may be
   //  vector magnitude if ScaleByVector() is enabled.)
-  vtkSetMacro(Clamping,int);
-  vtkBooleanMacro(Clamping,int);
-  vtkGetMacro(Clamping,int);
+  vtkSetMacro(Clamping, bool);
+  vtkGetMacro(Clamping, bool);
+  vtkBooleanMacro(Clamping, bool);
 
   // Description:
   // Specify whether to use vector or normal to perform vector operations.
@@ -218,9 +218,9 @@ public:
   // point ids are the id of the input generating point. The point ids are
   // stored in the output point field data and named "InputPointIds". Point
   // generation is useful for debugging and pick operations.
-  vtkSetMacro(GeneratePointIds,int);
-  vtkGetMacro(GeneratePointIds,int);
-  vtkBooleanMacro(GeneratePointIds,int);
+  vtkSetMacro(GeneratePointIds, bool);
+  vtkGetMacro(GeneratePointIds, bool);
+  vtkBooleanMacro(GeneratePointIds, bool);
 
   // Description:
   // Set/Get the name of the PointIds array if generated. By default the Ids
@@ -232,9 +232,9 @@ public:
   // Enable/disable the generation of cell data as part of the output.
   // The cell data at each cell will match the point data of the input
   // at the glyphed point.
-  vtkSetMacro(FillCellData,int);
-  vtkGetMacro(FillCellData,int);
-  vtkBooleanMacro(FillCellData,int);
+  vtkSetMacro(FillCellData, bool);
+  vtkGetMacro(FillCellData, bool);
+  vtkBooleanMacro(FillCellData, bool);
 
   // Description:
   // This can be overwritten by subclass to return 0 when a point is

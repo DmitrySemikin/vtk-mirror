@@ -51,9 +51,9 @@ public:
 
   // Description:
   // Set & Get for filter location and boolean macro
-  vtkSetMacro(FilterLocation,int);
-  vtkGetMacro(FilterLocation,int);
-  vtkBooleanMacro(FilterLocation,int);
+  vtkSetMacro(FilterLocation, bool);
+  vtkGetMacro(FilterLocation, bool);
+  vtkBooleanMacro(FilterLocation, bool);
 
 
   // Description:

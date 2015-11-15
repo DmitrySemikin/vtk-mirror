@@ -77,9 +77,9 @@ public:
   // Turn on/off connectivity based on scalar value. If on, cells are connected
   // only if they share points AND one of the cells scalar values falls in the
   // scalar range specified.
-  vtkSetMacro(ScalarConnectivity,int);
-  vtkGetMacro(ScalarConnectivity,int);
-  vtkBooleanMacro(ScalarConnectivity,int);
+  vtkSetMacro(ScalarConnectivity, bool);
+  vtkGetMacro(ScalarConnectivity, bool);
+  vtkBooleanMacro(ScalarConnectivity, bool);
 
   // Description:
   // Set the scalar range to use to extract cells based on scalar connectivity.
@@ -141,9 +141,9 @@ public:
 
   // Description:
   // Turn on/off the coloring of connected regions.
-  vtkSetMacro(ColorRegions,int);
-  vtkGetMacro(ColorRegions,int);
-  vtkBooleanMacro(ColorRegions,int);
+  vtkSetMacro(ColorRegions, bool);
+  vtkGetMacro(ColorRegions, bool);
+  vtkBooleanMacro(ColorRegions, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

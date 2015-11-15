@@ -120,9 +120,9 @@ public:
   // Enable automatic adjustment of number of divisions. If off, the number
   // of divisions specified by the user is always used (as long as it is valid).
   // The default is On
-  vtkSetMacro(AutoAdjustNumberOfDivisions,int);
-  vtkGetMacro(AutoAdjustNumberOfDivisions,int);
-  vtkBooleanMacro(AutoAdjustNumberOfDivisions,int);
+  vtkSetMacro(AutoAdjustNumberOfDivisions, bool);
+  vtkGetMacro(AutoAdjustNumberOfDivisions, bool);
+  vtkBooleanMacro(AutoAdjustNumberOfDivisions, bool);
 
   // Description:
   // This is an alternative way to set up the bins.  If you are trying to match
@@ -145,18 +145,18 @@ public:
   // error). This option does not work (i.e., input points cannot be used)
   // when the append methods (StartAppend(), Append(), EndAppend()) are being
   // called directly.
-  vtkSetMacro(UseInputPoints, int);
-  vtkGetMacro(UseInputPoints, int);
-  vtkBooleanMacro(UseInputPoints, int);
+  vtkSetMacro(UseInputPoints, bool);
+  vtkGetMacro(UseInputPoints, bool);
+  vtkBooleanMacro(UseInputPoints, bool);
 
   // Description:
   // By default, this flag is off.  When "UseFeatureEdges" is on, then
   // quadrics are computed for boundary edges/feature edges.  They influence
   // the quadrics (position of points), but not the mesh.  Which features to
   // use can be controlled by the filter "FeatureEdges".
-  vtkSetMacro(UseFeatureEdges, int);
-  vtkGetMacro(UseFeatureEdges, int);
-  vtkBooleanMacro(UseFeatureEdges, int);
+  vtkSetMacro(UseFeatureEdges, bool);
+  vtkGetMacro(UseFeatureEdges, bool);
+  vtkBooleanMacro(UseFeatureEdges, bool);
   vtkFeatureEdges *GetFeatureEdges() {return this->FeatureEdges;}
 
   // Description:
@@ -165,9 +165,9 @@ public:
   // quadrics are computed for boundary / feature points used in the boundary
   // / feature edges.  They influence the quadrics (position of points), but
   // not the mesh.
-  vtkSetMacro(UseFeaturePoints, int);
-  vtkGetMacro(UseFeaturePoints, int);
-  vtkBooleanMacro(UseFeaturePoints, int);
+  vtkSetMacro(UseFeaturePoints, bool);
+  vtkGetMacro(UseFeaturePoints, bool);
+  vtkBooleanMacro(UseFeaturePoints, bool);
 
   // Description:
   // Set/Get the angle to use in determining whether a point on a boundary /
@@ -180,9 +180,9 @@ public:
   // completely contained in a bin are added to the bin quadrics.  When the
   // the flag is off the filter operates faster, but the surface may not be
   // as well behaved.
-  vtkSetMacro(UseInternalTriangles, int);
-  vtkGetMacro(UseInternalTriangles, int);
-  vtkBooleanMacro(UseInternalTriangles, int);
+  vtkSetMacro(UseInternalTriangles, bool);
+  vtkGetMacro(UseInternalTriangles, bool);
+  vtkBooleanMacro(UseInternalTriangles, bool);
 
   // Description:
   // These methods provide an alternative way of executing the filter.
@@ -201,18 +201,18 @@ public:
   // (the best it can).  It uses input cells that trigger the addition
   // of output cells (no averaging).  This is off by default, and does
   // not work when append is being called explicitly (non-pipeline usage).
-  vtkSetMacro(CopyCellData, int);
-  vtkGetMacro(CopyCellData, int);
-  vtkBooleanMacro(CopyCellData, int);
+  vtkSetMacro(CopyCellData, bool);
+  vtkGetMacro(CopyCellData, bool);
+  vtkBooleanMacro(CopyCellData, bool);
 
   // Description:
   // Specify a boolean indicating whether to remove duplicate cells
   // (i.e. triangles).  This is a little slower, and takes more memory, but
   // in some cases can reduce the number of cells produced by an order of
   // magnitude. By default, this flag is true.
-  vtkSetMacro(PreventDuplicateCells,int);
-  vtkGetMacro(PreventDuplicateCells,int);
-  vtkBooleanMacro(PreventDuplicateCells,int);
+  vtkSetMacro(PreventDuplicateCells, bool);
+  vtkGetMacro(PreventDuplicateCells, bool);
+  vtkBooleanMacro(PreventDuplicateCells, bool);
 
 protected:
   vtkQuadricClustering();

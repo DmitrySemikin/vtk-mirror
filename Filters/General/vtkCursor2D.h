@@ -68,15 +68,15 @@ public:
 
   // Description:
   // Turn on/off the wireframe bounding box.
-  vtkSetMacro(Outline,int);
-  vtkGetMacro(Outline,int);
-  vtkBooleanMacro(Outline,int);
+  vtkSetMacro(Outline, bool);
+  vtkGetMacro(Outline, bool);
+  vtkBooleanMacro(Outline, bool);
 
   // Description:
   // Turn on/off the wireframe axes.
-  vtkSetMacro(Axes,int);
-  vtkGetMacro(Axes,int);
-  vtkBooleanMacro(Axes,int);
+  vtkSetMacro(Axes, bool);
+  vtkGetMacro(Axes, bool);
+  vtkBooleanMacro(Axes, bool);
 
   // Description:
   // Specify a radius for a circle. This erases the cursor
@@ -86,25 +86,25 @@ public:
 
   // Description:
   // Turn on/off the point located at the cursor focus.
-  vtkSetMacro(Point,int);
-  vtkGetMacro(Point,int);
-  vtkBooleanMacro(Point,int);
+  vtkSetMacro(Point, bool);
+  vtkGetMacro(Point, bool);
+  vtkBooleanMacro(Point, bool);
 
   // Description:
   // Enable/disable the translation mode. If on, changes in cursor position
   // cause the entire widget to translate along with the cursor.
   // By default, translation mode is off.
-  vtkSetMacro(TranslationMode,int);
-  vtkGetMacro(TranslationMode,int);
-  vtkBooleanMacro(TranslationMode,int);
+  vtkSetMacro(TranslationMode, bool);
+  vtkGetMacro(TranslationMode, bool);
+  vtkBooleanMacro(TranslationMode, bool);
 
   // Description:
   // Turn on/off cursor wrapping. If the cursor focus moves outside the
   // specified bounds, the cursor will either be restrained against the
   // nearest "wall" (Wrap=off), or it will wrap around (Wrap=on).
-  vtkSetMacro(Wrap,int);
-  vtkGetMacro(Wrap,int);
-  vtkBooleanMacro(Wrap,int);
+  vtkSetMacro(Wrap, bool);
+  vtkGetMacro(Wrap, bool);
+  vtkBooleanMacro(Wrap, bool);
 
   // Description:
   // Turn every part of the cursor on or off.

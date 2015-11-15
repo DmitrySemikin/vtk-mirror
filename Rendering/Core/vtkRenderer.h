@@ -107,9 +107,9 @@ public:
   // off, then only the side of the surface facing the light(s) will be lit,
   // and the other side dark. If two-sided lighting on, both sides of the
   // surface will be lit.
-  vtkGetMacro(TwoSidedLighting,int);
-  vtkSetMacro(TwoSidedLighting,int);
-  vtkBooleanMacro(TwoSidedLighting,int);
+  vtkSetMacro(TwoSidedLighting, bool);
+  vtkGetMacro(TwoSidedLighting, bool);
+  vtkBooleanMacro(TwoSidedLighting, bool);
 
   // Description:
   // Turn on/off the automatic repositioning of lights as the camera moves.
@@ -123,9 +123,9 @@ public:
   // behavior is enabled by default. To disable this mode, turn the
   // interactor's LightFollowCamera flag OFF, and leave the renderer's
   // LightFollowCamera flag ON.)
-  vtkSetMacro(LightFollowCamera,int);
-  vtkGetMacro(LightFollowCamera,int);
-  vtkBooleanMacro(LightFollowCamera,int);
+  vtkSetMacro(LightFollowCamera, bool);
+  vtkGetMacro(LightFollowCamera, bool);
+  vtkBooleanMacro(LightFollowCamera, bool);
 
   // Description:
   // Turn on/off a flag which disables the automatic light creation capability.
@@ -134,9 +134,9 @@ public:
   // undesirable, so the following boolean is provided to disable automatic
   // light creation. (Turn AutomaticLightCreation off if you do not want lights
   // to be created.)
-  vtkGetMacro(AutomaticLightCreation,int);
-  vtkSetMacro(AutomaticLightCreation,int);
-  vtkBooleanMacro(AutomaticLightCreation,int);
+  vtkSetMacro(AutomaticLightCreation, bool);
+  vtkGetMacro(AutomaticLightCreation, bool);
+  vtkBooleanMacro(AutomaticLightCreation, bool);
 
   // Description:
   // Ask the lights in the scene that are not in world space
@@ -173,17 +173,17 @@ public:
   // or the Zbuffer.  It is used to have overlapping renderers.
   // Both the RenderWindow Erase and Render Erase must be on
   // for the camera to clear the renderer.  By default, Erase is on.
-  vtkSetMacro(Erase, int);
-  vtkGetMacro(Erase, int);
-  vtkBooleanMacro(Erase, int);
+  vtkSetMacro(Erase, bool);
+  vtkGetMacro(Erase, bool);
+  vtkBooleanMacro(Erase, bool);
 
   // Description:
   // When this flag is off, render commands are ignored.  It is used to either
   // multiplex a vtkRenderWindow or render only part of a vtkRenderWindow.
   // By default, Draw is on.
-  vtkSetMacro(Draw, int);
-  vtkGetMacro(Draw, int);
-  vtkBooleanMacro(Draw, int);
+  vtkSetMacro(Draw, bool);
+  vtkGetMacro(Draw, bool);
+  vtkBooleanMacro(Draw, bool);
 
   // Description:
   // This function is called to capture an instance of vtkProp that requires
@@ -323,17 +323,17 @@ public:
   // time to be slightly slower when the view changes. But it is
   // much faster when the image has not changed, such as during an
   // expose event.
-  vtkSetMacro(BackingStore,int);
-  vtkGetMacro(BackingStore,int);
-  vtkBooleanMacro(BackingStore,int);
+  vtkSetMacro(BackingStore, bool);
+  vtkGetMacro(BackingStore, bool);
+  vtkBooleanMacro(BackingStore, bool);
 
   // Description:
   // Turn on/off interactive status.  An interactive renderer is one that
   // can receive events from an interactor.  Should only be set if
   // there are multiple renderers in the same section of the viewport.
-  vtkSetMacro(Interactive,int);
-  vtkGetMacro(Interactive,int);
-  vtkBooleanMacro(Interactive,int);
+  vtkSetMacro(Interactive, bool);
+  vtkGetMacro(Interactive, bool);
+  vtkBooleanMacro(Interactive, bool);
 
   // Description:
   // Set/Get the layer that this renderer belongs to.  This is only used if
@@ -357,16 +357,16 @@ public:
   //
   // This flag influences the Transparent() method, and is updated by calls to
   // SetLayer(). For this reason it should only be set after changing the layer.
-  vtkGetMacro(PreserveColorBuffer, int);
-  vtkSetMacro(PreserveColorBuffer, int);
-  vtkBooleanMacro(PreserveColorBuffer, int);
+  vtkSetMacro(PreserveColorBuffer, bool);
+  vtkGetMacro(PreserveColorBuffer, bool);
+  vtkBooleanMacro(PreserveColorBuffer, bool);
 
   // Description:
   // By default, the depth buffer is reset for each renderer. If this flag is
   // true, this renderer will use the existing depth buffer for its rendering.
-  vtkSetMacro(PreserveDepthBuffer, int);
-  vtkGetMacro(PreserveDepthBuffer, int);
-  vtkBooleanMacro(PreserveDepthBuffer, int);
+  vtkSetMacro(PreserveDepthBuffer, bool);
+  vtkGetMacro(PreserveDepthBuffer, bool);
+  vtkBooleanMacro(PreserveDepthBuffer, bool);
 
   // Description:
   // Returns a boolean indicating if this renderer is transparent.  It is
@@ -449,9 +449,9 @@ public:
   // for rendering translucent materials.
   // If UseDepthPeeling is off, alpha blending is used.
   // Initial value is off.
-  vtkSetMacro(UseDepthPeeling,int);
-  vtkGetMacro(UseDepthPeeling,int);
-  vtkBooleanMacro(UseDepthPeeling,int);
+  vtkSetMacro(UseDepthPeeling, bool);
+  vtkGetMacro(UseDepthPeeling, bool);
+  vtkBooleanMacro(UseDepthPeeling, bool);
 
   // Description:
   // In case of use of depth peeling technique for rendering translucent
@@ -510,9 +510,9 @@ public:
   // Description:
   // Turn on/off rendering of shadows if supported
   // Initial value is off.
-  vtkSetMacro(UseShadows,int);
-  vtkGetMacro(UseShadows,int);
-  vtkBooleanMacro(UseShadows,int);
+  vtkSetMacro(UseShadows, bool);
+  vtkGetMacro(UseShadows, bool);
+  vtkBooleanMacro(UseShadows, bool);
 
 //BTX
 protected:

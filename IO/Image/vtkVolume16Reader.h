@@ -103,9 +103,9 @@ public:
 
   // Description:
   // Turn on/off byte swapping.
-  vtkSetMacro(SwapBytes,int);
-  vtkGetMacro(SwapBytes,int);
-  vtkBooleanMacro(SwapBytes,int);
+  vtkSetMacro(SwapBytes, bool);
+  vtkGetMacro(SwapBytes, bool);
+  vtkBooleanMacro(SwapBytes, bool);
 
   // Description:
   // Set/Get transformation matrix to transform the data from slice space

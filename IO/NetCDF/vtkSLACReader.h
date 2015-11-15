@@ -65,22 +65,22 @@ public:
 
   // Description:
   // If on, reads the internal volume of the data set.  Set to off by default.
-  vtkGetMacro(ReadInternalVolume, int);
-  vtkSetMacro(ReadInternalVolume, int);
-  vtkBooleanMacro(ReadInternalVolume, int);
+  vtkSetMacro(ReadInternalVolume, bool);
+  vtkGetMacro(ReadInternalVolume, bool);
+  vtkBooleanMacro(ReadInternalVolume, bool);
 
   // Description:
   // If on, reads the external surfaces of the data set.  Set to on by default.
-  vtkGetMacro(ReadExternalSurface, int);
-  vtkSetMacro(ReadExternalSurface, int);
-  vtkBooleanMacro(ReadExternalSurface, int);
+  vtkSetMacro(ReadExternalSurface, bool);
+  vtkGetMacro(ReadExternalSurface, bool);
+  vtkBooleanMacro(ReadExternalSurface, bool);
 
   // Description:
   // If on, reads midpoint information for external surfaces and builds
   // quadratic surface triangles.  Set to on by default.
-  vtkGetMacro(ReadMidpoints, int);
-  vtkSetMacro(ReadMidpoints, int);
-  vtkBooleanMacro(ReadMidpoints, int);
+  vtkSetMacro(ReadMidpoints, bool);
+  vtkGetMacro(ReadMidpoints, bool);
+  vtkBooleanMacro(ReadMidpoints, bool);
 
   // Description:
   // Variable array selection.

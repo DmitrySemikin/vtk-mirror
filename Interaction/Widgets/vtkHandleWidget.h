@@ -98,16 +98,16 @@ public:
   // Enable / disable axis constrained motion of the handles. By default the
   // widget responds to the shift modifier to constrain the handle along the
   // axis closest aligned with the motion vector.
-  vtkSetMacro( EnableAxisConstraint, int );
-  vtkGetMacro( EnableAxisConstraint, int );
-  vtkBooleanMacro( EnableAxisConstraint, int );
+  vtkSetMacro(EnableAxisConstraint, bool);
+  vtkGetMacro(EnableAxisConstraint, bool);
+  vtkBooleanMacro(EnableAxisConstraint, bool);
 
   // Description:
   // Allow resizing of handles ? By default the right mouse button scales
   // the handle size.
-  vtkSetMacro( AllowHandleResize, int );
-  vtkGetMacro( AllowHandleResize, int );
-  vtkBooleanMacro( AllowHandleResize, int );
+  vtkSetMacro(AllowHandleResize, bool);
+  vtkGetMacro(AllowHandleResize, bool);
+  vtkBooleanMacro(AllowHandleResize, bool);
 
   // Description:
   // Get the widget state.

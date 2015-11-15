@@ -141,15 +141,15 @@ public:
   // Description:
   // Turn on/off the deletion of vertices on the boundary of a mesh. This
   // may limit the maximum reduction that may be achieved.
-  vtkSetMacro(BoundaryVertexDeletion,int);
-  vtkGetMacro(BoundaryVertexDeletion,int);
-  vtkBooleanMacro(BoundaryVertexDeletion,int);
+  vtkSetMacro(BoundaryVertexDeletion, bool);
+  vtkGetMacro(BoundaryVertexDeletion, bool);
+  vtkBooleanMacro(BoundaryVertexDeletion, bool);
 
   // Description:
   // Compute normals based on the input image. Off by default.
-  vtkSetMacro(ComputeNormals, int);
-  vtkGetMacro(ComputeNormals, int);
-  vtkBooleanMacro(ComputeNormals, int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
 protected:
   vtkGreedyTerrainDecimation();

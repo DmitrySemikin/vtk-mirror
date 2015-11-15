@@ -55,9 +55,9 @@ public:
 
   // Description:
   // Set/Get & boolean macro for the DuplicateNodes property.
-  vtkGetMacro(DuplicateNodes,int);
-  vtkSetMacro(DuplicateNodes,int);
-  vtkBooleanMacro(DuplicateNodes,int);
+  vtkSetMacro(DuplicateNodes, bool);
+  vtkGetMacro(DuplicateNodes, bool);
+  vtkBooleanMacro(DuplicateNodes, bool);
 
 protected:
   vtkStructuredGridPartitioner();

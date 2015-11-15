@@ -43,9 +43,9 @@ public:
   // pixels are treated as duplicated so that central differencing
   // works for the boundary pixels.  If disabled, the output whole
   // extent of the image is reduced by one pixel.
-  vtkSetMacro(HandleBoundaries, int);
-  vtkGetMacro(HandleBoundaries, int);
-  vtkBooleanMacro(HandleBoundaries, int);
+  vtkSetMacro(HandleBoundaries, bool);
+  vtkGetMacro(HandleBoundaries, bool);
+  vtkBooleanMacro(HandleBoundaries, bool);
 
 protected:
   vtkImageGradient();

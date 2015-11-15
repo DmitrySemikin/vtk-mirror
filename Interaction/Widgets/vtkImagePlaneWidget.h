@@ -219,26 +219,26 @@ public:
   // Description:
   // Make sure that the plane remains within the volume.
   // Default is On.
-  vtkSetMacro(RestrictPlaneToVolume,int);
-  vtkGetMacro(RestrictPlaneToVolume,int);
-  vtkBooleanMacro(RestrictPlaneToVolume,int);
+  vtkSetMacro(RestrictPlaneToVolume, bool);
+  vtkGetMacro(RestrictPlaneToVolume, bool);
+  vtkBooleanMacro(RestrictPlaneToVolume, bool);
 
   // Description:
   // Let the user control the lookup table. NOTE: apply this method BEFORE
   // applying the SetLookupTable method.
   // Default is Off.
-  vtkSetMacro(UserControlledLookupTable,int);
-  vtkGetMacro(UserControlledLookupTable,int);
-  vtkBooleanMacro(UserControlledLookupTable,int);
+  vtkSetMacro(UserControlledLookupTable, bool);
+  vtkGetMacro(UserControlledLookupTable, bool);
+  vtkBooleanMacro(UserControlledLookupTable, bool);
 
   // Description:
   // Specify whether to interpolate the texture or not. When off, the
   // reslice interpolation is nearest neighbour regardless of how the
   // interpolation is set through the API. Set before setting the
   // vtkImageData input. Default is On.
-  vtkSetMacro(TextureInterpolate,int);
-  vtkGetMacro(TextureInterpolate,int);
-  vtkBooleanMacro(TextureInterpolate,int);
+  vtkSetMacro(TextureInterpolate, bool);
+  vtkGetMacro(TextureInterpolate, bool);
+  vtkBooleanMacro(TextureInterpolate, bool);
 
   // Description:
   // Control the visibility of the actual texture mapped reformatted plane.
@@ -320,9 +320,9 @@ public:
   // Description:
   // Enable/disable text display of window-level, image coordinates and
   // scalar values in a render window.
-  vtkSetMacro(DisplayText,int);
-  vtkGetMacro(DisplayText,int);
-  vtkBooleanMacro(DisplayText,int);
+  vtkSetMacro(DisplayText, bool);
+  vtkGetMacro(DisplayText, bool);
+  vtkBooleanMacro(DisplayText, bool);
 
   // Description:
   // Set the properties of the cross-hair cursor.
@@ -395,9 +395,9 @@ public:
   // cursor coordinates are extent based.  With continuous probing, voxel data
   // is interpolated using vtkDataSetAttributes' InterpolatePoint method and
   // the reported coordinates are 3D spatial continuous.
-  vtkSetMacro(UseContinuousCursor,int);
-  vtkGetMacro(UseContinuousCursor,int);
-  vtkBooleanMacro(UseContinuousCursor,int);
+  vtkSetMacro(UseContinuousCursor, bool);
+  vtkGetMacro(UseContinuousCursor, bool);
+  vtkBooleanMacro(UseContinuousCursor, bool);
 
   // Description:
   // Enable/disable mouse interaction so the widget remains on display.

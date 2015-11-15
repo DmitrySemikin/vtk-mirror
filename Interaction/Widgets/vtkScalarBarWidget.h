@@ -67,9 +67,9 @@ public:
   // around.
   //
   // TODO: This functionality should probably be moved to the superclass.
-  vtkSetMacro(Repositionable, int);
-  vtkGetMacro(Repositionable, int);
-  vtkBooleanMacro(Repositionable, int);
+  vtkSetMacro(Repositionable, bool);
+  vtkGetMacro(Repositionable, bool);
+  vtkBooleanMacro(Repositionable, bool);
 
   // Description:
   // Create the default widget representation if one is not set.

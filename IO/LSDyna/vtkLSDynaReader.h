@@ -415,16 +415,16 @@ public:
   // It is also ignored if the database's element deletion option is set to
   // denote <b>points</b> (not cells) as deleted; in that case, "Death"
   // will appear to be a point array.
-  vtkSetMacro(RemoveDeletedCells,int);
-  vtkGetMacro(RemoveDeletedCells,int);
-  vtkBooleanMacro(RemoveDeletedCells,int);
+  vtkSetMacro(RemoveDeletedCells, bool);
+  vtkGetMacro(RemoveDeletedCells, bool);
+  vtkBooleanMacro(RemoveDeletedCells, bool);
 
   //Description:
   //Instead of removing the cells that are dead, hide them by setting
   //the array as the ghost levels arrays
-  vtkSetMacro(DeletedCellsAsGhostArray,int);
-  vtkGetMacro(DeletedCellsAsGhostArray,int);
-  vtkBooleanMacro(DeletedCellsAsGhostArray,int);
+  vtkSetMacro(DeletedCellsAsGhostArray, bool);
+  vtkGetMacro(DeletedCellsAsGhostArray, bool);
+  vtkBooleanMacro(DeletedCellsAsGhostArray, bool);
 
   // Description:
   // The name of the input deck corresponding to the current database.

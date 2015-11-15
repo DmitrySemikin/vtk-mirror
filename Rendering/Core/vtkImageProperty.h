@@ -65,9 +65,9 @@ public:
   // Use the range that is set in the lookup table, instead
   // of setting the range from the Window/Level settings.
   // This is off by default.
-  vtkSetMacro(UseLookupTableScalarRange, int);
-  vtkGetMacro(UseLookupTableScalarRange, int);
-  vtkBooleanMacro(UseLookupTableScalarRange, int);
+  vtkSetMacro(UseLookupTableScalarRange, bool);
+  vtkGetMacro(UseLookupTableScalarRange, bool);
+  vtkBooleanMacro(UseLookupTableScalarRange, bool);
 
   // Description:
   // The opacity of the image, where 1.0 is opaque and 0.0 is
@@ -109,9 +109,9 @@ public:
   // Description:
   // Make a checkerboard pattern where the black squares are transparent.
   // The pattern is aligned with the camera, and centered by default.
-  vtkSetMacro(Checkerboard, int);
-  vtkBooleanMacro(Checkerboard, int);
-  vtkGetMacro(Checkerboard, int);
+  vtkSetMacro(Checkerboard, bool);
+  vtkGetMacro(Checkerboard, bool);
+  vtkBooleanMacro(Checkerboard, bool);
 
   // Description:
   // The spacing for checkerboarding.  This is in real units, not pixels.
@@ -129,9 +129,9 @@ public:
   // is translucent.  When images are in a stack, the backing polygons
   // for all images will be drawn before any of the images in the stack,
   // in order to allow the images in the stack to be composited.
-  vtkSetMacro(Backing, int);
-  vtkBooleanMacro(Backing, int);
-  vtkGetMacro(Backing, int);
+  vtkSetMacro(Backing, bool);
+  vtkGetMacro(Backing, bool);
+  vtkBooleanMacro(Backing, bool);
 
   // Description:
   // Set the color of the backing polygon.  The default color is black.

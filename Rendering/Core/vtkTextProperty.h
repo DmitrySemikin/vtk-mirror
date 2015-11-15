@@ -90,21 +90,21 @@ public:
 
   // Description:
   // Enable/disable text bolding.
-  vtkSetMacro(Bold, int);
-  vtkGetMacro(Bold, int);
-  vtkBooleanMacro(Bold, int);
+  vtkSetMacro(Bold, bool);
+  vtkGetMacro(Bold, bool);
+  vtkBooleanMacro(Bold, bool);
 
   // Description:
   // Enable/disable text italic.
-  vtkSetMacro(Italic, int);
-  vtkGetMacro(Italic, int);
-  vtkBooleanMacro(Italic, int);
+  vtkSetMacro(Italic, bool);
+  vtkGetMacro(Italic, bool);
+  vtkBooleanMacro(Italic, bool);
 
   // Description:
   // Enable/disable text shadow.
-  vtkSetMacro(Shadow, int);
-  vtkGetMacro(Shadow, int);
-  vtkBooleanMacro(Shadow, int);
+  vtkSetMacro(Shadow, bool);
+  vtkGetMacro(Shadow, bool);
+  vtkBooleanMacro(Shadow, bool);
 
   // Description:
   // Set/Get the shadow offset, i.e. the distance from the text to

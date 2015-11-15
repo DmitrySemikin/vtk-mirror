@@ -47,9 +47,9 @@ public:
 
   // Description:
   // Enable/disable the generation of vertex cells.
-  vtkSetMacro(VertexCells,int);
-  vtkGetMacro(VertexCells,int);
-  vtkBooleanMacro(VertexCells,int);
+  vtkSetMacro(VertexCells, bool);
+  vtkGetMacro(VertexCells, bool);
+  vtkBooleanMacro(VertexCells, bool);
 
 protected:
   vtkEdgeCenters();

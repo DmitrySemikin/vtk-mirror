@@ -134,9 +134,9 @@ public:
 
   // Description:
   // Whether or not to display using curves
-  vtkSetMacro(UseCurves,int);
-  vtkGetMacro(UseCurves,int);
-  vtkBooleanMacro(UseCurves,int);
+  vtkSetMacro(UseCurves, bool);
+  vtkGetMacro(UseCurves, bool);
+  vtkBooleanMacro(UseCurves, bool);
 
   // Description:
   // Resolution of the curves displayed, enabled by setting UseCurves

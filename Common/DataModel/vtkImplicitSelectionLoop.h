@@ -83,9 +83,9 @@ public:
   // Turn on/off automatic normal generation. By default, the normal is
   // computed from the accumulated cross product of the edges. You can also
   // specify the normal to use.
-  vtkSetMacro(AutomaticNormalGeneration,int);
-  vtkGetMacro(AutomaticNormalGeneration,int);
-  vtkBooleanMacro(AutomaticNormalGeneration,int);
+  vtkSetMacro(AutomaticNormalGeneration, bool);
+  vtkGetMacro(AutomaticNormalGeneration, bool);
+  vtkBooleanMacro(AutomaticNormalGeneration, bool);
 
   // Description:
   // Set / get the normal used to determine whether a point is inside or outside

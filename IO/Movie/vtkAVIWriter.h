@@ -58,9 +58,9 @@ public:
   // Set/Get if the user should be prompted for compression options, i.e.
   // pick a compressor, set the compression rate (override Rate), etc.).
   // Default is OFF (legacy).
-  vtkSetMacro(PromptCompressionOptions, int);
-  vtkGetMacro(PromptCompressionOptions, int);
-  vtkBooleanMacro(PromptCompressionOptions, int);
+  vtkSetMacro(PromptCompressionOptions, bool);
+  vtkGetMacro(PromptCompressionOptions, bool);
+  vtkBooleanMacro(PromptCompressionOptions, bool);
 
   // Description:
   // Set/Get the compressor FourCC.

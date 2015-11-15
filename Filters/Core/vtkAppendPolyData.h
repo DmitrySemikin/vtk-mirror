@@ -49,9 +49,9 @@ public:
   // using the AddInput/RemoveInput functions. Calls to
   // SetNumberOfInputs/SetInputConnectionByNumber should not be mixed with calls
   // to AddInput/RemoveInput. By default, UserManagedInputs is false.
-  vtkSetMacro(UserManagedInputs,int);
-  vtkGetMacro(UserManagedInputs,int);
-  vtkBooleanMacro(UserManagedInputs,int);
+  vtkSetMacro(UserManagedInputs, bool);
+  vtkGetMacro(UserManagedInputs, bool);
+  vtkBooleanMacro(UserManagedInputs, bool);
 
   // Description:
   // Add a dataset to the list of data to append. Should not be
@@ -88,9 +88,9 @@ public:
   // along the seams.  The purpose of this feature is to get
   // data parallelism at a course scale.  Each of the inputs
   // can be generated in a different process at the same time.
-  vtkSetMacro(ParallelStreaming, int);
-  vtkGetMacro(ParallelStreaming, int);
-  vtkBooleanMacro(ParallelStreaming, int);
+  vtkSetMacro(ParallelStreaming, bool);
+  vtkGetMacro(ParallelStreaming, bool);
+  vtkBooleanMacro(ParallelStreaming, bool);
 
   // Description:
   // Set/get the desired precision for the output types. See the documentation

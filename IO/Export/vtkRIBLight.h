@@ -36,9 +36,9 @@ public:
   vtkTypeMacro(vtkRIBLight,vtkLight);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  vtkBooleanMacro(Shadows,int);
-  vtkSetMacro(Shadows,int);
-  vtkGetMacro(Shadows,int);
+  vtkSetMacro(Shadows, bool);
+  vtkGetMacro(Shadows, bool);
+  vtkBooleanMacro(Shadows, bool);
 
   void Render(vtkRenderer *ren, int index);
 protected:

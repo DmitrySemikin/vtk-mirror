@@ -103,16 +103,16 @@ public:
   // is the same as the input, except that scalars are generated.
   // If off, the filter outputs the cells laying inside the loop, and
   // does not generate scalars.
-  vtkSetMacro(GenerateSelectionScalars,int);
-  vtkGetMacro(GenerateSelectionScalars,int);
-  vtkBooleanMacro(GenerateSelectionScalars,int);
+  vtkSetMacro(GenerateSelectionScalars, bool);
+  vtkGetMacro(GenerateSelectionScalars, bool);
+  vtkBooleanMacro(GenerateSelectionScalars, bool);
 
   // Description:
   // Set/Get the InsideOut flag. When off, the mesh within the loop is
   // extracted. When on, the mesh outside the loop is extracted.
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description:
   // Set/Get the array of point coordinates defining the loop. There must
@@ -141,9 +141,9 @@ public:
   // Description:
   // Control whether a second output is generated. The second output
   // contains the polygonal data that's not been selected.
-  vtkSetMacro(GenerateUnselectedOutput,int);
-  vtkGetMacro(GenerateUnselectedOutput,int);
-  vtkBooleanMacro(GenerateUnselectedOutput,int);
+  vtkSetMacro(GenerateUnselectedOutput, bool);
+  vtkGetMacro(GenerateUnselectedOutput, bool);
+  vtkBooleanMacro(GenerateUnselectedOutput, bool);
 
   // Description:
   // Return output that hasn't been selected (if GenreateUnselectedOutput is

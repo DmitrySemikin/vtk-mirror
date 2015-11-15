@@ -122,9 +122,9 @@ public:
   // Rescale real data values to float.  If this is done, the
   // RescaleSlope and RescaleIntercept will be set to 1 and 0
   // respectively.  This is off by default.
-  vtkSetMacro(RescaleRealValues, int);
-  vtkBooleanMacro(RescaleRealValues, int);
-  vtkGetMacro(RescaleRealValues, int);
+  vtkSetMacro(RescaleRealValues, bool);
+  vtkGetMacro(RescaleRealValues, bool);
+  vtkBooleanMacro(RescaleRealValues, bool);
 
   // Description:
   // Get the scalar range of the output from the information in

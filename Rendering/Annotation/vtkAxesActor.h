@@ -222,9 +222,9 @@ public:
 
   // Description:
   // Enable/disable drawing the axis labels.
-  vtkSetMacro(AxisLabels, int);
-  vtkGetMacro(AxisLabels, int);
-  vtkBooleanMacro(AxisLabels, int);
+  vtkSetMacro(AxisLabels, bool);
+  vtkGetMacro(AxisLabels, bool);
+  vtkBooleanMacro(AxisLabels, bool);
 
 //BTX
   enum

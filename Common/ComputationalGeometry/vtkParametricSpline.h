@@ -97,16 +97,16 @@ public:
   // Control whether the spline is open or closed. A closed spline forms
   // a continuous loop: the first and last points are the same, and
   // derivatives are continuous.
-  vtkSetMacro(Closed,int);
-  vtkGetMacro(Closed,int);
-  vtkBooleanMacro(Closed,int);
+  vtkSetMacro(Closed, bool);
+  vtkGetMacro(Closed, bool);
+  vtkBooleanMacro(Closed, bool);
 
   // Description:
   // Control whether the spline is parameterized by length or by point index.
   // Default is by length.
-  vtkSetMacro(ParameterizeByLength,int);
-  vtkGetMacro(ParameterizeByLength,int);
-  vtkBooleanMacro(ParameterizeByLength,int);
+  vtkSetMacro(ParameterizeByLength, bool);
+  vtkGetMacro(ParameterizeByLength, bool);
+  vtkBooleanMacro(ParameterizeByLength, bool);
 
   // Description:
   // Set the type of constraint of the left(right) end points. Four

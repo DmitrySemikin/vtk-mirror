@@ -163,17 +163,17 @@ public:
 
   // Description:
   // Turn on/off the scaling of splats by scalar value.
-  vtkSetMacro(ScalarWarping,int);
-  vtkGetMacro(ScalarWarping,int);
-  vtkBooleanMacro(ScalarWarping,int);
+  vtkSetMacro(ScalarWarping, bool);
+  vtkGetMacro(ScalarWarping, bool);
+  vtkBooleanMacro(ScalarWarping, bool);
 
   // Description:
   // Turn on/off the generation of elliptical splats. If normal warping is
   // on, then the input normals affect the distribution of the splat. This
   // boolean is used in combination with the Eccentricity ivar.
-  vtkSetMacro(NormalWarping,int);
-  vtkGetMacro(NormalWarping,int);
-  vtkBooleanMacro(NormalWarping,int);
+  vtkSetMacro(NormalWarping, bool);
+  vtkGetMacro(NormalWarping, bool);
+  vtkBooleanMacro(NormalWarping, bool);
 
   // Description:
   // Control the shape of elliptical splatting. Eccentricity is the ratio
@@ -217,9 +217,9 @@ public:
   // Turn on/off the capping of the outer boundary of the volume
   // to a specified cap value. This can be used to close surfaces
   // (after iso-surfacing) and create other effects.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Specify the cap value to use. (This instance variable only has effect

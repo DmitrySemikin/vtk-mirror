@@ -286,9 +286,9 @@ public:
   // Turn on/off calculation of vorticity at streamline points
   // (necessary for generating proper streamribbons using the
   // vtkRibbonFilter.
-  vtkSetMacro(ComputeVorticity, int);
-  vtkGetMacro(ComputeVorticity, int);
-  vtkBooleanMacro(ComputeVorticity, int);
+  vtkSetMacro(ComputeVorticity, bool);
+  vtkGetMacro(ComputeVorticity, bool);
+  vtkBooleanMacro(ComputeVorticity, bool);
 
   // Description
   // This can be used to scale the rate with which the streamribbons

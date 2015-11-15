@@ -120,9 +120,9 @@ public:
   // view, it moves one "normalized spacing" in the direction of the normal to
   // the resliced plane, provided the new center will continue to lie within
   // the volume.
-  vtkSetMacro( SliceScrollOnMouseWheel, int );
-  vtkGetMacro( SliceScrollOnMouseWheel, int );
-  vtkBooleanMacro( SliceScrollOnMouseWheel, int );
+  vtkSetMacro(SliceScrollOnMouseWheel, bool);
+  vtkGetMacro(SliceScrollOnMouseWheel, bool);
+  vtkBooleanMacro(SliceScrollOnMouseWheel, bool);
 
   // Description:
   // Increment/Decrement slice by 'n' slices

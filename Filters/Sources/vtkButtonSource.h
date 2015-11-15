@@ -87,9 +87,9 @@ public:
   // button can be viewed from two sides...it looks sort of like a "pill."
   // A single-sided button is meant to viewed from a single side; it looks
   // like a "clam-shell."
-  vtkSetMacro(TwoSided,int);
-  vtkGetMacro(TwoSided,int);
-  vtkBooleanMacro(TwoSided,int);
+  vtkSetMacro(TwoSided, bool);
+  vtkGetMacro(TwoSided, bool);
+  vtkBooleanMacro(TwoSided, bool);
 
 protected:
   vtkButtonSource();

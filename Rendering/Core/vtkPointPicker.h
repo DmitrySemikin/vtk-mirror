@@ -47,9 +47,9 @@ public:
   // Description:
   // Specify whether the point search should be based on cell points or
   // directly on the point list.
-  vtkSetMacro(UseCells, int);
-  vtkGetMacro(UseCells, int);
-  vtkBooleanMacro(UseCells, int);
+  vtkSetMacro(UseCells, bool);
+  vtkGetMacro(UseCells, bool);
+  vtkBooleanMacro(UseCells, bool);
 
 protected:
   vtkPointPicker();

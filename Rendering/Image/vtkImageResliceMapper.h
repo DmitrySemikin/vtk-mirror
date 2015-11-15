@@ -59,9 +59,9 @@ public:
   // the closest slice to the focal point, instead of the default behavior
   // where a new slice is interpolated between the original slices.  This
   // flag is ignored if the slicing is oblique to the original slices.
-  vtkSetMacro(JumpToNearestSlice, int);
-  vtkBooleanMacro(JumpToNearestSlice, int);
-  vtkGetMacro(JumpToNearestSlice, int);
+  vtkSetMacro(JumpToNearestSlice, bool);
+  vtkGetMacro(JumpToNearestSlice, bool);
+  vtkBooleanMacro(JumpToNearestSlice, bool);
 
   // Description:
   // The slab thickness, for thick slicing (default: zero)
@@ -106,27 +106,27 @@ public:
   // Description:
   // Automatically reduce the rendering quality for greater speed
   // when doing an interactive render.  This is on by default.
-  vtkSetMacro(AutoAdjustImageQuality, int);
-  vtkBooleanMacro(AutoAdjustImageQuality, int);
-  vtkGetMacro(AutoAdjustImageQuality, int);
+  vtkSetMacro(AutoAdjustImageQuality, bool);
+  vtkGetMacro(AutoAdjustImageQuality, bool);
+  vtkBooleanMacro(AutoAdjustImageQuality, bool);
 
   // Description:
   // Resample the image directly to the screen pixels, instead of
   // using a texture to scale the image after resampling.  This is
   // slower and uses more memory, but provides high-quality results.
   // It is On by default.
-  vtkSetMacro(ResampleToScreenPixels, int);
-  vtkBooleanMacro(ResampleToScreenPixels, int);
-  vtkGetMacro(ResampleToScreenPixels, int);
+  vtkSetMacro(ResampleToScreenPixels, bool);
+  vtkGetMacro(ResampleToScreenPixels, bool);
+  vtkBooleanMacro(ResampleToScreenPixels, bool);
 
   // Description:
   // Keep the color mapping stage distinct from the reslicing stage.
   // This will improve the quality and possibly the speed of interactive
   // window/level operations, but it uses more memory and might slow down
   // interactive slicing operations.  On by default.
-  vtkSetMacro(SeparateWindowLevelOperation, int);
-  vtkBooleanMacro(SeparateWindowLevelOperation, int);
-  vtkGetMacro(SeparateWindowLevelOperation, int);
+  vtkSetMacro(SeparateWindowLevelOperation, bool);
+  vtkGetMacro(SeparateWindowLevelOperation, bool);
+  vtkBooleanMacro(SeparateWindowLevelOperation, bool);
 
   // Description:
   // Set a custom interpolator.  This will only be used if the

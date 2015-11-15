@@ -42,9 +42,9 @@ public:
   // Description:
   // Turn interpolation on and off (pixel replication is used when off).
   // Initially, interpolation is off.
-  vtkSetMacro(Interpolate,int);
-  vtkGetMacro(Interpolate,int);
-  vtkBooleanMacro(Interpolate,int);
+  vtkSetMacro(Interpolate, bool);
+  vtkGetMacro(Interpolate, bool);
+  vtkBooleanMacro(Interpolate, bool);
 
 protected:
   vtkImageMagnify();

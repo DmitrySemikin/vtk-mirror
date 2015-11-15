@@ -55,9 +55,9 @@ public:
 
   // Description:
   // Is the file to be read written in binary format (as opposed to ascii).
-  vtkSetMacro(BinaryFile, int);
-  vtkGetMacro(BinaryFile, int);
-  vtkBooleanMacro(BinaryFile, int);
+  vtkSetMacro(BinaryFile, bool);
+  vtkGetMacro(BinaryFile, bool);
+  vtkBooleanMacro(BinaryFile, bool);
 
   // Description:
   // Get the total number of cells.

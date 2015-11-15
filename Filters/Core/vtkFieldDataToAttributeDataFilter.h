@@ -183,9 +183,9 @@ public:
   // Description:
   // Set the default Normalize() flag for those methods setting a default
   // Normalize value (e.g., SetScalarComponents).
-  vtkSetMacro(DefaultNormalize,int);
-  vtkGetMacro(DefaultNormalize,int);
-  vtkBooleanMacro(DefaultNormalize,int);
+  vtkSetMacro(DefaultNormalize, bool);
+  vtkGetMacro(DefaultNormalize, bool);
+  vtkBooleanMacro(DefaultNormalize, bool);
 
   // Helper functions, made public to support other classes
 

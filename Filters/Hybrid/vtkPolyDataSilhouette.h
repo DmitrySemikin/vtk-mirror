@@ -71,16 +71,16 @@ public:
   // Description:
   // Enables or Disables generation of border edges. Note: borders exist only
   // in case of non closed surface
-  vtkSetMacro(BorderEdges,int);
-  vtkGetMacro(BorderEdges,int);
-  vtkBooleanMacro(BorderEdges,int);
+  vtkSetMacro(BorderEdges, bool);
+  vtkGetMacro(BorderEdges, bool);
+  vtkBooleanMacro(BorderEdges, bool);
 
   // Description:
   // Enables or Disables piece invariance. This is useful when dealing with
   // multi-block data sets. Note: requires one level of ghost cells
-  vtkSetMacro(PieceInvariant,int);
-  vtkGetMacro(PieceInvariant,int);
-  vtkBooleanMacro(PieceInvariant,int);
+  vtkSetMacro(PieceInvariant, bool);
+  vtkGetMacro(PieceInvariant, bool);
+  vtkBooleanMacro(PieceInvariant, bool);
 
   // Description:
   // Specify how view direction is computed. By default, the

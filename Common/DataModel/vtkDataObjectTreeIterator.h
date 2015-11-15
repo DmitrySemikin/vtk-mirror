@@ -82,17 +82,17 @@ public:
   // (composite of composite of composite for example :-) ) If
   // VisitOnlyLeaves is false, GetCurrentDataObject() may return
   // vtkCompositeDataSet. By default, VisitOnlyLeaves is 1.
-  vtkSetMacro(VisitOnlyLeaves, int);
-  vtkGetMacro(VisitOnlyLeaves, int);
-  vtkBooleanMacro(VisitOnlyLeaves, int);
+  vtkSetMacro(VisitOnlyLeaves, bool);
+  vtkGetMacro(VisitOnlyLeaves, bool);
+  vtkBooleanMacro(VisitOnlyLeaves, bool);
 
   // Description:
   // If TraverseSubTree is set to true, the iterator will visit the entire tree
   // structure, otherwise it only visits the first level children. Set to 1 by
   // default.
-  vtkSetMacro(TraverseSubTree, int);
-  vtkGetMacro(TraverseSubTree, int);
-  vtkBooleanMacro(TraverseSubTree, int);
+  vtkSetMacro(TraverseSubTree, bool);
+  vtkGetMacro(TraverseSubTree, bool);
+  vtkBooleanMacro(TraverseSubTree, bool);
 
 //BTX
 protected:

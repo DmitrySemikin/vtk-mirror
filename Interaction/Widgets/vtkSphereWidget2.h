@@ -110,12 +110,12 @@ public:
   // Description:
   // Control the behavior of the widget (i.e., how it processes
   // events). Translation, and scaling can all be enabled and disabled.
-  vtkSetMacro(TranslationEnabled,int);
-  vtkGetMacro(TranslationEnabled,int);
-  vtkBooleanMacro(TranslationEnabled,int);
-  vtkSetMacro(ScalingEnabled,int);
-  vtkGetMacro(ScalingEnabled,int);
-  vtkBooleanMacro(ScalingEnabled,int);
+  vtkSetMacro(TranslationEnabled, bool);
+  vtkGetMacro(TranslationEnabled, bool);
+  vtkBooleanMacro(TranslationEnabled, bool);
+  vtkSetMacro(ScalingEnabled, bool);
+  vtkGetMacro(ScalingEnabled, bool);
+  vtkBooleanMacro(ScalingEnabled, bool);
 
   // Description:
   // Create the default widget representation if one is not set. By default,

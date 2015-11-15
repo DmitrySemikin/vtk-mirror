@@ -127,9 +127,9 @@ public:
   // Set/Get a flag that controls whether the axes use the data ranges
   // or the ranges set by SetRanges. By default the axes use the data
   // ranges.
-  vtkSetMacro(UseRanges,int);
-  vtkGetMacro(UseRanges,int);
-  vtkBooleanMacro(UseRanges,int);
+  vtkSetMacro(UseRanges, bool);
+  vtkGetMacro(UseRanges, bool);
+  vtkBooleanMacro(UseRanges, bool);
 
   // Description:
   // Set/Get the camera to perform scaling and translation of the
@@ -155,9 +155,9 @@ public:
   // the viewport. If off, the axes size remains constant (i.e., stay the
   // size of the bounding box). By default scaling is on so the axes are
   // scaled to fit inside the viewport.
-  vtkSetMacro(Scaling,int);
-  vtkGetMacro(Scaling,int);
-  vtkBooleanMacro(Scaling,int);
+  vtkSetMacro(Scaling, bool);
+  vtkGetMacro(Scaling, bool);
+  vtkBooleanMacro(Scaling, bool);
 
   // Description:
   // Set/Get the number of annotation labels to show along the x, y, and
@@ -242,15 +242,15 @@ public:
 
   // Description:
   // Turn on and off the visibility of each axis.
-  vtkSetMacro(XAxisVisibility,int);
-  vtkGetMacro(XAxisVisibility,int);
-  vtkBooleanMacro(XAxisVisibility,int);
-  vtkSetMacro(YAxisVisibility,int);
-  vtkGetMacro(YAxisVisibility,int);
-  vtkBooleanMacro(YAxisVisibility,int);
-  vtkSetMacro(ZAxisVisibility,int);
-  vtkGetMacro(ZAxisVisibility,int);
-  vtkBooleanMacro(ZAxisVisibility,int);
+  vtkSetMacro(XAxisVisibility, bool);
+  vtkGetMacro(XAxisVisibility, bool);
+  vtkBooleanMacro(XAxisVisibility, bool);
+  vtkSetMacro(YAxisVisibility, bool);
+  vtkGetMacro(YAxisVisibility, bool);
+  vtkBooleanMacro(YAxisVisibility, bool);
+  vtkSetMacro(ZAxisVisibility, bool);
+  vtkGetMacro(ZAxisVisibility, bool);
+  vtkBooleanMacro(ZAxisVisibility, bool);
 
   // Description:
   // Shallow copy of a CubeAxesActor2D.

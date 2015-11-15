@@ -171,45 +171,45 @@ public:
 
   // Description:
   // Turn on and off the visibility of the polar axis.
-  vtkSetMacro( PolarAxisVisibility, int );
-  vtkGetMacro( PolarAxisVisibility, int );
-  vtkBooleanMacro( PolarAxisVisibility, int );
+  vtkSetMacro(PolarAxisVisibility, bool);
+  vtkGetMacro(PolarAxisVisibility, bool);
+  vtkBooleanMacro(PolarAxisVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of titles for polar axis.
-  vtkSetMacro( PolarTitleVisibility, int );
-  vtkGetMacro( PolarTitleVisibility, int );
-  vtkBooleanMacro( PolarTitleVisibility, int );
+  vtkSetMacro(PolarTitleVisibility, bool);
+  vtkGetMacro(PolarTitleVisibility, bool);
+  vtkBooleanMacro(PolarTitleVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of labels for polar axis.
-  vtkSetMacro( PolarLabelVisibility, int );
-  vtkGetMacro( PolarLabelVisibility, int );
-  vtkBooleanMacro( PolarLabelVisibility, int );
+  vtkSetMacro(PolarLabelVisibility, bool);
+  vtkGetMacro(PolarLabelVisibility, bool);
+  vtkBooleanMacro(PolarLabelVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of ticks for polar axis.
-  vtkSetMacro( PolarTickVisibility, int );
-  vtkGetMacro( PolarTickVisibility, int );
-  vtkBooleanMacro( PolarTickVisibility, int );
+  vtkSetMacro(PolarTickVisibility, bool);
+  vtkGetMacro(PolarTickVisibility, bool);
+  vtkBooleanMacro(PolarTickVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of non-polar radial axes.
-  vtkSetMacro( RadialAxesVisibility, int );
-  vtkGetMacro( RadialAxesVisibility, int );
-  vtkBooleanMacro( RadialAxesVisibility, int );
+  vtkSetMacro(RadialAxesVisibility, bool);
+  vtkGetMacro(RadialAxesVisibility, bool);
+  vtkBooleanMacro(RadialAxesVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of titles for non-polar radial axes.
-  vtkSetMacro( RadialTitleVisibility, int );
-  vtkGetMacro( RadialTitleVisibility, int );
-  vtkBooleanMacro( RadialTitleVisibility, int );
+  vtkSetMacro(RadialTitleVisibility, bool);
+  vtkGetMacro(RadialTitleVisibility, bool);
+  vtkBooleanMacro(RadialTitleVisibility, bool);
 
   // Description:
   // Turn on and off the visibility of arcs for polar axis.
-  vtkSetMacro( PolarArcsVisibility, int );
-  vtkGetMacro( PolarArcsVisibility, int );
-  vtkBooleanMacro( PolarArcsVisibility, int );
+  vtkSetMacro(PolarArcsVisibility, bool);
+  vtkGetMacro(PolarArcsVisibility, bool);
+  vtkBooleanMacro(PolarArcsVisibility, bool);
 
   // Description:
   // Set/Get the polar axis title text property.

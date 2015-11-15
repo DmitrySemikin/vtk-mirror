@@ -63,9 +63,9 @@ public:
 
   // Description:
   // Enable disable thick mode. Default is to enable it.
-  vtkSetMacro( ThickMode, int );
-  vtkGetMacro( ThickMode, int );
-  vtkBooleanMacro( ThickMode, int );
+  vtkSetMacro(ThickMode, bool);
+  vtkGetMacro(ThickMode, bool);
+  vtkBooleanMacro(ThickMode, bool);
 
   // Description:
   // Get the 3D PolyData representation

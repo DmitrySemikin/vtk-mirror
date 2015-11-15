@@ -39,9 +39,9 @@ public:
   // Description:
   // Set/Get if the filter should use Input bounds to sub-sample the data.
   // By default it is set to 1.
-  vtkSetMacro(UseInputBounds, int);
-  vtkGetMacro(UseInputBounds, int);
-  vtkBooleanMacro(UseInputBounds, int);
+  vtkSetMacro(UseInputBounds, bool);
+  vtkGetMacro(UseInputBounds, bool);
+  vtkBooleanMacro(UseInputBounds, bool);
 
   // Description:
   // Set/Get sampling bounds. If (UseInputBounds == 1) then the sampling

@@ -39,9 +39,9 @@ public:
   // want to create a copy of a data object. You can then disconnect
   // this filter's input connections and it will act like a source.
   // Defaults to OFF.
-  vtkSetMacro(DeepCopyInput, int);
-  vtkGetMacro(DeepCopyInput, int);
-  vtkBooleanMacro(DeepCopyInput, int);
+  vtkSetMacro(DeepCopyInput, bool);
+  vtkGetMacro(DeepCopyInput, bool);
+  vtkBooleanMacro(DeepCopyInput, bool);
 
 protected:
   vtkPassThrough();

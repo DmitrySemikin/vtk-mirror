@@ -119,9 +119,9 @@ public:
   // given color. For clarity, a texture grid is placed in the background
   // if Opacity is ON. You might also want to play with SetTextureGridWith
   // in that case. [Default: off]
-  vtkSetMacro( UseOpacity, int );
-  vtkGetMacro( UseOpacity, int );
-  vtkBooleanMacro( UseOpacity, int );
+  vtkSetMacro(UseOpacity, bool);
+  vtkGetMacro(UseOpacity, bool);
+  vtkBooleanMacro(UseOpacity, bool);
 
   // Description:
   // Set/Get the maximum number of scalar bar segments to show. This may
@@ -222,17 +222,17 @@ public:
   // Set/get whether text annotations should be rendered or not.
   // Currently, this only affects rendering when \a IndexedLookup is true.
   // The default is true.
-  vtkSetMacro(DrawAnnotations, int);
-  vtkGetMacro(DrawAnnotations, int);
-  vtkBooleanMacro(DrawAnnotations, int);
+  vtkSetMacro(DrawAnnotations, bool);
+  vtkGetMacro(DrawAnnotations, bool);
+  vtkBooleanMacro(DrawAnnotations, bool);
 
   // Description:
   // Set/get whether the NaN annotation should be rendered or not.
   // This only affects rendering when \a DrawAnnotations is true.
   // The default is false.
-  vtkSetMacro(DrawNanAnnotation, int);
-  vtkGetMacro(DrawNanAnnotation, int);
-  vtkBooleanMacro(DrawNanAnnotation, int);
+  vtkSetMacro(DrawNanAnnotation, bool);
+  vtkGetMacro(DrawNanAnnotation, bool);
+  vtkBooleanMacro(DrawNanAnnotation, bool);
 
   // Description:
   // Set/get how leader lines connecting annotations to values should be colored.
@@ -241,9 +241,9 @@ public:
   // When false, leader lines take on the color of the value they correspond to.
   // This only affects rendering when \a DrawAnnotations is true.
   // The default is false.
-  vtkSetMacro(FixedAnnotationLeaderLineColor, int);
-  vtkGetMacro(FixedAnnotationLeaderLineColor, int);
-  vtkBooleanMacro(FixedAnnotationLeaderLineColor, int);
+  vtkSetMacro(FixedAnnotationLeaderLineColor, bool);
+  vtkGetMacro(FixedAnnotationLeaderLineColor, bool);
+  vtkBooleanMacro(FixedAnnotationLeaderLineColor, bool);
 
   // Description:
   // Set/get the annotation text for "NaN" values.
@@ -263,29 +263,29 @@ public:
   // Description:
   // Set/Get whether a background should be drawn around the scalar bar.
   // Default is off.
-  vtkSetMacro(DrawBackground, int);
-  vtkGetMacro(DrawBackground, int);
-  vtkBooleanMacro(DrawBackground, int);
+  vtkSetMacro(DrawBackground, bool);
+  vtkGetMacro(DrawBackground, bool);
+  vtkBooleanMacro(DrawBackground, bool);
 
   // Description:
   // Set/Get whether a frame should be drawn around the scalar bar.
   // Default is off.
-  vtkSetMacro(DrawFrame, int);
-  vtkGetMacro(DrawFrame, int);
-  vtkBooleanMacro(DrawFrame, int);
+  vtkSetMacro(DrawFrame, bool);
+  vtkGetMacro(DrawFrame, bool);
+  vtkBooleanMacro(DrawFrame, bool);
 
   // Description:
   // Set/Get whether the color bar should be drawn. If off, only the tickmarks
   // and text will be drawn. Default is on.
-  vtkSetMacro(DrawColorBar, int);
-  vtkGetMacro(DrawColorBar, int);
-  vtkBooleanMacro(DrawColorBar, int);
+  vtkSetMacro(DrawColorBar, bool);
+  vtkGetMacro(DrawColorBar, bool);
+  vtkBooleanMacro(DrawColorBar, bool);
 
   // Description:
   // Set/Get whether the tick labels should be drawn. Default is on.
-  vtkSetMacro(DrawTickLabels, int);
-  vtkGetMacro(DrawTickLabels, int);
-  vtkBooleanMacro(DrawTickLabels, int);
+  vtkSetMacro(DrawTickLabels, bool);
+  vtkGetMacro(DrawTickLabels, bool);
+  vtkBooleanMacro(DrawTickLabels, bool);
 
   // Description:
   // Set/Get the background property.

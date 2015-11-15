@@ -61,21 +61,21 @@ public:
 
   // Description:
   // Turn on/off writing the displacement file.
-  vtkSetMacro(WriteDisplacement,int);
-  vtkGetMacro(WriteDisplacement,int);
-  vtkBooleanMacro(WriteDisplacement,int);
+  vtkSetMacro(WriteDisplacement, bool);
+  vtkGetMacro(WriteDisplacement, bool);
+  vtkBooleanMacro(WriteDisplacement, bool);
 
   // Description:
   // Turn on/off writing the scalar file.
-  vtkSetMacro(WriteScalar,int);
-  vtkGetMacro(WriteScalar,int);
-  vtkBooleanMacro(WriteScalar,int);
+  vtkSetMacro(WriteScalar, bool);
+  vtkGetMacro(WriteScalar, bool);
+  vtkBooleanMacro(WriteScalar, bool);
 
   // Description:
   // Turn on/off writing the texture file.
-  vtkSetMacro(WriteTexture,int);
-  vtkGetMacro(WriteTexture,int);
-  vtkBooleanMacro(WriteTexture,int);
+  vtkSetMacro(WriteTexture, bool);
+  vtkGetMacro(WriteTexture, bool);
+  vtkBooleanMacro(WriteTexture, bool);
 
   // Description:
   // Get the input to this writer.

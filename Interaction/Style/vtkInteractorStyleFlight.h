@@ -75,9 +75,9 @@ public:
 
   // Description:
   // Disable motion (temporarily - for viewing etc)
-  vtkSetMacro(DisableMotion,int);
-  vtkGetMacro(DisableMotion,int);
-  vtkBooleanMacro(DisableMotion,int);
+  vtkSetMacro(DisableMotion, bool);
+  vtkGetMacro(DisableMotion, bool);
+  vtkBooleanMacro(DisableMotion, bool);
 
   // Description:
   // When flying, apply a restorative force to the "Up" vector.
@@ -85,9 +85,9 @@ public:
   // (as defined in DefaultUpVector). This prevents excessive twisting forces
   // when viewing from arbitrary angles, but keep the horizon level when
   // the user is flying over terrain.
-  vtkSetMacro(RestoreUpVector,int);
-  vtkGetMacro(RestoreUpVector,int);
-  vtkBooleanMacro(RestoreUpVector,int);
+  vtkSetMacro(RestoreUpVector, bool);
+  vtkGetMacro(RestoreUpVector, bool);
+  vtkBooleanMacro(RestoreUpVector, bool);
 
   // Specify "up" (by default {0,0,1} but can be changed)
   vtkGetVectorMacro(DefaultUpVector,double,3);

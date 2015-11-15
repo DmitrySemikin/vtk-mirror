@@ -73,9 +73,9 @@ public:
   // first and last slices by half when doing sum and mean, as compared
   // to the default midpoint integration that weighs all slices equally.
   // It is off by default.
-  vtkSetMacro(TrapezoidIntegration, int);
-  vtkBooleanMacro(TrapezoidIntegration, int);
-  vtkGetMacro(TrapezoidIntegration, int);
+  vtkSetMacro(TrapezoidIntegration, bool);
+  vtkGetMacro(TrapezoidIntegration, bool);
+  vtkBooleanMacro(TrapezoidIntegration, bool);
 
   // Description:
   // Turn on multi-slice output.  Each slice of the output will be
@@ -83,9 +83,9 @@ public:
   // if the SliceRange is [0,3] then slice 'i' of the output will
   // be a projection through slices 'i' through '3+i' of the input.
   // This flag is off by default.
-  vtkSetMacro(MultiSliceOutput, int);
-  vtkBooleanMacro(MultiSliceOutput, int);
-  vtkGetMacro(MultiSliceOutput, int);
+  vtkSetMacro(MultiSliceOutput, bool);
+  vtkGetMacro(MultiSliceOutput, bool);
+  vtkBooleanMacro(MultiSliceOutput, bool);
 
   // Description:
   // Set the output scalar type to float or double, to avoid

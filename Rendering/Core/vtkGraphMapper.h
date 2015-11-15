@@ -109,9 +109,9 @@ public:
 
   // Description:
   // Whether to enable/disable edges using array values.  Default is off.
-  vtkSetMacro(EnableEdgesByArray, int);
-  vtkGetMacro(EnableEdgesByArray, int);
-  vtkBooleanMacro(EnableEdgesByArray, int);
+  vtkSetMacro(EnableEdgesByArray, bool);
+  vtkGetMacro(EnableEdgesByArray, bool);
+  vtkBooleanMacro(EnableEdgesByArray, bool);
 
   // Description:
   // The array to use for coloring edges.  Default is "color".
@@ -120,9 +120,9 @@ public:
 
   // Description:
   // Whether to enable/disable vertices using array values.  Default is off.
-  vtkSetMacro(EnableVerticesByArray, int);
-  vtkGetMacro(EnableVerticesByArray, int);
-  vtkBooleanMacro(EnableVerticesByArray, int);
+  vtkSetMacro(EnableVerticesByArray, bool);
+  vtkGetMacro(EnableVerticesByArray, bool);
+  vtkBooleanMacro(EnableVerticesByArray, bool);
 
   // Description:
   // The array to use for assigning icons.

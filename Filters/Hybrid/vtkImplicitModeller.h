@@ -136,9 +136,9 @@ public:
   // is set, then the bounds specified (or computed automatically) is modified
   // by the fraction given by AdjustDistance. This means that the model
   // bounds is expanded in each of the x-y-z directions.
-  vtkSetMacro(AdjustBounds,int);
-  vtkGetMacro(AdjustBounds,int);
-  vtkBooleanMacro(AdjustBounds,int);
+  vtkSetMacro(AdjustBounds, bool);
+  vtkGetMacro(AdjustBounds, bool);
+  vtkBooleanMacro(AdjustBounds, bool);
 
   // Description:
   // Specify the amount to grow the model bounds (if the ivar AdjustBounds
@@ -150,9 +150,9 @@ public:
   // Description:
   // The outer boundary of the structured point set can be assigned a
   // particular value. This can be used to close or "cap" all surfaces.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Specify the capping value to use. The CapValue is also used as an

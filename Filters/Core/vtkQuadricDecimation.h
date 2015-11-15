@@ -80,30 +80,30 @@ public:
   // Decide whether to include data attributes in the error metric. If off,
   // then only geometric error is used to control the decimation. By default
   // the attribute errors are off.
-  vtkSetMacro(AttributeErrorMetric, int);
-  vtkGetMacro(AttributeErrorMetric, int);
-  vtkBooleanMacro(AttributeErrorMetric, int);
+  vtkSetMacro(AttributeErrorMetric, bool);
+  vtkGetMacro(AttributeErrorMetric, bool);
+  vtkBooleanMacro(AttributeErrorMetric, bool);
 
   // Description:
   // If attribute errors are to be included in the metric (i.e.,
   // AttributeErrorMetric is on), then the following flags control which
   // attributes are to be included in the error calculation. By default all
   // of these are on.
-  vtkSetMacro(ScalarsAttribute, int);
-  vtkGetMacro(ScalarsAttribute, int);
-  vtkBooleanMacro(ScalarsAttribute, int);
-  vtkSetMacro(VectorsAttribute, int);
-  vtkGetMacro(VectorsAttribute, int);
-  vtkBooleanMacro(VectorsAttribute, int);
-  vtkSetMacro(NormalsAttribute, int);
-  vtkGetMacro(NormalsAttribute, int);
-  vtkBooleanMacro(NormalsAttribute, int);
-  vtkSetMacro(TCoordsAttribute, int);
-  vtkGetMacro(TCoordsAttribute, int);
-  vtkBooleanMacro(TCoordsAttribute, int);
-  vtkSetMacro(TensorsAttribute, int);
-  vtkGetMacro(TensorsAttribute, int);
-  vtkBooleanMacro(TensorsAttribute, int);
+  vtkSetMacro(ScalarsAttribute, bool);
+  vtkGetMacro(ScalarsAttribute, bool);
+  vtkBooleanMacro(ScalarsAttribute, bool);
+  vtkSetMacro(VectorsAttribute, bool);
+  vtkGetMacro(VectorsAttribute, bool);
+  vtkBooleanMacro(VectorsAttribute, bool);
+  vtkSetMacro(NormalsAttribute, bool);
+  vtkGetMacro(NormalsAttribute, bool);
+  vtkBooleanMacro(NormalsAttribute, bool);
+  vtkSetMacro(TCoordsAttribute, bool);
+  vtkGetMacro(TCoordsAttribute, bool);
+  vtkBooleanMacro(TCoordsAttribute, bool);
+  vtkSetMacro(TensorsAttribute, bool);
+  vtkGetMacro(TensorsAttribute, bool);
+  vtkBooleanMacro(TensorsAttribute, bool);
 
   // Description:
   // Set/Get the scaling weight contribution of the attribute. These

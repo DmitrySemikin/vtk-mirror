@@ -62,21 +62,21 @@ public:
   // Description:
   // Stop when the end vertex is reached
   // or calculate shortest path to all vertices
-  vtkSetMacro(StopWhenEndReached, int);
-  vtkGetMacro(StopWhenEndReached, int);
-  vtkBooleanMacro(StopWhenEndReached, int);
+  vtkSetMacro(StopWhenEndReached, bool);
+  vtkGetMacro(StopWhenEndReached, bool);
+  vtkBooleanMacro(StopWhenEndReached, bool);
 
   // Description:
   // Use scalar values in the edge weight (experimental)
-  vtkSetMacro(UseScalarWeights, int);
-  vtkGetMacro(UseScalarWeights, int);
-  vtkBooleanMacro(UseScalarWeights, int);
+  vtkSetMacro(UseScalarWeights, bool);
+  vtkGetMacro(UseScalarWeights, bool);
+  vtkBooleanMacro(UseScalarWeights, bool);
 
   // Description:
   // Use the input point to repel the path by assigning high costs.
-  vtkSetMacro(RepelPathFromVertices, int);
-  vtkGetMacro(RepelPathFromVertices, int);
-  vtkBooleanMacro(RepelPathFromVertices, int);
+  vtkSetMacro(RepelPathFromVertices, bool);
+  vtkGetMacro(RepelPathFromVertices, bool);
+  vtkBooleanMacro(RepelPathFromVertices, bool);
 
   // Description:
   // Specify vtkPoints to use to repel the path from.

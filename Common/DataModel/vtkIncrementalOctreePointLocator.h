@@ -77,9 +77,9 @@ public:
 
   // Description:
   // Set/Get whether the search octree is built as a cubic shape or not.
-  vtkSetMacro( BuildCubicOctree, int );
-  vtkGetMacro( BuildCubicOctree, int );
-  vtkBooleanMacro( BuildCubicOctree, int );
+  vtkSetMacro(BuildCubicOctree, bool);
+  vtkGetMacro(BuildCubicOctree, bool);
+  vtkBooleanMacro(BuildCubicOctree, bool);
 
   // Description:
   // Get access to the vtkPoints object in which point coordinates are stored

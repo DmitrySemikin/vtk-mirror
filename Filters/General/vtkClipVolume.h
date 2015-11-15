@@ -101,9 +101,9 @@ public:
   // InsideOutside is turned on, a vertex is considered inside the implicit
   // function if its implicit function value is less than or equal to the
   // Value ivar.  InsideOut is off by default.
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description
   // Specify the implicit function with which to perform the clipping. If you
@@ -117,16 +117,16 @@ public:
   // interpolated from the implicit function values, and not the
   // input scalar data. If you enable this flag but do not provide an
   // implicit function an error will be reported.
-  vtkSetMacro(GenerateClipScalars,int);
-  vtkGetMacro(GenerateClipScalars,int);
-  vtkBooleanMacro(GenerateClipScalars,int);
+  vtkSetMacro(GenerateClipScalars, bool);
+  vtkGetMacro(GenerateClipScalars, bool);
+  vtkBooleanMacro(GenerateClipScalars, bool);
 
   // Description:
   // Control whether a second output is generated. The second output
   // contains the unstructured grid that's been clipped away.
-  vtkSetMacro(GenerateClippedOutput,int);
-  vtkGetMacro(GenerateClippedOutput,int);
-  vtkBooleanMacro(GenerateClippedOutput,int);
+  vtkSetMacro(GenerateClippedOutput, bool);
+  vtkGetMacro(GenerateClippedOutput, bool);
+  vtkBooleanMacro(GenerateClippedOutput, bool);
 
   // Description:
   // Return the clipped output.
@@ -137,9 +137,9 @@ public:
   // whether the output cells are all tetrahedra. By default, a mixed set of
   // cells (e.g., tetrahedra and wedges) is produced. (Note: mixed type
   // generation is faster and less overall data is generated.)
-  vtkSetMacro(Mixed3DCellGeneration,int);
-  vtkGetMacro(Mixed3DCellGeneration,int);
-  vtkBooleanMacro(Mixed3DCellGeneration,int);
+  vtkSetMacro(Mixed3DCellGeneration, bool);
+  vtkGetMacro(Mixed3DCellGeneration, bool);
+  vtkBooleanMacro(Mixed3DCellGeneration, bool);
 
   // Description:
   // Set the tolerance for merging clip intersection points that are near

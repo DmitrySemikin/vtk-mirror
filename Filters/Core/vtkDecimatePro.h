@@ -114,9 +114,9 @@ public:
   // Turn on/off whether to preserve the topology of the original mesh. If
   // on, mesh splitting and hole elimination will not occur. This may limit
   // the maximum reduction that may be achieved.
-  vtkSetMacro(PreserveTopology,int);
-  vtkGetMacro(PreserveTopology,int);
-  vtkBooleanMacro(PreserveTopology,int);
+  vtkSetMacro(PreserveTopology, bool);
+  vtkGetMacro(PreserveTopology, bool);
+  vtkBooleanMacro(PreserveTopology, bool);
 
   // Description:
   // Specify the mesh feature angle. This angle is used to define what
@@ -130,9 +130,9 @@ public:
   // non-manifold points, or anywhere else a split is required. Turning
   // splitting off will better preserve the original topology of the
   // mesh, but you may not obtain the requested reduction.
-  vtkSetMacro(Splitting,int);
-  vtkGetMacro(Splitting,int);
-  vtkBooleanMacro(Splitting,int);
+  vtkSetMacro(Splitting, bool);
+  vtkGetMacro(Splitting, bool);
+  vtkBooleanMacro(Splitting, bool);
 
   // Description:
   // Specify the mesh split angle. This angle is used to control the splitting
@@ -148,9 +148,9 @@ public:
   // cases. If the ivar PreSplitMesh ivar is enabled, the mesh is split with
   // the specified SplitAngle. Otherwise mesh splitting is deferred as long
   // as possible.
-  vtkSetMacro(PreSplitMesh,int);
-  vtkGetMacro(PreSplitMesh,int);
-  vtkBooleanMacro(PreSplitMesh,int);
+  vtkSetMacro(PreSplitMesh, bool);
+  vtkGetMacro(PreSplitMesh, bool);
+  vtkBooleanMacro(PreSplitMesh, bool);
 
   // Description:
   // Set the largest decimation error that is allowed during the decimation
@@ -167,9 +167,9 @@ public:
   // MaximumError becomes a global bounds on mesh error. Accumulating the
   // error requires extra memory proportional to the number of vertices in
   // the mesh. If AccumulateError is off, then the error is not accumulated.
-  vtkSetMacro(AccumulateError,int);
-  vtkGetMacro(AccumulateError,int);
-  vtkBooleanMacro(AccumulateError,int);
+  vtkSetMacro(AccumulateError, bool);
+  vtkGetMacro(AccumulateError, bool);
+  vtkBooleanMacro(AccumulateError, bool);
 
   // Description:
   // The MaximumError is normally defined as a fraction of the dataset bounding
@@ -186,9 +186,9 @@ public:
   // Description:
   // Turn on/off the deletion of vertices on the boundary of a mesh. This
   // may limit the maximum reduction that may be achieved.
-  vtkSetMacro(BoundaryVertexDeletion,int);
-  vtkGetMacro(BoundaryVertexDeletion,int);
-  vtkBooleanMacro(BoundaryVertexDeletion,int);
+  vtkSetMacro(BoundaryVertexDeletion, bool);
+  vtkGetMacro(BoundaryVertexDeletion, bool);
+  vtkBooleanMacro(BoundaryVertexDeletion, bool);
 
   // Description:
   // If the number of triangles connected to a vertex exceeds "Degree", then

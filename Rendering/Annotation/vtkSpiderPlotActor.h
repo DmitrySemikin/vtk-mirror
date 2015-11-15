@@ -101,9 +101,9 @@ public:
 
   // Description:
   // Enable/Disable the display of a plot title.
-  vtkSetMacro(TitleVisibility, int);
-  vtkGetMacro(TitleVisibility, int);
-  vtkBooleanMacro(TitleVisibility, int);
+  vtkSetMacro(TitleVisibility, bool);
+  vtkGetMacro(TitleVisibility, bool);
+  vtkBooleanMacro(TitleVisibility, bool);
 
   // Description:
   // Set/Get the title of the spider plot.
@@ -119,9 +119,9 @@ public:
   // of each radial axis on the circumference of the spider plot. The label
   // text strings are derived from the names of the data object arrays
   // associated with the input.
-  vtkSetMacro(LabelVisibility, int);
-  vtkGetMacro(LabelVisibility, int);
-  vtkBooleanMacro(LabelVisibility, int);
+  vtkSetMacro(LabelVisibility, bool);
+  vtkGetMacro(LabelVisibility, bool);
+  vtkBooleanMacro(LabelVisibility, bool);
 
   // Description:
   // Enable/Disable the creation of a legend. If on, the legend labels will
@@ -160,9 +160,9 @@ public:
   // Enable/Disable the creation of a legend. If on, the legend labels will
   // be created automatically unless the per plot legend symbol has been
   // set.
-  vtkSetMacro(LegendVisibility, int);
-  vtkGetMacro(LegendVisibility, int);
-  vtkBooleanMacro(LegendVisibility, int);
+  vtkSetMacro(LegendVisibility, bool);
+  vtkGetMacro(LegendVisibility, bool);
+  vtkBooleanMacro(LegendVisibility, bool);
 
   // Description:
   // Retrieve handles to the legend box. This is useful if you would like

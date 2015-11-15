@@ -170,9 +170,9 @@ public:
 
   // Description:
   // Set/Get timer hint
-  vtkGetMacro(UseTimers,int);
-  vtkSetMacro(UseTimers,int);
-  vtkBooleanMacro(UseTimers,int);
+  vtkSetMacro(UseTimers, bool);
+  vtkGetMacro(UseTimers, bool);
+  vtkBooleanMacro(UseTimers, bool);
 
   // Description:
   // If using timers, specify the default timer interval (in
@@ -184,9 +184,9 @@ public:
 
   // Description:
   // Does ProcessEvents handle observers on this class or not
-  vtkSetMacro(HandleObservers,int);
-  vtkGetMacro(HandleObservers,int);
-  vtkBooleanMacro(HandleObservers,int);
+  vtkSetMacro(HandleObservers, bool);
+  vtkGetMacro(HandleObservers, bool);
+  vtkBooleanMacro(HandleObservers, bool);
 
   // Description:
   // Generic event bindings can be overridden in subclasses

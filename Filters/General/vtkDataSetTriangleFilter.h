@@ -46,9 +46,9 @@ public:
   // Description:
   // When On this filter will cull all 1D and 2D cells from the output.
   // The default is Off.
-  vtkSetMacro(TetrahedraOnly, int);
-  vtkGetMacro(TetrahedraOnly, int);
-  vtkBooleanMacro(TetrahedraOnly, int);
+  vtkSetMacro(TetrahedraOnly, bool);
+  vtkGetMacro(TetrahedraOnly, bool);
+  vtkBooleanMacro(TetrahedraOnly, bool);
 
 protected:
   vtkDataSetTriangleFilter();

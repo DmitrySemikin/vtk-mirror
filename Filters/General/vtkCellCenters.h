@@ -48,9 +48,9 @@ public:
   // Description:
   // Enable/disable the generation of vertex cells. The default
   // is Off.
-  vtkSetMacro(VertexCells,int);
-  vtkGetMacro(VertexCells,int);
-  vtkBooleanMacro(VertexCells,int);
+  vtkSetMacro(VertexCells, bool);
+  vtkGetMacro(VertexCells, bool);
+  vtkBooleanMacro(VertexCells, bool);
 
 protected:
   vtkCellCenters();

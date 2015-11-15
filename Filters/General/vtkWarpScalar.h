@@ -56,9 +56,9 @@ public:
   // Description:
   // Turn on/off use of user specified normal. If on, data normals
   // will be ignored and instance variable Normal will be used instead.
-  vtkSetMacro(UseNormal,int);
-  vtkGetMacro(UseNormal,int);
-  vtkBooleanMacro(UseNormal,int);
+  vtkSetMacro(UseNormal, bool);
+  vtkGetMacro(UseNormal, bool);
+  vtkBooleanMacro(UseNormal, bool);
 
   // Description:
   // Normal (i.e., direction) along which to warp geometry. Only used
@@ -70,9 +70,9 @@ public:
   // Turn on/off flag specifying that input data is x-y plane. If x-y plane,
   // then the z value is used to warp the surface in the z-axis direction
   // (times the scale factor) and scalars are used to color the surface.
-  vtkSetMacro(XYPlane,int);
-  vtkGetMacro(XYPlane,int);
-  vtkBooleanMacro(XYPlane,int);
+  vtkSetMacro(XYPlane, bool);
+  vtkGetMacro(XYPlane, bool);
+  vtkBooleanMacro(XYPlane, bool);
 
   int FillInputPortInformation(int port, vtkInformation *info);
 

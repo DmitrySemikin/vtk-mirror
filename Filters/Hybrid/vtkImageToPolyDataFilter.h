@@ -123,9 +123,9 @@ public:
   // Description:
   // If the output style is set to polygonalize, then you can control
   // whether to smooth boundaries.
-  vtkSetMacro(Smoothing, int);
-  vtkGetMacro(Smoothing, int);
-  vtkBooleanMacro(Smoothing, int);
+  vtkSetMacro(Smoothing, bool);
+  vtkGetMacro(Smoothing, bool);
+  vtkBooleanMacro(Smoothing, bool);
 
   // Description:
   // Specify the number of smoothing iterations to smooth polygons. (Only
@@ -136,9 +136,9 @@ public:
   // Description:
   // Turn on/off whether the final polygons should be decimated.
   // whether to smooth boundaries.
-  vtkSetMacro(Decimation, int);
-  vtkGetMacro(Decimation, int);
-  vtkBooleanMacro(Decimation, int);
+  vtkSetMacro(Decimation, bool);
+  vtkGetMacro(Decimation, bool);
+  vtkBooleanMacro(Decimation, bool);
 
   // Description:
   // Specify the error to use for decimation (if decimation is on).

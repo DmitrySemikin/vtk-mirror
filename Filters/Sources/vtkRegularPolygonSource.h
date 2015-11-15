@@ -62,15 +62,15 @@ public:
 
   // Description:
   // Control whether a polygon is produced. By default, GeneratePolygon is enabled.
-  vtkSetMacro(GeneratePolygon,int);
-  vtkGetMacro(GeneratePolygon,int);
-  vtkBooleanMacro(GeneratePolygon,int);
+  vtkSetMacro(GeneratePolygon, bool);
+  vtkGetMacro(GeneratePolygon, bool);
+  vtkBooleanMacro(GeneratePolygon, bool);
 
   // Description:
   // Control whether a polyline is produced. By default, GeneratePolyline is enabled.
-  vtkSetMacro(GeneratePolyline,int);
-  vtkGetMacro(GeneratePolyline,int);
-  vtkBooleanMacro(GeneratePolyline,int);
+  vtkSetMacro(GeneratePolyline, bool);
+  vtkGetMacro(GeneratePolyline, bool);
+  vtkBooleanMacro(GeneratePolyline, bool);
 
   // Description:
   // Set/get the desired precision for the output points.

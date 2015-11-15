@@ -81,9 +81,9 @@ public:
   // Description:
   // If SkipEmptyNodes is true, then NULL datasets will be skipped. Default is
   // true.
-  vtkSetMacro(SkipEmptyNodes, int);
-  vtkGetMacro(SkipEmptyNodes, int);
-  vtkBooleanMacro(SkipEmptyNodes, int);
+  vtkSetMacro(SkipEmptyNodes, bool);
+  vtkGetMacro(SkipEmptyNodes, bool);
+  vtkBooleanMacro(SkipEmptyNodes, bool);
 
   // Description:
   // Flat index is an index to identify the data in a composite data structure

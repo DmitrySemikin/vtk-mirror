@@ -134,9 +134,9 @@ public:
   // Description:
   // Turn on/off the creation of scalar data from velocity magnitude. If off,
   // and input dataset has scalars, input dataset scalars are used.
-  vtkSetMacro(SpeedScalars,int);
-  vtkGetMacro(SpeedScalars,int);
-  vtkBooleanMacro(SpeedScalars,int);
+  vtkSetMacro(SpeedScalars, bool);
+  vtkGetMacro(SpeedScalars, bool);
+  vtkBooleanMacro(SpeedScalars, bool);
 
   // Description:
   // Turn on/off the creation of scalar data from vorticity information.
@@ -144,9 +144,9 @@ public:
   // used in rotating stream tubes. If off, and input dataset has scalars,
   // then input dataset scalars are used, unless SpeedScalars is also on.
   // SpeedScalars takes precedence over OrientationScalars.
-  vtkSetMacro(OrientationScalars, int);
-  vtkGetMacro(OrientationScalars, int);
-  vtkBooleanMacro(OrientationScalars, int);
+  vtkSetMacro(OrientationScalars, bool);
+  vtkGetMacro(OrientationScalars, bool);
+  vtkBooleanMacro(OrientationScalars, bool);
 
   // Description:
   // Set/get terminal speed (i.e., speed is velocity magnitude).  Terminal
@@ -160,9 +160,9 @@ public:
   // vtkTubeFilter can be used to create rotated tubes.
   // If vorticity is turned on, in the output, the velocity vectors
   // are replaced by vorticity vectors.
-  vtkSetMacro(Vorticity,int);
-  vtkGetMacro(Vorticity,int);
-  vtkBooleanMacro(Vorticity,int);
+  vtkSetMacro(Vorticity, bool);
+  vtkGetMacro(Vorticity, bool);
+  vtkBooleanMacro(Vorticity, bool);
 
   vtkSetMacro( NumberOfThreads, int );
   vtkGetMacro( NumberOfThreads, int );

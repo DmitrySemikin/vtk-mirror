@@ -68,23 +68,23 @@ public:
   // Boolean controls whether to extract cells that are inside of implicit
   // function (ExtractInside == 1) or outside of implicit function
   // (ExtractInside == 0).
-  vtkSetMacro(ExtractInside,int);
-  vtkGetMacro(ExtractInside,int);
-  vtkBooleanMacro(ExtractInside,int);
+  vtkSetMacro(ExtractInside, bool);
+  vtkGetMacro(ExtractInside, bool);
+  vtkBooleanMacro(ExtractInside, bool);
 
   // Description:
   // Boolean controls whether to extract cells that are partially inside.
   // By default, ExtractBoundaryCells is off.
-  vtkSetMacro(ExtractBoundaryCells,int);
-  vtkGetMacro(ExtractBoundaryCells,int);
-  vtkBooleanMacro(ExtractBoundaryCells,int);
+  vtkSetMacro(ExtractBoundaryCells, bool);
+  vtkGetMacro(ExtractBoundaryCells, bool);
+  vtkBooleanMacro(ExtractBoundaryCells, bool);
 
   // Description:
   // Boolean controls whether points are culled or simply passed through
   // to the output.
-  vtkSetMacro(PassPoints,int);
-  vtkGetMacro(PassPoints,int);
-  vtkBooleanMacro(PassPoints,int);
+  vtkSetMacro(PassPoints, bool);
+  vtkGetMacro(PassPoints, bool);
+  vtkBooleanMacro(PassPoints, bool);
 
 protected:
   vtkExtractPolyDataGeometry(vtkImplicitFunction *f=NULL);

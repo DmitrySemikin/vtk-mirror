@@ -82,9 +82,9 @@ public:
   // deviation of the selection over time.
   //
   // The default is off to preserve backwards-compatibility.
-  vtkSetMacro(ReportStatisticsOnly,int);
-  vtkGetMacro(ReportStatisticsOnly,int);
-  vtkBooleanMacro(ReportStatisticsOnly,int);
+  vtkSetMacro(ReportStatisticsOnly, bool);
+  vtkGetMacro(ReportStatisticsOnly, bool);
+  vtkBooleanMacro(ReportStatisticsOnly, bool);
 
 //BTX
 protected:

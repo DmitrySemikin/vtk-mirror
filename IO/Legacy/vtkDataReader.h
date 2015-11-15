@@ -109,9 +109,9 @@ public:
   // Description:
   // Enable reading from an InputString or InputArray instead of the default,
   // a file.
-  vtkSetMacro(ReadFromInputString,int);
-  vtkGetMacro(ReadFromInputString,int);
-  vtkBooleanMacro(ReadFromInputString,int);
+  vtkSetMacro(ReadFromInputString, bool);
+  vtkGetMacro(ReadFromInputString, bool);
+  vtkBooleanMacro(ReadFromInputString, bool);
 
   // Description:
   // Get the type of file (ASCII or BINARY). Returned value only valid
@@ -192,45 +192,45 @@ public:
 
   // Description:
   // Enable reading all scalars.
-  vtkSetMacro(ReadAllScalars,int);
-  vtkGetMacro(ReadAllScalars,int);
-  vtkBooleanMacro(ReadAllScalars,int);
+  vtkSetMacro(ReadAllScalars, bool);
+  vtkGetMacro(ReadAllScalars, bool);
+  vtkBooleanMacro(ReadAllScalars, bool);
 
   // Description:
   // Enable reading all vectors.
-  vtkSetMacro(ReadAllVectors,int);
-  vtkGetMacro(ReadAllVectors,int);
-  vtkBooleanMacro(ReadAllVectors,int);
+  vtkSetMacro(ReadAllVectors, bool);
+  vtkGetMacro(ReadAllVectors, bool);
+  vtkBooleanMacro(ReadAllVectors, bool);
 
   // Description:
   // Enable reading all normals.
-  vtkSetMacro(ReadAllNormals,int);
-  vtkGetMacro(ReadAllNormals,int);
-  vtkBooleanMacro(ReadAllNormals,int);
+  vtkSetMacro(ReadAllNormals, bool);
+  vtkGetMacro(ReadAllNormals, bool);
+  vtkBooleanMacro(ReadAllNormals, bool);
 
   // Description:
   // Enable reading all tensors.
-  vtkSetMacro(ReadAllTensors,int);
-  vtkGetMacro(ReadAllTensors,int);
-  vtkBooleanMacro(ReadAllTensors,int);
+  vtkSetMacro(ReadAllTensors, bool);
+  vtkGetMacro(ReadAllTensors, bool);
+  vtkBooleanMacro(ReadAllTensors, bool);
 
   // Description:
   // Enable reading all color scalars.
-  vtkSetMacro(ReadAllColorScalars,int);
-  vtkGetMacro(ReadAllColorScalars,int);
-  vtkBooleanMacro(ReadAllColorScalars,int);
+  vtkSetMacro(ReadAllColorScalars, bool);
+  vtkGetMacro(ReadAllColorScalars, bool);
+  vtkBooleanMacro(ReadAllColorScalars, bool);
 
   // Description:
   // Enable reading all tcoords.
-  vtkSetMacro(ReadAllTCoords,int);
-  vtkGetMacro(ReadAllTCoords,int);
-  vtkBooleanMacro(ReadAllTCoords,int);
+  vtkSetMacro(ReadAllTCoords, bool);
+  vtkGetMacro(ReadAllTCoords, bool);
+  vtkBooleanMacro(ReadAllTCoords, bool);
 
   // Description:
   // Enable reading all fields.
-  vtkSetMacro(ReadAllFields,int);
-  vtkGetMacro(ReadAllFields,int);
-  vtkBooleanMacro(ReadAllFields,int);
+  vtkSetMacro(ReadAllFields, bool);
+  vtkGetMacro(ReadAllFields, bool);
+  vtkBooleanMacro(ReadAllFields, bool);
 
   // Description:
   // Open a vtk data file. Returns zero if error.

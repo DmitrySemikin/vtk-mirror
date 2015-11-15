@@ -52,9 +52,9 @@ public:
   // shot" timers can be either one shot or repeating timers with no
   // additional work. Also, "natively repeating" timers still work with the
   // default setting, but with potentially many create and destroy calls.
-  vtkSetMacro(TimerEventResetsTimer, int);
-  vtkGetMacro(TimerEventResetsTimer, int);
-  vtkBooleanMacro(TimerEventResetsTimer, int);
+  vtkSetMacro(TimerEventResetsTimer, bool);
+  vtkGetMacro(TimerEventResetsTimer, bool);
+  vtkBooleanMacro(TimerEventResetsTimer, bool);
 
 protected:
   vtkGenericRenderWindowInteractor();

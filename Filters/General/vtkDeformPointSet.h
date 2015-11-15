@@ -93,9 +93,9 @@ public:
   // input points/cells or the number of control mesh points/cells changes
   // between executions. Thus flag is used to force reexecution and
   // recomputation of weights.
-  vtkSetMacro(InitializeWeights, int);
-  vtkGetMacro(InitializeWeights, int);
-  vtkBooleanMacro(InitializeWeights, int);
+  vtkSetMacro(InitializeWeights, bool);
+  vtkGetMacro(InitializeWeights, bool);
+  vtkBooleanMacro(InitializeWeights, bool);
 
 protected:
   vtkDeformPointSet();

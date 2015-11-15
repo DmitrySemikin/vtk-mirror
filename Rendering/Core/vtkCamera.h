@@ -269,9 +269,9 @@ public:
   // for stereo rendering.
   // For reference see "High Resolution Virtual Reality", in Proc.
   // SIGGRAPH '92, Computer Graphics, pages 195-202, 1992.
-  vtkSetMacro(UseOffAxisProjection, int);
-  vtkGetMacro(UseOffAxisProjection, int);
-  vtkBooleanMacro(UseOffAxisProjection, int);
+  vtkSetMacro(UseOffAxisProjection, bool);
+  vtkGetMacro(UseOffAxisProjection, bool);
+  vtkBooleanMacro(UseOffAxisProjection, bool);
 
   // Description:
   // Set/Get top left corner point of the screen.

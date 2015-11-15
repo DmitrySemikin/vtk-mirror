@@ -53,9 +53,9 @@ public:
   // represent the edges that were in the Chaco file.  Each edge is a vtkLine.
   // Default is ON.
 
-  vtkSetMacro(GenerateGlobalElementIdArray, int);
-  vtkGetMacro(GenerateGlobalElementIdArray, int);
-  vtkBooleanMacro(GenerateGlobalElementIdArray, int);
+  vtkSetMacro(GenerateGlobalElementIdArray, bool);
+  vtkGetMacro(GenerateGlobalElementIdArray, bool);
+  vtkBooleanMacro(GenerateGlobalElementIdArray, bool);
 
   static const char *GetGlobalElementIdArrayName() { return "GlobalElementId"; }
 
@@ -66,9 +66,9 @@ public:
   // vertex in BaseName.coords and go up from there.
   // Default is ON.
 
-  vtkSetMacro(GenerateGlobalNodeIdArray, int);
-  vtkGetMacro(GenerateGlobalNodeIdArray, int);
-  vtkBooleanMacro(GenerateGlobalNodeIdArray, int);
+  vtkSetMacro(GenerateGlobalNodeIdArray, bool);
+  vtkGetMacro(GenerateGlobalNodeIdArray, bool);
+  vtkBooleanMacro(GenerateGlobalNodeIdArray, bool);
 
   static const char *GetGlobalNodeIdArrayName() { return "GlobalNodeId"; }
 
@@ -77,9 +77,9 @@ public:
   // vertex weight in the Chaco file.
   // Default is OFF.
 
-  vtkSetMacro(GenerateVertexWeightArrays, int);
-  vtkGetMacro(GenerateVertexWeightArrays, int);
-  vtkBooleanMacro(GenerateVertexWeightArrays, int);
+  vtkSetMacro(GenerateVertexWeightArrays, bool);
+  vtkGetMacro(GenerateVertexWeightArrays, bool);
+  vtkBooleanMacro(GenerateVertexWeightArrays, bool);
 
   // Description:
   // Returns the number of weights per vertex in the Chaco file, whether or
@@ -104,9 +104,9 @@ public:
   // create a cell array for each weight for every edge.
   // Default is OFF.
 
-  vtkSetMacro(GenerateEdgeWeightArrays, int);
-  vtkGetMacro(GenerateEdgeWeightArrays, int);
-  vtkBooleanMacro(GenerateEdgeWeightArrays, int);
+  vtkSetMacro(GenerateEdgeWeightArrays, bool);
+  vtkGetMacro(GenerateEdgeWeightArrays, bool);
+  vtkBooleanMacro(GenerateEdgeWeightArrays, bool);
 
   // Description:
   // Returns the number of weights per edge in the Chaco file, whether or

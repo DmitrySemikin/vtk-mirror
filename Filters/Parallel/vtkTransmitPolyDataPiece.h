@@ -44,9 +44,9 @@ public:
 
   // Description:
   // Turn on/off creating ghost cells (on by default).
-  vtkSetMacro(CreateGhostCells, int);
-  vtkGetMacro(CreateGhostCells, int);
-  vtkBooleanMacro(CreateGhostCells, int);
+  vtkSetMacro(CreateGhostCells, bool);
+  vtkGetMacro(CreateGhostCells, bool);
+  vtkBooleanMacro(CreateGhostCells, bool);
 
 protected:
   vtkTransmitPolyDataPiece();

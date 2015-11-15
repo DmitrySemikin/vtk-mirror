@@ -185,9 +185,9 @@ public:
   // color and depth textures. By default this is set to 0 (off).
   // It should be noted that it is possible that underlying API specific
   // mapper may not supoport RenderToImage mode.
-  vtkSetMacro(RenderToImage, int);
-  vtkGetMacro(RenderToImage, int);
-  vtkBooleanMacro(RenderToImage, int);
+  vtkSetMacro(RenderToImage, bool);
+  vtkGetMacro(RenderToImage, bool);
+  vtkBooleanMacro(RenderToImage, bool);
 
   // Description:
   // Low level API to export the depth texture as vtkImageData in
@@ -293,9 +293,9 @@ protected:
   // Description:
   // Set the mapper in AMR Mode or not. Initial value is false.
   // Called only by the vtkKWAMRVolumeMapper
-  vtkSetClampMacro(AMRMode,int,0,1);
-  vtkGetMacro(AMRMode,int);
-  vtkBooleanMacro(AMRMode,int);
+  vtkSetMacro(AMRMode, bool);
+  vtkGetMacro(AMRMode, bool);
+  vtkBooleanMacro(AMRMode, bool);
 
   vtkImageData * MaskInput;
   float          MaskBlendFactor;

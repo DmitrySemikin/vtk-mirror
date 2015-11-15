@@ -157,30 +157,30 @@ public:
   // direction cosines and origin of the ResliceAxes before applying
   // them as the default output spacing, origin and extent
   // (default: On).
-  vtkSetMacro(TransformInputSampling, int);
-  vtkBooleanMacro(TransformInputSampling, int);
-  vtkGetMacro(TransformInputSampling, int);
+  vtkSetMacro(TransformInputSampling, bool);
+  vtkGetMacro(TransformInputSampling, bool);
+  vtkBooleanMacro(TransformInputSampling, bool);
 
   // Description:
   // Turn this on if you want to guarantee that the extent of the
   // output will be large enough to ensure that none of the
   // data will be cropped (default: Off).
-  vtkSetMacro(AutoCropOutput, int);
-  vtkBooleanMacro(AutoCropOutput, int);
-  vtkGetMacro(AutoCropOutput, int);
+  vtkSetMacro(AutoCropOutput, bool);
+  vtkGetMacro(AutoCropOutput, bool);
+  vtkBooleanMacro(AutoCropOutput, bool);
 
   // Description:
   // Turn on wrap-pad feature (default: Off).
-  vtkSetMacro(Wrap, int);
-  vtkGetMacro(Wrap, int);
-  vtkBooleanMacro(Wrap, int);
+  vtkSetMacro(Wrap, bool);
+  vtkGetMacro(Wrap, bool);
+  vtkBooleanMacro(Wrap, bool);
 
   // Description:
   // Turn on mirror-pad feature (default: Off).
   // This will override the wrap-pad.
-  vtkSetMacro(Mirror, int);
-  vtkGetMacro(Mirror, int);
-  vtkBooleanMacro(Mirror, int);
+  vtkSetMacro(Mirror, bool);
+  vtkGetMacro(Mirror, bool);
+  vtkBooleanMacro(Mirror, bool);
 
   // Description:
   // Extend the apparent input border by a half voxel (default: On).
@@ -191,9 +191,9 @@ public:
   // is calculated as if the input's edge voxels were duplicated past
   // the edges of the input.
   // This has no effect if Mirror or Wrap are on.
-  vtkSetMacro(Border, int);
-  vtkGetMacro(Border, int);
-  vtkBooleanMacro(Border, int);
+  vtkSetMacro(Border, bool);
+  vtkGetMacro(Border, bool);
+  vtkBooleanMacro(Border, bool);
 
   // Description:
   // Set interpolation mode (default: nearest neighbor).
@@ -240,9 +240,9 @@ public:
   // Use trapezoid integration for slab computation.  All this does is
   // weigh the first and last slices by half when doing sum and mean.
   // It is off by default.
-  vtkSetMacro(SlabTrapezoidIntegration, int);
-  vtkBooleanMacro(SlabTrapezoidIntegration, int);
-  vtkGetMacro(SlabTrapezoidIntegration, int);
+  vtkSetMacro(SlabTrapezoidIntegration, bool);
+  vtkGetMacro(SlabTrapezoidIntegration, bool);
+  vtkBooleanMacro(SlabTrapezoidIntegration, bool);
 
   // Description:
   // The slab spacing as a fraction of the output slice spacing.
@@ -258,9 +258,9 @@ public:
   // Description:
   // Turn on and off optimizations (default on, they should only be
   // turned off for testing purposes).
-  vtkSetMacro(Optimization, int);
-  vtkGetMacro(Optimization, int);
-  vtkBooleanMacro(Optimization, int);
+  vtkSetMacro(Optimization, bool);
+  vtkGetMacro(Optimization, bool);
+  vtkBooleanMacro(Optimization, bool);
 
   // Description:
   // Set a value to add to all the output voxels.
@@ -379,9 +379,9 @@ public:
   // Description:
   // Generate an output stencil that defines which pixels were
   // interpolated and which pixels were out-of-bounds of the input.
-  vtkSetMacro(GenerateStencilOutput, int);
-  vtkGetMacro(GenerateStencilOutput, int);
-  vtkBooleanMacro(GenerateStencilOutput, int);
+  vtkSetMacro(GenerateStencilOutput, bool);
+  vtkGetMacro(GenerateStencilOutput, bool);
+  vtkBooleanMacro(GenerateStencilOutput, bool);
 
   // Description:
   // Get the output stencil.

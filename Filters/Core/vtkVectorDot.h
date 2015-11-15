@@ -51,9 +51,9 @@ public:
   // scalar values will strictly be a function of the vector and normal
   // data. By default, MapScalars is enabled, and the output scalar
   // values will fall into the range ScalarRange.
-  vtkSetMacro(MapScalars,int);
-  vtkGetMacro(MapScalars,int);
-  vtkBooleanMacro(MapScalars,int);
+  vtkSetMacro(MapScalars, bool);
+  vtkGetMacro(MapScalars, bool);
+  vtkBooleanMacro(MapScalars, bool);
 
   // Description:
   // Specify the range into which to map the scalars. This mapping only

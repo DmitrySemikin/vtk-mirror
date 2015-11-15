@@ -109,9 +109,9 @@ public:
   // Enable the display of text with numeric values characterizing the
   // transformation. Rotation and shear are expressed in degrees; translation
   // the distance in world coordinates; and scale normalized (sx,sy) values.
-  vtkSetMacro(DisplayText,int);
-  vtkGetMacro(DisplayText,int);
-  vtkBooleanMacro(DisplayText,int);
+  vtkSetMacro(DisplayText, bool);
+  vtkGetMacro(DisplayText, bool);
+  vtkBooleanMacro(DisplayText, bool);
 
   // Description:
   // Subclasses of vtkAffineRepresentation2D must implement these methods. These

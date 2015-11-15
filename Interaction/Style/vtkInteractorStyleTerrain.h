@@ -86,9 +86,9 @@ public:
 
   // Description:
   // Turn on/off the latitude/longitude lines.
-  vtkSetMacro(LatLongLines,int);
-  vtkGetMacro(LatLongLines,int);
-  vtkBooleanMacro(LatLongLines,int);
+  vtkSetMacro(LatLongLines, bool);
+  vtkGetMacro(LatLongLines, bool);
+  vtkBooleanMacro(LatLongLines, bool);
 
 protected:
   vtkInteractorStyleTerrain();

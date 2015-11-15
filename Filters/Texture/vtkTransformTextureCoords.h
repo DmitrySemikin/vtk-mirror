@@ -75,23 +75,23 @@ public:
   // Description:
   // Boolean indicates whether the texture map should be flipped around the
   // s-axis. Note that the flips occur around the texture origin.
-  vtkSetMacro(FlipR,int);
-  vtkGetMacro(FlipR,int);
-  vtkBooleanMacro(FlipR,int);
+  vtkSetMacro(FlipR, bool);
+  vtkGetMacro(FlipR, bool);
+  vtkBooleanMacro(FlipR, bool);
 
   // Description:
   // Boolean indicates whether the texture map should be flipped around the
   // s-axis. Note that the flips occur around the texture origin.
-  vtkSetMacro(FlipS,int);
-  vtkGetMacro(FlipS,int);
-  vtkBooleanMacro(FlipS,int);
+  vtkSetMacro(FlipS, bool);
+  vtkGetMacro(FlipS, bool);
+  vtkBooleanMacro(FlipS, bool);
 
   // Description:
   // Boolean indicates whether the texture map should be flipped around the
   // t-axis. Note that the flips occur around the texture origin.
-  vtkSetMacro(FlipT,int);
-  vtkGetMacro(FlipT,int);
-  vtkBooleanMacro(FlipT,int);
+  vtkSetMacro(FlipT, bool);
+  vtkGetMacro(FlipT, bool);
+  vtkBooleanMacro(FlipT, bool);
 
 protected:
   vtkTransformTextureCoords();

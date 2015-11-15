@@ -123,9 +123,9 @@ public:
   // Description:
   // Option to set the point scalars of the output.  The scalars will be the
   // iso value of course.  By default this flag is on.
-  vtkSetMacro(ComputeScalars,int);
-  vtkGetMacro(ComputeScalars,int);
-  vtkBooleanMacro(ComputeScalars,int);
+  vtkSetMacro(ComputeScalars, bool);
+  vtkGetMacro(ComputeScalars, bool);
+  vtkBooleanMacro(ComputeScalars, bool);
 
   // Description:
   // Set/get which component of the scalar array to contour on; defaults to 0.

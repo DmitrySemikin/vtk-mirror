@@ -48,9 +48,9 @@ public:
   // This flag determines whether the Size or spacing of
   // a data set remain constant (when extent is changed).
   // By default, size remains constant.
-  vtkSetMacro(ConstantSize, int);
-  vtkGetMacro(ConstantSize, int);
-  vtkBooleanMacro(ConstantSize, int);
+  vtkSetMacro(ConstantSize, bool);
+  vtkGetMacro(ConstantSize, bool);
+  vtkBooleanMacro(ConstantSize, bool);
 
   // Description:
   // Set the projection from  the 4D space (4 parameters / 2 imaginary numbers)

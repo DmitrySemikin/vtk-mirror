@@ -73,9 +73,9 @@ public:
   // Description:
   // Determines whether the vector components will be put
   // in separate outputs or in the first output's field data
-  vtkSetMacro(ExtractToFieldData, int);
-  vtkGetMacro(ExtractToFieldData, int);
-  vtkBooleanMacro(ExtractToFieldData, int);
+  vtkSetMacro(ExtractToFieldData, bool);
+  vtkGetMacro(ExtractToFieldData, bool);
+  vtkBooleanMacro(ExtractToFieldData, bool);
 
 protected:
   vtkExtractVectorComponents();

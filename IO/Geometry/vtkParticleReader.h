@@ -78,9 +78,9 @@ public:
 
   // Description:
   // Default: 1. If 1 then each particle has a value associated with it.
-  vtkSetMacro(HasScalar,int);
-  vtkGetMacro(HasScalar,int);
-  vtkBooleanMacro(HasScalar,int);
+  vtkSetMacro(HasScalar, bool);
+  vtkGetMacro(HasScalar, bool);
+  vtkBooleanMacro(HasScalar, bool);
 
   // Description:
   // Get/Set the file type.  The options are:

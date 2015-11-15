@@ -52,9 +52,9 @@ public:
   // Generate errors when the triangulation fails.
   // Note that triangulation failures are often minor, because they involve
   // tiny triangles that are too small to see.
-  vtkSetMacro(TriangulationErrorDisplay, int);
-  vtkBooleanMacro(TriangulationErrorDisplay, int);
-  vtkGetMacro(TriangulationErrorDisplay, int);
+  vtkSetMacro(TriangulationErrorDisplay, bool);
+  vtkGetMacro(TriangulationErrorDisplay, bool);
+  vtkBooleanMacro(TriangulationErrorDisplay, bool);
 
   // Description:
   // A robust method for triangulating a polygon.

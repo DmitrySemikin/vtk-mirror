@@ -61,9 +61,9 @@ public:
   // Set/Get whether to copy the data from the input array to the output array
   // before the mapping occurs. If turned off, FillValue is used to initialize
   // any unmapped array indices. Default is off.
-  vtkSetMacro(PassArray, int);
-  vtkGetMacro(PassArray, int);
-  vtkBooleanMacro(PassArray, int);
+  vtkSetMacro(PassArray, bool);
+  vtkGetMacro(PassArray, bool);
+  vtkBooleanMacro(PassArray, bool);
 
   // Description:
   // Set/Get whether to copy the data from the input array to the output array

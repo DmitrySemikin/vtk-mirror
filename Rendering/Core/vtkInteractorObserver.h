@@ -107,9 +107,9 @@ public:
   // interactor observer. (By default, the keypress is 'i' for "interactor
   // observer".)  Set the KeyPressActivationValue to change which key
   // activates the widget.)
-  vtkSetMacro(KeyPressActivation,int);
-  vtkGetMacro(KeyPressActivation,int);
-  vtkBooleanMacro(KeyPressActivation,int);
+  vtkSetMacro(KeyPressActivation, bool);
+  vtkGetMacro(KeyPressActivation, bool);
+  vtkBooleanMacro(KeyPressActivation, bool);
 
   // Description:
   // Specify which key press value to use to activate the interactor observer

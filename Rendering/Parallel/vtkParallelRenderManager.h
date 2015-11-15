@@ -142,18 +142,18 @@ public:
   // responds to render events of the attached window, propagates the
   // render event to other processors, and otherwise enables the parallel
   // rendering process.
-  vtkSetMacro(ParallelRendering, int);
-  vtkGetMacro(ParallelRendering, int);
-  vtkBooleanMacro(ParallelRendering, int);
+  vtkSetMacro(ParallelRendering, bool);
+  vtkGetMacro(ParallelRendering, bool);
+  vtkBooleanMacro(ParallelRendering, bool);
 
   // Description:
   // Turns on/off render event propagation.  When on (the default) and
   // ParallelRendering is on, process 0 will send an RMI call to all remote
   // processes to perform a synchronized render.  When off, render must be
   // manually called on each process.
-  vtkSetMacro(RenderEventPropagation, int);
-  vtkGetMacro(RenderEventPropagation, int);
-  vtkBooleanMacro(RenderEventPropagation, int);
+  vtkSetMacro(RenderEventPropagation, bool);
+  vtkGetMacro(RenderEventPropagation, bool);
+  vtkBooleanMacro(RenderEventPropagation, bool);
 
   // Description:
   // Get/Set the default value used for RenderEventPropagation when a new
@@ -168,9 +168,9 @@ public:
   // This is used for tiled display rendering.  When data has been
   // duplicated on all processes, then we do not need to compositing.
   // Cameras and renders are still propagated though.
-  vtkSetMacro(UseCompositing, int);
-  vtkGetMacro(UseCompositing, int);
-  vtkBooleanMacro(UseCompositing, int);
+  vtkSetMacro(UseCompositing, bool);
+  vtkGetMacro(UseCompositing, bool);
+  vtkBooleanMacro(UseCompositing, bool);
 
   // Description:
   // Set/Get the reduction factor (for sort-last based parallel renderers).
@@ -201,9 +201,9 @@ public:
   // If on, the ReductionFactor is automatically adjusted to best meet the
   // the DesiredUpdateRate in the current RenderWindow based on metrics
   // from the last render.
-  vtkSetMacro(AutoImageReductionFactor, int);
-  vtkGetMacro(AutoImageReductionFactor, int);
-  vtkBooleanMacro(AutoImageReductionFactor, int);
+  vtkSetMacro(AutoImageReductionFactor, bool);
+  vtkGetMacro(AutoImageReductionFactor, bool);
+  vtkBooleanMacro(AutoImageReductionFactor, bool);
 
   // Description:
   // Get rendering metrics.
@@ -218,9 +218,9 @@ public:
   // flag is off, the list of renderers held by this parallel render manager
   // (initially empty) is synced.  You can modify the list of renderers with the
   // AddRenderer, RemoveRenderer, and RemoveAllRenderers methods.
-  vtkGetMacro(SyncRenderWindowRenderers, int);
-  vtkSetMacro(SyncRenderWindowRenderers, int);
-  vtkBooleanMacro(SyncRenderWindowRenderers, int);
+  vtkSetMacro(SyncRenderWindowRenderers, bool);
+  vtkGetMacro(SyncRenderWindowRenderers, bool);
+  vtkBooleanMacro(SyncRenderWindowRenderers, bool);
   virtual void AddRenderer(vtkRenderer *);
   virtual void RemoveRenderer(vtkRenderer *);
   virtual void RemoveAllRenderers();
@@ -233,17 +233,17 @@ public:
   // vtkParallelRenderManager::GetPixelData.  Turning WriteBackImages off
   // may result in a speedup if the render window is not visible to the user
   // and images are read back for further processing or transit.
-  vtkSetMacro(WriteBackImages, int);
-  vtkGetMacro(WriteBackImages, int);
-  vtkBooleanMacro(WriteBackImages, int);
+  vtkSetMacro(WriteBackImages, bool);
+  vtkGetMacro(WriteBackImages, bool);
+  vtkBooleanMacro(WriteBackImages, bool);
 
   // Description:
   // If on (the default), when the ImageReductionFactor is greater than 1
   // and WriteBackImages is on, the image will be magnified to fill the
   // entire render window.
-  vtkSetMacro(MagnifyImages, int);
-  vtkGetMacro(MagnifyImages, int);
-  vtkBooleanMacro(MagnifyImages, int);
+  vtkSetMacro(MagnifyImages, bool);
+  vtkGetMacro(MagnifyImages, bool);
+  vtkBooleanMacro(MagnifyImages, bool);
 
 //BTX
   enum { NEAREST, LINEAR };
@@ -353,17 +353,17 @@ public:
   //If set to false, this will prevent to manager from swapping buffers.
   //This allows something else (for instance VisibleCellSelection) to
   //control front/back buffer swapping.
-  vtkSetMacro(UseBackBuffer, int);
-  vtkGetMacro(UseBackBuffer, int);
-  vtkBooleanMacro(UseBackBuffer, int);
+  vtkSetMacro(UseBackBuffer, bool);
+  vtkGetMacro(UseBackBuffer, bool);
+  vtkBooleanMacro(UseBackBuffer, bool);
 
   // Description:
   // When set the render manager will synchronize the TileViewport and TileScale
   // properties. This may not be desirable in cases where there's some other
   // mechanism to set the tile dimensions eg. Tile displays.
-  vtkSetMacro(SynchronizeTileProperties, int);
-  vtkGetMacro(SynchronizeTileProperties, int);
-  vtkBooleanMacro(SynchronizeTileProperties, int);
+  vtkSetMacro(SynchronizeTileProperties, bool);
+  vtkGetMacro(SynchronizeTileProperties, bool);
+  vtkBooleanMacro(SynchronizeTileProperties, bool);
 
   // Description:
   // INTERNAL METHODS (DON NOT USE).

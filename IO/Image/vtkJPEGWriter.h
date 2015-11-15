@@ -48,15 +48,15 @@ public:
 
   // Description:
   // Progressive JPEG generation.
-  vtkSetMacro(Progressive, unsigned int);
-  vtkGetMacro(Progressive, unsigned int);
-  vtkBooleanMacro(Progressive, unsigned int);
+  vtkSetMacro(Progressive, bool);
+  vtkGetMacro(Progressive, bool);
+  vtkBooleanMacro(Progressive, bool);
 
   // Description:
   // Write the image to memory (a vtkUnsignedCharArray)
-  vtkSetMacro(WriteToMemory, unsigned int);
-  vtkGetMacro(WriteToMemory, unsigned int);
-  vtkBooleanMacro(WriteToMemory, unsigned int);
+  vtkSetMacro(WriteToMemory, bool);
+  vtkGetMacro(WriteToMemory, bool);
+  vtkBooleanMacro(WriteToMemory, bool);
 
   // Description:
   // When writing to memory this is the result, it will be NULL until the

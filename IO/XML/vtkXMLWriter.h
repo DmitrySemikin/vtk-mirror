@@ -114,9 +114,9 @@ public:
 
   // Description:
   // Enable writing to an OutputString instead of the default, a file.
-  vtkSetMacro(WriteToOutputString,int);
-  vtkGetMacro(WriteToOutputString,int);
-  vtkBooleanMacro(WriteToOutputString,int);
+  vtkSetMacro(WriteToOutputString, bool);
+  vtkGetMacro(WriteToOutputString, bool);
+  vtkBooleanMacro(WriteToOutputString, bool);
   std::string GetOutputString() { return this->OutputString; }
 
   // Description:
@@ -169,9 +169,9 @@ public:
   // fully valid XML and text-only.  If not encoded, the XML
   // specification will be violated, but reading and writing will be
   // fast.  The default is to do the encoding.
-  vtkSetMacro(EncodeAppendedData, int);
-  vtkGetMacro(EncodeAppendedData, int);
-  vtkBooleanMacro(EncodeAppendedData, int);
+  vtkSetMacro(EncodeAppendedData, bool);
+  vtkGetMacro(EncodeAppendedData, bool);
+  vtkBooleanMacro(EncodeAppendedData, bool);
 
   // Description:
   // Assign a data object as input. Note that this method does not

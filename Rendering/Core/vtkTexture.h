@@ -90,24 +90,24 @@ public:
   // Description:
   // Turn on/off the repetition of the texture map when the texture
   // coords extend beyond the [0,1] range.
-  vtkGetMacro(Repeat, int);
-  vtkSetMacro(Repeat, int);
-  vtkBooleanMacro(Repeat, int);
+  vtkSetMacro(Repeat, bool);
+  vtkGetMacro(Repeat, bool);
+  vtkBooleanMacro(Repeat, bool);
 
   // Description:
   // Turn on/off the clamping of the texture map when the texture
   // coords extend beyond the [0,1] range.
   // Only used when Repeat is off, and edge clamping is supported by
   // the graphics card.
-  vtkGetMacro(EdgeClamp, int);
-  vtkSetMacro(EdgeClamp, int);
-  vtkBooleanMacro(EdgeClamp, int);
+  vtkSetMacro(EdgeClamp, bool);
+  vtkGetMacro(EdgeClamp, bool);
+  vtkBooleanMacro(EdgeClamp, bool);
 
   // Description:
   // Turn on/off linear interpolation of the texture map when rendering.
-  vtkGetMacro(Interpolate, int);
-  vtkSetMacro(Interpolate, int);
-  vtkBooleanMacro(Interpolate, int);
+  vtkSetMacro(Interpolate, bool);
+  vtkGetMacro(Interpolate, bool);
+  vtkBooleanMacro(Interpolate, bool);
 
   // Description:
   // Force texture quality to 16-bit or 32-bit.
@@ -128,9 +128,9 @@ public:
   // lookup table to generate 4-component unsigned char scalars.
   // This ivar does not affect other scalars like unsigned short, float,
   // etc. These scalars are always mapped through lookup tables.
-  vtkGetMacro(MapColorScalarsThroughLookupTable, int);
-  vtkSetMacro(MapColorScalarsThroughLookupTable, int);
-  vtkBooleanMacro(MapColorScalarsThroughLookupTable, int);
+  vtkSetMacro(MapColorScalarsThroughLookupTable, bool);
+  vtkGetMacro(MapColorScalarsThroughLookupTable, bool);
+  vtkBooleanMacro(MapColorScalarsThroughLookupTable, bool);
 
 //BTX
   // Description:
@@ -193,9 +193,9 @@ public:
   // respects to the original.  Setting RestrictPowerOf2ImageSmaller to be
   // 1 (or ON) with force the new image's dimensions to be less than or equal
   // to with respects to the original.
-  vtkGetMacro(RestrictPowerOf2ImageSmaller, int);
-  vtkSetMacro(RestrictPowerOf2ImageSmaller, int);
-  vtkBooleanMacro(RestrictPowerOf2ImageSmaller, int);
+  vtkSetMacro(RestrictPowerOf2ImageSmaller, bool);
+  vtkGetMacro(RestrictPowerOf2ImageSmaller, bool);
+  vtkBooleanMacro(RestrictPowerOf2ImageSmaller, bool);
 
   // Description:
   // Is this Texture Translucent?

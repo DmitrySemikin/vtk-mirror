@@ -176,9 +176,9 @@ public:
   // Turn on/off window manager borders. Typically, you shouldn't turn the
   // borders off, because that bypasses the window manager and can cause
   // undesirable behavior.
-  vtkSetMacro(Borders,int);
-  vtkGetMacro(Borders,int);
-  vtkBooleanMacro(Borders,int);
+  vtkSetMacro(Borders, bool);
+  vtkGetMacro(Borders, bool);
+  vtkBooleanMacro(Borders, bool);
 
   // Description:
   // Prescribe that the window be created in a stereo-capable mode. This
@@ -195,30 +195,30 @@ public:
 
   // Description:
   // Turn on/off the use of alpha bitplanes.
-  vtkSetMacro(AlphaBitPlanes, int);
-  vtkGetMacro(AlphaBitPlanes, int);
-  vtkBooleanMacro(AlphaBitPlanes, int);
+  vtkSetMacro(AlphaBitPlanes, bool);
+  vtkGetMacro(AlphaBitPlanes, bool);
+  vtkBooleanMacro(AlphaBitPlanes, bool);
 
   // Description:
   // Turn on/off point smoothing. Default is off.
   // This must be applied before the first Render.
-  vtkSetMacro(PointSmoothing,int);
-  vtkGetMacro(PointSmoothing,int);
-  vtkBooleanMacro(PointSmoothing,int);
+  vtkSetMacro(PointSmoothing, bool);
+  vtkGetMacro(PointSmoothing, bool);
+  vtkBooleanMacro(PointSmoothing, bool);
 
   // Description:
   // Turn on/off line smoothing. Default is off.
   // This must be applied before the first Render.
-  vtkSetMacro(LineSmoothing,int);
-  vtkGetMacro(LineSmoothing,int);
-  vtkBooleanMacro(LineSmoothing,int);
+  vtkSetMacro(LineSmoothing, bool);
+  vtkGetMacro(LineSmoothing, bool);
+  vtkBooleanMacro(LineSmoothing, bool);
 
   // Description:
   // Turn on/off polygon smoothing. Default is off.
   // This must be applied before the first Render.
-  vtkSetMacro(PolygonSmoothing,int);
-  vtkGetMacro(PolygonSmoothing,int);
-  vtkBooleanMacro(PolygonSmoothing,int);
+  vtkSetMacro(PolygonSmoothing, bool);
+  vtkGetMacro(PolygonSmoothing, bool);
+  vtkBooleanMacro(PolygonSmoothing, bool);
 
   // Description:
   // Set/Get what type of stereo rendering to use.  CrystalEyes
@@ -310,9 +310,9 @@ public:
 
   // Description:
   // Turn on/off buffer swapping between images.
-  vtkSetMacro(SwapBuffers,int);
-  vtkGetMacro(SwapBuffers,int);
-  vtkBooleanMacro(SwapBuffers,int);
+  vtkSetMacro(SwapBuffers, bool);
+  vtkGetMacro(SwapBuffers, bool);
+  vtkBooleanMacro(SwapBuffers, bool);
 
   // Description:
   // Set/Get the pixel data of an image, transmitted as RGBRGBRGB. The
@@ -421,9 +421,9 @@ public:
   vtkSetMacro(InAbortCheck,int);
   virtual int CheckAbortStatus();
 
-  vtkGetMacro(IsPicking,int);
-  vtkSetMacro(IsPicking,int);
-  vtkBooleanMacro(IsPicking,int);
+  vtkSetMacro(IsPicking, bool);
+  vtkGetMacro(IsPicking, bool);
+  vtkBooleanMacro(IsPicking, bool);
 
   // Description:
   // Check to see if a mouse button has been pressed.  All other events
@@ -549,9 +549,9 @@ public:
 
   // Description:
   // Set / Get the availability of the stencil buffer.
-  vtkSetMacro(StencilCapable, int);
-  vtkGetMacro(StencilCapable, int);
-  vtkBooleanMacro(StencilCapable, int);
+  vtkSetMacro(StencilCapable, bool);
+  vtkGetMacro(StencilCapable, bool);
+  vtkBooleanMacro(StencilCapable, bool);
 
   // Description:
   // If there are several graphics card installed on a system,

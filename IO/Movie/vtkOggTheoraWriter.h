@@ -60,9 +60,9 @@ public:
 
   // Description:
   // Is the video to be encoded using 4:2:0 subsampling?
-  vtkSetMacro(Subsampling, int);
-  vtkGetMacro(Subsampling, int);
-  vtkBooleanMacro(Subsampling, int);
+  vtkSetMacro(Subsampling, bool);
+  vtkGetMacro(Subsampling, bool);
+  vtkBooleanMacro(Subsampling, bool);
 protected:
   vtkOggTheoraWriter();
   ~vtkOggTheoraWriter();

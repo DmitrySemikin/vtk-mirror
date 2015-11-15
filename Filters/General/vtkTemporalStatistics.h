@@ -68,31 +68,31 @@ public:
   // Description:
   // Turn on/off the computation of the average values over time.  On by
   // default.  The resulting array names have "_average" appended to them.
-  vtkGetMacro(ComputeAverage, int);
-  vtkSetMacro(ComputeAverage, int);
-  vtkBooleanMacro(ComputeAverage, int);
+  vtkSetMacro(ComputeAverage, bool);
+  vtkGetMacro(ComputeAverage, bool);
+  vtkBooleanMacro(ComputeAverage, bool);
 
   // Description:
   // Turn on/off the computation of the minimum values over time.  On by
   // default.  The resulting array names have "_minimum" appended to them.
-  vtkGetMacro(ComputeMinimum, int);
-  vtkSetMacro(ComputeMinimum, int);
-  vtkBooleanMacro(ComputeMinimum, int);
+  vtkSetMacro(ComputeMinimum, bool);
+  vtkGetMacro(ComputeMinimum, bool);
+  vtkBooleanMacro(ComputeMinimum, bool);
 
   // Description:
   // Turn on/off the computation of the maximum values over time.  On by
   // default.  The resulting array names have "_maximum" appended to them.
-  vtkGetMacro(ComputeMaximum, int);
-  vtkSetMacro(ComputeMaximum, int);
-  vtkBooleanMacro(ComputeMaximum, int);
+  vtkSetMacro(ComputeMaximum, bool);
+  vtkGetMacro(ComputeMaximum, bool);
+  vtkBooleanMacro(ComputeMaximum, bool);
 
   // Definition:
   // Turn on/off the computation of the standard deviation of the values over
   // time.  On by default.  The resulting array names have "_stddev" appended to
   // them.
-  vtkGetMacro(ComputeStandardDeviation, int);
-  vtkSetMacro(ComputeStandardDeviation, int);
-  vtkBooleanMacro(ComputeStandardDeviation, int);
+  vtkSetMacro(ComputeStandardDeviation, bool);
+  vtkGetMacro(ComputeStandardDeviation, bool);
+  vtkBooleanMacro(ComputeStandardDeviation, bool);
 
 protected:
   vtkTemporalStatistics();

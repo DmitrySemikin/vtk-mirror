@@ -81,9 +81,9 @@ public:
 
   // Description:
   // Turn on/off the capping of the skirt.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Set/Get extrusion scale factor,

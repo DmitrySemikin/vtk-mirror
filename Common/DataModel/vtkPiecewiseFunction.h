@@ -129,9 +129,9 @@ public:
   // the value at the lowest point for a request below all points
   // specified and returns the value at the highest point for a request
   // above all points specified. On is the default.
-  vtkSetMacro( Clamping, int );
-  vtkGetMacro( Clamping, int );
-  vtkBooleanMacro( Clamping, int );
+  vtkSetMacro(Clamping, bool);
+  vtkGetMacro(Clamping, bool);
+  vtkBooleanMacro(Clamping, bool);
 
   // Description:
   // Return the type of function:
@@ -163,9 +163,9 @@ public:
   // Description:
   // Toggle whether to allow duplicate scalar values in the piecewise
   // function (off by default).
-  vtkSetMacro(AllowDuplicateScalars, int);
-  vtkGetMacro(AllowDuplicateScalars, int);
-  vtkBooleanMacro(AllowDuplicateScalars, int);
+  vtkSetMacro(AllowDuplicateScalars, bool);
+  vtkGetMacro(AllowDuplicateScalars, bool);
+  vtkBooleanMacro(AllowDuplicateScalars, bool);
 
 protected:
   vtkPiecewiseFunction();

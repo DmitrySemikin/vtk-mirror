@@ -184,40 +184,40 @@ public:
 
   // Description:
   // Set/Get whether mesh is to be cached.
-  vtkSetMacro(CacheMesh, int);
-  vtkGetMacro(CacheMesh, int);
-  vtkBooleanMacro(CacheMesh, int);
+  vtkSetMacro(CacheMesh, bool);
+  vtkGetMacro(CacheMesh, bool);
+  vtkBooleanMacro(CacheMesh, bool);
 
   // Description:
   // Set/Get whether polyhedra are to be decomposed.
-  vtkSetMacro(DecomposePolyhedra, int);
-  vtkGetMacro(DecomposePolyhedra, int);
-  vtkBooleanMacro(DecomposePolyhedra, int);
+  vtkSetMacro(DecomposePolyhedra, bool);
+  vtkGetMacro(DecomposePolyhedra, bool);
+  vtkBooleanMacro(DecomposePolyhedra, bool);
 
   // Option for reading old binary lagrangian/positions format
   // Description:
   // Set/Get whether the lagrangian/positions is in OF 1.3 format
-  vtkSetMacro(PositionsIsIn13Format, int);
-  vtkGetMacro(PositionsIsIn13Format, int);
-  vtkBooleanMacro(PositionsIsIn13Format, int);
+  vtkSetMacro(PositionsIsIn13Format, bool);
+  vtkGetMacro(PositionsIsIn13Format, bool);
+  vtkBooleanMacro(PositionsIsIn13Format, bool);
 
   // Description:
   // Determine if time directories are to be listed according to controlDict
-  vtkSetMacro(ListTimeStepsByControlDict, int);
-  vtkGetMacro(ListTimeStepsByControlDict, int);
-  vtkBooleanMacro(ListTimeStepsByControlDict, int);
+  vtkSetMacro(ListTimeStepsByControlDict, bool);
+  vtkGetMacro(ListTimeStepsByControlDict, bool);
+  vtkBooleanMacro(ListTimeStepsByControlDict, bool);
 
   // Description:
   // Add dimensions to array names
-  vtkSetMacro(AddDimensionsToArrayNames, int);
-  vtkGetMacro(AddDimensionsToArrayNames, int);
-  vtkBooleanMacro(AddDimensionsToArrayNames, int);
+  vtkSetMacro(AddDimensionsToArrayNames, bool);
+  vtkGetMacro(AddDimensionsToArrayNames, bool);
+  vtkBooleanMacro(AddDimensionsToArrayNames, bool);
 
   // Description:
   // Set/Get whether zones will be read.
-  vtkSetMacro(ReadZones, int);
-  vtkGetMacro(ReadZones, int);
-  vtkBooleanMacro(ReadZones, int);
+  vtkSetMacro(ReadZones, bool);
+  vtkGetMacro(ReadZones, bool);
+  vtkBooleanMacro(ReadZones, bool);
 
   void SetRefresh() { this->Refresh = true; this->Modified(); }
 

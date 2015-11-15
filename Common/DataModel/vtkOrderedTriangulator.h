@@ -192,25 +192,25 @@ public:
   // TemplateTriangulate() method should be called when appropriate.
   // (Note: the TemplateTriangulate() method works for complete
   // (interior) cells without extra points due to intersection, etc.)
-  vtkSetMacro(UseTemplates,int);
-  vtkGetMacro(UseTemplates,int);
-  vtkBooleanMacro(UseTemplates,int);
+  vtkSetMacro(UseTemplates, bool);
+  vtkGetMacro(UseTemplates, bool);
+  vtkBooleanMacro(UseTemplates, bool);
 
   // Description:
   // Boolean indicates whether the points have been pre-sorted. If
   // pre-sorted is enabled, the points are not sorted on point id.
   // By default, presorted is off. (The point id is defined in
   // InsertPoint().)
-  vtkSetMacro(PreSorted,int);
-  vtkGetMacro(PreSorted,int);
-  vtkBooleanMacro(PreSorted,int);
+  vtkSetMacro(PreSorted, bool);
+  vtkGetMacro(PreSorted, bool);
+  vtkBooleanMacro(PreSorted, bool);
 
   // Description:
   // Tells the triangulator that a second sort id is provided
   // for each point and should also be considered when sorting.
-  vtkSetMacro(UseTwoSortIds,int);
-  vtkGetMacro(UseTwoSortIds,int);
-  vtkBooleanMacro(UseTwoSortIds,int);
+  vtkSetMacro(UseTwoSortIds, bool);
+  vtkGetMacro(UseTwoSortIds, bool);
+  vtkBooleanMacro(UseTwoSortIds, bool);
 
   // Description:
   // Initialize and add the tetras and points from the triangulation to the

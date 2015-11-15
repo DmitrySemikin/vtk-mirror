@@ -50,9 +50,9 @@ public:
   // Warning: some graphics systems will have trouble with the very large, concave
   // filled polygons. Recommend you use OutlienOn (i.e., disable filled polygons)
   // for now.
-  vtkSetMacro(Outline,int);
-  vtkGetMacro(Outline,int);
-  vtkBooleanMacro(Outline,int);
+  vtkSetMacro(Outline, bool);
+  vtkGetMacro(Outline, bool);
+  vtkBooleanMacro(Outline, bool);
 
 protected:
   vtkEarthSource();

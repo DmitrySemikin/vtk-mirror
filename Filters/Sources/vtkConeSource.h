@@ -85,9 +85,9 @@ public:
 
   // Description:
   // Turn on/off whether to cap the base of the cone with a polygon.
-  vtkSetMacro(Capping,int);
-  vtkGetMacro(Capping,int);
-  vtkBooleanMacro(Capping,int);
+  vtkSetMacro(Capping, bool);
+  vtkGetMacro(Capping, bool);
+  vtkBooleanMacro(Capping, bool);
 
   // Description:
   // Set/get the desired precision for the output points.

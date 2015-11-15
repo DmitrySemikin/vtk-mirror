@@ -80,9 +80,9 @@ public:
   // Description:
   // Should the tetrahedra have scalar data
   // indicating which Voxel they came from in the vtkRectilinearGrid?
-  vtkSetMacro(RememberVoxelId,int);
-  vtkGetMacro(RememberVoxelId,int);
-  vtkBooleanMacro(RememberVoxelId,int);
+  vtkSetMacro(RememberVoxelId, bool);
+  vtkGetMacro(RememberVoxelId, bool);
+  vtkBooleanMacro(RememberVoxelId, bool);
 
   // Description:
   // This function for convenience for creating a Rectilinear Grid

@@ -64,9 +64,9 @@ public:
   // Set this to Off to disable interaction. On by default.
   // Subclasses must overide SetProcessEvents() to make sure
   // that they pass on the flag to all component widgets.
-  vtkSetClampMacro(ProcessEvents, int, 0, 1);
-  vtkGetMacro(ProcessEvents, int);
-  vtkBooleanMacro(ProcessEvents, int);
+  vtkSetMacro(ProcessEvents, bool);
+  vtkGetMacro(ProcessEvents, bool);
+  vtkBooleanMacro(ProcessEvents, bool);
 
   // Description:
   // Tolerance for Point-in-Plane check

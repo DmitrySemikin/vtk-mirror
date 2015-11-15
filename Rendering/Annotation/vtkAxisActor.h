@@ -138,9 +138,9 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
 
   // Description:
   // Set/Get the flag that controls whether the minor ticks are visible.
-  vtkSetMacro(MinorTicksVisible, int);
-  vtkGetMacro(MinorTicksVisible, int);
-  vtkBooleanMacro(MinorTicksVisible, int);
+  vtkSetMacro(MinorTicksVisible, bool);
+  vtkGetMacro(MinorTicksVisible, bool);
+  vtkBooleanMacro(MinorTicksVisible, bool);
 
   // Description:
   // Set/Get the title of the axis actor,
@@ -171,27 +171,27 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
 
   // Description:
   // Set/Get visibility of the axis line.
-  vtkSetMacro(AxisVisibility, int);
-  vtkGetMacro(AxisVisibility, int);
-  vtkBooleanMacro(AxisVisibility, int);
+  vtkSetMacro(AxisVisibility, bool);
+  vtkGetMacro(AxisVisibility, bool);
+  vtkBooleanMacro(AxisVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis tick marks.
-  vtkSetMacro(TickVisibility, int);
-  vtkGetMacro(TickVisibility, int);
-  vtkBooleanMacro(TickVisibility, int);
+  vtkSetMacro(TickVisibility, bool);
+  vtkGetMacro(TickVisibility, bool);
+  vtkBooleanMacro(TickVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis labels.
-  vtkSetMacro(LabelVisibility, int);
-  vtkGetMacro(LabelVisibility, int);
-  vtkBooleanMacro(LabelVisibility, int);
+  vtkSetMacro(LabelVisibility, bool);
+  vtkGetMacro(LabelVisibility, bool);
+  vtkBooleanMacro(LabelVisibility, bool);
 
   // Description:
   // Set/Get visibility of the axis title.
-  vtkSetMacro(TitleVisibility, int);
-  vtkGetMacro(TitleVisibility, int);
-  vtkBooleanMacro(TitleVisibility, int);
+  vtkSetMacro(TitleVisibility, bool);
+  vtkGetMacro(TitleVisibility, bool);
+  vtkBooleanMacro(TitleVisibility, bool);
 
   // Description:
   // Set/Get the axis title text property.
@@ -225,26 +225,26 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
 
   // Description:
   // Set/Get whether gridlines should be drawn.
-  vtkSetMacro(DrawGridlines, int);
-  vtkGetMacro(DrawGridlines, int);
-  vtkBooleanMacro(DrawGridlines, int);
+  vtkSetMacro(DrawGridlines, bool);
+  vtkGetMacro(DrawGridlines, bool);
+  vtkBooleanMacro(DrawGridlines, bool);
 
   // Description:
   // Set/Get whether ONLY the gridlines should be drawn.
   // This will only draw GridLines and will skip any other part of the rendering
   // such as Axis/Tick/Title/...
-  vtkSetMacro(DrawGridlinesOnly, int);
-  vtkGetMacro(DrawGridlinesOnly, int);
-  vtkBooleanMacro(DrawGridlinesOnly, int);
+  vtkSetMacro(DrawGridlinesOnly, bool);
+  vtkGetMacro(DrawGridlinesOnly, bool);
+  vtkBooleanMacro(DrawGridlinesOnly, bool);
 
   vtkSetMacro(DrawGridlinesLocation, int);
   vtkGetMacro(DrawGridlinesLocation, int);
 
   // Description:
   // Set/Get whether inner gridlines should be drawn.
-  vtkSetMacro(DrawInnerGridlines, int);
-  vtkGetMacro(DrawInnerGridlines, int);
-  vtkBooleanMacro(DrawInnerGridlines, int);
+  vtkSetMacro(DrawInnerGridlines, bool);
+  vtkGetMacro(DrawInnerGridlines, bool);
+  vtkBooleanMacro(DrawInnerGridlines, bool);
 
   // Description:
   // Set/Get the length to use when drawing gridlines.
@@ -257,9 +257,9 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
 
   // Description:
   // Set/Get whether gridpolys should be drawn.
-  vtkSetMacro(DrawGridpolys, int);
-  vtkGetMacro(DrawGridpolys, int);
-  vtkBooleanMacro(DrawGridpolys, int);
+  vtkSetMacro(DrawGridpolys, bool);
+  vtkGetMacro(DrawGridpolys, bool);
+  vtkBooleanMacro(DrawGridpolys, bool);
 
   // Description:
   // Set/Get the type of this axis.
@@ -386,16 +386,16 @@ class VTKRENDERINGANNOTATION_EXPORT vtkAxisActor : public vtkActor
   // Description:
   // Set/Get flag whether to calculate title offset.
   // Default is true.
-  vtkSetMacro(CalculateTitleOffset, int);
-  vtkGetMacro(CalculateTitleOffset, int);
-  vtkBooleanMacro(CalculateTitleOffset, int);
+  vtkSetMacro(CalculateTitleOffset, bool);
+  vtkGetMacro(CalculateTitleOffset, bool);
+  vtkBooleanMacro(CalculateTitleOffset, bool);
 
   // Description:
   // Set/Get flag whether to calculate label offset.
   // Default is true.
-  vtkSetMacro(CalculateLabelOffset, int);
-  vtkGetMacro(CalculateLabelOffset, int);
-  vtkBooleanMacro(CalculateLabelOffset, int);
+  vtkSetMacro(CalculateLabelOffset, bool);
+  vtkGetMacro(CalculateLabelOffset, bool);
+  vtkBooleanMacro(CalculateLabelOffset, bool);
 
   // Description:
   // Set/Get the 2D mode

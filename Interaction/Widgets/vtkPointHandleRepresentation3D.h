@@ -181,9 +181,9 @@ public:
   // which constrains the widget to the surface of a mesh. In such cases,
   // inherent restrictions on handle placement might conflict with a request
   // for smooth motion of the handles.
-  vtkSetMacro( SmoothMotion, int );
-  vtkGetMacro( SmoothMotion, int );
-  vtkBooleanMacro( SmoothMotion, int );
+  vtkSetMacro(SmoothMotion, bool);
+  vtkGetMacro(SmoothMotion, bool);
+  vtkBooleanMacro(SmoothMotion, bool);
 
 protected:
   vtkPointHandleRepresentation3D();

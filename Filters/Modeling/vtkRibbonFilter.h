@@ -74,9 +74,9 @@ public:
   // Description:
   // Turn on/off the variation of ribbon width with scalar value.
   // The default is Off
-  vtkSetMacro(VaryWidth,int);
-  vtkGetMacro(VaryWidth,int);
-  vtkBooleanMacro(VaryWidth,int);
+  vtkSetMacro(VaryWidth, bool);
+  vtkGetMacro(VaryWidth, bool);
+  vtkBooleanMacro(VaryWidth, bool);
 
   // Description:
   // Set the maximum ribbon width in terms of a multiple of the minimum width.
@@ -93,9 +93,9 @@ public:
   // Description:
   // Set a boolean to control whether to use default normals.
   // The default is Off
-  vtkSetMacro(UseDefaultNormal,int);
-  vtkGetMacro(UseDefaultNormal,int);
-  vtkBooleanMacro(UseDefaultNormal,int);
+  vtkSetMacro(UseDefaultNormal, bool);
+  vtkGetMacro(UseDefaultNormal, bool);
+  vtkBooleanMacro(UseDefaultNormal, bool);
 
   // Description:
   // Control whether and how texture coordinates are produced. This is

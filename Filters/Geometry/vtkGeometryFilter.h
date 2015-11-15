@@ -63,21 +63,21 @@ public:
 
   // Description:
   // Turn on/off selection of geometry by point id.
-  vtkSetMacro(PointClipping,int);
-  vtkGetMacro(PointClipping,int);
-  vtkBooleanMacro(PointClipping,int);
+  vtkSetMacro(PointClipping, bool);
+  vtkGetMacro(PointClipping, bool);
+  vtkBooleanMacro(PointClipping, bool);
 
   // Description:
   // Turn on/off selection of geometry by cell id.
-  vtkSetMacro(CellClipping,int);
-  vtkGetMacro(CellClipping,int);
-  vtkBooleanMacro(CellClipping,int);
+  vtkSetMacro(CellClipping, bool);
+  vtkGetMacro(CellClipping, bool);
+  vtkBooleanMacro(CellClipping, bool);
 
   // Description:
   // Turn on/off selection of geometry via bounding box.
-  vtkSetMacro(ExtentClipping,int);
-  vtkGetMacro(ExtentClipping,int);
-  vtkBooleanMacro(ExtentClipping,int);
+  vtkSetMacro(ExtentClipping, bool);
+  vtkGetMacro(ExtentClipping, bool);
+  vtkBooleanMacro(ExtentClipping, bool);
 
   // Description:
   // Specify the minimum point id for point id selection.
@@ -113,9 +113,9 @@ public:
   // Turn on/off merging of coincident points. Note that is merging is
   // on, points with different point attributes (e.g., normals) are merged,
   // which may cause rendering artifacts.
-  vtkSetMacro(Merging,int);
-  vtkGetMacro(Merging,int);
-  vtkBooleanMacro(Merging,int);
+  vtkSetMacro(Merging, bool);
+  vtkGetMacro(Merging, bool);
+  vtkBooleanMacro(Merging, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By

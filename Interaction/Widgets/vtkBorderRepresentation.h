@@ -116,9 +116,9 @@ public:
   // the rectangle (Position,Position2) is a bounding rectangle, and the
   // representation will be placed in the rectangle in such a way as to
   // preserve the aspect ratio of the representation.
-  vtkSetMacro(ProportionalResize,int);
-  vtkGetMacro(ProportionalResize,int);
-  vtkBooleanMacro(ProportionalResize,int);
+  vtkSetMacro(ProportionalResize, bool);
+  vtkGetMacro(ProportionalResize, bool);
+  vtkBooleanMacro(ProportionalResize, bool);
 
   // Description:
   // Specify a minimum and/or maximum size (in pixels) that this representation
@@ -145,9 +145,9 @@ public:
   // This is a modifier of the interaction state. When set, widget interaction
   // allows the border (and stuff inside of it) to be translated with mouse
   // motion.
-  vtkSetMacro(Moving,int);
-  vtkGetMacro(Moving,int);
-  vtkBooleanMacro(Moving,int);
+  vtkSetMacro(Moving, bool);
+  vtkGetMacro(Moving, bool);
+  vtkBooleanMacro(Moving, bool);
 
 //BTX
   // Description:

@@ -52,9 +52,9 @@ public:
   // or with different extensions, or which do not fit into the same
   // numbered series will be placed into different groups.  This is
   // off by default.
-  vtkSetMacro(Grouping, int);
-  vtkGetMacro(Grouping, int);
-  vtkBooleanMacro(Grouping, int);
+  vtkSetMacro(Grouping, bool);
+  vtkGetMacro(Grouping, bool);
+  vtkBooleanMacro(Grouping, bool);
 
   // Description:
   // Sort the files numerically, rather than lexicographically.
@@ -63,24 +63,24 @@ public:
   // instead of the usual alphabetic sorting order
   // ["file10.dat" "file8.dat", "file9.dat"].
   // NumericSort is off by default.
-  vtkSetMacro(NumericSort, int);
-  vtkGetMacro(NumericSort, int);
-  vtkBooleanMacro(NumericSort, int);
+  vtkSetMacro(NumericSort, bool);
+  vtkGetMacro(NumericSort, bool);
+  vtkBooleanMacro(NumericSort, bool);
 
   // Description:
   // Ignore case when sorting.  This flag is honored by both
   // the sorting and the grouping. This is off by default.
-  vtkSetMacro(IgnoreCase, int);
-  vtkGetMacro(IgnoreCase, int);
-  vtkBooleanMacro(IgnoreCase, int);
+  vtkSetMacro(IgnoreCase, bool);
+  vtkGetMacro(IgnoreCase, bool);
+  vtkBooleanMacro(IgnoreCase, bool);
 
   // Description:
   // Skip directories. If this flag is set, any input item that
   // is a directory rather than a file will not be included in
   // the output.  This is off by default.
-  vtkSetMacro(SkipDirectories, int);
-  vtkGetMacro(SkipDirectories, int);
-  vtkBooleanMacro(SkipDirectories, int);
+  vtkSetMacro(SkipDirectories, bool);
+  vtkGetMacro(SkipDirectories, bool);
+  vtkBooleanMacro(SkipDirectories, bool);
 
   // Description:
   // Set a list of file names to group and sort.

@@ -74,9 +74,9 @@ public:
   // Description:
   // Set/Get the computation of normals. The normal generated is simply the
   // cut plane normal. By default this is disabled.
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Set/get which component of the scalar array to contour on; defaults to 0.

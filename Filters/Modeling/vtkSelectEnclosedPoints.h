@@ -76,16 +76,16 @@ public:
   // By default, points inside the surface are marked inside or sent to
   // the output. If InsideOut is on, then the points outside the surface
   // are marked inside.
-  vtkSetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description:
   // Specify whether to check the surface for closure. If on, then the
   // algorithm first checks to see if the surface is closed and manifold.
-  vtkSetMacro(CheckSurface,int);
-  vtkBooleanMacro(CheckSurface,int);
-  vtkGetMacro(CheckSurface,int);
+  vtkSetMacro(CheckSurface, bool);
+  vtkGetMacro(CheckSurface, bool);
+  vtkBooleanMacro(CheckSurface, bool);
 
   // Description:
   // Query an input point id as to whether it is inside or outside. Note that

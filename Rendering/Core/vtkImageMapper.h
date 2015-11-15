@@ -94,9 +94,9 @@ public:
   // If RenderToRectangle is set (by default not), then the imagemapper
   // will render the image into the rectangle supplied by the Actor2D's
   // PositionCoordinate and Position2Coordinate
-  vtkSetMacro(RenderToRectangle, int);
-  vtkGetMacro(RenderToRectangle, int);
-  vtkBooleanMacro(RenderToRectangle, int);
+  vtkSetMacro(RenderToRectangle, bool);
+  vtkGetMacro(RenderToRectangle, bool);
+  vtkBooleanMacro(RenderToRectangle, bool);
 
   // Description:
   // Usually, the entire image is displayed, if UseCustomExtents
@@ -104,9 +104,9 @@ public:
   // CustomDisplayExtents is used in preference.
   // Note that the Custom extents are x,y only and the zslice is still
   // applied
-  vtkSetMacro(UseCustomExtents, int);
-  vtkGetMacro(UseCustomExtents, int);
-  vtkBooleanMacro(UseCustomExtents, int);
+  vtkSetMacro(UseCustomExtents, bool);
+  vtkGetMacro(UseCustomExtents, bool);
+  vtkBooleanMacro(UseCustomExtents, bool);
 
   // Description:
   // The image extents which should be displayed with UseCustomExtents

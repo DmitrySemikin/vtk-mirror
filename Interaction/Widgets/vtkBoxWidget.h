@@ -119,9 +119,9 @@ public:
   // Set/Get the InsideOut flag. When off, the normals point out of the
   // box. When on, the normals point into the hexahedron.  InsideOut
   // is off by default.
-  vtkSetMacro(InsideOut,int);
-  vtkGetMacro(InsideOut,int);
-  vtkBooleanMacro(InsideOut,int);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description:
   // Retrieve a linear transform characterizing the transformation of the
@@ -196,15 +196,15 @@ public:
   // Description:
   // Control the behavior of the widget. Translation, rotation, and
   // scaling can all be enabled and disabled.
-  vtkSetMacro(TranslationEnabled,int);
-  vtkGetMacro(TranslationEnabled,int);
-  vtkBooleanMacro(TranslationEnabled,int);
-  vtkSetMacro(ScalingEnabled,int);
-  vtkGetMacro(ScalingEnabled,int);
-  vtkBooleanMacro(ScalingEnabled,int);
-  vtkSetMacro(RotationEnabled,int);
-  vtkGetMacro(RotationEnabled,int);
-  vtkBooleanMacro(RotationEnabled,int);
+  vtkSetMacro(TranslationEnabled, bool);
+  vtkGetMacro(TranslationEnabled, bool);
+  vtkBooleanMacro(TranslationEnabled, bool);
+  vtkSetMacro(ScalingEnabled, bool);
+  vtkGetMacro(ScalingEnabled, bool);
+  vtkBooleanMacro(ScalingEnabled, bool);
+  vtkSetMacro(RotationEnabled, bool);
+  vtkGetMacro(RotationEnabled, bool);
+  vtkBooleanMacro(RotationEnabled, bool);
 
 protected:
   vtkBoxWidget();

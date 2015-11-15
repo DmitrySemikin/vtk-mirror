@@ -188,9 +188,9 @@ public:
 
   // Description:
   // Show the distance between the points.
-  vtkSetMacro( DistanceAnnotationVisibility, int );
-  vtkGetMacro( DistanceAnnotationVisibility, int );
-  vtkBooleanMacro( DistanceAnnotationVisibility, int );
+  vtkSetMacro(DistanceAnnotationVisibility, bool);
+  vtkGetMacro(DistanceAnnotationVisibility, bool);
+  vtkBooleanMacro(DistanceAnnotationVisibility, bool);
 
   // Description:
   // Specify the format to use for labelling the line. Note that an empty

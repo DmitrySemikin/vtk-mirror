@@ -101,9 +101,9 @@ public:
   // number of discrete values is set by using SetNumberOfValues().
   // Not set by default, i.e. color value is determined by
   // interpolating at the scalar value.
-  vtkSetMacro(Discretize, int);
-  vtkGetMacro(Discretize, int);
-  vtkBooleanMacro(Discretize, int);
+  vtkSetMacro(Discretize, bool);
+  vtkGetMacro(Discretize, bool);
+  vtkBooleanMacro(Discretize, bool);
 
   // Description:
   // Get/Set if log scale must be used while mapping scalars

@@ -119,9 +119,9 @@ public:
   // value is greater than IVAR Value. With this flag on, a vertex is considered
   // inside (the implicit function or the isosurface) if the (function or scalar)
   // value is less than or equal to IVAR Value. This flag is off by default.
-  vtkSetMacro( InsideOut, int );
-  vtkGetMacro( InsideOut, int );
-  vtkBooleanMacro( InsideOut, int );
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  vtkBooleanMacro(InsideOut, bool);
 
   // Description:
   // Set/Get the clipping value of the implicit function (if an implicit function
@@ -151,9 +151,9 @@ public:
   // flag on, the scalar point data values obtained by evaluating the implicit
   // function will be exported to the output. Note that this flag requries that
   // an implicit function be provided.
-  vtkSetMacro( GenerateClipScalars, int );
-  vtkGetMacro( GenerateClipScalars, int );
-  vtkBooleanMacro( GenerateClipScalars, int );
+  vtkSetMacro(GenerateClipScalars, bool);
+  vtkGetMacro(GenerateClipScalars, bool);
+  vtkBooleanMacro(GenerateClipScalars, bool);
 
   // Description:
   // Set/Get a point locator locator for merging duplicate points. By default,
@@ -180,9 +180,9 @@ public:
   // Description:
   // Set/Get whether a second output is generated. The second output contains the
   // polygonal data that is clipped away by the iso-surface.
-  vtkSetMacro( GenerateClippedOutput, int );
-  vtkGetMacro( GenerateClippedOutput, int );
-  vtkBooleanMacro( GenerateClippedOutput, int );
+  vtkSetMacro(GenerateClippedOutput, bool);
+  vtkGetMacro(GenerateClippedOutput, bool);
+  vtkBooleanMacro(GenerateClippedOutput, bool);
 
   // Description:
   // Return the clipped output.

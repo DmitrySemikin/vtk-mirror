@@ -90,9 +90,9 @@ public:
   // expensive in both time and storage. If the output data will be
   // processed by filters that modify topology or geometry, it may be
   // wise to turn Normals and Gradients off.
-  vtkSetMacro(ComputeNormals,int);
-  vtkGetMacro(ComputeNormals,int);
-  vtkBooleanMacro(ComputeNormals,int);
+  vtkSetMacro(ComputeNormals, bool);
+  vtkGetMacro(ComputeNormals, bool);
+  vtkBooleanMacro(ComputeNormals, bool);
 
   // Description:
   // Set/Get the computation of gradients. Gradient computation is
@@ -101,21 +101,21 @@ public:
   // will not be stored in the output dataset.  If the output data
   // will be processed by filters that modify topology or geometry, it
   // may be wise to turn Normals and Gradients off.
-  vtkSetMacro(ComputeGradients,int);
-  vtkGetMacro(ComputeGradients,int);
-  vtkBooleanMacro(ComputeGradients,int);
+  vtkSetMacro(ComputeGradients, bool);
+  vtkGetMacro(ComputeGradients, bool);
+  vtkBooleanMacro(ComputeGradients, bool);
 
   // Description:
   // Set/Get the computation of scalars.
-  vtkSetMacro(ComputeScalars,int);
-  vtkGetMacro(ComputeScalars,int);
-  vtkBooleanMacro(ComputeScalars,int);
+  vtkSetMacro(ComputeScalars, bool);
+  vtkGetMacro(ComputeScalars, bool);
+  vtkBooleanMacro(ComputeScalars, bool);
 
   // Description:
   // Enable the use of a scalar tree to accelerate contour extraction.
-  vtkSetMacro(UseScalarTree,int);
-  vtkGetMacro(UseScalarTree,int);
-  vtkBooleanMacro(UseScalarTree,int);
+  vtkSetMacro(UseScalarTree, bool);
+  vtkGetMacro(UseScalarTree, bool);
+  vtkBooleanMacro(UseScalarTree, bool);
 
   // Description:
   // Set / get a spatial locator for merging points. By default,

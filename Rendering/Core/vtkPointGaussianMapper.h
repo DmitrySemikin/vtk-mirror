@@ -64,9 +64,9 @@ public:
 
   // Description:
   // Treat the points/splats as emissive light sources. The default is true.
-  vtkSetMacro(Emissive, int);
-  vtkGetMacro(Emissive, int);
-  vtkBooleanMacro(Emissive, int);
+  vtkSetMacro(Emissive, bool);
+  vtkGetMacro(Emissive, bool);
+  vtkBooleanMacro(Emissive, bool);
 
   // Description:
   // Set/Get the optional opacity transfer function. This is only

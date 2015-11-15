@@ -51,9 +51,9 @@ public:
 
   // Description:
   // Write the image to memory (a vtkUnsignedCharArray)
-  vtkSetMacro(WriteToMemory, unsigned int);
-  vtkGetMacro(WriteToMemory, unsigned int);
-  vtkBooleanMacro(WriteToMemory, unsigned int);
+  vtkSetMacro(WriteToMemory, bool);
+  vtkGetMacro(WriteToMemory, bool);
+  vtkBooleanMacro(WriteToMemory, bool);
 
   // Description:
   // When writing to memory this is the result, it will be NULL until the

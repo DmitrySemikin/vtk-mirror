@@ -53,9 +53,9 @@ public:
   // Turn on/off automatic graph bounds calculation. If this
   // boolean is off, then the manually specified GraphBounds is used.
   // If on, then the input's bounds us used as the graph bounds.
-  vtkSetMacro(AutomaticBoundsComputation, int);
-  vtkGetMacro(AutomaticBoundsComputation, int);
-  vtkBooleanMacro(AutomaticBoundsComputation, int);
+  vtkSetMacro(AutomaticBoundsComputation, bool);
+  vtkGetMacro(AutomaticBoundsComputation, bool);
+  vtkBooleanMacro(AutomaticBoundsComputation, bool);
 
   // Description:
   // Set/Get the maximum number of iterations to be used.
@@ -74,9 +74,9 @@ public:
   // Turn on/off layout of graph in three dimensions. If off, graph
   // layout occurs in two dimensions. By default, three dimensional
   // layout is on.
-  vtkSetMacro(ThreeDimensionalLayout, int);
-  vtkGetMacro(ThreeDimensionalLayout, int);
-  vtkBooleanMacro(ThreeDimensionalLayout, int);
+  vtkSetMacro(ThreeDimensionalLayout, bool);
+  vtkGetMacro(ThreeDimensionalLayout, bool);
+  vtkBooleanMacro(ThreeDimensionalLayout, bool);
 
 protected:
   vtkGraphLayoutFilter();

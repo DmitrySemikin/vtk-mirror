@@ -70,9 +70,9 @@ public:
   // Specify whether to build the LOD immediately (i.e., on the first render)
   // or to wait until the LOD is requested in a subsequent render. By default,
   // LOD construction is not deferred (DeferLODConstruction is false).
-  vtkSetMacro(DeferLODConstruction, int);
-  vtkGetMacro(DeferLODConstruction, int);
-  vtkBooleanMacro(DeferLODConstruction, int);
+  vtkSetMacro(DeferLODConstruction, bool);
+  vtkGetMacro(DeferLODConstruction, bool);
+  vtkBooleanMacro(DeferLODConstruction, bool);
 
   // Description:
   // Turn on/off a flag to control whether the underlying pipeline is static.
@@ -80,9 +80,9 @@ public:
   // again until the user manually modifies this class. By default, Static is
   // off because trying to debug this is tricky, and you should only use it
   // when you know what you are doing.
-  vtkSetMacro(Static, int);
-  vtkGetMacro(Static, int);
-  vtkBooleanMacro(Static, int);
+  vtkSetMacro(Static, bool);
+  vtkGetMacro(Static, bool);
+  vtkBooleanMacro(Static, bool);
 
 //BTX
   enum DataConfigurationEnum

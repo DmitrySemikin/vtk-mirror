@@ -71,24 +71,24 @@ public:
 
   // Description:
   // Keep track of whether the rendering window has been mapped to screen.
-  vtkSetMacro(Mapped,int);
-  vtkGetMacro(Mapped,int);
-  vtkBooleanMacro(Mapped,int);
+  vtkSetMacro(Mapped, bool);
+  vtkGetMacro(Mapped, bool);
+  vtkBooleanMacro(Mapped, bool);
 
   // Description:
   // Turn on/off erasing the screen between images. This allows multiple
   // exposure sequences if turned on. You will need to turn double
   // buffering off or make use of the SwapBuffers methods to prevent
   // you from swapping buffers between exposures.
-  vtkSetMacro(Erase,int);
-  vtkGetMacro(Erase,int);
-  vtkBooleanMacro(Erase,int);
+  vtkSetMacro(Erase, bool);
+  vtkGetMacro(Erase, bool);
+  vtkBooleanMacro(Erase, bool);
 
   // Description:
   // Keep track of whether double buffering is on or off
-  vtkSetMacro(DoubleBuffer,int);
-  vtkGetMacro(DoubleBuffer,int);
-  vtkBooleanMacro(DoubleBuffer,int);
+  vtkSetMacro(DoubleBuffer, bool);
+  vtkGetMacro(DoubleBuffer, bool);
+  vtkBooleanMacro(DoubleBuffer, bool);
 
   // Description:
   // Get name of rendering window
@@ -133,9 +133,9 @@ public:
   // Create a window in memory instead of on the screen. This may not be
   // supported for every type of window and on some windows you may need to
   // invoke this prior to the first render.
-  vtkSetMacro(OffScreenRendering,int);
-  vtkGetMacro(OffScreenRendering,int);
-  vtkBooleanMacro(OffScreenRendering,int);
+  vtkSetMacro(OffScreenRendering, bool);
+  vtkGetMacro(OffScreenRendering, bool);
+  vtkBooleanMacro(OffScreenRendering, bool);
 
   // Description:
   // Make the window current. May be overridden in subclasses to do

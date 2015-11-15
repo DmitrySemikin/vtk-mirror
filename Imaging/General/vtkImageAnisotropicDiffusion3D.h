@@ -77,21 +77,21 @@ public:
 
   // Description:
   // Choose neighbors to diffuse (6 faces, 12 edges, 8 corners).
-  vtkSetMacro(Faces,int);
-  vtkGetMacro(Faces,int);
-  vtkBooleanMacro(Faces,int);
-  vtkSetMacro(Edges,int);
-  vtkGetMacro(Edges,int);
-  vtkBooleanMacro(Edges,int);
-  vtkSetMacro(Corners,int);
-  vtkGetMacro(Corners,int);
-  vtkBooleanMacro(Corners,int);
+  vtkSetMacro(Faces, bool);
+  vtkGetMacro(Faces, bool);
+  vtkBooleanMacro(Faces, bool);
+  vtkSetMacro(Edges, bool);
+  vtkGetMacro(Edges, bool);
+  vtkBooleanMacro(Edges, bool);
+  vtkSetMacro(Corners, bool);
+  vtkGetMacro(Corners, bool);
+  vtkBooleanMacro(Corners, bool);
 
   // Description:
   // Switch between gradient magnitude threshold and pixel gradient threshold.
-  vtkSetMacro(GradientMagnitudeThreshold,int);
-  vtkGetMacro(GradientMagnitudeThreshold,int);
-  vtkBooleanMacro(GradientMagnitudeThreshold,int);
+  vtkSetMacro(GradientMagnitudeThreshold, bool);
+  vtkGetMacro(GradientMagnitudeThreshold, bool);
+  vtkBooleanMacro(GradientMagnitudeThreshold, bool);
 
 protected:
   vtkImageAnisotropicDiffusion3D();

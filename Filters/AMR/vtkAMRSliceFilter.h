@@ -49,15 +49,15 @@ public:
 
   // Description:
   // Set/Get ForwardUpstream property
-  vtkSetMacro( ForwardUpstream, int );
-  vtkGetMacro( ForwardUpstream, int );
-  vtkBooleanMacro( ForwardUpstream, int );
+  vtkSetMacro(ForwardUpstream, bool);
+  vtkGetMacro(ForwardUpstream, bool);
+  vtkBooleanMacro(ForwardUpstream, bool);
 
   // Description:
   // Set/Get EnablePrefetching property
-  vtkSetMacro( EnablePrefetching, int );
-  vtkGetMacro( EnablePrefetching, int );
-  vtkBooleanMacro( EnablePrefetching, int );
+  vtkSetMacro(EnablePrefetching, bool);
+  vtkGetMacro(EnablePrefetching, bool);
+  vtkBooleanMacro(EnablePrefetching, bool);
 
   // Description:
   // Set/Get the maximum resolution used in this instance.

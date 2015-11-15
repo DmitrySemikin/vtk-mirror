@@ -65,29 +65,29 @@ public:
 
   // Description:
   // For testing ghost levels.
-  vtkSetMacro(GhostLevels, int);
-  vtkGetMacro(GhostLevels, int);
-  vtkBooleanMacro(GhostLevels, int);
+  vtkSetMacro(GhostLevels, bool);
+  vtkGetMacro(GhostLevels, bool);
+  vtkBooleanMacro(GhostLevels, bool);
 
   // Description:
   // Generate either rectilinear grids either uniform grids.
   // Default is false.
-  vtkSetMacro(GenerateRectilinearGrids, int);
-  vtkGetMacro(GenerateRectilinearGrids, int);
-  vtkBooleanMacro(GenerateRectilinearGrids, int);
+  vtkSetMacro(GenerateRectilinearGrids, bool);
+  vtkGetMacro(GenerateRectilinearGrids, bool);
+  vtkBooleanMacro(GenerateRectilinearGrids, bool);
 
   // Description:
   // Limit this source to discrete integer time steps
   // Default is off (continuous)
-  vtkSetMacro(DiscreteTimeSteps, int);
-  vtkGetMacro(DiscreteTimeSteps, int);
-  vtkBooleanMacro(DiscreteTimeSteps, int);
+  vtkSetMacro(DiscreteTimeSteps, bool);
+  vtkGetMacro(DiscreteTimeSteps, bool);
+  vtkBooleanMacro(DiscreteTimeSteps, bool);
 
   // Description:
   // Make a 2D data set to test.
-  vtkSetMacro(TwoDimensional, int);
-  vtkGetMacro(TwoDimensional, int);
-  vtkBooleanMacro(TwoDimensional, int);
+  vtkSetMacro(TwoDimensional, bool);
+  vtkGetMacro(TwoDimensional, bool);
+  vtkBooleanMacro(TwoDimensional, bool);
 
   // Description:
   // Test the case when the blocks do not have the same sizes.
@@ -97,9 +97,9 @@ public:
 
   // Description:
   // Make the division adaptive or not, defaults to Adaptive
-  vtkSetMacro(AdaptiveSubdivision, int);
-  vtkGetMacro(AdaptiveSubdivision, int);
-  vtkBooleanMacro(AdaptiveSubdivision, int);
+  vtkSetMacro(AdaptiveSubdivision, bool);
+  vtkGetMacro(AdaptiveSubdivision, bool);
+  vtkBooleanMacro(AdaptiveSubdivision, bool);
 
 
 protected:

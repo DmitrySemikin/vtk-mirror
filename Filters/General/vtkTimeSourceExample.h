@@ -38,9 +38,9 @@ public:
   //Description:
   //When off (the default) this source produces a discrete set of values.
   //When on, this source produces a value analytically for any queried time.
-  vtkSetClampMacro(Analytic, int, 0, 1);
-  vtkGetMacro(Analytic, int);
-  vtkBooleanMacro(Analytic, int);
+  vtkSetMacro(Analytic, bool);
+  vtkGetMacro(Analytic, bool);
+  vtkBooleanMacro(Analytic, bool);
 
   //Description:
   //When 0.0 (the default) this produces a data set that is stationary.
@@ -55,9 +55,9 @@ public:
   //When off (the default) this produces a single cell data set.
   //When on the the number of cells (in the Y direction) grows
   //and shrinks over time along a hat function.
-  vtkSetClampMacro(Growing, int, 0, 1);
-  vtkGetMacro(Growing, int);
-  vtkBooleanMacro(Growing, int);
+  vtkSetMacro(Growing, bool);
+  vtkGetMacro(Growing, bool);
+  vtkBooleanMacro(Growing, bool);
 
 protected:
   vtkTimeSourceExample();

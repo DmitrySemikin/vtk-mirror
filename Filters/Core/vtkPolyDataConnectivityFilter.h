@@ -80,9 +80,9 @@ public:
   // Turn on/off connectivity based on scalar value. If on, cells are connected
   // only if they share points AND one of the cells scalar values falls in the
   // scalar range specified.
-  vtkSetMacro(ScalarConnectivity,int);
-  vtkGetMacro(ScalarConnectivity,int);
-  vtkBooleanMacro(ScalarConnectivity,int);
+  vtkSetMacro(ScalarConnectivity, bool);
+  vtkGetMacro(ScalarConnectivity, bool);
+  vtkBooleanMacro(ScalarConnectivity, bool);
 
   // Description:
   // Turn on/off the use of Fully connected scalar connectivity. This is off
@@ -92,9 +92,9 @@ public:
   // FullScalarConnectivity is OFF, any one of the cell's points may lie in
   // the user specified scalar range for the cell to qualify as being
   // connected.
-  vtkSetMacro(FullScalarConnectivity,int);
-  vtkGetMacro(FullScalarConnectivity,int);
-  vtkBooleanMacro(FullScalarConnectivity,int);
+  vtkSetMacro(FullScalarConnectivity, bool);
+  vtkGetMacro(FullScalarConnectivity, bool);
+  vtkBooleanMacro(FullScalarConnectivity, bool);
 
   // Description:
   // Set the scalar range to use to extract cells based on scalar connectivity.
@@ -157,16 +157,16 @@ public:
 
   // Description:
   // Turn on/off the coloring of connected regions.
-  vtkSetMacro(ColorRegions,int);
-  vtkGetMacro(ColorRegions,int);
-  vtkBooleanMacro(ColorRegions,int);
+  vtkSetMacro(ColorRegions, bool);
+  vtkGetMacro(ColorRegions, bool);
+  vtkBooleanMacro(ColorRegions, bool);
 
   // Description:
   // Mark visited point ids ? It may be useful to extract the visited point
   // ids for use by a downstream filter. Default is OFF.
-  vtkSetMacro( MarkVisitedPointIds, int );
-  vtkGetMacro( MarkVisitedPointIds, int );
-  vtkBooleanMacro( MarkVisitedPointIds, int );
+  vtkSetMacro(MarkVisitedPointIds, bool);
+  vtkGetMacro(MarkVisitedPointIds, bool);
+  vtkBooleanMacro(MarkVisitedPointIds, bool);
 
   // Description:
   // Get the visited point ids. This is valid only if MarkVisitedPointIds

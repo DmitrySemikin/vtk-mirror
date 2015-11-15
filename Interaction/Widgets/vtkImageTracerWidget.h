@@ -116,9 +116,9 @@ public:
 
   // Description:
   // Force handles to be on a specific ortho plane. Default is Off.
-  vtkSetMacro(ProjectToPlane,int);
-  vtkGetMacro(ProjectToPlane,int);
-  vtkBooleanMacro(ProjectToPlane,int);
+  vtkSetMacro(ProjectToPlane, bool);
+  vtkGetMacro(ProjectToPlane, bool);
+  vtkBooleanMacro(ProjectToPlane, bool);
 
   // Description:
   // Set the projection normal.  The normal in SetProjectionNormal is 0,1,2
@@ -153,9 +153,9 @@ public:
   // In concert with a CaptureRadius value, automatically
   // form a closed path by connecting first to last path points.
   // Default is Off.
-  vtkSetMacro(AutoClose,int);
-  vtkGetMacro(AutoClose,int);
-  vtkBooleanMacro(AutoClose,int);
+  vtkSetMacro(AutoClose, bool);
+  vtkGetMacro(AutoClose, bool);
+  vtkBooleanMacro(AutoClose, bool);
 
   // Description:
   // Set/Get the capture radius for automatic path closing.  For image
@@ -211,15 +211,15 @@ public:
 
   // Description:
   // Enable/Disable mouse button events
-  vtkSetMacro(HandleLeftMouseButton,int);
-  vtkGetMacro(HandleLeftMouseButton,int);
-  vtkBooleanMacro(HandleLeftMouseButton,int);
-  vtkSetMacro(HandleMiddleMouseButton,int);
-  vtkGetMacro(HandleMiddleMouseButton,int);
-  vtkBooleanMacro(HandleMiddleMouseButton,int);
-  vtkSetMacro(HandleRightMouseButton,int);
-  vtkGetMacro(HandleRightMouseButton,int);
-  vtkBooleanMacro(HandleRightMouseButton,int);
+  vtkSetMacro(HandleLeftMouseButton, bool);
+  vtkGetMacro(HandleLeftMouseButton, bool);
+  vtkBooleanMacro(HandleLeftMouseButton, bool);
+  vtkSetMacro(HandleMiddleMouseButton, bool);
+  vtkGetMacro(HandleMiddleMouseButton, bool);
+  vtkBooleanMacro(HandleMiddleMouseButton, bool);
+  vtkSetMacro(HandleRightMouseButton, bool);
+  vtkGetMacro(HandleRightMouseButton, bool);
+  vtkBooleanMacro(HandleRightMouseButton, bool);
 
 #ifdef VTK_WORKAROUND_WINDOWS_MANGLE
 # define SetPropA SetProp

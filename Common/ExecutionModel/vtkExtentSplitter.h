@@ -87,9 +87,9 @@ public:
   // read, but not necessarily every cell.  This can be used when
   // point data are stored in a planar slice per piece with no cell
   // data.  The default is OFF.
-  vtkGetMacro(PointMode, int);
-  vtkSetMacro(PointMode, int);
-  vtkBooleanMacro(PointMode, int);
+  vtkSetMacro(PointMode, bool);
+  vtkGetMacro(PointMode, bool);
+  vtkBooleanMacro(PointMode, bool);
 
 protected:
   vtkExtentSplitter();

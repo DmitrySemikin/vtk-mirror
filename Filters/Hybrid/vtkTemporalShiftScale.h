@@ -70,9 +70,9 @@ public:
   // from the end of one period to the start of the next, will subtract the
   // initial time - a source with T{5..6} repeated periodicaly will have output
   // time {5..6..7..8} etc.
-  vtkSetMacro(Periodic, int);
-  vtkGetMacro(Periodic, int);
-  vtkBooleanMacro(Periodic, int);
+  vtkSetMacro(Periodic, bool);
+  vtkGetMacro(Periodic, bool);
+  vtkBooleanMacro(Periodic, bool);
 
   // Description:
   // if Periodic time is enabled, this flag determines if the last time step is the same
@@ -82,9 +82,9 @@ public:
   // is the same as 0 and step 0 is not repeated. When this flag is false
   // the data is assumed to be literal and output is of the form 0,1,2,3...N,0,1,2,3...
   // By default this flag is ON
-  vtkSetMacro(PeriodicEndCorrection, int);
-  vtkGetMacro(PeriodicEndCorrection, int);
-  vtkBooleanMacro(PeriodicEndCorrection, int);
+  vtkSetMacro(PeriodicEndCorrection, bool);
+  vtkGetMacro(PeriodicEndCorrection, bool);
+  vtkBooleanMacro(PeriodicEndCorrection, bool);
 
   // Description:
   // if Periodic time is enabled, this controls how many time periods time is reported

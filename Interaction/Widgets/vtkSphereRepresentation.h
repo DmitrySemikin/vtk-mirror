@@ -133,9 +133,9 @@ public:
   // the surface by picking (left mouse) and then moving. The position
   // of the handle can be retrieved, this is useful for positioning cameras
   // and lights. By default, the handle is turned off.
-  vtkSetMacro(HandleVisibility,int);
-  vtkGetMacro(HandleVisibility,int);
-  vtkBooleanMacro(HandleVisibility,int);
+  vtkSetMacro(HandleVisibility, bool);
+  vtkGetMacro(HandleVisibility, bool);
+  vtkBooleanMacro(HandleVisibility, bool);
 
   // Description:
   // Set/Get the position of the handle. Note that this may adjust the radius
@@ -160,16 +160,16 @@ public:
   // phi, are displayed in degrees. Note that phi is measured from the
   // north pole down towards the equator; and theta is the angle around
   // the north/south axis.
-  vtkSetMacro(HandleText,int);
-  vtkGetMacro(HandleText,int);
-  vtkBooleanMacro(HandleText,int);
+  vtkSetMacro(HandleText, bool);
+  vtkGetMacro(HandleText, bool);
+  vtkBooleanMacro(HandleText, bool);
 
   // Description:
   // Enable/disable a radial line segment that joins the center of the
   // outer sphere and the handle.
-  vtkSetMacro(RadialLine,int);
-  vtkGetMacro(RadialLine,int);
-  vtkBooleanMacro(RadialLine,int);
+  vtkSetMacro(RadialLine, bool);
+  vtkGetMacro(RadialLine, bool);
+  vtkBooleanMacro(RadialLine, bool);
 
   // Description:
   // Grab the polydata (including points) that defines the sphere.  The

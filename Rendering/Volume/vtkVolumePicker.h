@@ -46,9 +46,9 @@ public:
   // rather than on the data. The GetCroppingPlaneId() method will return
   // the index of the cropping plane of the volume that was picked.  This
   // setting is only relevant to the picking of volumes.
-  vtkSetMacro(PickCroppingPlanes, int);
-  vtkBooleanMacro(PickCroppingPlanes, int);
-  vtkGetMacro(PickCroppingPlanes, int);
+  vtkSetMacro(PickCroppingPlanes, bool);
+  vtkGetMacro(PickCroppingPlanes, bool);
+  vtkBooleanMacro(PickCroppingPlanes, bool);
 
   // Description:
   // Get the index of the cropping plane that the pick ray passed

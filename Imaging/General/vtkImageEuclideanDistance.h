@@ -72,16 +72,16 @@ public:
   // the distance transformation. Setting Initialize off keeps the current
   // value in the input image as starting point. This allows to superimpose
   // several distance maps.
-  vtkSetMacro(Initialize, int);
-  vtkGetMacro(Initialize, int);
-  vtkBooleanMacro(Initialize, int);
+  vtkSetMacro(Initialize, bool);
+  vtkGetMacro(Initialize, bool);
+  vtkBooleanMacro(Initialize, bool);
 
   // Description:
   // Used to define whether Spacing should be used in the computation of the
   // distances
-  vtkSetMacro(ConsiderAnisotropy, int);
-  vtkGetMacro(ConsiderAnisotropy, int);
-  vtkBooleanMacro(ConsiderAnisotropy, int);
+  vtkSetMacro(ConsiderAnisotropy, bool);
+  vtkGetMacro(ConsiderAnisotropy, bool);
+  vtkBooleanMacro(ConsiderAnisotropy, bool);
 
   // Description:
   // Any distance bigger than this->MaximumDistance will not ne computed but

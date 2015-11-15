@@ -49,9 +49,9 @@ public:
 
   // Description:
   // To collect or just copy input to output. Off (collect) by default.
-  vtkSetMacro(PassThrough, int);
-  vtkGetMacro(PassThrough, int);
-  vtkBooleanMacro(PassThrough, int);
+  vtkSetMacro(PassThrough, bool);
+  vtkGetMacro(PassThrough, bool);
+  vtkBooleanMacro(PassThrough, bool);
 
 protected:
   vtkCollectPolyData();

@@ -60,9 +60,9 @@ public:
   // generated.  Otherwise, field data is generated. Note that the
   // generated the data are integer numbers indicating which piece a
   // particular point belongs to.
-  vtkSetMacro(FieldData,int);
-  vtkGetMacro(FieldData,int);
-  vtkBooleanMacro(FieldData,int);
+  vtkSetMacro(FieldData, bool);
+  vtkGetMacro(FieldData, bool);
+  vtkBooleanMacro(FieldData, bool);
 
   // Description:
   // Specify the method to determine how many pieces the data should be

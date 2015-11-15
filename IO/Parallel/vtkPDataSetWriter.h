@@ -75,9 +75,9 @@ public:
   // By default the pieces are put in the main directory, and the piece file
   // names in the meta data pvtk file are relative to this directory.
   // This should make moving the whole lot to another directory, an easier task.
-  vtkSetMacro(UseRelativeFileNames, int);
-  vtkGetMacro(UseRelativeFileNames, int);
-  vtkBooleanMacro(UseRelativeFileNames, int);
+  vtkSetMacro(UseRelativeFileNames, bool);
+  vtkGetMacro(UseRelativeFileNames, bool);
+  vtkBooleanMacro(UseRelativeFileNames, bool);
 
   // Description:
   // Controller used to communicate data type of blocks.

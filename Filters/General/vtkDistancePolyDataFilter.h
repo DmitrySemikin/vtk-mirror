@@ -48,23 +48,23 @@ public:
   // Description:
   // Enable/disable computation of the signed distance between
   // the first poly data and the second poly data. Defaults to on.
-  vtkSetMacro(SignedDistance,int);
-  vtkGetMacro(SignedDistance,int);
-  vtkBooleanMacro(SignedDistance,int);
+  vtkSetMacro(SignedDistance, bool);
+  vtkGetMacro(SignedDistance, bool);
+  vtkBooleanMacro(SignedDistance, bool);
 
   // Description:
   // Enable/disable negation of the distance values. Defaults to
   // off. Has no effect if SignedDistance is off.
-  vtkSetMacro(NegateDistance,int);
-  vtkGetMacro(NegateDistance,int);
-  vtkBooleanMacro(NegateDistance,int);
+  vtkSetMacro(NegateDistance, bool);
+  vtkGetMacro(NegateDistance, bool);
+  vtkBooleanMacro(NegateDistance, bool);
 
   // Description:
   // Enable/disable computation of a second output poly data with the
   // distance from the first poly data at each point. Defaults to on.
-  vtkSetMacro(ComputeSecondDistance,int);
-  vtkGetMacro(ComputeSecondDistance,int);
-  vtkBooleanMacro(ComputeSecondDistance,int);
+  vtkSetMacro(ComputeSecondDistance, bool);
+  vtkGetMacro(ComputeSecondDistance, bool);
+  vtkBooleanMacro(ComputeSecondDistance, bool);
 
   // Description:
   // Get the second output, which is a copy of the second input with an

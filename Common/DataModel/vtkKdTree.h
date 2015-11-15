@@ -79,9 +79,9 @@ public:
 
   // Description:
   //  Turn on timing of the k-d tree build
-  vtkBooleanMacro(Timing, int);
-  vtkSetMacro(Timing, int);
-  vtkGetMacro(Timing, int);
+  vtkSetMacro(Timing, bool);
+  vtkGetMacro(Timing, bool);
+  vtkBooleanMacro(Timing, bool);
 
   // Description:
   //  Minimum number of cells per spatial region.  Default is 100.
@@ -267,9 +267,9 @@ public:
   //   intersect a given region, but are not assigned
   //   to the region.  These lists are obtained with
   //   GetBoundaryCellList().  Default is OFF.
-  vtkSetMacro(IncludeRegionBoundaryCells, int);
-  vtkGetMacro(IncludeRegionBoundaryCells, int);
-  vtkBooleanMacro(IncludeRegionBoundaryCells, int);
+  vtkSetMacro(IncludeRegionBoundaryCells, bool);
+  vtkGetMacro(IncludeRegionBoundaryCells, bool);
+  vtkBooleanMacro(IncludeRegionBoundaryCells, bool);
 
   // Description:
   //    Free the memory used by the cell lists.
@@ -501,9 +501,9 @@ public:
   //    of the k-d tree decomposition spatial regions.  The data inside
   //    the regions may not occupy the entire space.  To draw just the
   //    bounds of the data in the regions, set this variable ON.
-  vtkBooleanMacro(GenerateRepresentationUsingDataBounds, int);
-  vtkSetMacro(GenerateRepresentationUsingDataBounds, int);
-  vtkGetMacro(GenerateRepresentationUsingDataBounds, int);
+  vtkSetMacro(GenerateRepresentationUsingDataBounds, bool);
+  vtkGetMacro(GenerateRepresentationUsingDataBounds, bool);
+  vtkBooleanMacro(GenerateRepresentationUsingDataBounds, bool);
 
   // Description:
   //    Print timing of k-d tree build

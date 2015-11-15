@@ -103,9 +103,9 @@ public:
   // of other actors in the scene. (In effect, this will disable OpenGL
   // Depth buffer tests while rendering the contour).
   // Default is to set it to false.
-  vtkSetMacro( AlwaysOnTop, int );
-  vtkGetMacro( AlwaysOnTop, int );
-  vtkBooleanMacro( AlwaysOnTop, int );
+  vtkSetMacro(AlwaysOnTop, bool);
+  vtkGetMacro(AlwaysOnTop, bool);
+  vtkBooleanMacro(AlwaysOnTop, bool);
 
   // Description:
   // Convenience method to set the line color.

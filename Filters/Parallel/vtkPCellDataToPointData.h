@@ -37,9 +37,9 @@ public:
   // Description:
   // To get piece invariance, this filter has to request an
   // extra ghost level.  By default piece invariance is on.
-  vtkSetMacro(PieceInvariant, int);
-  vtkGetMacro(PieceInvariant, int);
-  vtkBooleanMacro(PieceInvariant, int);
+  vtkSetMacro(PieceInvariant, bool);
+  vtkGetMacro(PieceInvariant, bool);
+  vtkBooleanMacro(PieceInvariant, bool);
 
 protected:
   vtkPCellDataToPointData();

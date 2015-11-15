@@ -231,9 +231,9 @@ public:
   // sqrt(-2), note that function parser does not handle complex
   // numbers) will be replaced by ReplacementValue. Otherwise an
   // error will be reported
-  vtkSetMacro(ReplaceInvalidValues,int);
-  vtkGetMacro(ReplaceInvalidValues,int);
-  vtkBooleanMacro(ReplaceInvalidValues,int);
+  vtkSetMacro(ReplaceInvalidValues, bool);
+  vtkGetMacro(ReplaceInvalidValues, bool);
+  vtkBooleanMacro(ReplaceInvalidValues, bool);
   vtkSetMacro(ReplacementValue,double);
   vtkGetMacro(ReplacementValue,double);
 

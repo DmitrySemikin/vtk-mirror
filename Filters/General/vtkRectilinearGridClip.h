@@ -51,9 +51,9 @@ public:
   // By default, ClipData is off, and only the WholeExtent is modified.
   // the data's extent may actually be larger.  When this flag is on,
   // the data extent will be no more than the OutputWholeExtent.
-  vtkSetMacro(ClipData, int);
-  vtkGetMacro(ClipData, int);
-  vtkBooleanMacro(ClipData, int);
+  vtkSetMacro(ClipData, bool);
+  vtkGetMacro(ClipData, bool);
+  vtkBooleanMacro(ClipData, bool);
 
 protected:
   vtkRectilinearGridClip();

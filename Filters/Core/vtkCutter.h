@@ -130,9 +130,9 @@ public:
   // If this flag is enabled, then the output scalar values will be
   // interpolated from the implicit function values, and not the input scalar
   // data.
-  vtkSetMacro(GenerateCutScalars,int);
-  vtkGetMacro(GenerateCutScalars,int);
-  vtkBooleanMacro(GenerateCutScalars,int);
+  vtkSetMacro(GenerateCutScalars, bool);
+  vtkGetMacro(GenerateCutScalars, bool);
+  vtkBooleanMacro(GenerateCutScalars, bool);
 
  // Description:
   // If this is enabled (by default), the output will be triangles
@@ -140,9 +140,9 @@ public:
   // WARNING: if the cutting function is not a plane, the output
   // will be 3D poygons, which might be nice to look at but hard
   // to compute with downstream.
-  vtkSetMacro(GenerateTriangles,int);
-  vtkGetMacro(GenerateTriangles,int);
-  vtkBooleanMacro(GenerateTriangles,int);
+  vtkSetMacro(GenerateTriangles, bool);
+  vtkGetMacro(GenerateTriangles, bool);
+  vtkBooleanMacro(GenerateTriangles, bool);
 
   // Description:
   // Specify a spatial locator for merging points. By default,

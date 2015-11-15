@@ -119,15 +119,15 @@ public:
 
   // Description:
   // Turn the light on or off.
-  vtkSetMacro(Switch,int);
-  vtkGetMacro(Switch,int);
-  vtkBooleanMacro(Switch,int);
+  vtkSetMacro(Switch, bool);
+  vtkGetMacro(Switch, bool);
+  vtkBooleanMacro(Switch, bool);
 
   // Description:
   // Turn positional lighting on or off.
-  vtkSetMacro(Positional,int);
-  vtkGetMacro(Positional,int);
-  vtkBooleanMacro(Positional,int);
+  vtkSetMacro(Positional, bool);
+  vtkGetMacro(Positional, bool);
+  vtkBooleanMacro(Positional, bool);
 
   // Description:
   // Set/Get the exponent of the cosine used in positional lighting.

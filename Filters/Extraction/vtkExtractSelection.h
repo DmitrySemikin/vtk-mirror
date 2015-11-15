@@ -51,17 +51,17 @@ public:
   // Description:
   // When On, this returns an unstructured grid that outlines selection area.
   // Off is the default. Applicable only to Frustum selection extraction.
-  vtkSetMacro(ShowBounds,int);
-  vtkGetMacro(ShowBounds,int);
-  vtkBooleanMacro(ShowBounds,int);
+  vtkSetMacro(ShowBounds, bool);
+  vtkGetMacro(ShowBounds, bool);
+  vtkBooleanMacro(ShowBounds, bool);
 
   // Description:
   // When On, vtkProbeSelectedLocations is used for extracting selections of
   // content type vtkSelection::LOCATIONS. Default is off and then
   // vtkExtractSelectedLocations is used.
-  vtkSetMacro(UseProbeForLocations, int);
-  vtkGetMacro(UseProbeForLocations, int);
-  vtkBooleanMacro(UseProbeForLocations, int);
+  vtkSetMacro(UseProbeForLocations, bool);
+  vtkGetMacro(UseProbeForLocations, bool);
+  vtkBooleanMacro(UseProbeForLocations, bool);
 
 protected:
   vtkExtractSelection();

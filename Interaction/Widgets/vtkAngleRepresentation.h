@@ -96,15 +96,15 @@ public:
   // Description:
   // Special methods for turning off the rays and arc that define the cone
   // and arc of the angle.
-  vtkSetMacro(Ray1Visibility,int);
-  vtkGetMacro(Ray1Visibility,int);
-  vtkBooleanMacro(Ray1Visibility,int);
-  vtkSetMacro(Ray2Visibility,int);
-  vtkGetMacro(Ray2Visibility,int);
-  vtkBooleanMacro(Ray2Visibility,int);
-  vtkSetMacro(ArcVisibility,int);
-  vtkGetMacro(ArcVisibility,int);
-  vtkBooleanMacro(ArcVisibility,int);
+  vtkSetMacro(Ray1Visibility, bool);
+  vtkGetMacro(Ray1Visibility, bool);
+  vtkBooleanMacro(Ray1Visibility, bool);
+  vtkSetMacro(Ray2Visibility, bool);
+  vtkGetMacro(Ray2Visibility, bool);
+  vtkBooleanMacro(Ray2Visibility, bool);
+  vtkSetMacro(ArcVisibility, bool);
+  vtkGetMacro(ArcVisibility, bool);
+  vtkBooleanMacro(ArcVisibility, bool);
 
   // Used to communicate about the state of the representation
   enum {Outside=0,NearP1,NearCenter,NearP2};

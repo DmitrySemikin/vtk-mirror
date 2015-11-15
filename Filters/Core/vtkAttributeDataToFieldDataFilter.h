@@ -54,9 +54,9 @@ public:
   // Description:
   // Turn on/off the passing of point and cell non-field attribute data to the
   // output of the filter.
-  vtkSetMacro(PassAttributeData,int);
-  vtkGetMacro(PassAttributeData,int);
-  vtkBooleanMacro(PassAttributeData,int);
+  vtkSetMacro(PassAttributeData, bool);
+  vtkGetMacro(PassAttributeData, bool);
+  vtkBooleanMacro(PassAttributeData, bool);
 
 protected:
   vtkAttributeDataToFieldDataFilter();
