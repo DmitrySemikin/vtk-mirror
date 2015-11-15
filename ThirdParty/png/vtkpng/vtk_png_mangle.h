@@ -14,10 +14,14 @@ nm libvtkpng.a |grep " [TR] "
 
 */
 
+#define png_64bit_product vtk_png_64bit_product
 #define png_access_version_number vtk_png_access_version_number
 #define png_build_gamma_table vtk_png_build_gamma_table
 #define png_build_grayscale_palette vtk_png_build_grayscale_palette
 #define png_calculate_crc vtk_png_calculate_crc
+#define png_calloc vtk_png_calloc
+#define png_check_IHDR vtk_png_check_IHDR
+#define png_check_cHRM_fixed vtk_png_check_cHRM_fixed
 #define png_check_chunk_name vtk_png_check_chunk_name
 #define png_check_keyword vtk_png_check_keyword
 #define png_check_sig vtk_png_check_sig
@@ -36,6 +40,9 @@ nm libvtkpng.a |grep " [TR] "
 #define png_create_write_struct vtk_png_create_write_struct
 #define png_data_freer vtk_png_data_freer
 #define png_decompress_chunk vtk_png_decompress_chunk
+#define png_default_flush vtk_png_default_flush
+#define png_default_read_data vtk_png_default_read_data
+#define png_default_write_data vtk_png_default_write_data
 #define png_destroy_info_struct vtk_png_destroy_info_struct
 #define png_destroy_read_struct vtk_png_destroy_read_struct
 #define png_destroy_struct vtk_png_destroy_struct
@@ -63,7 +70,6 @@ nm libvtkpng.a |grep " [TR] "
 #define png_do_unpack vtk_png_do_unpack
 #define png_do_unshift vtk_png_do_unshift
 #define png_do_write_interlace vtk_png_do_write_interlace
-#define png_do_write_invert_alpha vtk_png_do_write_invert_alpha
 #define png_do_write_swap_alpha vtk_png_do_write_swap_alpha
 #define png_do_write_transformations vtk_png_do_write_transformations
 #define png_error vtk_png_error
@@ -113,6 +119,7 @@ nm libvtkpng.a |grep " [TR] "
 #define png_get_tRNS vtk_png_get_tRNS
 #define png_get_text vtk_png_get_text
 #define png_get_uint_16 vtk_png_get_uint_16
+#define png_get_uint_31 vtk_png_get_uint_31
 #define png_get_uint_32 vtk_png_get_uint_32
 #define png_get_unknown_chunks vtk_png_get_unknown_chunks
 #define png_get_user_chunk_ptr vtk_png_get_user_chunk_ptr
@@ -150,17 +157,9 @@ nm libvtkpng.a |grep " [TR] "
 #define png_info_init_3 vtk_png_info_init_3
 #define png_init_io vtk_png_init_io
 #define png_init_read_transformations vtk_png_init_read_transformations
-#define png_libpng_ver vtk_png_libpng_ver
 #define png_malloc vtk_png_malloc
 #define png_memcpy_check vtk_png_memcpy_check
 #define png_memset_check vtk_png_memset_check
-#define png_mmx_support vtk_png_mmx_support
-#define png_pass_dsp_mask vtk_png_pass_dsp_mask
-#define png_pass_mask vtk_png_pass_mask
-#define png_pass_yinc vtk_png_pass_yinc
-#define png_pass_ystart vtk_png_pass_ystart
-#define png_pass_inc vtk_png_pass_inc
-#define png_pass_start vtk_png_pass_start
 #define png_permit_empty_plte vtk_png_permit_empty_plte
 #define png_process_IDAT_data vtk_png_process_IDAT_data
 #define png_process_data vtk_png_process_data
@@ -169,9 +168,6 @@ nm libvtkpng.a |grep " [TR] "
 #define png_push_crc_finish vtk_png_push_crc_finish
 #define png_push_crc_skip vtk_png_push_crc_skip
 #define png_push_fill_buffer vtk_png_push_fill_buffer
-#define png_push_handle_tEXt vtk_png_push_handle_tEXt
-#define png_push_handle_unknown vtk_png_push_handle_unknown
-#define png_push_handle_zTXt vtk_png_push_handle_zTXt
 #define png_push_have_end vtk_png_push_have_end
 #define png_push_have_info vtk_png_push_have_info
 #define png_push_have_row vtk_png_push_have_row
@@ -179,10 +175,9 @@ nm libvtkpng.a |grep " [TR] "
 #define png_push_read_IDAT vtk_png_push_read_IDAT
 #define png_push_read_chunk vtk_png_push_read_chunk
 #define png_push_read_sig vtk_png_push_read_sig
-#define png_push_read_tEXt vtk_png_push_read_tEXt
-#define png_push_read_zTXt vtk_png_push_read_zTXt
 #define png_push_restore_buffer vtk_png_push_restore_buffer
 #define png_push_save_buffer vtk_png_push_save_buffer
+#define png_read_chunk_header vtk_png_read_chunk_header
 #define png_read_data vtk_png_read_data
 #define png_read_destroy vtk_png_read_destroy
 #define png_read_end vtk_png_read_end
@@ -267,6 +262,7 @@ nm libvtkpng.a |grep " [TR] "
 #define png_set_tRNS vtk_png_set_tRNS
 #define png_set_tRNS_to_alpha vtk_png_set_tRNS_to_alpha
 #define png_set_text vtk_png_set_text
+#define png_set_text_2 vtk_png_set_text_2
 #define png_set_unknown_chunk_location vtk_png_set_unknown_chunk_location
 #define png_set_unknown_chunks vtk_png_set_unknown_chunks
 #define png_set_user_transform_info vtk_png_set_user_transform_info
@@ -322,29 +318,5 @@ nm libvtkpng.a |grep " [TR] "
 #define png_write_zTXt vtk_png_write_zTXt
 #define png_zalloc vtk_png_zalloc
 #define png_zfree vtk_png_zfree
-
-#define png_zTXt vtk_png_zTXt
-#define png_tRNS vtk_png_tRNS
-#define png_tIME vtk_png_tIME
-#define png_tEXt vtk_png_tEXt
-#define png_sRGB vtk_png_sRGB
-#define png_sPLT vtk_png_sPLT
-#define png_sBIT vtk_png_sBIT
-#define png_pHYs vtk_png_pHYs
-#define png_sCAL vtk_png_sCAL
-#define png_pCAL vtk_png_pCAL
-#define png_oFFs vtk_png_oFFs
-#define png_iTXt vtk_png_iTXt
-#define png_iCCP vtk_png_iCCP
-#define png_hIST vtk_png_hIST
-#define png_gAMA vtk_png_gAMA
-#define png_cHRM vtk_png_cHRM
-#define png_bKGD vtk_png_bKGD
-#define png_PLTE vtk_png_PLTE
-#define png_IEND vtk_png_IEND
-#define png_IDAT vtk_png_IDAT
-#define png_IHDR vtk_png_IHDR
-#define png_sig  vtk_png_sig
-#define png_sig_bytes vtk_png_sig_bytes
 
 #endif
