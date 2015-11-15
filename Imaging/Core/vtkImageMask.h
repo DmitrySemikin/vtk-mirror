@@ -73,7 +73,7 @@ public:
   // where the input value is non zero.
   vtkSetMacro(NotMask,int);
   vtkGetMacro(NotMask,int);
-  vtkBooleanMacro(NotMask, int);
+  vtkBooleanMacro(NotMask,int);
 
   // Description:
   // Set the two inputs to this filter

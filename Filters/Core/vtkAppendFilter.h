@@ -50,17 +50,11 @@ public:
 //ETX
 
   // Description:
-  // Get if the filter should merge coincidental points
-  // Note: The filter will only merge points if the ghost cell array doesn't exist
-  // Defaults to Off
-  vtkGetMacro(MergePoints,int);
-
-  // Description:
-  // Set the filter to merge coincidental points.
+  // Get/set if the filter should merge coincidental points
   // Note: The filter will only merge points if the ghost cell array doesn't exist
   // Defaults to Off
   vtkSetMacro(MergePoints,int);
-
+  vtkGetMacro(MergePoints,int);
   vtkBooleanMacro(MergePoints,int);
 
   // Description:

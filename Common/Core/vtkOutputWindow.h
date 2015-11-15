@@ -75,7 +75,7 @@ public:
   // If PromptUser is set to true then each time a line of text
   // is displayed, the user is asked if they want to keep getting
   // messages.
-  vtkBooleanMacro(PromptUser,int);
+  vtkBooleanMacro(PromptUser, int);
   vtkSetMacro(PromptUser, int);
 //BTX
   // use this as a way of memory management when the

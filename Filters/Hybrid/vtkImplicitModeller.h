@@ -171,7 +171,7 @@ public:
   // CapValue is not changed from 255.
   vtkSetMacro(ScaleToMaximumDistance, int);
   vtkGetMacro(ScaleToMaximumDistance, int);
-  vtkBooleanMacro(ScaleToMaximumDistance,int);
+  vtkBooleanMacro(ScaleToMaximumDistance, int);
 
   // Description:
   // Specify whether to visit each cell once per append or each voxel once
