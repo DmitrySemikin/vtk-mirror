@@ -177,15 +177,9 @@ vtkCamera::~vtkCamera()
 }
 
 //----------------------------------------------------------------------------
-void vtkCamera::SetScissorRect(vtkRecti scissorRect)
+void vtkCamera::SetScissorRect(const vtkRecti &scissorRect)
 {
   this->ScissorRect = scissorRect;
-}
-
-//----------------------------------------------------------------------------
-void vtkCamera::GetScissorRect(vtkRecti& scissorRect)
-{
-  scissorRect = this->ScissorRect;
 }
 
 //----------------------------------------------------------------------------
