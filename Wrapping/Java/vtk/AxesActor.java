@@ -120,9 +120,9 @@ public class AxesActor extends vtkAssembly {
   }
 
   public void setAxesVisibility(boolean ison) {
-    this.SetVisibility(ison ? 1 : 0);
-    xactor.SetVisibility(ison ? 1 : 0);
-    yactor.SetVisibility(ison ? 1 : 0);
-    zactor.SetVisibility(ison ? 1 : 0);
+    this.SetVisibility(ison);
+    xactor.SetVisibility(ison);
+    yactor.SetVisibility(ison);
+    zactor.SetVisibility(ison);
   }
 }

@@ -197,13 +197,13 @@ void vtkScalarBarRepresentation::SwapOrientation()
 }
 
 //-----------------------------------------------------------------------------
-int vtkScalarBarRepresentation::GetVisibility()
+bool vtkScalarBarRepresentation::GetVisibility()
 {
   return this->ScalarBarActor->GetVisibility();
 }
 
 //-----------------------------------------------------------------------------
-void vtkScalarBarRepresentation::SetVisibility(int vis)
+void vtkScalarBarRepresentation::SetVisibility(bool vis)
 {
   this->ScalarBarActor->SetVisibility(vis);
   this->Superclass::SetVisibility(vis);

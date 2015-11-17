@@ -67,8 +67,8 @@ public:
   // Description:
   // These methods are necessary to make this representation behave as
   // a vtkProp.
-  virtual int GetVisibility();
-  virtual void SetVisibility(int);
+  virtual bool GetVisibility();
+  virtual void SetVisibility(bool);
   virtual void GetActors2D(vtkPropCollection *collection);
   virtual void ReleaseGraphicsResources(vtkWindow *window);
   virtual int RenderOverlay(vtkViewport*);
