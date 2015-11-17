@@ -496,14 +496,14 @@ public:
 
   // Description:
   // Enable/Disable the scissor
-//  vtkSetMacro(UseScissor, bool);
-//  vtkGetMacro(UseScissor, bool);
+  vtkSetMacro(UseScissor, bool);
+  vtkGetMacro(UseScissor, bool);
 
   // Description:
   // Set/Get the vtkRect value of the scissor
   //void SetScissorRect(const vtkRecti &scissorRect);
   //void GetScissorRect(vtkRecti& scissorRect);
-  //vtkGetMacro(ScissorRect, vtkRecti);
+  vtkGetMacro(ScissorRect, vtkRecti);
 
 protected:
   vtkCamera();
@@ -604,7 +604,7 @@ protected:
   // transformed to the camera's location and orientation.
   vtkTimeStamp ViewingRaysMTime;
   bool FreezeFocalPoint;
-  //bool UseScissor;
+  bool UseScissor;
 
   vtkRecti ScissorRect;
 

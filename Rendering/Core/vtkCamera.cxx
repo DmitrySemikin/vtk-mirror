@@ -138,7 +138,7 @@ vtkCamera::vtkCamera()
   this->ComputeCameraLightTransform();
 
   this->FreezeFocalPoint = false;
-  //this->UseScissor = false;
+  this->UseScissor = false;
 }
 
 //----------------------------------------------------------------------------
