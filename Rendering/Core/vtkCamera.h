@@ -501,9 +501,8 @@ public:
 
   // Description:
   // Set/Get the vtkRect value of the scissor
-  virtual void SetMonkeyScissorRect(const vtkRecti &scissorRect);
-  //void GetScissorRect(vtkRecti& scissorRect);
-  vtkGetMacro(ScissorRect, vtkRecti);
+  virtual void SetScissorRectangle(const vtkRecti &scissorRect);
+  vtkGetMacro(ScissorRectangle, vtkRecti);
 
 protected:
   vtkCamera();
@@ -606,7 +605,7 @@ protected:
   bool FreezeFocalPoint;
   bool UseScissor;
 
-  vtkRecti ScissorRect;
+  vtkRecti ScissorRectangle;
 
 
 private:
