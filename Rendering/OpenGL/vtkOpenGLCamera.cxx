@@ -111,16 +111,7 @@ void vtkOpenGLCamera::Render(vtkRenderer *ren)
 
   glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
   glEnable(GL_SCISSOR_TEST);
-  if (this->UseSubregion)
-    {
-    glScissor(this->SubregionRectangle.GetX(),this->SubregionRectangle.GetY(),
-              this->SubregionRectangle.GetWidth(), this->SubregionRectangle.GetHeight());
-    this->UseSubregion = false;
-    }
-  else
-    {
-    glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
-    }
+  glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
 
   // some renderer subclasses may have more complicated computations for the
   // aspect ratio. So take that into account by computing the difference
