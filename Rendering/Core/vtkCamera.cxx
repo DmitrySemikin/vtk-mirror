@@ -177,7 +177,7 @@ vtkCamera::~vtkCamera()
 }
 
 //----------------------------------------------------------------------------
-void vtkCamera::SetScissorRect(const vtkRecti &scissorRect)
+void vtkCamera::SetMonkeyScissorRect(const vtkRecti &scissorRect)
 {
   this->ScissorRect = scissorRect;
 }
