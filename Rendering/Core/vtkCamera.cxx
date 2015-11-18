@@ -177,10 +177,10 @@ vtkCamera::~vtkCamera()
 }
 
 //----------------------------------------------------------------------------
-// void vtkCamera::SetScissorRect(const vtkRecti &scissorRect)
-// {
-//   this->ScissorRect = scissorRect;
-// }
+void vtkCamera::SetScissorRect(const vtkRecti &scissorRect)
+{
+  this->ScissorRect = scissorRect;
+}
 
 //----------------------------------------------------------------------------
 // The first set of methods deal exclusively with the ViewTransform, which
