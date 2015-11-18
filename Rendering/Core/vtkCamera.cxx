@@ -138,7 +138,7 @@ vtkCamera::vtkCamera()
   this->ComputeCameraLightTransform();
 
   this->FreezeFocalPoint = false;
-  this->UseScissor = false;
+  this->UseSubregion = false;
 }
 
 //----------------------------------------------------------------------------
@@ -177,9 +177,9 @@ vtkCamera::~vtkCamera()
 }
 
 //----------------------------------------------------------------------------
-void vtkCamera::SetScissorRectangle(const vtkRecti &scissorRect)
+void vtkCamera::SetSubregionRectangle(const vtkRecti &srRect)
 {
-  this->ScissorRectangle = scissorRect;
+  this->SubregionRectangle = srRect;
 }
 
 //----------------------------------------------------------------------------

@@ -124,11 +124,11 @@ void vtkOpenGLCamera::Render(vtkRenderer *ren)
 
   glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
   glEnable(GL_SCISSOR_TEST);
-  if (this->UseScissor)
+  if (this->UseSubregion)
     {
-    glScissor(this->ScissorRectangle.GetX(),this->ScissorRectangle.GetY(),
-              this->ScissorRectangle.GetWidth(), this->ScissorRectangle.GetHeight());
-    this->UseScissor = false;
+    glScissor(this->SubregionRectangle.GetX(),this->SubregionRectangle.GetY(),
+              this->SubregionRectangle.GetWidth(), this->SubregionRectangle.GetHeight());
+    this->UseSubregion = false;
     }
   else
     {
@@ -155,11 +155,11 @@ void vtkOpenGLCamera::UpdateViewport(vtkRenderer *ren)
 
   glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
   glEnable(GL_SCISSOR_TEST);
-  if (this->UseScissor)
+  if (this->UseSubregion)
     {
-    glScissor(this->ScissorRectangle.GetX(),this->ScissorRectangle.GetY(),
-              this->ScissorRectangle.GetWidth(), this->ScissorRectangle.GetHeight());
-    this->UseScissor = false;
+    glScissor(this->SubregionRectangle.GetX(),this->SubregionRectangle.GetY(),
+              this->SubregionRectangle.GetWidth(), this->SubregionRectangle.GetHeight());
+    this->UseSubregion = false;
     }
   else
     {
