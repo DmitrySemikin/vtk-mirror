@@ -138,7 +138,6 @@ vtkCamera::vtkCamera()
   this->ComputeCameraLightTransform();
 
   this->FreezeFocalPoint = false;
-  this->UseSubregion = false;
 }
 
 //----------------------------------------------------------------------------
@@ -174,12 +173,6 @@ vtkCamera::~vtkCamera()
     {
     this->UserViewTransformCallbackCommand->Delete();
     }
-}
-
-//----------------------------------------------------------------------------
-void vtkCamera::SetSubregionRectangle(const vtkRecti &srRect)
-{
-  this->SubregionRectangle = srRect;
 }
 
 //----------------------------------------------------------------------------

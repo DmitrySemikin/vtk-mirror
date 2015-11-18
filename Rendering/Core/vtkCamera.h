@@ -494,16 +494,6 @@ public:
   vtkSetMacro(FreezeFocalPoint, bool);
   vtkGetMacro(FreezeFocalPoint, bool);
 
-  // Description:
-  // Enable/Disable the scissor
-  vtkSetMacro(UseSubregion, bool);
-  vtkGetMacro(UseSubregion, bool);
-
-  // Description:
-  // Set/Get the vtkRect value of the scissor
-  virtual void SetSubregionRectangle(const vtkRecti &srRect);
-  vtkGetMacro(SubregionRectangle, vtkRecti);
-
 protected:
   vtkCamera();
   ~vtkCamera();
@@ -603,10 +593,6 @@ protected:
   // transformed to the camera's location and orientation.
   vtkTimeStamp ViewingRaysMTime;
   bool FreezeFocalPoint;
-  bool UseSubregion;
-
-  vtkRecti SubregionRectangle;
-
 
 private:
   vtkCamera(const vtkCamera&);  // Not implemented.

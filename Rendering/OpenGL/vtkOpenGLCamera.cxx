@@ -187,16 +187,7 @@ void vtkOpenGLCamera::UpdateViewport(vtkRenderer *ren)
 
   glViewport(lowerLeft[0], lowerLeft[1], usize, vsize);
   glEnable(GL_SCISSOR_TEST);
-  if (this->UseSubregion)
-    {
-    glScissor(this->SubregionRectangle.GetX(),this->SubregionRectangle.GetY(),
-              this->SubregionRectangle.GetWidth(), this->SubregionRectangle.GetHeight());
-    this->UseSubregion = false;
-    }
-  else
-    {
-    glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
-    }
+  glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
 
   vtkOpenGLCheckErrorMacro("failed after UpdateViewport");
 }
