@@ -133,7 +133,7 @@ void vtkOpenGLCamera::Render(vtkRenderer *ren)
   else
     {
     glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
-   }
+    }
 
   if ((ren->GetRenderWindow())->GetErase() && ren->GetErase()
       && !ren->GetIsPicking())
@@ -164,7 +164,7 @@ void vtkOpenGLCamera::UpdateViewport(vtkRenderer *ren)
   else
     {
     glScissor(lowerLeft[0], lowerLeft[1], usize, vsize);
-   }
+    }
 
   vtkOpenGLCheckErrorMacro("failed after UpdateViewport");
 }
