@@ -330,7 +330,7 @@ M_Read(void)
     MET_SizeOfType(m_ElementType, &elementSize);
     METAIO_STL::streamsize readSize = m_NPoints*(m_NDims+4)*elementSize;
 
-    char* _data = new char[readSize];
+    char* _data = new char[static_cast<unsigned int>(readSize)];
     m_ReadStream->read((char *)_data, readSize);
 
     METAIO_STL::streamsize gc = m_ReadStream->gcount();
