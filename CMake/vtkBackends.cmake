@@ -12,6 +12,11 @@
 
 if (VTK_LEGACY_REMOVE)
   set (_options "OpenGL2" "None")
+  if (VTK_RENDERING_BACKEND STREQUAL "OpenGL")
+    message(WARNING "You have turned on VTK_LEGACY_REMOVE but selected the legacy OpenGL backend. You need to use the OpenGL2 backend instead. VTK will switch to the new back end for you.")
+    set(VTK_RENDERING_BACKEND "OpenGL2" CACHE STRING
+        "Choose the rendering backend." FORCE)
+  endif()
 else()
   set (_options ${VTK_BACKENDS} "None")
 endif()
