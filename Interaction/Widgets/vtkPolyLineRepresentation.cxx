@@ -62,7 +62,9 @@ vtkPolyLineRepresentation::vtkPolyLineRepresentation()
   vtkPolyDataMapper* lineMapper = vtkPolyDataMapper::New();
   lineMapper->SetInputConnection(
     this->PolyLineSource->GetOutputPort()) ;
+#if !defined(VTK_LEGACY_REMOVE)
   lineMapper->ImmediateModeRenderingOn();
+#endif
   lineMapper->SetResolveCoincidentTopologyToPolygonOffset();
 
   this->LineActor->SetMapper( lineMapper );

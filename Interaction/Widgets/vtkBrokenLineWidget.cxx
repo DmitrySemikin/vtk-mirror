@@ -104,7 +104,9 @@ vtkBrokenLineWidget::vtkBrokenLineWidget()
   // Represent the broken line
   this->LineMapper = vtkPolyDataMapper::New();
   this->LineMapper->SetInputConnection( this->LineSource->GetOutputPort() );
+#if !defined(VTK_LEGACY_REMOVE)
   this->LineMapper->ImmediateModeRenderingOn();
+#endif
   this->LineMapper->SetResolveCoincidentTopologyToPolygonOffset();
   this->LineActor = vtkActor::New();
   this->LineActor->SetMapper( this->LineMapper );

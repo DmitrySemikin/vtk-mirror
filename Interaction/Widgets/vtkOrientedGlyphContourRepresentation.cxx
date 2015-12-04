@@ -153,7 +153,9 @@ vtkOrientedGlyphContourRepresentation::vtkOrientedGlyphContourRepresentation()
   // as it is a class static on the mapper
   this->Mapper->SetResolveCoincidentTopologyToPolygonOffset();
   this->Mapper->ScalarVisibilityOff();
+#if !defined(VTK_LEGACY_REMOVE)
   this->Mapper->ImmediateModeRenderingOn();
+#endif
   // put this on top of other objects
   this->Mapper->SetRelativeCoincidentTopologyLineOffsetParameters(-1,-1);
   this->Mapper->SetRelativeCoincidentTopologyPolygonOffsetParameters(-1,-1);
@@ -163,7 +165,9 @@ vtkOrientedGlyphContourRepresentation::vtkOrientedGlyphContourRepresentation()
   this->ActiveMapper->SetInputConnection(
     this->ActiveGlypher->GetOutputPort());
   this->ActiveMapper->ScalarVisibilityOff();
+#if !defined(VTK_LEGACY_REMOVE)
   this->ActiveMapper->ImmediateModeRenderingOn();
+#endif
   this->ActiveMapper->SetRelativeCoincidentTopologyLineOffsetParameters(-1,-1);
   this->ActiveMapper->SetRelativeCoincidentTopologyPolygonOffsetParameters(-1,-1);
   this->ActiveMapper->SetRelativeCoincidentTopologyPointOffsetParameter(-1);
@@ -998,7 +1002,9 @@ void vtkOrientedGlyphContourRepresentation::CreateSelectedNodesRepresentation()
   this->SelectedNodesMapper->SetInputData(this->SelectedNodesGlypher->GetOutput());
   this->SelectedNodesMapper->SetResolveCoincidentTopologyToPolygonOffset();
   this->SelectedNodesMapper->ScalarVisibilityOff();
+#if !defined(VTK_LEGACY_REMOVE)
   this->SelectedNodesMapper->ImmediateModeRenderingOn();
+#endif
 
   vtkProperty* selProperty = vtkProperty::New();
   selProperty->SetColor(0.0,1.0,0.0);

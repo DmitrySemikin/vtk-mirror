@@ -377,8 +377,8 @@ public:
   // Set the number of frames for doing antialiasing. The default is
   // zero. Typically five or six will yield reasonable results without
   // taking too long.
-  vtkGetMacro(AAFrames,int);
-  vtkSetMacro(AAFrames,int);
+  VTK_LEGACY(vtkGetMacro(AAFrames,int));
+  VTK_LEGACY(vtkSetMacro(AAFrames,int));
 
   // Description:
   // Set the number of frames for doing focal depth. The default is zero.
@@ -540,7 +540,7 @@ public:
   // Get the vtkPainterDeviceAdapter which can be used to paint on
   // this render window.  Note the old OpenGL backend requires this
   // method.
-  vtkGetObjectMacro(PainterDeviceAdapter, vtkPainterDeviceAdapter);
+  VTK_LEGACY(vtkGetObjectMacro(PainterDeviceAdapter, vtkPainterDeviceAdapter));
 
   // Description:
   // Set / Get the number of multisamples to use for hardware antialiasing.

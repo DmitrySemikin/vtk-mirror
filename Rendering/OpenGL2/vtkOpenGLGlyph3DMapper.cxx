@@ -152,13 +152,16 @@ void vtkOpenGLGlyph3DMapper::CopyInformationToSubMapper(
   mapper->SetClippingPlanes(this->ClippingPlanes);
 
   mapper->SetResolveCoincidentTopology(this->GetResolveCoincidentTopology());
+#if !defined(VTK_LEGACY_REMOVE)
   mapper->SetResolveCoincidentTopologyZShift(
     this->GetResolveCoincidentTopologyZShift());
+
+  mapper->SetImmediateModeRendering(this->ImmediateModeRendering);
+#endif
 
   // ResolveCoincidentTopologyPolygonOffsetParameters is static
   mapper->SetResolveCoincidentTopologyPolygonOffsetFaces(
     this->GetResolveCoincidentTopologyPolygonOffsetFaces());
-  mapper->SetImmediateModeRendering(this->ImmediateModeRendering);
 }
 
 void vtkOpenGLGlyph3DMapper::SetupColorMapper()

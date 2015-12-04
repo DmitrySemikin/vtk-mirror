@@ -1908,6 +1908,7 @@ void vtkOpenGLPolyDataMapper::GetCoincidentParameters(
   // type
   factor = 0.0;
   offset = 0.0;
+#if !defined(VTK_LEGACY_REMOVE)
   if ( this->GetResolveCoincidentTopology() == VTK_RESOLVE_SHIFT_ZBUFFER )
     {
     // do something rough is better than nothing
@@ -1915,6 +1916,7 @@ void vtkOpenGLPolyDataMapper::GetCoincidentParameters(
     double f = zRes*4.0;
     factor = f;
     }
+#endif
 
   vtkProperty *prop = actor->GetProperty();
   if ((this->GetResolveCoincidentTopology() == VTK_RESOLVE_POLYGON_OFFSET) ||

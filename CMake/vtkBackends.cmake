@@ -10,8 +10,13 @@
 # module name, i.e. vtkRenderingOpenGL for OpenGL and vtkRenderingOpenGL2
 # for OpenGL2.
 
+if (VTK_LEGACY_REMOVE)
+  set (_options "OpenGL2" "None")
+else()
+  set (_options ${VTK_BACKENDS} "None")
+endif()
+
 # is the current backend not a valid value?
-set (_options ${VTK_BACKENDS} "None")
 list (FIND _options "${VTK_RENDERING_BACKEND}"  _index)
 if (${_index} EQUAL -1)
 

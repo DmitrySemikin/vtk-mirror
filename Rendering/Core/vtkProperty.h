@@ -244,8 +244,8 @@ public:
 
   // Description:
   // Get the vtkShaderDeviceAdapter2 if set, returns null otherwise.
-  virtual vtkShaderDeviceAdapter2* GetShaderDeviceAdapter2()
-    { return NULL; }
+  VTK_LEGACY(virtual vtkShaderDeviceAdapter2* GetShaderDeviceAdapter2()
+    { return NULL; });
 
   // Description:
   // Provide values to initialize shader variables.

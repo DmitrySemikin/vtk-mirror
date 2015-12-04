@@ -180,6 +180,7 @@ public:
   vtkSetVector2Macro(ScalarRange, double);
   vtkGetVectorMacro(ScalarRange, double, 2);
 
+#if !defined(VTK_LEGACY_REMOVE)
   // Description:
   // Turn on/off flag to control whether data is rendered using
   // immediate mode or note. Immediate mode rendering
@@ -190,6 +191,7 @@ public:
   vtkSetMacro(ImmediateModeRendering, int);
   vtkGetMacro(ImmediateModeRendering, int);
   vtkBooleanMacro(ImmediateModeRendering, int);
+#endif
 
   // Description:
   // Turn on/off flag to control whether data is rendered using
@@ -198,12 +200,12 @@ public:
   // The default value is immediate mode off. If you are
   // having problems rendering a large dataset you might
   // want to consider using immediate more rendering.
-  static void SetGlobalImmediateModeRendering(int val);
-  static void GlobalImmediateModeRenderingOn()
-    { vtkMapper::SetGlobalImmediateModeRendering(1); }
-  static void GlobalImmediateModeRenderingOff()
-    { vtkMapper::SetGlobalImmediateModeRendering(0); }
-  static int  GetGlobalImmediateModeRendering();
+  VTK_LEGACY(static void SetGlobalImmediateModeRendering(int val));
+  VTK_LEGACY(static void GlobalImmediateModeRenderingOn()
+    { vtkMapper::SetGlobalImmediateModeRendering(1); });
+  VTK_LEGACY(static void GlobalImmediateModeRenderingOff()
+    { vtkMapper::SetGlobalImmediateModeRendering(0); });
+  VTK_LEGACY(static int  GetGlobalImmediateModeRendering());
 
   //BTX
   // Description:
@@ -214,8 +216,8 @@ public:
   // This can be used by another rendering class which also uses display lists
   // (call of display lists can be nested but not their creation.)
   // There is no good reason to expose it to wrappers.
-  vtkGetMacro(ForceCompileOnly, int);
-  void SetForceCompileOnly(int value);
+  VTK_LEGACY(vtkGetMacro(ForceCompileOnly, int));
+  VTK_LEGACY(void SetForceCompileOnly(int value));
   //ETX
 
   // Description:
@@ -311,8 +313,8 @@ public:
     { SetResolveCoincidentTopology(VTK_RESOLVE_OFF) ;}
   static void SetResolveCoincidentTopologyToPolygonOffset()
     { SetResolveCoincidentTopology(VTK_RESOLVE_POLYGON_OFFSET); }
-  static void SetResolveCoincidentTopologyToShiftZBuffer()
-    { SetResolveCoincidentTopology(VTK_RESOLVE_SHIFT_ZBUFFER); }
+  VTK_LEGACY(static void SetResolveCoincidentTopologyToShiftZBuffer()
+    { SetResolveCoincidentTopology(VTK_RESOLVE_SHIFT_ZBUFFER); });
 
   // Description:
   // Used to set the polygon offset scale factor and units.
@@ -384,8 +386,8 @@ public:
   // Description:
   // Used to set the z-shift if ResolveCoincidentTopology is set to
   // ShiftZBuffer. This is a global variable.
-  static void SetResolveCoincidentTopologyZShift(double val);
-  static double GetResolveCoincidentTopologyZShift();
+  VTK_LEGACY(static void SetResolveCoincidentTopologyZShift(double val));
+  VTK_LEGACY(static double GetResolveCoincidentTopologyZShift());
 
   // Description:
   // Return bounding box (array of six doubles) of data expressed as

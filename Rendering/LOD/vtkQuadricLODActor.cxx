@@ -60,7 +60,9 @@ vtkQuadricLODActor::vtkQuadricLODActor()
 
   // mapper for LOD actor
   this->LODMapper = vtkPolyDataMapper::New();
+#if !defined(VTK_LEGACY_REMOVE)
   this->LODMapper->ImmediateModeRenderingOff();
+#endif
 
   // A internal matrix for performance
   vtkMatrix4x4 *m = vtkMatrix4x4::New();
@@ -148,6 +150,7 @@ void vtkQuadricLODActor::Render(vtkRenderer *ren, vtkMapper *vtkNotUsed(m))
 
   // Use display lists if it makes sense
   vtkIdType nCells = this->GetDisplayListSize(static_cast<vtkPolyData*>(this->Mapper->GetInput()));
+#if !defined(VTK_LEGACY_REMOVE)
   if (nCells < this->MaximumDisplayListSize)
     {
     this->Mapper->ImmediateModeRenderingOff();
@@ -156,6 +159,7 @@ void vtkQuadricLODActor::Render(vtkRenderer *ren, vtkMapper *vtkNotUsed(m))
     {
     this->Mapper->ImmediateModeRenderingOn();
     }
+#endif
 
   vtkMatrix4x4 *matrix;
 
@@ -175,7 +179,9 @@ void vtkQuadricLODActor::Render(vtkRenderer *ren, vtkMapper *vtkNotUsed(m))
 
     // Make sure LOD mapper is consistent with mapper
     this->LODMapper->ShallowCopy(this->Mapper);
+#if !defined(VTK_LEGACY_REMOVE)
     this->LODMapper->ImmediateModeRenderingOff();
+#endif
     this->LODActor->SetProperty(this->GetProperty());
     this->LODActor->SetBackfaceProperty(this->BackfaceProperty);
 

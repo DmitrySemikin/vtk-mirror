@@ -87,7 +87,9 @@ vtkGraphMapper::vtkGraphMapper()
   this->VertexMapper->SetScalarModeToUsePointData();
   this->VertexMapper->SetLookupTable(this->VertexLookupTable);
   this->VertexMapper->SetScalarVisibility(false);
+#if !defined(VTK_LEGACY_REMOVE)
   this->VertexMapper->ImmediateModeRenderingOn();
+#endif
   this->VertexActor->PickableOff();
   this->VertexActor->GetProperty()->SetPointSize(this->GetVertexPointSize());
   this->OutlineActor->PickableOff();
@@ -95,11 +97,15 @@ vtkGraphMapper::vtkGraphMapper()
   this->OutlineActor->SetPosition(0, 0, -0.001);
   this->OutlineActor->GetProperty()->SetRepresentationToWireframe();
   this->OutlineMapper->SetScalarVisibility(false);
+#if !defined(VTK_LEGACY_REMOVE)
   this->OutlineMapper->ImmediateModeRenderingOn();
+#endif
   this->EdgeMapper->SetScalarModeToUseCellData();
   this->EdgeMapper->SetLookupTable(this->EdgeLookupTable);
   this->EdgeMapper->SetScalarVisibility(false);
+#if !defined(VTK_LEGACY_REMOVE)
   this->EdgeMapper->ImmediateModeRenderingOn();
+#endif
   this->EdgeActor->SetPosition(0, 0, -0.003);
   this->EdgeActor->GetProperty()->SetLineWidth(this->GetEdgeLineWidth());
 

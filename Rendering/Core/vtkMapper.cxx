@@ -29,12 +29,15 @@
 #include "vtkVariantArray.h"
 
 
+#if !defined(VTK_LEGACY_REMOVE)
 // Initialize static member that controls global immediate mode rendering
 static int vtkMapperGlobalImmediateModeRendering = 0;
 
 // Initialize static member that controls global coincidence resolution
-static int vtkMapperGlobalResolveCoincidentTopology = VTK_RESOLVE_OFF;
 static double vtkMapperGlobalResolveCoincidentTopologyZShift = 0.01;
+#endif
+
+static int vtkMapperGlobalResolveCoincidentTopology = VTK_RESOLVE_OFF;
 static int vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFaces = 1;
 
 static double vtkMapperGlobalResolveCoincidentTopologyPolygonOffsetFactor = 2.0;
@@ -154,8 +157,10 @@ vtkDataSet *vtkMapper::GetInput()
     this->GetExecutive()->GetInputData(0, 0));
 }
 
+#if !defined(VTK_LEGACY_REMOVE)
 void vtkMapper::SetForceCompileOnly(int value)
 {
+  VTK_LEGACY_BODY(vtkMapper::SetForceCompileOnly, "VTK 7.0");
   if(this->ForceCompileOnly!=value)
     {
       this->ForceCompileOnly=value;
@@ -166,6 +171,7 @@ void vtkMapper::SetForceCompileOnly(int value)
 
 void vtkMapper::SetGlobalImmediateModeRendering(int val)
 {
+  VTK_LEGACY_BODY(vtkMapper::SetGlobalImmediateModeRendering, "VTK 7.0");
   if (val == vtkMapperGlobalImmediateModeRendering)
     {
     return;
@@ -175,8 +181,10 @@ void vtkMapper::SetGlobalImmediateModeRendering(int val)
 
 int vtkMapper::GetGlobalImmediateModeRendering()
 {
+  VTK_LEGACY_BODY(vtkMapper::GetGlobalImmediateModeRendering, "VTK 7.0");
   return vtkMapperGlobalImmediateModeRendering;
 }
+#endif
 
 void vtkMapper::SetResolveCoincidentTopology(int val)
 {
@@ -197,8 +205,10 @@ void vtkMapper::SetResolveCoincidentTopologyToDefault()
   vtkMapperGlobalResolveCoincidentTopology = VTK_RESOLVE_OFF;
 }
 
+#if !defined(VTK_LEGACY_REMOVE)
 void vtkMapper::SetResolveCoincidentTopologyZShift(double val)
 {
+  VTK_LEGACY_BODY(vtkMapper::SetResolveCoincidentTopologyZShift, "VTK 7.0");
   if (val == vtkMapperGlobalResolveCoincidentTopologyZShift)
     {
     return;
@@ -208,8 +218,10 @@ void vtkMapper::SetResolveCoincidentTopologyZShift(double val)
 
 double vtkMapper::GetResolveCoincidentTopologyZShift()
 {
+  VTK_LEGACY_BODY(vtkMapper::GetResolveCoincidentTopologyZShift, "VTK 7.0");
   return vtkMapperGlobalResolveCoincidentTopologyZShift;
 }
+#endif
 
 void vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(
                                             double factor, double units)
@@ -381,7 +393,9 @@ void vtkMapper::ShallowCopy(vtkAbstractMapper *mapper)
     this->SetColorMode(m->GetColorMode());
     this->SetScalarMode(m->GetScalarMode());
     this->SetScalarMaterialMode(m->GetScalarMaterialMode());
+#if !defined(VTK_LEGACY_REMOVE)
     this->SetImmediateModeRendering(m->GetImmediateModeRendering());
+#endif
     this->SetUseLookupTableScalarRange(m->GetUseLookupTableScalarRange());
     this->SetInterpolateScalarsBeforeMapping(
       m->GetInterpolateScalarsBeforeMapping());
@@ -1178,8 +1192,10 @@ void vtkMapper::PrintSelf(ostream& os, vtkIndent indent)
    os << indent << "Force compile only for display lists: "
     << (this->ForceCompileOnly ? "On\n" : "Off\n");
 
+#if !defined(VTK_LEGACY_REMOVE)
   os << indent << "Global Immediate Mode Rendering: " <<
     (vtkMapperGlobalImmediateModeRendering ? "On\n" : "Off\n");
+#endif
 
   os << indent << "Scalar Visibility: "
     << (this->ScalarVisibility ? "On\n" : "Off\n");
