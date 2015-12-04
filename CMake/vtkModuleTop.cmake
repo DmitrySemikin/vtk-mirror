@@ -36,6 +36,11 @@ if(NOT DEFINED VTK_RENDERING_BACKEND)
     set(VTK_RENDERING_BACKEND "OpenGL2")
   endif()
   set(_backend_set_for_first_cmake TRUE)
+else()
+  if (VTK_LEGACY_REMOVE AND VTK_RENDERING_BACKEND STREQUAL "OpenGL")
+    set(VTK_RENDERING_BACKEND "OpenGL2" CACHE STRING
+        "Choose the rendering backend." FORCE)
+  endif()
 endif()
 
 # Assess modules, and tests in the repository.

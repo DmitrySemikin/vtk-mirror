@@ -189,7 +189,9 @@ void vtkGeoView::Render()
   // Since ZShift or polygon offsets are global, here we would like to
   // use polygon offset to push the polygons (of globe) away so that
   // other polygons or lines can be drawn on top of it.
+#if !defined(VTK_LEGACY_REMOVE)
   double zShift = 0.0;
+#endif
   double factor = 0.0;
   double units = 0.0;
 
@@ -200,13 +202,15 @@ void vtkGeoView::Render()
     vtkMapper::GetResolveCoincidentTopologyPolygonOffsetParameters(
         factor, units);
     }
+#if !defined(VTK_LEGACY_REMOVE)
   else if(vtkMapper::GetResolveCoincidentTopology() ==
           VTK_RESOLVE_SHIFT_ZBUFFER)
     {
     zShift = vtkMapper::GetResolveCoincidentTopologyZShift();
     }
-
   vtkMapper::SetResolveCoincidentTopologyZShift(0.0);
+#endif
+
   vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
 
   // Apply minimum offset (using factor and units == 1.0).
@@ -223,12 +227,14 @@ void vtkGeoView::Render()
     vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(
         factor, units);
     }
+#if !defined(VTK_LEGACY_REMOVE)
   else if(vtkMapper::GetResolveCoincidentTopology() ==
           VTK_RESOLVE_SHIFT_ZBUFFER)
     {
     vtkMapper::SetResolveCoincidentTopologyToShiftZBuffer();
     vtkMapper::SetResolveCoincidentTopologyZShift(zShift);
     }
+#endif
   else
     {
     vtkMapper::SetResolveCoincidentTopologyToOff();
