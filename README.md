@@ -1,3 +1,4 @@
+<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< HEAD
 ![VTK - The Visualization Toolkit](vtkBanner.gif)
 
 Introduction
