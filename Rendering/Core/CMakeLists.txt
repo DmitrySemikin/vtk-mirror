@@ -68,6 +68,7 @@ set(Module_SRCS
   vtkRenderer.cxx
   vtkRendererDelegate.cxx
   vtkRendererSource.cxx
+  vtkRenderingMetadata.cxx
   vtkRenderWindowCollection.cxx
   vtkRenderWindow.cxx
   vtkRenderWindowInteractor.cxx
@@ -131,6 +132,7 @@ if(VTK_RENDERING_BACKEND STREQUAL "OpenGL2")
   set_source_files_properties(
     vtkRenderWindow.cxx  # dummy out painterdevice adapter
     vtkHardwareSelector.cxx # dummy out painter device adapter
+    vtkRenderingMetadata.cxx
     PROPERTIES COMPILE_FLAGS -DVTK_OPENGL2)
   list(APPEND Module_SRCS
     vtkPointGaussianMapper.cxx
