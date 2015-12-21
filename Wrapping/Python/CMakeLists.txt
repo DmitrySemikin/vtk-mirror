@@ -65,7 +65,7 @@ if(VTK_ENABLE_KITS)
     list(REMOVE_DUPLICATES _kit_depends)
     set(${kit}${VTK_KIT_SUFFIX}_DEPENDS ${_kit_depends})
     # Wrap kit.
-    vtk_add_python_wrapping_library(${kit}${VTK_KIT_SUFFIX} kit_srcs ${kit})
+    vtk_add_python_wrapping_library(${kit}${VTK_KIT_SUFFIX} kit_srcs ${_${kit}_modules})
   endforeach()
 endif()
 # Loop through all modules that should be wrapped, and wrap them.
