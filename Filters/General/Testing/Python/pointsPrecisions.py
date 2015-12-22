@@ -1,12 +1,12 @@
 import unittest
 
-from vtk.vtkCommonCore import vtkPoints, vtkDoubleArray, vtkIdList
-from vtk.vtkCommonDataModel import vtkPlane,\
-                                   vtkUnstructuredGrid,\
-                                   vtkStructuredGrid,\
-                                   vtkPolyData
-from vtk.vtkFiltersGeneral import vtkClipDataSet
-from vtk.vtkFiltersGeneral import vtkTableBasedClipDataSet
+from vtk import vtkPoints, vtkDoubleArray, vtkIdList
+from vtk import vtkPlane,\
+                vtkUnstructuredGrid,\
+                vtkStructuredGrid,\
+                vtkPolyData
+from vtk import vtkClipDataSet
+from vtk import vtkTableBasedClipDataSet
 import vtk.util.vtkConstants as vtk_const
 
 class FiltersLosingPrecisionBase:

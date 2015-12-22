@@ -20,8 +20,8 @@ from . import dataset_adapter as dsa
 from . import internal_algorithms as algs
 import itertools
 try:
-    from vtk.vtkParallelCore import vtkMultiProcessController
-    from vtk.vtkParallelMPI4Py import vtkMPI4PyCommunicator
+    from vtk import vtkMultiProcessController
+    from vtk import vtkMPI4PyCommunicator
 except ImportError:
     vtkMultiProcessController = None
     vtkMPI4PyCommunicator = None
@@ -340,7 +340,7 @@ def _global_per_block(impl, array, axis=None, controller=None):
 
     t = type(array)
     if t == dsa.VTKArray or t == numpy.ndarray:
-        from vtk.vtkCommonDataModel import vtkMultiBlockDataSet
+        from vtk import vtkMultiBlockDataSet
         array = dsa.VTKCompositeDataArray([array])
         ds = vtkMultiBlockDataSet()
         ds.SetBlock(0, dataset.VTKObject)
@@ -886,8 +886,8 @@ def unstructured_from_composite_arrays(points, arrays, controller=None):
         comm.Allreduce([lownership, mpitype], [ownership, mpitype], MPI.MIN)
 
     # Iterate over blocks to produce points and arrays
-    from vtk.vtkCommonDataModel import vtkUnstructuredGrid
-    from vtk.vtkCommonCore import vtkDoubleArray, vtkPoints
+    from vtk import vtkUnstructuredGrid
+    from vtk import vtkDoubleArray, vtkPoints
     ugrid = vtkUnstructuredGrid()
     da = vtkDoubleArray()
     da.SetNumberOfComponents(3)

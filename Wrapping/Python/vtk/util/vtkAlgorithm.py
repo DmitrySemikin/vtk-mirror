@@ -1,8 +1,8 @@
-from vtk.vtkCommonDataModel import vtkDataObject
-from vtk.vtkCommonExecutionModel import vtkAlgorithm
-from vtk.vtkCommonExecutionModel import vtkDemandDrivenPipeline
-from vtk.vtkCommonExecutionModel import vtkStreamingDemandDrivenPipeline
-from vtk.vtkFiltersPython import vtkPythonAlgorithm
+from vtk import vtkDataObject
+from vtk import vtkAlgorithm
+from vtk import vtkDemandDrivenPipeline
+from vtk import vtkStreamingDemandDrivenPipeline
+from vtk import vtkPythonAlgorithm
 
 class VTKAlgorithm(object):
     """This is a superclass which can be derived to implement
