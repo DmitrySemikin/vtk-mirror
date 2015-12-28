@@ -1654,6 +1654,10 @@ int vtkXOpenGLRenderWindow::SupportsOpenGL()
     return this->OpenGLSupportResult;
     }
 
+  // disable error reporting which we check for OpenGL support.
+  int oldVal = vtkObject::GetGlobalWarningDisplay();
+  vtkObject::GlobalWarningDisplayOff();
+
   vtkXOpenGLRenderWindow *rw = vtkXOpenGLRenderWindow::New();
   rw->SetDisplayId(this->DisplayId);
   rw->SetOffScreenRendering(1);
@@ -1703,7 +1707,7 @@ int vtkXOpenGLRenderWindow::SupportsOpenGL()
     }
 
   rw->Delete();
-
+  vtkObject::SetGlobalWarningDisplay(oldVal);
   this->OpenGLSupportTested = true;
 
   return this->OpenGLSupportResult;
