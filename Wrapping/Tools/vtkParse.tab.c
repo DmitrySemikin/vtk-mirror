@@ -2313,8 +2313,8 @@ static const char *const yytname[] =
 };
 #endif
 
-#define YYPACT_NINF -1052
-#define YYTABLE_NINF -658
+#define YYPACT_NINF (-1052)
+#define YYTABLE_NINF (-658)
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
