@@ -102,6 +102,10 @@ static void sort_hierarchy_entries(HierarchyInfo *info)
         &compare_hierarchy_entries);
 }
 
+/* forward declaration */
+static int vtkParseHierarchy_ReadFileIntoInfo(
+  HierarchyInfo* info, const char *filename);
+
 /* Find an entry with a binary search */
 HierarchyEntry *vtkParseHierarchy_FindEntry(
   const HierarchyInfo *info, const char *classname)
@@ -153,6 +157,15 @@ HierarchyEntry *vtkParseHierarchy_FindEntry(
   return entry;
 }
 
+/* read a hierarchy file into a HeirarchyInfo struct, or return NULL
+ * XXX DEPRECATED; use vtkParseHierarchy_ReadFiles
+ */
+HierarchyInfo *vtkParseHierarchy_ReadFile(const char *filename)
+{
+  char *fn = (char *)filename;
+  return vtkParseHierarchy_ReadFiles(1, &fn);
+}
+
 /* read hierarchy files into a HierarchyInfo struct, or return NULL */
 HierarchyInfo *vtkParseHierarchy_ReadFiles(int n, char **filenames)
 {
@@ -169,7 +182,7 @@ HierarchyInfo *vtkParseHierarchy_ReadFiles(int n, char **filenames)
 
   for (currentFile = 0; currentFile < n; currentFile++)
     {
-    if (!vtkParseHierarchy_ReadFile(info, filenames[currentFile]))
+    if (!vtkParseHierarchy_ReadFileIntoInfo(info, filenames[currentFile]))
       {
       vtkParseHierarchy_Free(info);
       info = NULL;
@@ -186,7 +199,8 @@ HierarchyInfo *vtkParseHierarchy_ReadFiles(int n, char **filenames)
 }
 
 /* read hierarchy file into a HierarchyInfo struct, return 1 if success */
-int vtkParseHierarchy_ReadFile(HierarchyInfo* info, const char *filename)
+static int vtkParseHierarchy_ReadFileIntoInfo(
+  HierarchyInfo* info, const char *filename)
 {
   HierarchyEntry *entry;
 
