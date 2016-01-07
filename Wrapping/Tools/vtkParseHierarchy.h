@@ -80,14 +80,15 @@ extern "C" {
 #endif
 
 /**
+* Read a hierarchy file into a HeirarchyInfo struct, or return NULL
+* XXX DEPRECATED; use vtkParseHierarchy_ReadFiles
+*/
+HierarchyInfo *vtkParseHierarchy_ReadFile(const char *filename);
+
+/**
  * Read hierarchy files into a HierarchyInfo struct, or return NULL
  */
 HierarchyInfo *vtkParseHierarchy_ReadFiles(int n, char **filenames);
-
-/**
- * Read hierarchy file into a HierarchyInfo struct
- */
-int vtkParseHierarchy_ReadFile(HierarchyInfo *info, const char *filename);
 
 /**
  * Free a HierarchyInfo struct

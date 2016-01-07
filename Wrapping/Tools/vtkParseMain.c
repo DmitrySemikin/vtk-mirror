@@ -266,6 +266,7 @@ static int parse_check_options(int argc, char *argv[], int multi)
   options.Files = NULL;
   options.InputFileName = NULL;
   options.OutputFileName = NULL;
+  options.HierarchyFileName = 0;
   options.NumberOfHierarchyFileNames = 0;
   options.HierarchyFileNames = NULL;
   options.HintFileName = 0;
@@ -349,6 +350,7 @@ static int parse_check_options(int argc, char *argv[], int multi)
       if (options.NumberOfHierarchyFileNames == 0)
         {
         options.HierarchyFileNames = (char **)malloc(sizeof(char *));
+        options.HierarchyFileName = argv[i]; // legacy
         }
       else if ((options.NumberOfHierarchyFileNames & (options.NumberOfHierarchyFileNames - 1)) == 0)
         {
