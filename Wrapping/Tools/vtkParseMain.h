@@ -55,7 +55,8 @@ typedef struct _OptionInfo
   char        **Files;              /* all of the file arguments */
   char         *InputFileName;      /* the first file argument */
   char         *OutputFileName;     /* the second file, or the "-o" file */
-  char         *HintFileName;       /* the file preceded by "--hints" */
+  int           NumberOfHintFileNames; /* the total number of hints arguments */
+  char        **HintFileNames;      /* all of the hints arguments */
   char         *HierarchyFileName;  /* the file preceded by "--types" XXX DEPRECATED */
   int           NumberOfHierarchyFileNames; /* the total number of types argument */
   char        **HierarchyFileNames; /* the file preceded by "--types" */

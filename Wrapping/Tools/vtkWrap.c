@@ -872,7 +872,7 @@ void vtkWrap_ApplyUsingDeclarations(
       {
       vtkParseMerge_MergeHelper(
         finfo, finfo->Contents, hinfo, data->SuperClasses[i],
-        NULL, NULL, data);
+        0, NULL, NULL, data);
       }
     }
 }

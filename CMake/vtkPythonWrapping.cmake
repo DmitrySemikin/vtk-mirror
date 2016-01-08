@@ -8,21 +8,10 @@ if(PYTHONINTERP_FOUND AND PYTHONLIBS_FOUND)
    endif()
 endif()
 
-function(_concatenate_files input_files output_file)
-  file(WRITE ${output_file} "") # Clear
-  foreach(file IN LISTS input_files)
-    file(READ ${file} content)
-    file(APPEND ${output_file} "${content}")
-  endforeach()
-endfunction()
-
 # To support wrapping of either module or kit, this function
 # has two signatures:
 # 1) vtk_add_python_wrapping(<module_name> <sources_var>)
 # 2) vtk_add_python_wrapping("<module_name>[ <module_name>]" <sources_var> <kit_name>)
-#
-# XXX It manually concatenate the hierarchy and hint files. Instead
-#     the wrapping executable could be update to understand list of these.
 function(vtk_add_python_wrapping module_names sources_var)
   if("${ARGV2}" MATCHES ".+")
     set(target ${ARGN})
@@ -54,13 +43,7 @@ function(vtk_add_python_wrapping module_names sources_var)
   endforeach()
 
   if(VTK_WRAP_HINTS_FILES)
-    list(LENGTH VTK_WRAP_HINTS_FILES _length)
-    if(_length GREATER 1)
-      set(VTK_WRAP_HINTS ${CMAKE_CURRENT_BINARY_DIR}/${target}_hints)
-      _concatenate_files("${VTK_WRAP_HINTS_FILES}" ${VTK_WRAP_HINTS})
-    else()
-      set(VTK_WRAP_HINTS ${VTK_WRAP_HINTS_FILES})
-    endif()
+    set(VTK_WRAP_HINTS ${VTK_WRAP_HINTS_FILES})
   endif()
 
   vtk_wrap_python(${target}Python Python_SRCS "${module_names}")
