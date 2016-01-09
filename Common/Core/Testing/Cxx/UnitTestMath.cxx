@@ -3800,3 +3800,43 @@ int TestNan()
     }
   return status;
 }
+
+int TestCbrt()
+{
+  int status = 0;
+  std::cout << "cbrt..";
+
+  double result = vtkMath::cbrt(0.0);
+  if (result != 0.0)
+    {
+    ++status;
+    }
+
+  result = vtkMath::cbrt(-0.0);
+  if (result != 0.0)
+    {
+    ++status;
+    }
+
+  result = vtkMath::cbrt(8.0);
+  if (result != 2.0)
+    {
+    ++status;
+    }
+
+  result = vtkMath::cbrt(-8.0);
+  if (result != -2.0)
+    {
+    ++status;
+    }
+
+  if (status)
+    {
+    std::cout << "..FAILED" << std::endl;
+    }
+  else
+    {
+    std::cout << ".PASSED" << std::endl;
+    }
+  return status;
+}

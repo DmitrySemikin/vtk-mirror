@@ -3154,3 +3154,29 @@ bool vtkMath::IsFinite(double x)
   return !vtkMath::IsNan(x) && !vtkMath::IsInf(x);
 }
 #endif
+
+//-----------------------------------------------------------------------------
+double vtkMath::cbrt(double x)
+{
+#if __cplusplus > 199711L
+  return std::cbrt(x);
+#else
+  if (x == 0.0)
+    {
+    return 0.0;
+    }
+  else if (x > 0.0)
+    {
+    return pow(x, 1.0/3.0);
+    }
+  else if (x < 0.0)
+    {
+    return -pow(-x, 1.0/3.0);
+    }
+  else
+    {
+    assert("Upgrade to C++11" && 0);
+    return 0.0;
+    }
+#endif
+}

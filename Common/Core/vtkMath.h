@@ -960,6 +960,10 @@ public:
   // Test if a number has finite value i.e. it is normal, subnormal or zero, but not infinite or Nan.
   static bool IsFinite(double x);
 
+  // Description:
+  // Returns the cube root of the parameter.
+  static double cbrt(double x);
+
 protected:
   vtkMath() {}
   ~vtkMath() {}

@@ -25,9 +25,6 @@
 
 vtkStandardNewMacro(vtkMassProperties);
 
-#define  VTK_CUBE_ROOT(x) \
-  ((x<0.0)?(-pow((-x),0.333333333333333)):(pow((x),0.333333333333333)))
-
 //----------------------------------------------------------------------------
 // Constructs with initial 0 values.
 vtkMassProperties::vtkMassProperties()
@@ -257,7 +254,7 @@ int vtkMassProperties::RequestData(
   this->Volume =  fabs(this->Volume);
   this->VolumeProjected = volumeproj;
   this->NormalizedShapeIndex =
-    (sqrt(surfacearea)/VTK_CUBE_ROOT(this->Volume))/2.199085233;
+    (sqrt(surfacearea)/vtkMath::cbrt(this->Volume))/2.199085233;
 
   return 1;
 }
