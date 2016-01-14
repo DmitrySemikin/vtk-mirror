@@ -16,12 +16,14 @@ PURPOSE.  See the above copyright notice for more information.
 
 #include "vtkIdList.h"
 #include "vtkCommand.h"
+#include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLRenderer.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLError.h"
 #include "vtkOpenGLShaderCache.h"
 #include "vtkRendererCollection.h"
+#include "vtkStringOutputWindow.h"
 #include "vtkWin32RenderWindowInteractor.h"
 
 #include <math.h>
@@ -284,9 +286,7 @@ void vtkWin32OpenGLRenderWindow::SetSize(int x, int y)
   static int resizing = 0;
   if ((this->Size[0] != x) || (this->Size[1] != y))
     {
-    this->Modified();
-    this->Size[0] = x;
-    this->Size[1] = y;
+    this->Superclass::SetSize(x, y);
 
     if (this->Interactor)
       {
@@ -418,6 +418,11 @@ int vtkWin32OpenGLRenderWindow::SupportsOpenGL()
     return this->OpenGLSupportResult;
     }
 
+  vtkOutputWindow *oldOW = vtkOutputWindow::GetInstance();
+  oldOW->Register(this);
+  vtkNew<vtkStringOutputWindow> sow;
+  vtkOutputWindow::SetInstance(sow.Get());
+
   vtkWin32OpenGLRenderWindow *rw = vtkWin32OpenGLRenderWindow::New();
   rw->SetOffScreenRendering(1);
   rw->Initialize();
@@ -466,6 +471,12 @@ int vtkWin32OpenGLRenderWindow::SupportsOpenGL()
     }
 
   rw->Delete();
+
+  this->OpenGLSupportMessage +=
+    "vtkOutputWindow Text Folows:\n\n" +
+    sow->GetOutput();
+  vtkOutputWindow::SetInstance(oldOW);
+  oldOW->Delete();
 
   this->OpenGLSupportTested = true;
 

@@ -323,9 +323,7 @@ void vtkWin32OpenGLRenderWindow::SetSize(int x, int y)
   static int resizing = 0;
   if ((this->Size[0] != x) || (this->Size[1] != y))
     {
-    this->Modified();
-    this->Size[0] = x;
-    this->Size[1] = y;
+    this->Superclass::SetSize(x, y);
 
     if (this->Interactor)
       {
@@ -1195,6 +1193,11 @@ int *vtkWin32OpenGLRenderWindow::GetSize(void)
 // Get the size of the whole screen.
 int *vtkWin32OpenGLRenderWindow::GetScreenSize(void)
 {
+  if (this->OffScreenRendering)
+    {
+    return this->Size;
+    }
+
   HDC hDC = ::GetDC(NULL);
   if (hDC)
     {
@@ -1490,6 +1493,10 @@ void vtkWin32OpenGLRenderWindow::CreateOffScreenWindow(int width,
 #endif
     this->CreateOffScreenDC(width, height, dc);
     DeleteDC(dc);
+    }
+    else
+    {
+    this->Mapped = 0;
     }
   this->CreatingOffScreenWindow = status;
 }

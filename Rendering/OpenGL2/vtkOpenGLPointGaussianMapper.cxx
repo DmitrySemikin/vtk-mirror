@@ -120,6 +120,12 @@ vtkOpenGLPointGaussianMapperHelper::vtkOpenGLPointGaussianMapperHelper()
   this->Owner = NULL;
   this->OpacityTable = 0;
   this->ScaleTable = 0;
+  this->UsingPoints = false;
+  this->OpacityScale = 1.0;
+  this->ScaleScale = 1.0;
+  this->OpacityOffset = 0.0;
+  this->ScaleOffset = 0.0;
+  this->TriangleScale = 0.0;
 }
 
 
@@ -527,7 +533,6 @@ void vtkOpenGLPointGaussianMapperHelper::BuildOpacityTable()
 
   // if a piecewise function was provided, use it to map the opacities
   vtkPiecewiseFunction *pwf = this->Owner->GetScalarOpacityFunction();
-  pwf->GetRange(range);
   int tableSize = this->Owner->GetOpacityTableSize();
 
   if (this->OpacityTable)
@@ -538,6 +543,7 @@ void vtkOpenGLPointGaussianMapperHelper::BuildOpacityTable()
   if (pwf)
     {
     // build the interpolation table
+    pwf->GetRange(range);
     pwf->GetTable(range[0],range[1],tableSize,this->OpacityTable);
     // duplicate the last value for bilinear interp edge case
     this->OpacityTable[tableSize] = this->OpacityTable[tableSize-1];
@@ -554,7 +560,6 @@ void vtkOpenGLPointGaussianMapperHelper::BuildScaleTable()
 
   // if a piecewise function was provided, use it to map the opacities
   vtkPiecewiseFunction *pwf = this->Owner->GetScaleFunction();
-  pwf->GetRange(range);
   int tableSize = this->Owner->GetScaleTableSize();
 
   if (this->ScaleTable)
@@ -565,6 +570,7 @@ void vtkOpenGLPointGaussianMapperHelper::BuildScaleTable()
   if (pwf)
     {
     // build the interpolation table
+    pwf->GetRange(range);
     pwf->GetTable(range[0],range[1],tableSize,this->ScaleTable);
     // duplicate the last value for bilinear interp edge case
     this->ScaleTable[tableSize] = this->ScaleTable[tableSize-1];
@@ -682,6 +688,8 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
         ));
     }
   this->VBO->Upload(this->VBO->PackedVBO, vtkOpenGLBufferObject::ArrayBuffer);
+  // free the memory using a swap because OO gone bad
+  std::vector<float>().swap(this->VBO->PackedVBO);
 
   this->VBO->VertexCount = splatCount;
 

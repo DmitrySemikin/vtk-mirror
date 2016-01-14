@@ -80,6 +80,8 @@ vtkOpenGLPolyDataMapper::vtkOpenGLPolyDataMapper()
   this->DrawingEdges = false;
   this->ForceTextureCoordinates = false;
 
+  this->PrimitiveIDOffset = 0;
+
   this->CellScalarTexture = NULL;
   this->CellScalarBuffer = NULL;
   this->CellNormalTexture = NULL;
@@ -97,6 +99,7 @@ vtkOpenGLPolyDataMapper::vtkOpenGLPolyDataMapper()
 
   this->AppleBugPrimIDBuffer = 0;
   this->HaveAppleBug = false;
+  this->HaveAppleBugForce = 0;
   this->LastBoundBO = NULL;
 
   this->VertexShaderCode = 0;
@@ -418,7 +421,7 @@ void vtkOpenGLPolyDataMapper::ReplaceShaderColor(
       "  vec3 specularColor;\n"
       "  float specularPower;\n";
     }
-  if (actor->GetBackfaceProperty())
+  if (actor->GetBackfaceProperty() && !this->DrawingEdges)
     {
     if (this->LastLightComplexity[this->LastBoundBO])
       {
@@ -1970,15 +1973,6 @@ void vtkOpenGLPolyDataMapper::RenderPieceStart(vtkRenderer* ren, vtkActor *actor
   if (selector && this->PopulateSelectionSettings)
     {
     selector->BeginRenderProp();
-    // render points for point picking in a special way
-    if (selector->GetFieldAssociation() == vtkDataObject::FIELD_ASSOCIATION_POINTS &&
-        selector->GetCurrentPass() >= vtkHardwareSelector::ID_LOW24)
-      {
-#if GL_ES_VERSION_2_0 != 1
-      glPointSize(4.0); //make verts large enough to be sure to overlap cell
-#endif
-      glDepthMask(GL_FALSE); //prevent verts from interfering with each other
-      }
     if (selector->GetCurrentPass() == vtkHardwareSelector::COMPOSITE_INDEX_PASS)
       {
       selector->RenderCompositeIndex(1);
@@ -2021,9 +2015,31 @@ void vtkOpenGLPolyDataMapper::RenderPieceStart(vtkRenderer* ren, vtkActor *actor
 //-----------------------------------------------------------------------------
 void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
 {
+  int representation = actor->GetProperty()->GetRepresentation();
+
+  // render points for point picking in a special way
+  // all cell types should be rendered as points
+  vtkHardwareSelector* selector = ren->GetSelector();
+  bool pointPicking = false;
+  if (selector && this->PopulateSelectionSettings &&
+      selector->GetFieldAssociation() == vtkDataObject::FIELD_ASSOCIATION_POINTS &&
+      selector->GetCurrentPass() >= vtkHardwareSelector::ID_LOW24)
+    {
+    representation = VTK_POINTS;
+    pointPicking = true;
+    }
+
   // draw points
   if (this->Points.IBO->IndexCount)
     {
+    // render points for point picking in a special way
+    if (pointPicking)
+      {
+#if GL_ES_VERSION_2_0 != 1
+      glPointSize(2.0);
+#endif
+      }
+
     // Update/build/etc the shader.
     this->UpdateShaders(this->Points, ren, actor);
     this->Points.IBO->Bind();
@@ -2034,18 +2050,6 @@ void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
                         reinterpret_cast<const GLvoid *>(NULL));
     this->Points.IBO->Release();
     this->PrimitiveIDOffset += (int)this->Points.IBO->IndexCount;
-    }
-
-  int representation = actor->GetProperty()->GetRepresentation();
-
-  // render points for point picking in a special way
-  // all cell types should be rendered as points
-  vtkHardwareSelector* selector = ren->GetSelector();
-  if (selector && this->PopulateSelectionSettings &&
-      selector->GetFieldAssociation() == vtkDataObject::FIELD_ASSOCIATION_POINTS &&
-      selector->GetCurrentPass() >= vtkHardwareSelector::ID_LOW24)
-    {
-    representation = VTK_POINTS;
     }
 
   // draw lines
@@ -2059,6 +2063,12 @@ void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
     this->Lines.IBO->Bind();
     if (representation == VTK_POINTS)
       {
+      if (pointPicking)
+        {
+  #if GL_ES_VERSION_2_0 != 1
+        glPointSize(4.0);
+  #endif
+        }
       glDrawRangeElements(GL_POINTS, 0,
                           static_cast<GLuint>(this->VBO->VertexCount - 1),
                           static_cast<GLsizei>(this->Lines.IBO->IndexCount),
@@ -2089,6 +2099,12 @@ void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
     this->Tris.IBO->Bind();
     GLenum mode = (representation == VTK_POINTS) ? GL_POINTS :
       (representation == VTK_WIREFRAME) ? GL_LINES : GL_TRIANGLES;
+    if (pointPicking)
+      {
+#if GL_ES_VERSION_2_0 != 1
+      glPointSize(6.0);
+#endif
+      }
     glDrawRangeElements(mode, 0,
                       static_cast<GLuint>(this->VBO->VertexCount - 1),
                       static_cast<GLsizei>(this->Tris.IBO->IndexCount),
@@ -2106,6 +2122,12 @@ void vtkOpenGLPolyDataMapper::RenderPieceDraw(vtkRenderer* ren, vtkActor *actor)
     this->TriStrips.IBO->Bind();
     if (representation == VTK_POINTS)
       {
+      if (pointPicking)
+        {
+  #if GL_ES_VERSION_2_0 != 1
+        glPointSize(6.0);
+  #endif
+        }
       glDrawRangeElements(GL_POINTS, 0,
                           static_cast<GLuint>(this->VBO->VertexCount - 1),
                           static_cast<GLsizei>(this->TriStrips.IBO->IndexCount),
@@ -2793,14 +2815,43 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
   this->HaveAppleBug = false;
 
 #ifdef __APPLE__
+  // working AMD APPLE systems
+  // OpenGL vendor string:  ATI Technologies Inc.
+  // OpenGL renderer string:  AMD Radeon R9 M370X OpenGL Engine
+  // OpenGL version string:  4.1 ATI-1.40.15
+
+  // known bad APPLE AMD systems
+  // OpenGL vendor string:  ATI Technologies Inc.
+  // OpenGL renderer string:  ATI Radeon HD 2600 PRO OpenGL Engine
+  // OpenGL version string:  3.3 ATI-10.0.40
+
   std::string vendor = (const char *)glGetString(GL_VENDOR);
   if (vendor.find("ATI") != std::string::npos ||
       vendor.find("AMD") != std::string::npos ||
       vendor.find("amd") != std::string::npos)
     {
+    // assume we have the bug
     this->HaveAppleBug = true;
+
+    // but exclude systems we know do not have it
+    std::string renderer = (const char *)glGetString(GL_RENDERER);
+    std::string version = (const char *)glGetString(GL_VERSION);
+    if (renderer.find("AMD Radeon R9 M370X OpenGL Engine") != std::string::npos
+        && version.find("4.1 ATI-1.40.15") != std::string::npos)
+      {
+      this->HaveAppleBug = false;
+      }
     }
 #endif
+
+  if (this->HaveAppleBugForce == 1)
+    {
+    this->HaveAppleBug = false;
+    }
+  if (this->HaveAppleBugForce == 2)
+    {
+    this->HaveAppleBug = true;
+    }
 
   vtkCellArray *prims[4];
   prims[0] =  poly->GetVerts();
@@ -2840,7 +2891,8 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
       {
       vtkWarningMacro("VTK is working around a bug in Apple-AMD hardware related to gl_PrimitiveID.  This may cause significant memory and performance impacts. Your hardware has been identified as vendor "
         << (const char *)glGetString(GL_VENDOR) << " with renderer of "
-        << (const char *)glGetString(GL_RENDERER));
+        << (const char *)glGetString(GL_RENDERER) << " and version "
+        << (const char *)glGetString(GL_VERSION));
       warnedAboutBrokenAppleDriver = true;
       }
     if (n)
@@ -2866,7 +2918,6 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
     // for coloring with a point attribute.
     // fixme ... make the existence of the coordinate array the signal.
     vtkDataArray *tcoords = NULL;
-    this->TextureComponents = 4;
     if (haveTextures)
       {
       if (this->InterpolateScalarsBeforeMapping && this->ColorCoordinates)
@@ -3018,7 +3069,7 @@ void vtkOpenGLPolyDataMapper::BuildIBO(
           vtkDebugMacro(<< "Currently only 1d edge flags are supported.");
           ef = NULL;
           }
-        if (!ef->IsA("vtkUnsignedCharArray"))
+        else if (!ef->IsA("vtkUnsignedCharArray"))
           {
           vtkDebugMacro(<< "Currently only unsigned char edge flags are suported.");
           ef = NULL;
