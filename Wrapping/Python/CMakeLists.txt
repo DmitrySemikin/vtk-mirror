@@ -120,9 +120,8 @@ if(VTK_ENABLE_KITS)
   # Wrap kits and modules.
   foreach(target IN LISTS _vtk_python_wrapping_work_list)
     # Determine whether target is a kit or module
-    string(REGEX REPLACE "(.+)${VTK_KIT_SUFFIX}$" "\\1" _stripped_target ${target})
-    list(FIND vtk_kits ${_stripped_target} _kit_index)
-    if(_kit_index GREATER -1)
+    string(REGEX REPLACE "(.+)${VTK_KIT_SUFFIX}\$" "\\1" _stripped_target ${target})
+    if(_${_stripped_target}_is_kit)
       # Wrap kit
       set(kit ${_stripped_target})
       set(kit_srcs)
