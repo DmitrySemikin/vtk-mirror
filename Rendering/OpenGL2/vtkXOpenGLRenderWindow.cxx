@@ -72,10 +72,8 @@ private:
   // how about abstracting this a bit?
 
   // support for Pixmap based offscreen rendering
-  Pixmap pixmap;
   GLXContext PixmapContextId;
   Window PixmapWindowId;
-
 
   // support for Pbuffer based offscreen rendering
   GLXContext PbufferContextId;
@@ -907,7 +905,6 @@ void vtkXOpenGLRenderWindow::DestroyOffScreenWindow()
         {
         glXDestroyGLXPixmap(this->DisplayId, this->Internal->PixmapWindowId);
         this->Internal->PixmapWindowId = 0;
-        XFreePixmap(this->DisplayId, this->Internal->pixmap);
         glXDestroyContext( this->DisplayId, this->Internal->PixmapContextId);
         this->Internal->PixmapContextId = NULL;
         }
@@ -1114,8 +1111,7 @@ void vtkXOpenGLRenderWindow::SetSize(int width,int height)
 {
   if ((this->Size[0] != width)||(this->Size[1] != height))
     {
-    this->Size[0] = width;
-    this->Size[1] = height;
+    this->Superclass::SetSize(width, height);
 
     if (this->Interactor)
       {
