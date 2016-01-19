@@ -194,15 +194,15 @@ int vtkCellDerivatives::RequestData(
           }
         else if (this->TensorMode == VTK_TENSOR_MODE_COMPUTE_STRAIN)
           {
-          tens->SetComponent(0,0, derivs[0]);
+          tens->SetComponent(0,0, 0.5*(derivs[0]+derivs[0]));
           tens->SetComponent(0,1, 0.5*(derivs[1]+derivs[3]));
           tens->SetComponent(0,2, 0.5*(derivs[2]+derivs[6]));
-          tens->SetComponent(1,0, 0.5*(derivs[1]+derivs[3]));
-          tens->SetComponent(1,1, derivs[4]);
+          tens->SetComponent(1,0, 0.5*(derivs[3]+derivs[1]));
+          tens->SetComponent(1,1, 0.5*(derivs[4]+derivs[4]));
           tens->SetComponent(1,2, 0.5*(derivs[5]+derivs[7]));
-          tens->SetComponent(2,0, 0.5*(derivs[2]+derivs[6]));
-          tens->SetComponent(2,1, 0.5*(derivs[5]+derivs[7]));
-          tens->SetComponent(2,2, derivs[8]);
+          tens->SetComponent(2,0, 0.5*(derivs[6]+derivs[2]));
+          tens->SetComponent(2,1, 0.5*(derivs[7]+derivs[5]));
+          tens->SetComponent(2,2, 0.5*(derivs[8]+derivs[8]));
 
           outTensors->InsertTuple(cellId, tens->T);
           }
