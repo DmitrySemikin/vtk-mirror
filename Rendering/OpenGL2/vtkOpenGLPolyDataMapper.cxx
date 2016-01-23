@@ -2815,12 +2815,12 @@ void vtkOpenGLPolyDataMapper::BuildBufferObjects(vtkRenderer *ren, vtkActor *act
   this->HaveAppleBug = false;
 
 #ifdef __APPLE__
-  // working AMD APPLE systems
+  // working Apple+AMD systems
   // OpenGL vendor string:  ATI Technologies Inc.
   // OpenGL renderer string:  AMD Radeon R9 M370X OpenGL Engine
   // OpenGL version string:  4.1 ATI-1.40.15
 
-  // known bad APPLE AMD systems
+  // known bad Apple+AMD systems
   // OpenGL vendor string:  ATI Technologies Inc.
   // OpenGL renderer string:  ATI Radeon HD 2600 PRO OpenGL Engine
   // OpenGL version string:  3.3 ATI-10.0.40

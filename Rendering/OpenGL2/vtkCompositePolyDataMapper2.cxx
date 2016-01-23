@@ -187,7 +187,7 @@ void vtkCompositePolyDataMapper2::Render(
         }
       }
 
-    // check if this system is subject to the apple primID bug
+    // check if this system is subject to the Apple primID bug
     // if so don't even try using the fast path, just go slow
 
 #ifdef __APPLE__
