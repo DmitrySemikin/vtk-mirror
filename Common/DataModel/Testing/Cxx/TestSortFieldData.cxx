@@ -150,6 +150,7 @@ int TestSortFieldData(int, char*[])
   dArray->Delete();
   vArray->Delete();
   fd->Delete();
+  delete [] idx;
 
   return 0;
 }
