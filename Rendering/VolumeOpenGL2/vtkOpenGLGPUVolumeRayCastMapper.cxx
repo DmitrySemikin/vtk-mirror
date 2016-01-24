@@ -1771,7 +1771,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateCropping(
                             static_cast<float>(croppingRegionPlanes[4]),
                             static_cast<float>(croppingRegionPlanes[5]) };
 
-    this->ShaderProgram->SetUniform1fv("cropping_planes", 6, cropPlanes);
+    this->ShaderProgram->SetUniform1fv("in_croppingPlanes", 6, cropPlanes);
     const int numberOfRegions = 32;
     int cropFlagsArray[numberOfRegions];
     cropFlagsArray[0] = 0;
@@ -1787,7 +1787,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::UpdateCropping(
       cropFlagsArray[i] = 0;
       }
 
-    this->ShaderProgram->SetUniform1iv("cropping_flags",
+    this->ShaderProgram->SetUniform1iv("in_croppingFlags",
                                        numberOfRegions,
                                        cropFlagsArray);
     }
