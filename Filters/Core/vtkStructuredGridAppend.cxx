@@ -234,7 +234,7 @@ int vtkStructuredGridAppend::RequestData(
   // value set from a ghost entity, 3 means value set from a non-ghost entity.
   // VTK assumes ghost entities have correct values in them but that may not
   // always be the case.
-  std::vector<int> validValues(vtkStructuredData::GetNumberOfPoints(outExt), 0);
+  std::vector<int> validValues(vtkStructuredData::GetNumberOfPoints(outExt));
 
   for (int idx1 = 0; idx1 < this->GetNumberOfInputConnections(0); ++idx1)
     {
@@ -258,6 +258,14 @@ int vtkStructuredGridAppend::RequestData(
         vtkIdType numComp;
 
         vtkUnsignedCharArray* ghosts = input->GetPointGhostArray();
+
+        if(input->GetPointData()->GetNumberOfArrays())
+          { // only zero out the array if we have point arrays
+          for(vtkIdType i=0;i<output->GetNumberOfPoints();i++)
+            {
+            validValues[i] = 0;
+            }
+          }
 
         //do point associated arrays
         for (vtkIdType ai = 0;
@@ -344,10 +352,14 @@ int vtkStructuredGridAppend::RequestData(
             return 0;
           }
 
-        validValues.resize(output->GetNumberOfCells());
-        for(vtkIdType i=0;i<output->GetNumberOfCells();i++)
-          {
-          validValues[i] = 0;
+        // note that we are still using validValues but only for the
+        // cells now so there are less of them than points.
+        if(input->GetCellData()->GetNumberOfArrays())
+          { // only zero out values if we have cell arrays to compute
+          for(vtkIdType i=0;i<output->GetNumberOfCells();i++)
+            {
+            validValues[i] = 0;
+            }
           }
         ghosts = input->GetCellGhostArray();
 
