@@ -5,6 +5,8 @@ vtk_module(vtkRenderingVolumeOpenGL2
     vtkRenderingVolume
   BACKEND
     OpenGL2
+  IMPLEMENTATION_REQUIRED_BY_BACKEND
+    TRUE
   DEPENDS
     vtkglew
     vtkRenderingOpenGL2

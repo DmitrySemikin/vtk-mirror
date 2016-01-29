@@ -7,8 +7,9 @@ vtk_module(vtkRenderingOpenGL2
     vtkRenderingCore
   BACKEND
     OpenGL2
+  IMPLEMENTATION_REQUIRED_BY_BACKEND
+    TRUE
   PRIVATE_DEPENDS
-    vtkImagingHybrid
     vtkglew
     vtksys
   COMPILE_DEPENDS

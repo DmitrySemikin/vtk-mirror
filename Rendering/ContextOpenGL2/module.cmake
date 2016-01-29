@@ -8,6 +8,8 @@ vtk_module(vtkRenderingContextOpenGL2
     vtkRenderingContext2D
   BACKEND
     OpenGL2
+  IMPLEMENTATION_REQUIRED_BY_BACKEND
+    TRUE
   PRIVATE_DEPENDS
     vtkRenderingFreeType
     vtkglew

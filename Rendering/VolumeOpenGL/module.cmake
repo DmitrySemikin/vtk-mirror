@@ -12,6 +12,8 @@ vtk_module(vtkRenderingVolumeOpenGL
     vtkRenderingVolume
   BACKEND
     OpenGL
+  IMPLEMENTATION_REQUIRED_BY_BACKEND
+    TRUE
   DEPENDS
     vtkRenderingOpenGL
     ${VTK_RENDERINGVOLUMEOPENGLNEW}

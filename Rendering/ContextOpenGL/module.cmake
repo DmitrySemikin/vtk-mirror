@@ -5,6 +5,8 @@ vtk_module(vtkRenderingContextOpenGL
     vtkRenderingContext2D
   BACKEND
     OpenGL
+  IMPLEMENTATION_REQUIRED_BY_BACKEND
+    TRUE
   PRIVATE_DEPENDS
     vtkRenderingFreeType
   KIT

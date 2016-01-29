@@ -8,7 +8,7 @@ vtk_module(vtkRenderingCore
   PRIVATE_DEPENDS
     vtkFiltersSources
     vtkFiltersGeometry
-    vtkFiltersExtraction
+#    vtkFiltersExtraction
     vtksys
   TEST_DEPENDS
     vtkIOLegacy
