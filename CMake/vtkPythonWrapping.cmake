@@ -12,8 +12,21 @@ endif()
 # has two signatures:
 # 1) vtk_add_python_wrapping(<module_name> <sources_var>)
 # 2) vtk_add_python_wrapping("<module_name>[ <module_name>]" <sources_var> <kit_name>)
-function(vtk_add_python_wrapping module_names sources_var)
+#
+# Legacy code may call this function with a single argument. In that case,
+# vtk_add_python_wrapping_library() is called internally to maintain backwards
+# compatibility.
+function(vtk_add_python_wrapping module_names)
+  if(${ARGC} EQUAL 1)
+    set(_legacy TRUE)
+    message(WARNING
+      "Calling vtk_add_python_wrapping() with a single argument is deprecated.")
+  endif()
+  if("${ARGV1}" MATCHES ".+")
+    set(sources_var ${ARGV1})
+  endif()
   if("${ARGV2}" MATCHES ".+")
+    list(REMOVE_AT ARGN 0)
     set(target ${ARGN})
   else()
     set(target ${module_names})
@@ -47,7 +60,12 @@ function(vtk_add_python_wrapping module_names sources_var)
   endif()
 
   vtk_wrap_python(${target}Python Python_SRCS "${module_names}")
-  set(${sources_var} "${Python_SRCS}" "${extra_srcs}" PARENT_SCOPE)
+  if(_legacy)
+    set(_sources "${Python_SRCS}" "${extra_srcs}")
+    vtk_add_python_wrapping_library(${module_names} _sources ${module_names})
+  else()
+    set(${sources_var} "${Python_SRCS}" "${extra_srcs}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(vtk_add_python_wrapping_library module srcs)
