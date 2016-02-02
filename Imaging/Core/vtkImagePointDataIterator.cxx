@@ -326,10 +326,14 @@ void vtkImagePointDataIterator::NextSpan()
 
     if (this->HasStencil)
       {
+      // check that Index is within the stencil
       if ((this->Index[1] >= this->Extent[2]) &&
           (this->Index[1] <= this->Extent[3]) &&
           (this->Index[2] >= this->Extent[4]) &&
-          (this->Index[2] <= this->Extent[5]))
+          (this->Index[2] <= this->Extent[5]) &&
+          // do not increment past final position
+          ((this->Index[1] != this->Extent[3]) ||
+           (this->Index[2] != this->Extent[5])))
         {
         this->SpanCountPointer += spanIncr;
         this->SpanListPointer += spanIncr;
