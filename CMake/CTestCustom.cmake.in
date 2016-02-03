@@ -326,6 +326,7 @@ SET(CTEST_CUSTOM_WARNING_EXCEPTION
 
   #supress diy2 warnings
   "include.diy"
+  "include/[^/]*/diy" # install tree layout
   "diy::"
   "expanded from macro 'diy'"
   )
