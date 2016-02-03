@@ -632,6 +632,16 @@ int vtkSMPContourGrid::ProcessRequest(vtkInformation* request,
     return this->RequestDataObject(request, inputVector, outputVector);
     }
 
+  if(request->Has(vtkDemandDrivenPipeline::REQUEST_DATA_NOT_GENERATED()))
+    {
+    if (this->ContourValues->GetNumberOfContours() == 0)
+      {
+      vtkInformation *outInfo = outputVector->GetInformationObject(0);
+      outInfo->Set(vtkDemandDrivenPipeline::DATA_NOT_GENERATED(), 1);
+      return 1;
+      }
+    }
+
   return this->Superclass::ProcessRequest(request, inputVector, outputVector);
 }
 
