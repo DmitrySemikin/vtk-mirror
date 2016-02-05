@@ -461,7 +461,7 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         else:
             delta = ev.angleDelta().y()
 
-        if ev.delta() >= 0:
+        if delta() >= 0:
             self._Iren.MouseWheelForwardEvent()
         else:
             self._Iren.MouseWheelBackwardEvent()
