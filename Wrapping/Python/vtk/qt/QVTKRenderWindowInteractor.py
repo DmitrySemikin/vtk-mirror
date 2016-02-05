@@ -456,6 +456,11 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         self._Iren.KeyReleaseEvent()
 
     def wheelEvent(self, ev):
+        if hasattr(ev, 'delta'):
+            delta = ev.delta()
+        else:
+            delta = ev.angleDelta().y()
+
         if ev.delta() >= 0:
             self._Iren.MouseWheelForwardEvent()
         else:
