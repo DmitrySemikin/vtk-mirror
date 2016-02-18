@@ -23,7 +23,6 @@
 // .SECTION see also
 // vtkActor vtkFollower vtkCamera vtkAxisActor vtkCubeAxesActor
 
-
 #ifndef vtkAxisFollower_h
 #define vtkAxisFollower_h
 
@@ -89,8 +88,14 @@ public:
 
  // Description:
  // Set/Get the desired screen offset from the axis.
- vtkSetMacro(ScreenOffset, double);
- vtkGetMacro(ScreenOffset, double);
+ // Conveninience method, using a zero horizontal offset
+ double GetScreenOffset();
+ void SetScreenOffset(double offset);
+
+ // Description:
+ // Set/Get the desired screen offset from the axis.
+ vtkSetVector2Macro(ScreenOffsetVector, double);
+ vtkGetVector2Macro(ScreenOffsetVector, double);
 
  // Description:
  // This causes the actor to be rendered. It in turn will render the actor's
@@ -123,7 +128,6 @@ protected:
                                  vtkAxisActor *axis1, double *dop,
                                  vtkRenderer *ren);
 
-
  void ComputeRotationAndTranlation(vtkRenderer *ren, double translation[3],
                                    double Rx[3], double Ry[3], double Rz[3],
                                    vtkAxisActor *axis);
@@ -131,7 +135,6 @@ protected:
  // \NOTE: Not used as of now.
  void ComputerAutoCenterTranslation(const double& autoScaleFactor,
                                     double translation[3]);
-
 
  int  TestDistanceVisibility();
  void ExecuteViewAngleVisibility(double normal[3]);
@@ -146,10 +149,9 @@ protected:
  int          EnableViewAngleLOD;
  double       ViewAngleLODThreshold;
 
- double       ScreenOffset;
+ double       ScreenOffsetVector[2];
 
  vtkWeakPointer<vtkAxisActor> Axis;
-
 
 private:
 
