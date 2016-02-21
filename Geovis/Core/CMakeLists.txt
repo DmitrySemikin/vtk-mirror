@@ -1,3 +1,8 @@
+# Mac GNU compiler has trouble linking to libvtkprog
+# if the library is build shared
+if (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+  set(BUILD_SHARED_LIBS OFF)
+endif()
 set(Module_SRCS
   vtkCompassRepresentation.cxx
   vtkCompassWidget.cxx

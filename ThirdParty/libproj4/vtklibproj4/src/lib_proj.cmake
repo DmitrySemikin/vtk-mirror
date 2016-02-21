@@ -5,13 +5,18 @@ colormsg(_HIBLUE_ "Configuring proj library:")
 message(STATUS "")
 
 # default config, shared on unix and static on Windows
-set(BUILD_LIBPROJ_SHARED_DEFAULT ON )
+set(BUILD_LIBPROJ_SHARED_DEFAULT OFF )
 if( WIN32)
     set(BUILD_LIBPROJ_SHARED_DEFAULT OFF)
 endif(WIN32)
 if ( NOT DEFINED BUILD_SHARED_LIBS )
     option(BUILD_SHARED_LIBS "Build libproj library shared." ${BUILD_LIBPROJ_SHARED_DEFAULT})
 endif ()
+# Mac GNU compiler has trouble linking to libvtkprog
+# if the library is build shared
+if (APPLE AND CMAKE_COMPILER_IS_GNUCXX)
+  set(BUILD_SHARED_LIBS OFF)
+endif()
 
 option(LIBPROJ_USE_THREAD "Build libproj with thread/mutex support " ON)
 mark_as_advanced(LIBPROJ_USE_THREAD)
