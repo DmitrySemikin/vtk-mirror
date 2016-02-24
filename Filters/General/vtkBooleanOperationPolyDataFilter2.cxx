@@ -220,70 +220,70 @@ int vtkBooleanOperationPolyDataFilter2::Impl::FindRegion(int inputIndex,
       //Get the three points of the cell
       this->Mesh[inputIndex]->GetCellPoints(cellId,npts,pts);
       if (this->checked[inputIndex][cellId] == 0)
-	{
-	//Mark cell as checked and insert the fillnumber value to cell
-	if (fill)
-	  {
-	  this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
-	  }
-	this->checked[inputIndex][cellId] = 1;
-	for (i=0; i < npts; i++)
-	  {
-	  p1 = pts[i];
-	  //Get the cells attached to each point
-	  this->Mesh[inputIndex]->GetPointCells(p1,neighbors);
-	  numNei = neighbors->GetNumberOfIds();
+        {
+        //Mark cell as checked and insert the fillnumber value to cell
+        if (fill)
+          {
+          this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
+          }
+        this->checked[inputIndex][cellId] = 1;
+        for (i=0; i < npts; i++)
+          {
+          p1 = pts[i];
+          //Get the cells attached to each point
+          this->Mesh[inputIndex]->GetPointCells(p1,neighbors);
+          numNei = neighbors->GetNumberOfIds();
 
-	  //For each neighboring cell
-	  for (j=0;j < numNei;j++)
-	    {
-	    //If this cell is close to a boundary
-	    if (this->BoundaryCellArray[inputIndex]->
-		GetValue(neighbors->GetId(j)))
-	      {
-	      //If this cell hasn't been checked already
-	      if (this->checkedcarefully[inputIndex][neighbors->
-		  GetId(j)] == 0)
-		{
-		//Add this cell to the careful check cells list and run
-		//the region finding tip toe code
-		this->CheckCellsCareful->
-		  InsertNextId(neighbors->GetId(j));
-		if (fill)
-		  {
-		  this->FindRegionTipToe(inputIndex,fillnumber,1);
-		  }
-		else
-		  {
-		  this->FindRegionTipToe(inputIndex,fillnumber,0);
-		  }
-		this->CheckCellsCareful->Reset();
-		this->CheckCellsCareful2->Reset();
-		}
-	      }
-	    //Cell needs to be added to check list
-	    else
-	      {
-	      this->CheckCells2->InsertNextId(neighbors->GetId(j));
-	      }
-	    }
-	  }
-	}
+          //For each neighboring cell
+          for (j=0;j < numNei;j++)
+            {
+            //If this cell is close to a boundary
+            if (this->BoundaryCellArray[inputIndex]->
+                GetValue(neighbors->GetId(j)))
+              {
+              //If this cell hasn't been checked already
+              if (this->checkedcarefully[inputIndex][neighbors->
+                  GetId(j)] == 0)
+                {
+                //Add this cell to the careful check cells list and run
+                //the region finding tip toe code
+                this->CheckCellsCareful->
+                  InsertNextId(neighbors->GetId(j));
+                if (fill)
+                  {
+                  this->FindRegionTipToe(inputIndex,fillnumber,1);
+                  }
+                else
+                  {
+                  this->FindRegionTipToe(inputIndex,fillnumber,0);
+                  }
+                this->CheckCellsCareful->Reset();
+                this->CheckCellsCareful2->Reset();
+                }
+              }
+            //Cell needs to be added to check list
+            else
+              {
+              this->CheckCells2->InsertNextId(neighbors->GetId(j));
+              }
+            }
+          }
+        }
       //This statement is for if the start cell is a boundary cell
       else if (this->checkedcarefully[inputIndex][cellId] == 0 && start)
-	{
-	start=0;
-	this->CheckCells->Reset();
-	this->CheckCellsCareful->InsertNextId(cellId);
-	if (fill)
-	  {
-	  this->FindRegionTipToe(inputIndex,fillnumber,1);
-	  }
-	else
-	  {
-	  this->FindRegionTipToe(inputIndex,fillnumber,0);
-	  }
-	}
+        {
+        start=0;
+        this->CheckCells->Reset();
+        this->CheckCellsCareful->InsertNextId(cellId);
+        if (fill)
+          {
+          this->FindRegionTipToe(inputIndex,fillnumber,1);
+          }
+        else
+          {
+          this->FindRegionTipToe(inputIndex,fillnumber,0);
+          }
+        }
       }
 
     //Swap the current check list to the full check list and continue
@@ -335,103 +335,103 @@ int vtkBooleanOperationPolyDataFilter2::Impl::FindRegionTipToe(
       this->Mesh[inputIndex]->GetCellPoints(cellId,npts,pts);
       if (this->checkedcarefully[inputIndex][cellId] == 0)
         {
-	//Update this cell to have been checked carefully and assign it
-	//with the fillnumber scalar
-	if (fill)
-	  {
-	  this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
-	  }
-	this->checkedcarefully[inputIndex][cellId] = 1;
-	//For each edge of the cell
-	//std::cout<<"Checking edges of cell "<<cellId<<endl;
-	for (i=0; i < npts; i++)
-	  {
-	  p1 = pts[i];
-	  p2 = pts[(i+1)%(npts)];
+        //Update this cell to have been checked carefully and assign it
+        //with the fillnumber scalar
+        if (fill)
+          {
+          this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
+          }
+        this->checkedcarefully[inputIndex][cellId] = 1;
+        //For each edge of the cell
+        //std::cout<<"Checking edges of cell "<<cellId<<endl;
+        for (i=0; i < npts; i++)
+          {
+          p1 = pts[i];
+          p2 = pts[(i+1)%(npts)];
 
-	  vtkSmartPointer<vtkIdList> neighbors =
-	    vtkSmartPointer<vtkIdList>::New();
-	  //Initial check to make sure the cell is in fact a face cell
-	  this->Mesh[inputIndex]->
-	    GetCellEdgeNeighbors(cellId,p1,p2,neighbors);
-	  numNei = neighbors->GetNumberOfIds();
+          vtkSmartPointer<vtkIdList> neighbors =
+            vtkSmartPointer<vtkIdList>::New();
+          //Initial check to make sure the cell is in fact a face cell
+          this->Mesh[inputIndex]->
+            GetCellEdgeNeighbors(cellId,p1,p2,neighbors);
+          numNei = neighbors->GetNumberOfIds();
 
-	  //Check to make sure it is an oustide surface cell,
-	  //i.e. one neighbor
-	  if (numNei==1)
-	    {
-	    int count = 0;
-	      //Check to see if cell is on the boundary,
-	      //if it is get adjacent lines
-	    if (this->BoundaryPointArray[inputIndex]->GetValue(p1) == 1)
-	      {
-	      count++;
-	      }
+          //Check to make sure it is an oustide surface cell,
+          //i.e. one neighbor
+          if (numNei==1)
+            {
+            int count = 0;
+              //Check to see if cell is on the boundary,
+              //if it is get adjacent lines
+            if (this->BoundaryPointArray[inputIndex]->GetValue(p1) == 1)
+              {
+              count++;
+              }
 
-	    if (this->BoundaryPointArray[inputIndex]->GetValue(p2) == 1)
-	      {
-	      count++;
-	      }
+            if (this->BoundaryPointArray[inputIndex]->GetValue(p2) == 1)
+              {
+              count++;
+              }
 
-	    nei=neighbors->GetId(0);
-	    //if cell is not on the boundary, add new cell to check list
-	    if (count < 2)
-	      {
-	      neiIds->InsertNextId(nei);
-	      }
-	    //if cell is on boundary, check to make sure it isn't
-	    //false positive; don't add to check list. This is done by
-	    //getting the boundary lines attached to each point, then
-	    //intersecting the two lists. If the result is zero, then this
-	    //is a false positive
-	    else
-	      {
-	      vtkIdType bPt1 = pointMapper[inputIndex][p1];
-	      this->IntersectionLines->GetPointCells(bPt1,bLinesOne);
+            nei=neighbors->GetId(0);
+            //if cell is not on the boundary, add new cell to check list
+            if (count < 2)
+              {
+              neiIds->InsertNextId(nei);
+              }
+            //if cell is on boundary, check to make sure it isn't
+            //false positive; don't add to check list. This is done by
+            //getting the boundary lines attached to each point, then
+            //intersecting the two lists. If the result is zero, then this
+            //is a false positive
+            else
+              {
+              vtkIdType bPt1 = pointMapper[inputIndex][p1];
+              this->IntersectionLines->GetPointCells(bPt1,bLinesOne);
 
-	      vtkIdType bPt2 = pointMapper[inputIndex][p2];
-	      this->IntersectionLines->GetPointCells(bPt2,bLinesTwo);
+              vtkIdType bPt2 = pointMapper[inputIndex][p2];
+              this->IntersectionLines->GetPointCells(bPt2,bLinesTwo);
 
-	      bLinesOne->IntersectWith(bLinesTwo);
-	      //Cell is false positive. Add to check list.
-	      if (bLinesOne->GetNumberOfIds() == 0)
-	        {
-		//std::cout<<"False positive! "<<nei<<endl;
-		neiIds->InsertNextId(nei);
-	        }
-	      //else
-		//std::cout<<"I have not been added because false"<<endl;
-	      }
-	    }
-	  else
-	    {
-	    //cout<<"NumNei is not 1"<<endl;
-	    //cout<<"Number of Neighbors "<<numNei<<endl;
-	    //cout<<"Cell is "<<cellId<<endl;
-	    for (k=0;k<numNei;k++)
-	      {
-	      //cout<<"Id!!! "<<neighbors->GetId(k)<<endl;
-	      }
-	    }
-	  }
+              bLinesOne->IntersectWith(bLinesTwo);
+              //Cell is false positive. Add to check list.
+              if (bLinesOne->GetNumberOfIds() == 0)
+                {
+                //std::cout<<"False positive! "<<nei<<endl;
+                neiIds->InsertNextId(nei);
+                }
+              //else
+                //std::cout<<"I have not been added because false"<<endl;
+              }
+            }
+          else
+            {
+            //cout<<"NumNei is not 1"<<endl;
+            //cout<<"Number of Neighbors "<<numNei<<endl;
+            //cout<<"Cell is "<<cellId<<endl;
+            for (k=0;k<numNei;k++)
+              {
+              //cout<<"Id!!! "<<neighbors->GetId(k)<<endl;
+              }
+            }
+          }
 
-	nIds = neiIds->GetNumberOfIds();
-	if (nIds>0)
-	  {
-	  //Add all Ids in current list to global list of Ids
-	  for (k=0; k< nIds;k++)
-	    {
-	      neiId = neiIds->GetId(k);
-	      if (this->checkedcarefully[inputIndex][neiId]==0)
-	        {
-		this->CheckCellsCareful2->InsertNextId(neiId);
-	        }
-	      else if (this->checked[inputIndex][neiId]==0)
-	        {
-		this->CheckCells2->InsertNextId(neiId);
-	        }
-	    }
-	  }
+        nIds = neiIds->GetNumberOfIds();
+        if (nIds>0)
+          {
+          //Add all Ids in current list to global list of Ids
+          for (k=0; k< nIds;k++)
+            {
+              neiId = neiIds->GetId(k);
+              if (this->checkedcarefully[inputIndex][neiId]==0)
+                {
+                this->CheckCellsCareful2->InsertNextId(neiId);
+                }
+              else if (this->checked[inputIndex][neiId]==0)
+                {
+                this->CheckCells2->InsertNextId(neiId);
+                }
+            }
+          }
         }
       }
 
@@ -954,14 +954,14 @@ int vtkBooleanOperationPolyDataFilter2::RequestData(
         numPolys = impl->Mesh[i]->GetNumberOfPolys();
         numPts = impl->Mesh[i]->GetNumberOfPoints();
         for (int j=0;j<numPts;j++)
-	  {
+          {
           impl->BoundaryPointArray[i]->InsertValue(j,0);
-	  }
+          }
 
         for (int j=0;j<numPolys;j++)
-	  {
+          {
           impl->BoundaryCellArray[i]->InsertValue(j,0);
-	  }
+          }
 
         impl->BoundaryCellArray[i]->SetName("BoundaryCells");
         impl->Mesh[i]->GetCellData()->AddArray(impl->BoundaryCellArray[i]);
@@ -1182,15 +1182,15 @@ void vtkBooleanOperationPolyDataFilter2::Impl::DetermineIntersection(
       if (this->Verbose)
         {
         if (cellIds->GetNumberOfIds() > 2)
-	  {
+          {
           std::cout<<"Number Of Cells is greater than 2 for first point "
             <<interPt<<endl;
-	  }
+          }
         else if (cellIds->GetNumberOfIds() < 2)
-	  {
+          {
           std::cout<<"Number Of Cells is less than 2 for point "<<interPt
             <<endl;
-	  }
+          }
         }
 
       nextCell = cellIds->GetId(0);
@@ -1205,9 +1205,9 @@ void vtkBooleanOperationPolyDataFilter2::Impl::DetermineIntersection(
           {
           vtkIdType nextPt = caseId;
           if (this->Verbose)
-	    {
+            {
             std::cout<<"End point of open loop is "<<nextPt<<endl;
-	    }
+            }
           newloop.endPt = nextPt;
           newloop.loopType = 2;
           nextCell = cellIds->GetId(1);
@@ -1490,9 +1490,9 @@ int vtkBooleanOperationPolyDataFilter2::Impl::RunLoopTest(
       if (numRegionsFound == 1)
         {
         if (this->Verbose)
-	  {
+          {
           std::cout<<"Legitimate Loop found"<<endl;
-	  }
+          }
         return cellId;
         }
       }
