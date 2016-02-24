@@ -334,156 +334,156 @@ int vtkIntersectionPolyDataFilter2::Impl
               else
                 {
                 if (unique[0])
+                {
+                intersectionSurfaceId->InsertValue(ptId0,surfaceid[0]);
+                }
+              else
+                {
+                if (intersectionSurfaceId->GetValue(ptId0) != 3)
                   {
                   intersectionSurfaceId->InsertValue(ptId0,surfaceid[0]);
                   }
-                else
-                  {
-                  if (intersectionSurfaceId->GetValue(ptId0) != 3)
-                    {
-                    intersectionSurfaceId->InsertValue(ptId0,surfaceid[0]);
-                    }
 
-                  }
-                if (unique[1])
+                }
+              if (unique[1])
+                {
+                intersectionSurfaceId->InsertValue(ptId1,surfaceid[1]);
+                }
+              else
+                {
+                if (intersectionSurfaceId->GetValue(ptId1) != 3)
                   {
                   intersectionSurfaceId->InsertValue(ptId1,surfaceid[1]);
                   }
-                else
+                }
+              }
+
+            info->IntersectionPtsMap[0]->
+              insert(std::make_pair(ptId0, cellId0));
+            info->IntersectionPtsMap[1]->
+              insert(std::make_pair(ptId0, cellId1));
+            info->IntersectionPtsMap[0]->
+              insert(std::make_pair(ptId1, cellId0));
+            info->IntersectionPtsMap[1]->
+              insert(std::make_pair(ptId1, cellId1));
+
+            //Check to see if duplicate line. Line can only be a duplicate
+            //line if both points are not unique and they don't
+            //equal eachother
+            if (!unique[0] && !unique[1] && ptId0 != ptId1)
+              {
+              vtkSmartPointer<vtkPolyData> lineTest =
+                vtkSmartPointer<vtkPolyData>::New();
+              lineTest->SetPoints(pointMerger->GetPoints());
+              lineTest->SetLines(intersectionLines);
+              lineTest->BuildLinks();
+              int newLine = info->CheckLine(lineTest,ptId0,ptId1);
+              if (newLine == 0)
+                {
+                addline = 0;
+                }
+              }
+            if (addline)
+              {
+              //If the line is new and does not consist of two identical
+              //points, add the line to the intersection and update
+              //mapping information
+              intersectionLines->InsertNextCell(2);
+              intersectionLines->InsertCellPoint(ptId0);
+              intersectionLines->InsertCellPoint(ptId1);
+
+              intersectionCellIds0->InsertNextValue(cellId0);
+              intersectionCellIds1->InsertNextValue(cellId1);
+
+              info->PointCellIds[0]->InsertValue( ptId0, cellId0 );
+              info->PointCellIds[0]->InsertValue( ptId1, cellId0 );
+              info->PointCellIds[1]->InsertValue( ptId0, cellId1 );
+              info->PointCellIds[1]->InsertValue( ptId1, cellId1 );
+
+              info->IntersectionMap[0]->
+                insert(std::make_pair(cellId0, lineId));
+              info->IntersectionMap[1]->
+                insert(std::make_pair(cellId1, lineId));
+
+              // Check which edges of cellId0 and cellId1 outpt0 and
+              // outpt1 are on, if any.
+              int isOnEdge=0;
+              int m0p0=0,m0p1=0,m1p0=0,m1p1=0;
+              for (vtkIdType edgeId = 0; edgeId < 3; edgeId++)
+                {
+                isOnEdge = info->AddToPointEdgeMap(0, ptId0, outpt0,
+                    mesh0, cellId0,edgeId, lineId, triPtIds0);
+                if (isOnEdge != -1)
                   {
-                  if (intersectionSurfaceId->GetValue(ptId1) != 3)
-                    {
-                    intersectionSurfaceId->InsertValue(ptId1,surfaceid[1]);
-                    }
+                  m0p0++;
+                  }
+                isOnEdge = info->AddToPointEdgeMap(0, ptId1, outpt1,
+                    mesh0, cellId0,edgeId, lineId, triPtIds0);
+                if (isOnEdge != -1)
+                  {
+                  m0p1++;
+                  }
+                isOnEdge = info->AddToPointEdgeMap(1, ptId0, outpt0,
+                    mesh1, cellId1,edgeId, lineId, triPtIds1);
+                if (isOnEdge != -1)
+                  {
+                  m1p0++;
+                  }
+                isOnEdge = info->AddToPointEdgeMap(1, ptId1, outpt1,
+                    mesh1, cellId1,edgeId, lineId, triPtIds1);
+                if (isOnEdge != -1)
+                  {
+                  m1p1++;
                   }
                 }
-
+              //Special cases caught by tolerance and not from the Point
+              //Merger
+              if (m0p0 > 0 && m1p0 > 0)
+                {
+                intersectionSurfaceId->InsertValue(ptId0,3);
+                }
+              if (m0p1 > 0 && m1p1 > 0)
+                {
+                intersectionSurfaceId->InsertValue(ptId1,3);
+                }
+              }
+            //Add information about origin surface to std::maps for
+            //checks later
+            if (intersectionSurfaceId->GetValue(ptId0) == 1)
+              {
+              info->IntersectionPtsMap[0]->
+                insert(std::make_pair(ptId0, cellId0));
+              }
+            else if (intersectionSurfaceId->GetValue(ptId0) == 2)
+              {
+              info->IntersectionPtsMap[1]->
+                insert(std::make_pair(ptId0, cellId1));
+              }
+            else
+              {
               info->IntersectionPtsMap[0]->
                 insert(std::make_pair(ptId0, cellId0));
               info->IntersectionPtsMap[1]->
                 insert(std::make_pair(ptId0, cellId1));
+              }
+            if (intersectionSurfaceId->GetValue(ptId1) == 1)
+              {
+              info->IntersectionPtsMap[0]->
+                insert(std::make_pair(ptId1, cellId0));
+              }
+            else if (intersectionSurfaceId->GetValue(ptId1) == 2)
+              {
+              info->IntersectionPtsMap[1]->
+                insert(std::make_pair(ptId1, cellId1));
+              }
+            else
+              {
               info->IntersectionPtsMap[0]->
                 insert(std::make_pair(ptId1, cellId0));
               info->IntersectionPtsMap[1]->
                 insert(std::make_pair(ptId1, cellId1));
-
-              //Check to see if duplicate line. Line can only be a duplicate
-              //line if both points are not unique and they don't
-              //equal eachother
-              if (!unique[0] && !unique[1] && ptId0 != ptId1)
-                {
-                vtkSmartPointer<vtkPolyData> lineTest =
-                  vtkSmartPointer<vtkPolyData>::New();
-                lineTest->SetPoints(pointMerger->GetPoints());
-                lineTest->SetLines(intersectionLines);
-                lineTest->BuildLinks();
-                int newLine = info->CheckLine(lineTest,ptId0,ptId1);
-                if (newLine == 0)
-                  {
-                  addline = 0;
-                  }
-                }
-              if (addline)
-                {
-                //If the line is new and does not consist of two identical
-                //points, add the line to the intersection and update
-                //mapping information
-                intersectionLines->InsertNextCell(2);
-                intersectionLines->InsertCellPoint(ptId0);
-                intersectionLines->InsertCellPoint(ptId1);
-
-                intersectionCellIds0->InsertNextValue(cellId0);
-                intersectionCellIds1->InsertNextValue(cellId1);
-
-                info->PointCellIds[0]->InsertValue( ptId0, cellId0 );
-                info->PointCellIds[0]->InsertValue( ptId1, cellId0 );
-                info->PointCellIds[1]->InsertValue( ptId0, cellId1 );
-                info->PointCellIds[1]->InsertValue( ptId1, cellId1 );
-
-                info->IntersectionMap[0]->
-                  insert(std::make_pair(cellId0, lineId));
-                info->IntersectionMap[1]->
-                  insert(std::make_pair(cellId1, lineId));
-
-                // Check which edges of cellId0 and cellId1 outpt0 and
-                // outpt1 are on, if any.
-                int isOnEdge=0;
-                int m0p0=0,m0p1=0,m1p0=0,m1p1=0;
-                for (vtkIdType edgeId = 0; edgeId < 3; edgeId++)
-                  {
-                  isOnEdge = info->AddToPointEdgeMap(0, ptId0, outpt0,
-                      mesh0, cellId0,edgeId, lineId, triPtIds0);
-                  if (isOnEdge != -1)
-                    {
-                    m0p0++;
-                    }
-                  isOnEdge = info->AddToPointEdgeMap(0, ptId1, outpt1,
-                      mesh0, cellId0,edgeId, lineId, triPtIds0);
-                  if (isOnEdge != -1)
-                    {
-                    m0p1++;
-                    }
-                  isOnEdge = info->AddToPointEdgeMap(1, ptId0, outpt0,
-                      mesh1, cellId1,edgeId, lineId, triPtIds1);
-                  if (isOnEdge != -1)
-                    {
-                    m1p0++;
-                    }
-                  isOnEdge = info->AddToPointEdgeMap(1, ptId1, outpt1,
-                      mesh1, cellId1,edgeId, lineId, triPtIds1);
-                  if (isOnEdge != -1)
-                    {
-                    m1p1++;
-                    }
-                  }
-                //Special cases caught by tolerance and not from the Point
-                //Merger
-                if (m0p0 > 0 && m1p0 > 0)
-                  {
-                  intersectionSurfaceId->InsertValue(ptId0,3);
-                  }
-                if (m0p1 > 0 && m1p1 > 0)
-                  {
-                  intersectionSurfaceId->InsertValue(ptId1,3);
-                  }
-                }
-              //Add information about origin surface to std::maps for
-              //checks later
-              if (intersectionSurfaceId->GetValue(ptId0) == 1)
-                {
-                info->IntersectionPtsMap[0]->
-                  insert(std::make_pair(ptId0, cellId0));
-                }
-              else if (intersectionSurfaceId->GetValue(ptId0) == 2)
-                {
-                info->IntersectionPtsMap[1]->
-                  insert(std::make_pair(ptId0, cellId1));
-                }
-              else
-                {
-                info->IntersectionPtsMap[0]->
-                  insert(std::make_pair(ptId0, cellId0));
-                info->IntersectionPtsMap[1]->
-                  insert(std::make_pair(ptId0, cellId1));
-                }
-              if (intersectionSurfaceId->GetValue(ptId1) == 1)
-                {
-                info->IntersectionPtsMap[0]->
-                  insert(std::make_pair(ptId1, cellId0));
-                }
-              else if (intersectionSurfaceId->GetValue(ptId1) == 2)
-                {
-                info->IntersectionPtsMap[1]->
-                  insert(std::make_pair(ptId1, cellId1));
-                }
-              else
-                {
-                info->IntersectionPtsMap[0]->
-                  insert(std::make_pair(ptId1, cellId0));
-                info->IntersectionPtsMap[1]->
-                  insert(std::make_pair(ptId1, cellId1));
-                }
               }
+            }
             }
           }
         }
