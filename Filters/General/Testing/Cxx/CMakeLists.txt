@@ -18,6 +18,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestAppendPoints.cxx,NO_VALID
   TestBooleanOperationPolyDataFilter2.cxx
   TestBooleanOperationPolyDataFilter.cxx
+  TestBooleanOperationPolyDataFilter_Type2.cxx
   TestContourTriangulatorCutter.cxx
   TestContourTriangulator.cxx
   TestContourTriangulatorMarching.cxx
@@ -28,6 +29,7 @@ vtk_add_test_cxx(${vtk-module}CxxTests tests
   TestImageDataToPointSet.cxx,NO_VALID
   TestIntersectionPolyDataFilter2.cxx,NO_VALID
   TestIntersectionPolyDataFilter.cxx
+  TestIntersectionPolyDataFilter_Type2.cxx
   TestRectilinearGridToPointSet.cxx,NO_VALID
   TestReflectionFilter.cxx,NO_VALID
   TestTableSplitColumnComponents.cxx,NO_VALID

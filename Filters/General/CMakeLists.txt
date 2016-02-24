@@ -98,7 +98,9 @@ set(Module_SRCS
   vtkGraphWeightFilter.cxx
   vtkImageDataToPointSet.cxx
   vtkIntersectionPolyDataFilter.cxx
+  vtkIntersectionPolyDataFilter2.cxx
   vtkBooleanOperationPolyDataFilter.cxx
+  vtkBooleanOperationPolyDataFilter2.cxx
   vtkDistancePolyDataFilter.cxx
 
   vtkOverlappingAMRLevelIdScalars.cxx
