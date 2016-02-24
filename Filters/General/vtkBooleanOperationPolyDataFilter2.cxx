@@ -221,7 +221,6 @@ int vtkBooleanOperationPolyDataFilter2::Impl::FindRegion(int inputIndex,
       this->Mesh[inputIndex]->GetCellPoints(cellId,npts,pts);
       if (this->checked[inputIndex][cellId] == 0)
         {
-        //Tab check
         //Mark cell as checked and insert the fillnumber value to cell
         if (fill)
           {
