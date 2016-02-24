@@ -220,71 +220,71 @@ int vtkBooleanOperationPolyDataFilter2::Impl::FindRegion(int inputIndex,
       //Get the three points of the cell
       this->Mesh[inputIndex]->GetCellPoints(cellId,npts,pts);
       if (this->checked[inputIndex][cellId] == 0)
-        {
-        //Mark cell as checked and insert the fillnumber value to cell
-        if (fill)
-          {
-          this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
-          }
-        this->checked[inputIndex][cellId] = 1;
-        for (i=0; i < npts; i++)
-          {
-          p1 = pts[i];
-          //Get the cells attached to each point
-          this->Mesh[inputIndex]->GetPointCells(p1,neighbors);
-          numNei = neighbors->GetNumberOfIds();
+       {
+       //Mark cell as checked and insert the fillnumber value to cell
+       if (fill)
+         {
+         this->BooleanArray[inputIndex]->InsertValue(cellId,fillnumber);
+         }
+       this->checked[inputIndex][cellId] = 1;
+       for (i=0; i < npts; i++)
+         {
+         p1 = pts[i];
+         //Get the cells attached to each point
+         this->Mesh[inputIndex]->GetPointCells(p1,neighbors);
+         numNei = neighbors->GetNumberOfIds();
 
-          //For each neighboring cell
-          for (j=0;j < numNei;j++)
-            {
-            //If this cell is close to a boundary
-            if (this->BoundaryCellArray[inputIndex]->
-                GetValue(neighbors->GetId(j)))
-              {
-              //If this cell hasn't been checked already
-              if (this->checkedcarefully[inputIndex][neighbors->
-                  GetId(j)] == 0)
-                {
-                //Add this cell to the careful check cells list and run
-                //the region finding tip toe code
-                this->CheckCellsCareful->
-                  InsertNextId(neighbors->GetId(j));
-                if (fill)
-                  {
-                  this->FindRegionTipToe(inputIndex,fillnumber,1);
-                  }
-                else
-                  {
-                  this->FindRegionTipToe(inputIndex,fillnumber,0);
-                  }
-                this->CheckCellsCareful->Reset();
-                this->CheckCellsCareful2->Reset();
-                }
-              }
-            //Cell needs to be added to check list
-            else
-              {
-              this->CheckCells2->InsertNextId(neighbors->GetId(j));
-              }
-            }
-          }
-        }
-      //This statement is for if the start cell is a boundary cell
-      else if (this->checkedcarefully[inputIndex][cellId] == 0 && start)
-        {
-        start=0;
-        this->CheckCells->Reset();
-        this->CheckCellsCareful->InsertNextId(cellId);
-        if (fill)
-          {
-          this->FindRegionTipToe(inputIndex,fillnumber,1);
-          }
-        else
-          {
-          this->FindRegionTipToe(inputIndex,fillnumber,0);
-          }
-        }
-      }
+         //For each neighboring cell
+         for (j=0;j < numNei;j++)
+           {
+           //If this cell is close to a boundary
+           if (this->BoundaryCellArray[inputIndex]->
+               GetValue(neighbors->GetId(j)))
+             {
+             //If this cell hasn't been checked already
+             if (this->checkedcarefully[inputIndex][neighbors->
+                 GetId(j)] == 0)
+               {
+               //Add this cell to the careful check cells list and run
+               //the region finding tip toe code
+               this->CheckCellsCareful->
+                 InsertNextId(neighbors->GetId(j));
+               if (fill)
+                 {
+                 this->FindRegionTipToe(inputIndex,fillnumber,1);
+                 }
+               else
+                 {
+                 this->FindRegionTipToe(inputIndex,fillnumber,0);
+                 }
+               this->CheckCellsCareful->Reset();
+               this->CheckCellsCareful2->Reset();
+               }
+             }
+           //Cell needs to be added to check list
+           else
+             {
+             this->CheckCells2->InsertNextId(neighbors->GetId(j));
+             }
+           }
+         }
+       }
+     //This statement is for if the start cell is a boundary cell
+     else if (this->checkedcarefully[inputIndex][cellId] == 0 && start)
+       {
+       start=0;
+       this->CheckCells->Reset();
+       this->CheckCellsCareful->InsertNextId(cellId);
+       if (fill)
+         {
+         this->FindRegionTipToe(inputIndex,fillnumber,1);
+         }
+       else
+         {
+         this->FindRegionTipToe(inputIndex,fillnumber,0);
+         }
+       }
+     }
 
     //Swap the current check list to the full check list and continue
     tmp = this->CheckCells;
