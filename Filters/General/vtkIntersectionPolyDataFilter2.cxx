@@ -383,11 +383,11 @@ int vtkIntersectionPolyDataFilter2::Impl
                 addline = 0;
                 }
               }
+	    //If the line is new and does not consist of two identical
+	    //points, add the line to the intersection and update
+	    //mapping information
             if (addline)
               {
-              //If the line is new and does not consist of two identical
-              //points, add the line to the intersection and update
-              //mapping information
               intersectionLines->InsertNextCell(2);
               intersectionLines->InsertCellPoint(ptId0);
               intersectionLines->InsertCellPoint(ptId1);
