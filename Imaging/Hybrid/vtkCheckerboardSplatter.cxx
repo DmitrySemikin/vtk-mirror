@@ -752,6 +752,8 @@ int vtkCheckerboardSplatter::RequestData(
     vtkWarningMacro(<<"Only FLOAT or DOUBLE output scalar type is supported");
     }
 
+  outScalars->SetName(inScalars->GetName());
+
   return 1;
 }
 
