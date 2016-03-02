@@ -3,10 +3,11 @@ set(Module_SRCS
   vtkEllipsoidalGaussianKernel.cxx
   vtkGaussianKernel.cxx
   vtkInterpolationKernel.cxx
-  vtkPointInterpolator.cxx
   vtkLinearKernel.cxx
+  vtkPointInterpolator.cxx
   vtkSPHKernel.cxx
   vtkShepardKernel.cxx
+  vtkTerrainInterpolator.cxx
   vtkVoronoiKernel.cxx
   )
 
