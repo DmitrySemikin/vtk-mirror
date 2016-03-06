@@ -31,13 +31,8 @@ v16.SetFilePrefix(VTK_DATA_ROOT + "/Data/headsq/quarter")
 v16.SetDataSpacing(3.2, 3.2, 1.5)
 
 # The volume will be displayed by ray-cast alpha compositing.
-# A ray-cast mapper is needed to do the ray-casting, and a
-# compositing function is needed to do the compositing along the ray.
-rayCastFunction = vtk.vtkVolumeRayCastCompositeFunction()
-
-volumeMapper = vtk.vtkVolumeRayCastMapper()
+volumeMapper = vtk.vtkGPUVolumeRayCastMapper()
 volumeMapper.SetInputConnection(v16.GetOutputPort())
-volumeMapper.SetVolumeRayCastFunction(rayCastFunction)
 
 # The color transfer function maps voxel intensities to colors.
 # It is modality-specific, and often anatomy-specific as well.
@@ -110,6 +105,9 @@ camera.SetViewUp(0, 0, -1)
 renWin.SetSize(640, 480)
 
 # Interact with the data.
-iren.Initialize()
-renWin.Render()
-iren.Start()
+if volumeMapper.IsRenderSupported(renWin, volumeProperty):
+    iren.Initialize()
+    renWin.Render()
+    iren.Start()
+else:
+    print("Required OpenGL extension not supported")

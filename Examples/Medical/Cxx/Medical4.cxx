@@ -23,14 +23,13 @@ See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
 #include <vtkRenderWindowInteractor.h>
 #include <vtkVolume16Reader.h>
 #include <vtkVolume.h>
-#include <vtkVolumeRayCastMapper.h>
-#include <vtkVolumeRayCastCompositeFunction.h>
+#include <vtkGPUVolumeRayCastMapper.h>
 #include <vtkVolumeProperty.h>
 #include <vtkColorTransferFunction.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkCamera.h>
 
-int main (int argc, char *argv[])
+int main(int argc, char *argv[])
 {
   if (argc < 2)
     {
@@ -41,11 +40,16 @@ int main (int argc, char *argv[])
   // Create the renderer, the render window, and the interactor. The renderer
   // draws into the render window, the interactor enables mouse- and
   // keyboard-based interaction with the scene.
-  vtkSmartPointer<vtkRenderer> ren =
-    vtkSmartPointer<vtkRenderer>::New();
   vtkSmartPointer<vtkRenderWindow> renWin =
     vtkSmartPointer<vtkRenderWindow>::New();
+  // Increase the size of the render window, render to create a context
+  renWin->SetSize(640, 480);
+  renWin->Render();
+
+  vtkSmartPointer<vtkRenderer> ren =
+    vtkSmartPointer<vtkRenderer>::New();
   renWin->AddRenderer(ren);
+
   vtkSmartPointer<vtkRenderWindowInteractor> iren =
     vtkSmartPointer<vtkRenderWindowInteractor>::New();
   iren->SetRenderWindow(renWin);
@@ -65,15 +69,9 @@ int main (int argc, char *argv[])
   v16->SetDataSpacing(3.2, 3.2, 1.5);
 
   // The volume will be displayed by ray-cast alpha compositing.
-  // A ray-cast mapper is needed to do the ray-casting, and a
-  // compositing function is needed to do the compositing along the ray.
-  vtkSmartPointer<vtkVolumeRayCastCompositeFunction> rayCastFunction =
-    vtkSmartPointer<vtkVolumeRayCastCompositeFunction>::New();
-
-  vtkSmartPointer<vtkVolumeRayCastMapper> volumeMapper =
-    vtkSmartPointer<vtkVolumeRayCastMapper>::New();
+  vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeMapper =
+    vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
   volumeMapper->SetInputConnection(v16->GetOutputPort());
-  volumeMapper->SetVolumeRayCastFunction(rayCastFunction);
 
   // The color transfer function maps voxel intensities to colors.
   // It is modality-specific, and often anatomy-specific as well.
@@ -147,12 +145,16 @@ int main (int argc, char *argv[])
   camera->SetPosition(c[0] + 400, c[1], c[2]);
   camera->SetViewUp(0, 0, -1);
 
-  // Increase the size of the render window
-  renWin->SetSize(640, 480);
-
   // Interact with the data.
-  iren->Initialize();
-  iren->Start();
+  if (volumeMapper->IsRenderSupported(renWin, volumeProperty))
+    {
+    iren->Initialize();
+    iren->Start();
+    }
+  else
+    {
+    cerr << "Required OpenGL extension not supported\n";
+    }
 
   return EXIT_SUCCESS;
 }
