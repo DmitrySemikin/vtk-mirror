@@ -3,7 +3,11 @@ set (GenericVolumePythonTests
      TestFixedPointRayCasterLinearCropped.py,NO_RT
      TestFixedPointRayCasterLinear.py,NO_RT
      TestFixedPointRayCasterNearestCropped.py,NO_RT
-     TestFixedPointRayCasterNearest.py,NO_RT)
+     TestFixedPointRayCasterNearest.py,NO_RT
+     VolumePicker.py,NO_RT
+     VolumePickerCrop.py
+     VolumeOutlineSourceClipped.py
+     VolumeOutlineSource.py)
 
 if (NOT VTK_LEGACY_REMOVE)
   list(APPEND GenericVolumePythonTests
@@ -11,9 +15,7 @@ if (NOT VTK_LEGACY_REMOVE)
     gaussian.py
     volRCClipPlanes.py
     volRCCropRegions.py
-    volRCRotateClip.py
-    VolumePicker.py,NO_RT
-    VolumePickerCrop.py)
+    volRCRotateClip.py)
 endif()
 
 # These tests are only built when the rendering backend is OpenGL
@@ -28,9 +30,7 @@ if (NOT VTK_LEGACY_REMOVE)
     volTM2DCropRegions.py
     volTM3DCropRegions.py
     volTM3DCompressedCropRegions.py
-    volTM3DRotateClip.py
-    VolumeOutlineSourceClipped.py
-    VolumeOutlineSource.py)
+    volTM3DRotateClip.py)
 endif()
 
 # These tests are only built when the rendering backend is OpenGL2
