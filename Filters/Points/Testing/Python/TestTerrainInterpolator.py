@@ -62,7 +62,6 @@ interpolator1.SetSourceConnection(attr.GetOutputPort())
 #interpolator1.SetKernel(gaussianKernel)
 interpolator1.SetKernel(voronoiKernel)
 interpolator1.SetNullPointsStrategyToClosestPoint()
-interpolator1.SetZ(center[2])
 
 # Time execution
 timer = vtk.vtkTimerLog()

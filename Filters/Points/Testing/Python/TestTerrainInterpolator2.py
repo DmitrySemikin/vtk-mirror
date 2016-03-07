@@ -41,7 +41,6 @@ interp.SetInputConnection(plane.GetOutputPort())
 interp.SetSourceConnection(demReader.GetOutputPort())
 interp.SetKernel(gaussianKernel)
 interp.SetNullPointsStrategyToClosestPoint()
-interp.SetZ(center[2])
 
 # Time execution
 timer = vtk.vtkTimerLog()

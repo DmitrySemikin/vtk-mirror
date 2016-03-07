@@ -35,8 +35,6 @@
 #include "vtkSMPTools.h"
 #include "vtkSMPThreadLocalObject.h"
 
-#include <vector>
-
 vtkStandardNewMacro(vtkTerrainInterpolator);
 vtkCxxSetObjectMacro(vtkTerrainInterpolator,Locator,vtkAbstractPointLocator);
 vtkCxxSetObjectMacro(vtkTerrainInterpolator,Kernel,vtkInterpolationKernel);
@@ -51,11 +49,10 @@ namespace {
 struct ProjectPoints
 {
   vtkDataSet *Input;
-  double Z;
   double *OutPoints;
 
-  ProjectPoints(vtkDataSet *input, double z, double *outPts) :
-    Input(input), Z(z), OutPoints(outPts)
+  ProjectPoints(vtkDataSet *input, double *outPts) :
+    Input(input), OutPoints(outPts)
     {
     }
 
@@ -69,7 +66,7 @@ struct ProjectPoints
         this->Input->GetPoint(ptId,x);
         *p++ = x[0];
         *p++ = x[1];
-        *p++ = this->Z;
+        *p++ = 0.0; //x-y projection
         }
     }
 };
@@ -85,7 +82,6 @@ struct ProbePoints
   ArrayList Arrays;
   char *Valid;
   int Strategy;
-  double Z;
 
   // Don't want to allocate these working arrays on every thread invocation,
   // so make them thread local.
@@ -93,9 +89,9 @@ struct ProbePoints
   vtkSMPThreadLocalObject<vtkDoubleArray> Weights;
 
   ProbePoints(vtkDataSet *input, vtkInterpolationKernel *kernel,vtkAbstractPointLocator *loc,
-              vtkPointData *inPD, vtkPointData *outPD, int strategy, char *valid, double nullV, double z) :
+              vtkPointData *inPD, vtkPointData *outPD, int strategy, char *valid, double nullV) :
     Input(input), Kernel(kernel), Locator(loc), InPD(inPD), OutPD(outPD),
-    Valid(valid), Strategy(strategy), Z(z)
+    Valid(valid), Strategy(strategy)
     {
       this->Arrays.AddArrays(input->GetNumberOfPoints(), inPD, outPD, nullV);
     }
@@ -145,7 +141,7 @@ struct ProbePoints
       for ( ; ptId < endPtId; ++ptId)
         {
         this->Input->GetPoint(ptId,x);
-        x[2] = this->Z; //projection
+        x[2] = 0.0; //x-y projection
 
         if ( this->Kernel->ComputeBasis(x, pIds) > 0 )
           {
@@ -240,7 +236,7 @@ Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output)
     return;
     }
 
-  // We need to project the source points to the z=constant plane
+  // We need to project the source points to the z=0.0 plane
   vtkIdType numSourcePts = source->GetNumberOfPoints();
   vtkPolyData *projSource = vtkPolyData::New();
   projSource->ShallowCopy(source);
@@ -250,7 +246,7 @@ Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output)
   projSource->SetPoints(projPoints);
   projPoints->UnRegister(this);
 
-  ProjectPoints project(source,this->Z,static_cast<double*>(projPoints->GetVoidPointer(0)));
+  ProjectPoints project(source,static_cast<double*>(projPoints->GetVoidPointer(0)));
   vtkSMPTools::For(0, numSourcePts, project);
 
   this->Locator->SetDataSet(projSource);
@@ -280,7 +276,7 @@ Probe(vtkDataSet *input, vtkDataSet *source, vtkDataSet *output)
 
   // If the input is image data then there is a faster path
   ProbePoints probe(input,this->Kernel,this->Locator,inPD,outPD,
-                    this->NullPointsStrategy,mask,this->NullValue,this->Z);
+                    this->NullPointsStrategy,mask,this->NullValue);
   vtkSMPTools::For(0, numPts, probe);
 
   // Clean up
@@ -440,7 +436,6 @@ void vtkTerrainInterpolator::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Source: " << source << "\n";
   os << indent << "Locator: " << this->Locator << "\n";
   os << indent << "Kernel: " << this->Kernel << "\n";
-  os << indent << "Z: " << this->Z << "\n";
   os << indent << "Null Points Strategy: " << this->NullPointsStrategy << endl;
   os << indent << "Null Value: " << this->NullValue << "\n";
   os << indent << "Valid Points Mask Array Name: "

@@ -23,9 +23,8 @@
 // the dataset forming Pc. Similary, the output P can also be represented by
 // any vtkDataSet type; and the topology/geometry structure of P is passed
 // through to the output along with the newly interpolated arrays. However,
-// this filter presumes that P lies on a plane z=constant, thus z-coordinates
-// are set to z = constant during the interpolation process. (The z-constant
-// value is user specified.)
+// this filter presumes that P lies on a plane z=0.0, thus z-coordinates
+// are set accordingly during the interpolation process.
 //
 // A key input to this filter is the specification of the interpolation
 // kernel, and the parameters which control the associated interpolation
@@ -146,13 +145,6 @@ public:
   vtkGetMacro(NullValue,double);
 
   // Description:
-  // Specify the constant z value. (The filter presumes the input points, and
-  // points to be interpolated are on the plane z = constant.) By default
-  // z=0.0.
-  vtkSetMacro(Z,double);
-  vtkGetMacro(Z,double);
-
-  // Description:
   // Indicate whether to shallow copy the input point data arrays to the
   // output.  On by default.
   vtkSetMacro(PassPointArrays, bool);
@@ -180,7 +172,6 @@ protected:
   vtkAbstractPointLocator *Locator;
   vtkInterpolationKernel *Kernel;
 
-  double Z;
   int NullPointsStrategy;
   double NullValue;
   char* ValidPointsMaskArrayName;
@@ -206,11 +197,6 @@ protected:
   // PassCellArrays, PassPointArrays, PassFieldArrays flags.
   void PassAttributeData(
     vtkDataSet* input, vtkDataObject* source, vtkDataSet* output);
-
-  // Description:
-  // Internal method to extract image metadata
-  void ExtractImageDescription(vtkImageData *input, int dims[3],
-                               double origin[3], double spacing[3]);
 
 private:
   vtkTerrainInterpolator(const vtkTerrainInterpolator&);  // Not implemented.
