@@ -38,8 +38,8 @@
 
 #include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkRenderPass.h"
-#include <vector>  // STL Header
 
+class vtkFrameBufferObject2;
 class vtkTextureObject;
 class vtkOpenGLRenderWindow;
 class vtkInformationIntegerKey;
@@ -161,7 +161,9 @@ public:
   vtkTextureObject *TranslucentRGBATexture;
   vtkTextureObject *TranslucentZTexture;
   vtkTextureObject *CurrentRGBATexture;
-  std::vector<float> *DepthZData;
+
+  // Used to clear the TranslucentZTexture quickly:
+  vtkFrameBufferObject2 *RenderToTranslucentZTextureBuffer;
 
   void BlendIntermediatePeels(vtkOpenGLRenderWindow *renWin, bool);
   void BlendFinalPeel(vtkOpenGLRenderWindow *renWin);

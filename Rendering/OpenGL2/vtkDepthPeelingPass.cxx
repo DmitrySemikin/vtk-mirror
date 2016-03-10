@@ -14,6 +14,7 @@ PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 
 #include "vtkDepthPeelingPass.h"
+#include "vtkFrameBufferObject2.h"
 #include "vtkInformation.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationIntegerVectorKey.h"
@@ -57,9 +58,9 @@ vtkDepthPeelingPass::vtkDepthPeelingPass()
   this->IntermediateBlendProgram = 0;
   this->FinalBlendProgram = 0;
 
-  this->DepthZData = 0;
   this->OpaqueZTexture = NULL;
   this->TranslucentZTexture = NULL;
+  this->RenderToTranslucentZTextureBuffer = NULL;
   this->OpaqueRGBATexture = NULL;
   this->TranslucentRGBATexture = NULL;
   this->CurrentRGBATexture = NULL;
@@ -78,7 +79,6 @@ vtkDepthPeelingPass::~vtkDepthPeelingPass()
     {
     this->TranslucentPass->Delete();
     }
-  delete this->DepthZData;
   if (this->OpaqueZTexture)
     {
     this->OpaqueZTexture->UnRegister(this);
@@ -88,6 +88,11 @@ vtkDepthPeelingPass::~vtkDepthPeelingPass()
     {
     this->TranslucentZTexture->UnRegister(this);
     this->TranslucentZTexture = NULL;
+    }
+  if (this->RenderToTranslucentZTextureBuffer)
+    {
+    this->RenderToTranslucentZTextureBuffer->UnRegister(this);
+    this->RenderToTranslucentZTextureBuffer = NULL;
     }
   if (this->OpaqueRGBATexture)
     {
@@ -136,6 +141,10 @@ void vtkDepthPeelingPass::ReleaseGraphicsResources(vtkWindow *w)
   if (this->TranslucentZTexture)
     {
     this->TranslucentZTexture->ReleaseGraphicsResources(w);
+    }
+  if (this->RenderToTranslucentZTextureBuffer)
+    {
+    this->RenderToTranslucentZTextureBuffer->SetContext(NULL);
     }
   if (this->OpaqueRGBATexture)
     {
@@ -288,8 +297,6 @@ void vtkDepthPeelingPass::BlendFinalPeel(vtkOpenGLRenderWindow *renWin)
   glDepthFunc( GL_LEQUAL );
 }
 
-
-
 // ----------------------------------------------------------------------------
 // Description:
 // Perform rendering according to a render state \p s.
@@ -359,9 +366,6 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
       this->OpaqueRGBATexture->GetWidth() != static_cast<unsigned int>(this->ViewportWidth) ||
       this->OpaqueRGBATexture->GetHeight() != static_cast<unsigned int>(this->ViewportHeight)))
     {
-    delete this->DepthZData;
-    this->DepthZData = 0;
-
     this->OpaqueZTexture->UnRegister(this);
     this->OpaqueZTexture = 0;
 
@@ -386,11 +390,31 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
       renWin, this->ViewportWidth, this->ViewportHeight, 4, false, NULL);
     this->CurrentRGBATexture = vtkDepthPeelingPassCreateTextureObject(
       renWin, this->ViewportWidth, this->ViewportHeight, 4, false, NULL);
-    this->DepthZData = new std::vector<float>(this->ViewportWidth * this->ViewportHeight, 0.0);
     }
 
-  this->TranslucentZTexture = vtkDepthPeelingPassCreateTextureObject(
-    renWin, this->ViewportWidth, this->ViewportHeight, 1, true, &((*this->DepthZData)[0]));
+  if (!this->TranslucentZTexture)
+    {
+    this->TranslucentZTexture = vtkDepthPeelingPassCreateTextureObject(
+          renWin, this->ViewportWidth, this->ViewportHeight, 1, true, NULL);
+    }
+
+  // Fill TranslucentZTexture with 0.f by rendering a glClearBuffer call to it.
+  // This is an optimization to avoid having to regen the texture or transfer
+  // a buffer filled with 0.f to the GPU memory.
+  if (this->RenderToTranslucentZTextureBuffer == NULL)
+    {
+    this->RenderToTranslucentZTextureBuffer = vtkFrameBufferObject2::New();
+    }
+  this->RenderToTranslucentZTextureBuffer->SetContext(renWin);
+  this->RenderToTranslucentZTextureBuffer->SaveCurrentBindings();
+  this->RenderToTranslucentZTextureBuffer->Bind(GL_DRAW_FRAMEBUFFER);
+  this->RenderToTranslucentZTextureBuffer->AddDepthAttachment(
+        GL_DRAW_FRAMEBUFFER, this->TranslucentZTexture);
+  GLfloat clearVal = 0.f;
+  glClearBufferfv(GL_DEPTH, 0, &clearVal);
+  vtkOpenGLCheckErrorMacro("failed after ClearBuffer");
+  // UnBind restores old FBOs when SaveCurrentBindings is used:
+  this->RenderToTranslucentZTextureBuffer->UnBind(GL_DRAW_FRAMEBUFFER);
 
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   glClearColor(0.0,0.0,0.0,0.0); // always clear to black
@@ -520,8 +544,7 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
 
   // unload the textures we are done with
   this->CurrentRGBATexture->Deactivate();
-  this->TranslucentZTexture->UnRegister(this);
-  this->TranslucentZTexture = 0;
+  this->TranslucentZTexture->Deactivate();
 
   // do the final blend
   this->BlendFinalPeel(renWin);
