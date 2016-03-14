@@ -410,11 +410,23 @@ void vtkDepthPeelingPass::Render(const vtkRenderState *s)
   this->RenderToTranslucentZTextureBuffer->Bind(GL_DRAW_FRAMEBUFFER);
   this->RenderToTranslucentZTextureBuffer->AddDepthAttachment(
         GL_DRAW_FRAMEBUFFER, this->TranslucentZTexture);
+  this->RenderToTranslucentZTextureBuffer->CheckFrameBufferStatus(
+        GL_DRAW_FRAMEBUFFER);
   GLfloat clearVal = 0.f;
   glClearBufferfv(GL_DEPTH, 0, &clearVal);
   vtkOpenGLCheckErrorMacro("failed after ClearBuffer");
   // UnBind restores old FBOs when SaveCurrentBindings is used:
+  this->RenderToTranslucentZTextureBuffer->RemoveTexDepthAttachment(
+        GL_DRAW_FRAMEBUFFER);
   this->RenderToTranslucentZTextureBuffer->UnBind(GL_DRAW_FRAMEBUFFER);
+
+#ifdef __APPLE__
+  // There's a bug on some macs that prevents the texture from being used later
+  // unless the render-to-texture FBO is deleted. Benchmarks show that this has
+  // no tangible effect on performance.
+  this->RenderToTranslucentZTextureBuffer->Delete();
+  this->RenderToTranslucentZTextureBuffer = NULL;
+#endif
 
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   glClearColor(0.0,0.0,0.0,0.0); // always clear to black
