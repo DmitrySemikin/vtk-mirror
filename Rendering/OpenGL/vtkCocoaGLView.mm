@@ -59,6 +59,8 @@
                                toTarget:self
                              withObject:nil];
       }
+    // Reset the accumulator for the scroll deltaY
+    _accumDeltaY = 0.0;
     }
   return self;
 }
@@ -127,6 +129,8 @@
 #endif
 
   [super updateTrackingAreas];
+
+  _accumDeltaY = 0.0;
 }
 
 //----------------------------------------------------------------------------
@@ -439,17 +443,53 @@ static const char *vtkMacKeyCodeToKeySymTable[128] = {
 // Overridden (from NSResponder).
 - (void)scrollWheel:(NSEvent *)theEvent
 {
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+  CGFloat dy = [theEvent scrollingDeltaY];
+#else
   CGFloat dy = [theEvent deltaY];
+#endif
 
   unsigned long eventId = 0;
 
-  if (dy > 0)
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+  if ([theEvent hasPreciseScrollingDeltas])
     {
-    eventId = vtkCommand::MouseWheelForwardEvent;
+    // accumulate the scroll delta until it reaches the threshold
+    CGFloat threshold = 15.0;
+    _accumDeltaY += dy;
+
+    if (_accumDeltaY >= threshold)
+      {
+      eventId = vtkCommand::MouseWheelForwardEvent;
+      _accumDeltaY -= threshold;
+      // cap the amount of delta that can accumulate
+      if (_accumDeltaY > 0.5*threshold)
+        {
+        _accumDeltaY = 0.5*threshold;
+        }
+      }
+    else if (_accumDeltaY <= -threshold)
+      {
+      eventId = vtkCommand::MouseWheelBackwardEvent;
+      _accumDeltaY += threshold;
+      if (_accumDeltaY < -0.5*threshold)
+        {
+        _accumDeltaY = -0.5*threshold;
+        }
+      }
     }
-  else if (dy < 0)
+  else
+#endif
     {
-    eventId = vtkCommand::MouseWheelBackwardEvent;
+    // hasPreciseScrollingDeltas is false
+    if (dy > 0)
+      {
+      eventId = vtkCommand::MouseWheelForwardEvent;
+      }
+    else if (dy < 0)
+      {
+      eventId = vtkCommand::MouseWheelBackwardEvent;
+      }
     }
 
   if (eventId != 0)

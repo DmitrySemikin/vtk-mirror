@@ -62,6 +62,7 @@
   @private
   vtkCocoaRenderWindowRef _myVTKRenderWindow;
   NSTrackingArea* _rolloverTrackingArea;
+  CGFloat _accumDeltaY;
 }
 
 - (vtkCocoaRenderWindowRef)getVTKRenderWindow;
