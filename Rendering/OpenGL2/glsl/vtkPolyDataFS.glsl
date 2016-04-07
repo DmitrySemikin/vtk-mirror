@@ -53,6 +53,9 @@ uniform int PrimitiveIDOffset;
 
 void main()
 {
+  // Early depth peeling abort:
+  //VTK::DepthPeeling::PreColor
+
   // Apple Bug
   //VTK::PrimID::Impl
 
