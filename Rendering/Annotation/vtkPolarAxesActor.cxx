@@ -207,7 +207,6 @@ void vtkPolarAxesActor::PrintSelf(ostream& os, vtkIndent indent)
     os << indent << "Ratio Between Last Arc Major and Minor Tick Thickness: " << this->ArcTickRatioThickness << endl;
     }
 
-
 }
 
 //-----------------------------------------------------------------------------
@@ -611,13 +610,13 @@ int vtkPolarAxesActor::RenderOpaqueGeometry(vtkViewport *viewport)
   // Render the radial axes
   if (this->RadialAxesVisibility)
     {
-    bool isInnerAxis, isInnerAxisVisible;
+    bool isInnerAxis, isAxisVisible;
     for (int i = 0; i < this->NumberOfRadialAxes; ++ i)
       {
       isInnerAxis = (i != this->NumberOfRadialAxes - 1) ||
         (i == this->NumberOfRadialAxes - 1 && (vtkMathUtilities::FuzzyCompare(MaximumAngle, MinimumAngle))) ;
-      isInnerAxisVisible = !isInnerAxis || this->DrawRadialGridlines;
-      if (this->RadialAxesVisibility && isInnerAxisVisible)
+      isAxisVisible = !isInnerAxis || this->DrawRadialGridlines;
+      if (this->RadialAxesVisibility && isAxisVisible)
         {
         renderedSomething += this->RadialAxes[i]->RenderOpaqueGeometry(viewport);
         }
@@ -919,7 +918,6 @@ bool vtkPolarAxesActor::CheckMembersConsistency()
       << "ArcTickRatioSize: " << this->ArcTickRatioSize);
     return false;
   }
-
   return true;
 }
 
@@ -988,27 +986,9 @@ void vtkPolarAxesActor::BuildAxes(vtkViewport *viewport)
   // Set polar axis endpoints
   vtkAxisActor* axis = this->PolarAxis;
 
-    // convert section angle to an angle applied to ellipse equation.
-  // the result point with ellipse angle, is the point located on section angle
-
-  double miniAngleEllipse;
-  double minimumAngleRad = vtkMath::RadiansFromDegrees(this->MinimumAngle);
-
-  quotient = (int)(minimumAngleRad / (2.0*vtkMath::Pi()));
-  minimumAngleRad = minimumAngleRad - quotient* 2.0*vtkMath::Pi();
-
-  // result range: -pi/2, pi/2
-  miniAngleEllipse = atan(tan(minimumAngleRad) / this->Ratio);
-
-  //theta range: 0, 2*pi
-  if (minimumAngleRad > vtkMath::Pi() / 2 && minimumAngleRad <= vtkMath::Pi())
-    {
-    miniAngleEllipse += vtkMath::Pi();
-    }
-  else if (minimumAngleRad > vtkMath::Pi() && minimumAngleRad <= 1.5*vtkMath::Pi())
-    {
-    miniAngleEllipse -= vtkMath::Pi();
-    }
+  // compute ellipse angle
+  double miniAngleEllipse =
+    this->ComputeEllipseAngle(this->MinimumAngle, this->Ratio);
 
   // Set the start point and end point (world coord system) of the Polar Axis.
   double startPt[3], endPt[3];
@@ -1034,10 +1014,8 @@ void vtkPolarAxesActor::BuildAxes(vtkViewport *viewport)
     axis->SetAxisTypeToX();
     }
 
-  // Set common axis attributes (range, tick location)
+  // Set axess attributes (range, tick location)
   this->SetCommonAxisAttributes(axis);
-
-  // Set (title, visibility for axis, ticks, title.)
   this->SetPolarAxisAttributes(axis);
 
   // ------- Ticks thickness -------
@@ -1064,16 +1042,15 @@ void vtkPolarAxesActor::BuildAxes(vtkViewport *viewport)
 
   // Build polar axis ticks
   if (this->Log)
-  {
-  this->BuildLabelsLog();
-
-  this->BuildPolarArcsLog();
-  }
+    {
+    this->BuildLabelsLog();
+    this->BuildPolarArcsLog();
+    }
   else
-  {
-  // Build polar axis labels
-  this->BuildPolarAxisLabelsArcs();
-  }
+    {
+    // Build polar axis labels
+    this->BuildPolarAxisLabelsArcs();
+    }
 
   // Set title relative location from the axis
   if (this->PolarAxisTitleLocation == VTK_TITLE_BOTTOM)
@@ -1207,7 +1184,7 @@ void vtkPolarAxesActor::SetPolarAxisAttributes(vtkAxisActor* axis)
   axis->SetTitle(this->PolarAxisTitle);
   axis->SetTitleTextProperty(this->PolarAxisTitleTextProperty);
 
-  // Set Labels exposant value
+  // Set Labels exponent value
   if (this->ExponentLocation == VTK_EXPONENT_BOTTOM)
     {
     axis->SetExponentLocation(vtkAxisActor::VTK_ALIGN_BOTTOM);
@@ -1318,10 +1295,9 @@ void vtkPolarAxesActor::BuildRadialAxes()
 
   bool positiveSection = false;
   double dAlpha = this->DeltaAngleRadialAxes;
-  double alphaDeg, alphaRad, currentAlpha;
+  double alphaDeg, currentAlpha;
 
   // current ellipse angle
-  double thetaEllipse;
   double actualAngle;
   int i = 0;
 
@@ -1362,26 +1338,7 @@ void vtkPolarAxesActor::BuildRadialAxes()
       currentAlpha = angleSection + this->MinimumAngle;
 
     // Calculate startpoint coordinates
-    alphaRad = vtkMath::RadiansFromDegrees(currentAlpha);
-
-    // convert section angle to an angle being applied to ellipse equation.
-    // the result point with the ellipse angle, will be located on section angle
-    int quotient = (int)(alphaRad / (2.0*vtkMath::Pi()));
-    alphaRad = alphaRad - quotient* 2.0*vtkMath::Pi();
-
-    // result range: -pi/2, pi/2
-    thetaEllipse = atan(tan(alphaRad) / this->Ratio);
-
-    //theta range: 0, 2*pi
-    if (alphaRad > vtkMath::Pi() / 2 && alphaRad <= vtkMath::Pi())
-      {
-      thetaEllipse += vtkMath::Pi();
-      }
-    else if (alphaRad > vtkMath::Pi() && alphaRad <= 1.5*vtkMath::Pi())
-      {
-      thetaEllipse -= vtkMath::Pi();
-      }
-
+    double thetaEllipse = this->ComputeEllipseAngle(currentAlpha, this->Ratio);
     double xStart = this->Pole[0] + this->MinimumRadius * cos(thetaEllipse);
     double yStart = this->Pole[1] + this->MinimumRadius * this->Ratio * sin(thetaEllipse);
 
@@ -1527,32 +1484,13 @@ void vtkPolarAxesActor::BuildArcTicks()
   // Create requested number of radial axes
   double dAlpha = this->DeltaAngleMajor;
   double alphaStart;
-  double alphaDeg, alphaRad;
+  double alphaDeg;
 
   alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: floor(this->MinimumAngle / dAlpha)*dAlpha + dAlpha;
 
-  // current ellipse angle
-  double thetaEllipse;
-
   for (alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
     {
-    // Calculate startpoint coordinates
-    alphaRad = vtkMath::RadiansFromDegrees(alphaDeg);
-
-    // convert section angle to an angle being applied to ellipse equation.
-    // the result point with the ellipse angle, will be located on section angle
-    int quotient = (int)(alphaRad / (2.0*vtkMath::Pi()));
-    alphaRad = alphaRad - quotient* 2.0*vtkMath::Pi();
-
-    // result range: -pi/2, pi/2
-    thetaEllipse = atan(tan(alphaRad) / this->Ratio);
-
-    //theta range: 0, 2*pi
-    if (alphaRad > vtkMath::Pi() / 2 && alphaRad <= vtkMath::Pi())
-      thetaEllipse += vtkMath::Pi();
-    else if (alphaRad > vtkMath::Pi() && alphaRad <= 1.5*vtkMath::Pi())
-      thetaEllipse -= vtkMath::Pi();
-
+    double thetaEllipse = ComputeEllipseAngle(alphaDeg, this->Ratio);
     StoreTicksPtsFromParamEllipse(this->MaximumRadius, thetaEllipse, this->ArcMajorTickSize, this->ArcMajorTickPts);
   }
 
@@ -1563,23 +1501,7 @@ void vtkPolarAxesActor::BuildArcTicks()
   alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: floor(this->MinimumAngle / dAlpha)*dAlpha + dAlpha;
   for (alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
     {
-    // Calculate startpoint coordinates
-    alphaRad = vtkMath::RadiansFromDegrees(alphaDeg);
-
-    // convert section angle to an angle being applied to ellipse equation.
-    // the result point with the ellipse angle, will be located on section angle
-    int quotient = (int)(alphaRad / (2.0*vtkMath::Pi()));
-    alphaRad = alphaRad - quotient* 2.0*vtkMath::Pi();
-
-    // result range: -pi/2, pi/2
-    thetaEllipse = atan(tan(alphaRad) / this->Ratio);
-
-    //theta range: 0, 2*pi
-    if (alphaRad > vtkMath::Pi() / 2 && alphaRad <= vtkMath::Pi())
-      thetaEllipse += vtkMath::Pi();
-    else if (alphaRad > vtkMath::Pi() && alphaRad <= 1.5*vtkMath::Pi())
-      thetaEllipse -= vtkMath::Pi();
-
+    double thetaEllipse = ComputeEllipseAngle(alphaDeg, this->Ratio);
     StoreTicksPtsFromParamEllipse(this->MaximumRadius, thetaEllipse, this->ArcTickRatioSize*this->ArcMajorTickSize, this->ArcMinorTickPts);
   }
 
@@ -1725,7 +1647,8 @@ void vtkPolarAxesActor::BuildPolarAxisLabelsArcs()
   double rangeScale = axisLength / rangeLength;
 
   // Label values refers to range values
-  double valueRange = axis->GetRange()[0], currentValue;
+  double valueRange = axis->GetRange()[0];
+  double currentValue;
   double deltaRange = axis->GetDeltaRangeMajor();
   double deltaArc;
 
@@ -1883,24 +1806,7 @@ void vtkPolarAxesActor::BuildPolarArcsLog()
   this->SecondaryPolarArcs->SetLines(secondaryPolarArcsLines.Get());
 
   //--- prepare significant values ----
-
-  double minAngleRad = vtkMath::RadiansFromDegrees(this->MinimumAngle);
-
-  double miniAngleEllipseRad;
-
-  // convert section angle to an angle applied to ellipse equation.
-  // the result point with the ellipse angle, will be located on section angle
-  int quotient = (int)(minAngleRad / (2.0*vtkMath::Pi()));
-  minAngleRad = minAngleRad - quotient* 2.0*vtkMath::Pi();
-
-  // result range of tan: ]-pi/2, pi/2]
-  miniAngleEllipseRad = atan(tan(minAngleRad) / this->Ratio);
-
-  //theta range: 0, 2*pi
-  if (minAngleRad > vtkMath::Pi() / 2 && minAngleRad <= vtkMath::Pi())
-    miniAngleEllipseRad += vtkMath::Pi();
-  else if (minAngleRad > vtkMath::Pi() && minAngleRad <= 1.5*vtkMath::Pi())
-    miniAngleEllipseRad -= vtkMath::Pi();
+  double miniAngleEllipseRad = ComputeEllipseAngle(this->MinimumAngle, this->Ratio);
 
   //distance from Pole to Range[0]
   vtkAxisActor* axis = this->PolarAxis;
@@ -2586,4 +2492,26 @@ int vtkPolarAxesActor::GetNumberOfPolarAxisTicks()
 {
   double rangeLength = fabs(this->Range[1] - this->Range[0]);
   return static_cast<int>((rangeLength / this->DeltaRangeMajor) + 1);
+}
+
+double vtkPolarAxesActor::ComputeEllipseAngle(double angleInDegrees, double ratio)
+{
+  double miniAngleEllipse;
+  double minimumAngleRad = vtkMath::RadiansFromDegrees(angleInDegrees);
+  int quotient = (int)(minimumAngleRad / (2.0*vtkMath::Pi()));
+  minimumAngleRad = minimumAngleRad - quotient* 2.0*vtkMath::Pi();
+
+  // result range: -pi/2, pi/2
+  miniAngleEllipse = atan(tan(minimumAngleRad) / ratio);
+
+  //ellipse range: 0, 2*pi
+  if (minimumAngleRad > vtkMath::Pi() / 2 && minimumAngleRad <= vtkMath::Pi())
+    {
+    miniAngleEllipse += vtkMath::Pi();
+    }
+  else if (minimumAngleRad > vtkMath::Pi() && minimumAngleRad <= 1.5*vtkMath::Pi())
+    {
+    miniAngleEllipse -= vtkMath::Pi();
+    }
+  return miniAngleEllipse;
 }
