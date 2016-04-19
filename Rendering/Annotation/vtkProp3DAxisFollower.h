@@ -88,8 +88,8 @@ class VTKRENDERINGANNOTATION_EXPORT vtkProp3DAxisFollower
  vtkGetMacro(ViewAngleLODThreshold, double);
 
  // Description:
- // Set/Get the desired screen offset from the axis.
- // Conveninience method, using a zero horizontal offset
+ // Set/Get the desired screen vertical offset from the axis.
+ // Convenience method, using a zero horizontal offset
  double GetScreenOffset();
  void SetScreenOffset(double offset);
 

@@ -13,16 +13,16 @@
 #include "vtkStringArray.h"
 #include "vtkTextProperty.h"
 
-inline int TestAxisActorInternal( int use2dMode, int use3dProp)
+inline int TestAxisActorInternal(int use2dMode, int use3dProp)
 {
   vtkNew<vtkStringArray> labels;
-  labels->SetNumberOfTuples(10);
-  labels->SetValue(0,"0");
-  labels->SetValue(1,"2");
-  labels->SetValue(2,"4");
-  labels->SetValue(3,"6");
-  labels->SetValue(4,"8");
-  labels->SetValue(5,"10");
+  labels->SetNumberOfTuples(6);
+  labels->SetValue(0, "0");
+  labels->SetValue(1, "2");
+  labels->SetValue(2, "4");
+  labels->SetValue(3, "6");
+  labels->SetValue(4, "8");
+  labels->SetValue(5, "10");
 
   vtkNew<vtkTextProperty> textProp1;
   textProp1->SetColor(0., 0., 1.);
@@ -54,10 +54,10 @@ inline int TestAxisActorInternal( int use2dMode, int use3dProp)
   axisXActor->SetPoint1(0, 0, 0);
   axisXActor->SetPoint2(10, 0, 0);
   axisXActor->SetTitle("X Axis");
-  axisXActor->SetBounds(0,10,0,0,0,0);
+  axisXActor->SetBounds(0, 10, 0, 0, 0, 0);
   axisXActor->SetTickLocationToBoth();
   axisXActor->SetAxisTypeToX();
-  axisXActor->SetRange(0,10);
+  axisXActor->SetRange(0, 10);
   axisXActor->SetLabels(labels.Get());
   axisXActor->SetDeltaRangeMajor(2);
   axisXActor->SetDeltaRangeMinor(0.5);
@@ -83,10 +83,10 @@ inline int TestAxisActorInternal( int use2dMode, int use3dProp)
   axisYActor->SetPoint1(0, 0, 0);
   axisYActor->SetPoint2(0, 10, 0);
   axisYActor->SetTitle("Y Axis");
-  axisYActor->SetBounds(0,0,0,10,0,0);
+  axisYActor->SetBounds(0, 0, 0, 10, 0, 0);
   axisYActor->SetTickLocationToInside();
   axisYActor->SetAxisTypeToY();
-  axisYActor->SetRange(0.1,500);
+  axisYActor->SetRange(0.1, 500);
   axisYActor->SetMajorRangeStart(0.1);
   axisYActor->SetMinorRangeStart(0.1);
   axisYActor->SetMinorTicksVisible(true);
@@ -103,7 +103,7 @@ inline int TestAxisActorInternal( int use2dMode, int use3dProp)
   axisYActor->SetLog(true);
   axisYActor->SetAxisLinesProperty(prop1.Get());
 
-  //-------------  Y Axis -------------
+  //-------------  Z Axis -------------
   vtkNew<vtkAxisActor> axisZActor;
   axisZActor->SetUse2DMode(use2dMode);
   axisZActor->SetUseTextActor3D(use3dProp);
@@ -112,10 +112,10 @@ inline int TestAxisActorInternal( int use2dMode, int use3dProp)
   axisZActor->SetPoint1(0, 0, 0);
   axisZActor->SetPoint2(0, 0, 10);
   axisZActor->SetTitle("Z Axis");
-  axisZActor->SetBounds(0,0,0,0,0,10);
+  axisZActor->SetBounds(0, 0, 0, 0, 0, 10);
   axisZActor->SetTickLocationToOutside();
   axisZActor->SetAxisTypeToZ();
-  axisZActor->SetRange(0,10);
+  axisZActor->SetRange(0, 10);
   axisZActor->SetTitleAlignLocation(vtkAxisActor::VTK_ALIGN_POINT2);
   axisZActor->SetExponent("+00");
   axisZActor->SetExponentVisibility(true);
@@ -145,10 +145,10 @@ inline int TestAxisActorInternal( int use2dMode, int use3dProp)
   axisXActor->SetCamera(camera);
   axisYActor->SetCamera(camera);
   axisZActor->SetCamera(camera);
-  renderWindow->SetSize(300,300);
+  renderWindow->SetSize(300, 300);
 
-  camera->SetPosition( -10.0, 22.0, -29 );
-  camera->SetFocalPoint( -2, 8.5, -9. );
+  camera->SetPosition(-10.0, 22.0, -29);
+  camera->SetFocalPoint(-2, 8.5, -9.);
 
   renderWindow->SetMultiSamples(0);
   renderWindow->Render();

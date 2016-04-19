@@ -73,8 +73,8 @@ vtkAxisFollower::vtkAxisFollower() : vtkFollower()
   this->EnableViewAngleLOD        = 1;
   this->ViewAngleLODThreshold     = 0.34;
 
-  this->ScreenOffsetVector[0]     = 10.0;
-  this->ScreenOffsetVector[1]     = 0.0;
+  this->ScreenOffsetVector[0]     = 0.0;
+  this->ScreenOffsetVector[1]     = 10.0;
 
   this->Axis                      = NULL;
 
@@ -327,9 +327,9 @@ void vtkAxisFollower::ComputeRotationAndTranlation(vtkRenderer *ren, double tran
                                                    double rX[3], double rY[3], double rZ[3],
                                                    vtkAxisActor *axis)
 {
-  double autoScaleVert =
-    this->AutoScale(ren, this->Camera, this->ScreenOffsetVector[0], this->Position);
   double autoScaleHoriz =
+    this->AutoScale(ren, this->Camera, this->ScreenOffsetVector[0], this->Position);
+  double autoScaleVert =
     this->AutoScale(ren, this->Camera, this->ScreenOffsetVector[1], this->Position);
 
   double dop[3];
@@ -509,13 +509,13 @@ void vtkAxisFollower::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------
 void vtkAxisFollower::SetScreenOffset(double offset)
 {
-  this->SetScreenOffsetVector(offset, 0);
+  this->SetScreenOffsetVector(0, offset);
 }
 
 //----------------------------------------------------------------------
 double vtkAxisFollower::GetScreenOffset()
 {
-  return this->GetScreenOffsetVector()[0];
+  return this->GetScreenOffsetVector()[1];
 }
 
 //----------------------------------------------------------------------

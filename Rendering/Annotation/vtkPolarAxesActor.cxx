@@ -68,9 +68,13 @@ void vtkPolarAxesActor::PrintSelf(ostream& os, vtkIndent indent)
      << this->Pole[1] << ", "
      << this->Pole[2] << ")\n";
 
+  os << indent << "Number of radial axes: " << this->NumberOfRadialAxes << endl;
+  os << indent << "Auto Subdivide Polar Axis: " << this->AutoSubdividePolarAxis << endl;
+  os << indent << "Abgle between two radial axes: " << this->DeltaAngleRadialAxes << endl;
   os << indent << "Minimum Radius: " << this->MinimumRadius << endl;
   os << indent << "Maximum Radius: " << this->MaximumRadius << endl;
-  os << indent << "Auto-Scale Radius: " << this->AutoScaleRadius << endl;
+  os << indent << "Log Scale: " << (this->Log ? "On" : "Off") << endl;
+  os << indent << "Auto-Scale Radius: " << (this->AutoScaleRadius ? "On" : "Off") << endl;
   os << indent << "Ratio: "<< this->Ratio << endl;
   os << indent << "Minimum Angle: " << this->MinimumAngle << endl;
   os << indent << "Maximum Angle: " << this->MaximumAngle << endl;
@@ -98,6 +102,8 @@ void vtkPolarAxesActor::PrintSelf(ostream& os, vtkIndent indent)
 
   os << indent << "Polar Axis Title: " << this->PolarAxisTitle << "\n";
   os << indent << "Polar Label Format: " << this->PolarLabelFormat << "\n";
+  os << indent << "Title Scale: " << this->TitleScale << "\n";
+  os << indent << "Label Scale: " << this->LabelScale << "\n";
   os << indent << "Radial Angle Format: " << this->RadialAngleFormat << "\n";
   os << indent << "PolarAxisLabelTextProperty: " << this->PolarAxisLabelTextProperty << endl;
   os << indent << "PolarAxisTitleTextProperty: " << this->PolarAxisTitleTextProperty << endl;
@@ -110,70 +116,98 @@ void vtkPolarAxesActor::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Polar Label Visibility: "
      << (this->PolarLabelVisibility ? "On" : "Off") << endl;
   if (this->PolarAxisTitleLocation == VTK_TITLE_BOTTOM)
+    {
     os << indent << "Polar Title Location: BOTTOM" << endl;
+    }
   else if (this->PolarAxisTitleLocation == VTK_TITLE_EXTERN)
+    {
     os << indent << "Polar Title Location: EXTERN" << endl;
+    }
 
   os << indent << "Polar Label exponent location: ";
 
   if (this->ExponentLocation == VTK_EXPONENT_BOTTOM)
+    {
     os << " next to the polar axis title."<<endl;
+    }
   else if (this->ExponentLocation == VTK_EXPONENT_EXTERN)
+    {
     os << " outer side."<<endl;
+    }
   else
+    {
     os << " bound to labels."<<endl;
+    }
 
   os << indent << "Radial Axes Visibility: "<< (this->RadialAxesVisibility ? "On\n" : "Off\n");
   os << indent << "Radial Title Visibility: "   << (this->RadialTitleVisibility ? "On" : "Off") << endl;
   if (this->RadialAxisTitleLocation == VTK_TITLE_BOTTOM)
+    {
     os << indent << "Radial Title Location: BOTTOM" << endl;
+    }
   else if (this->RadialAxisTitleLocation == VTK_TITLE_EXTERN)
+    {
     os << indent << "Radial Title Location: EXTERN" << endl;
+    }
 
   os << indent << "Polar Arcs Visibility: "<< (this->PolarArcsVisibility ? "On" : "Off") << endl;
+  os << indent << "Draw Radial Gridlines: "<< (this->DrawRadialGridlines ? "On" : "Off") << endl;
+  os << indent << "Draw Polar Arcs Gridlines: "<< (this->DrawPolarArcsGridlines ? "On" : "Off") << endl;
+  os << indent << "Draw Radial Axes From Polar Axis: "<< (this->RadialAxesOriginToPolarAxis ? "On" : "Off") << endl;
 
   //--------------------- TICKS ------------------
   os << indent << "TickLocation: " << this->TickLocation << endl;
 
   os << indent << "Ticks overall enabled: " << (this->PolarTickVisibility ? "On" : "Off") << endl;
+  os << indent << "Draw Arc Ticks From Polar Axis: "<< (this->ArcTicksOriginToPolarAxis ? "On" : "Off") << endl;
 
   //--- major ticks ---
   // polar axis and last radial axis
   os << indent << "Axes Major Tick Visibility: "<<(this->AxisTickVisibility ? "On" : "Off")<<endl;
   if (this->AxisTickVisibility && this->PolarTickVisibility)
-  {
+    {
     os << indent << "Axes Major Tick Step: " << this->DeltaRangeMajor << endl;
     os << indent << "PolarAxis Major Tick Size: " << this->PolarAxisMajorTickSize << endl;
-  if (this->RadialAxesVisibility)
-    os << indent << "Last Radial Axis Major Ticks Size: " << this->LastRadialAxisMajorTickSize << endl;
-  }
+    os << indent << "PolarAxis Major Tick Thickness: " << this->PolarAxisMajorTickThickness << endl;
+    if (this->RadialAxesVisibility)
+      {
+      os << indent << "Last Radial Axis Major Ticks Size: " << this->LastRadialAxisMajorTickSize << endl;
+      os << indent << "Last Radial Axis Major Ticks Thickness: " << this->LastRadialAxisMajorTickThickness << endl;
+      }
+    }
 
   // last arc
   os << indent << "Arc Major Ticks Visibility: "<<(this->ArcTickVisibility ? "On" : "Off")<<endl;
   if (this->ArcTickVisibility && this->PolarTickVisibility)
-  {
+    {
     os << indent << "Arc Major angle step: " << this->DeltaAngleMajor << endl;
-  os << indent << "Arc Major Ticks Size: " << this->ArcMajorTickSize << endl;
-  }
+    os << indent << "Arc Major Ticks Size: " << this->ArcMajorTickSize << endl;
+    os << indent << "Arc Major Ticks Thickness: " << this->ArcMajorTickThickness << endl;
+    }
 
   //--- minor ticks ---
   //  polar axis and last radial axis
   os << indent << "Axis Minor Ticks Visibility: "<<(this->AxisMinorTickVisibility ? "On" : "Off")<<endl;
   if (this->AxisMinorTickVisibility && this->PolarTickVisibility)
-  {
+    {
     os << indent << "Axes Minor Tick Step: " << this->DeltaRangeMinor << endl;
-  os << indent << "Ratio Between PolarAxis Major and Minor Tick : " << this->PolarAxisTickRatioSize << endl;
-  if (this->RadialAxesVisibility)
-    os << indent << "Ratio Between LastAxis Major and Minor Tick : " << this->LastAxisTickRatioSize << endl;
-  }
+    os << indent << "Ratio Between PolarAxis Major and Minor Tick : " << this->PolarAxisTickRatioSize << endl;
+    os << indent << "Ratio Between PolarAxis Major and Minor Tick Thickness : " << this->PolarAxisTickRatioThickness << endl;
+    if (this->RadialAxesVisibility)
+      {
+      os << indent << "Ratio Between LastAxis Major and Minor Tick : " << this->LastAxisTickRatioSize << endl;
+      os << indent << "Ratio Between LastAxis Major and Minor Tick Thickness: " << this->LastAxisTickRatioThickness << endl;
+      }
+    }
   os << indent << "Arc Minor Ticks Visibility: "<<(this->ArcMinorTickVisibility ? "On" : "Off")<<endl;
   if (this->ArcMinorTickVisibility && this->PolarTickVisibility)
-  {
+    {
     os << indent << "Arc Minor angle step: " << this->DeltaAngleMinor << endl;
     os << indent << "Ratio Between Last Arc Major and Minor Tick : " << this->ArcTickRatioSize << endl;
-  }
+    os << indent << "Ratio Between Last Arc Major and Minor Tick Thickness: " << this->ArcTickRatioThickness << endl;
+    }
 
-  // TODO: add thickness infos
+
 }
 
 //-----------------------------------------------------------------------------
@@ -190,7 +224,6 @@ vtkPolarAxesActor::vtkPolarAxesActor() : vtkActor()
   this->Pole[2] = 0.;
 
   // Invalid default number of polar arcs, and auto-calculate by default
-  //this->NumberOfPolarAxisTicks = -1;
   this->AutoSubdividePolarAxis = true;
 
   // Ratio of the ellipse arc
@@ -230,10 +263,6 @@ vtkPolarAxesActor::vtkPolarAxesActor() : vtkActor()
 
   // Default text screen size
   this->ScreenSize = 10.0;
-
-  // Screen offset for labels
-  // Pivot point at center of the geometry hence this->ScreenSize * 0.5
-  this->LabelScreenOffset = 15.0 + this->ScreenSize * 0.5;
 
   // Text properties of polar axis title and labels, with default color white
   // Properties of the radial axes, with default color black
@@ -390,12 +419,8 @@ vtkPolarAxesActor::vtkPolarAxesActor() : vtkActor()
   // Angle between 2 minor ticks on the last arc.
   this->DeltaAngleMinor = 0.5*this->DeltaAngleMajor;
 
-  // Default number of radial axes
-  //this->NumberOfRadialAxes = VTK_DEFAULT_NUMBER_OF_RADIAL_AXES;
   this->RadialAxesOriginToPolarAxis = 1;
-
   this->DeltaAngleRadialAxes = 45.0;
-
   this->NumberOfRadialAxes = 0;
 
   // By default all radial axes features are visible
@@ -414,10 +439,6 @@ vtkPolarAxesActor::vtkPolarAxesActor() : vtkActor()
 
   // Default label scale
   this->LabelScale = -1.;
-
-  this->RenderCount = 0;
-
-  this->RenderSomething = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -576,7 +597,6 @@ int vtkPolarAxesActor::RenderOpaqueGeometry(vtkViewport *viewport)
   if (!this->Camera)
     {
     vtkErrorMacro(<<"No camera!");
-    this->RenderSomething = 0;
     return renderedSomething;
     }
 
@@ -1116,7 +1136,6 @@ void vtkPolarAxesActor::BuildAxes(vtkViewport *viewport)
   // Scale appropriately
   this->AutoScale(viewport);
 
-  this->RenderSomething = 1;
   this->BuildTime.Modified();
 }
 

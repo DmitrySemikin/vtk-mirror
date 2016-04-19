@@ -70,8 +70,8 @@ vtkProp3DAxisFollower::vtkProp3DAxisFollower()
   this->EnableViewAngleLOD        = 1;
   this->ViewAngleLODThreshold     = 0.34;
 
-  this->ScreenOffsetVector[0]           = 10.0;
-  this->ScreenOffsetVector[1]           = 0.0;
+  this->ScreenOffsetVector[0]     = 0.0;
+  this->ScreenOffsetVector[1]     = 10.0;
 
   this->Axis                      = NULL;
   this->Viewport                  = NULL;
@@ -362,9 +362,9 @@ void vtkProp3DAxisFollower
                                double rX[3], double rY[3], double rZ[3],
                                vtkAxisActor *axis)
 {
-  double autoScaleVert =
-    this->AutoScale(viewport, this->Camera, this->ScreenOffsetVector[0], this->Position);
   double autoScaleHoriz =
+    this->AutoScale(viewport, this->Camera, this->ScreenOffsetVector[0], this->Position);
+  double autoScaleVert =
     this->AutoScale(viewport, this->Camera, this->ScreenOffsetVector[1], this->Position);
 
   double dop[3];
@@ -570,13 +570,13 @@ bool vtkProp3DAxisFollower::IsTextUpsideDown( double* a, double* b )
 //----------------------------------------------------------------------
 void vtkProp3DAxisFollower::SetScreenOffset(double offset)
 {
-  this->SetScreenOffsetVector(offset, 0);
+  this->SetScreenOffsetVector(0, offset);
 }
 
 //----------------------------------------------------------------------
 double vtkProp3DAxisFollower::GetScreenOffset()
 {
-  return this->GetScreenOffsetVector()[0];
+  return this->GetScreenOffsetVector()[1];
 }
 
 //----------------------------------------------------------------------

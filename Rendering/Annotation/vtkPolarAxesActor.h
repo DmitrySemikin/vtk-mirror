@@ -571,7 +571,6 @@ protected:
 
   // Description:
   // Number of radial axes
-  // Default: VTK_DEFAULT_NUMBER_OF_RADIAL_AXES
   int NumberOfRadialAxes;
 
   // Description:
@@ -785,10 +784,6 @@ protected:
   // Visibility of the inner arcs (overriden to 0 if PolarArcsVisibility is set to 0)
   int DrawPolarArcsGridlines;
 
-  int RenderCount;
-
-  int RenderSomething;
-
   // Description:
   // Keep the arc major ticks vtkPoints instances
   vtkPoints* ArcMajorTickPts;
@@ -838,10 +833,6 @@ protected:
   // Description:
   // Label scale factor
   double LabelScale;
-
-  // Description:
-  // Label screen offset
-  double LabelScreenOffset;
 
   // Description:
   // Text screen size

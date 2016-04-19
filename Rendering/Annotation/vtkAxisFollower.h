@@ -88,12 +88,13 @@ public:
 
  // Description:
  // Set/Get the desired screen offset from the axis.
- // Conveninience method, using a zero horizontal offset
+ // Convenience method, using a zero horizontal offset
  double GetScreenOffset();
  void SetScreenOffset(double offset);
 
  // Description:
  // Set/Get the desired screen offset from the axis.
+ // first component is horizaontal, second is vertical.
  vtkSetVector2Macro(ScreenOffsetVector, double);
  vtkGetVector2Macro(ScreenOffsetVector, double);
 

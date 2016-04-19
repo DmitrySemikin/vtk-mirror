@@ -192,7 +192,6 @@ public:
 
   // Description:
   // Set/Get visibility of the axis detached exponent.
-  // If not visible
   vtkSetMacro(ExponentVisibility, bool);
   vtkGetMacro(ExponentVisibility, bool);
   vtkBooleanMacro(ExponentVisibility, bool);
@@ -368,10 +367,9 @@ public:
   // resources to release.
   void ReleaseGraphicsResources(vtkWindow *);
 
-  //BTX
   double ComputeMaxLabelLength(const double [3]);
   double ComputeTitleLength(const double [3]);
-  //ETX
+
   void SetLabelScale(const double scale);
   void SetLabelScale(int labelIndex, const double scale);
   void SetTitleScale(const double scale);
@@ -406,17 +404,10 @@ public:
   vtkSetMacro(DeltaRangeMajor, double);
   vtkGetMacro(DeltaRangeMajor, double);
 
-  // Description:
-  // Get the factor of conversion between a range value to world coord system value.
-  vtkGetMacro(ScaleRange, double);
-
-  //BTX
   void SetLabels(vtkStringArray *labels);
-  //ETX
 
   void BuildAxis(vtkViewport *viewport, bool);
 
-  //BTX
   // Description:
   // Get title actor and it is responsible for drawing
   // title text.
@@ -449,8 +440,6 @@ public:
   // Get title actor and it is responsible for drawing
   // title text.
   vtkGetObjectMacro(ExponentProp3D, vtkProp3DAxisFollower);
-
-  //ETX
 
   // Description:
   // Get total number of labels built. Once built
@@ -530,7 +519,6 @@ protected:
   char  *Exponent;
   double  Range[2];
   double  LastRange[2];
-  double ScaleRange;
   char  *LabelFormat;
   int    UseTextActor3D;
   int    NumberOfLabelsBuilt;
@@ -698,7 +686,6 @@ private:
   vtkTextActor      *ExponentActor2D;
   vtkProp3DAxisFollower *ExponentProp3D;
   vtkTextActor3D    *ExponentActor3D;
-
 
   vtkVectorText     **LabelVectors;
   vtkPolyDataMapper **LabelMappers;

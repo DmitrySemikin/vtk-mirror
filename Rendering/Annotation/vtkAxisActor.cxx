@@ -1338,7 +1338,7 @@ void vtkAxisActor::BuildTitle(bool force)
   double labelAngle = vtkMath::RadiansFromDegrees(this->LabelTextProperty->GetOrientation());
   double labelCos = fabs(cos(labelAngle)), labelSin = fabs(sin(labelAngle));
   double labBounds[6];
-  double offset[2] = {this->TitleOffset, 0};
+  double offset[2] = {0, this->TitleOffset};
 
   // find max height label (with the label text property considered)
   // only when title is on bottom
@@ -1359,7 +1359,7 @@ void vtkAxisActor::BuildTitle(bool force)
         (labBounds[3] - labBounds[2]) * labelCos;
       labelMaxHeight = (labHeight > labelMaxHeight ? labHeight : labelMaxHeight);
       }
-    offset[0] += this->LabelOffset + this->ScreenSize * labelMaxHeight;
+    offset[1] += this->LabelOffset + this->ScreenSize * labelMaxHeight;
     }
 
   // ---------- title size ----------
@@ -1369,7 +1369,7 @@ void vtkAxisActor::BuildTitle(bool force)
     (titleBounds[3] - titleBounds[2]) * 0.5;
   double halfTitleWidth =
     (titleBounds[1] - titleBounds[0]) * 0.5;
-  offset[0] += this->ScreenSize * halfTitleHeight;
+  offset[1] += this->ScreenSize * halfTitleHeight;
 
   double *p1 = this->Point1Coordinate->GetValue();
   double *p2 = this->Point2Coordinate->GetValue();
@@ -1397,7 +1397,7 @@ void vtkAxisActor::BuildTitle(bool force)
         {
         pos[i] = p1[i];
         }
-      offset[1] += this->ScreenSize * halfTitleWidth + 3;
+      offset[0] += this->ScreenSize * halfTitleWidth + 3;
       break;
     case (VTK_ALIGN_POINT2):
       // Position to p2
@@ -1405,7 +1405,7 @@ void vtkAxisActor::BuildTitle(bool force)
         {
         pos[i] = p2[i];
         }
-      offset[1] += this->ScreenSize * halfTitleWidth + 3;
+      offset[0] += this->ScreenSize * halfTitleWidth + 3;
       break;
     }
 
@@ -1422,7 +1422,7 @@ void vtkAxisActor::BuildTitle(bool force)
       }
     }
 
-  offset[0] *= vertOffsetSign;
+  offset[1] *= vertOffsetSign;
   this->TitleActor->SetScreenOffsetVector(offset);
   this->TitleProp3D->SetScreenOffsetVector(offset);
 
@@ -1437,8 +1437,6 @@ void vtkAxisActor::BuildTitle(bool force)
     this->TitleActor3D->SetScale(
       (titleBounds[1] - titleBounds[0]) / titleActor3DWidth);
     }
-
-  // applie offset
   this->TitleActor->SetPosition(pos);
   this->TitleProp3D->SetPosition(pos);
 }
@@ -1467,7 +1465,7 @@ void vtkAxisActor::BuildExponent(bool force)
   double labelAngle = vtkMath::RadiansFromDegrees(this->LabelTextProperty->GetOrientation());
   double labelCos = fabs(cos(labelAngle)), labelSin = fabs(sin(labelAngle));
   double labBounds[6];
-  double offset[2] = { this->ExponentOffset, 0};
+  double offset[2] = { 0, this->ExponentOffset};
 
   // find max height label (with the label text property considered)
   // only when title is on bottom
@@ -1488,7 +1486,7 @@ void vtkAxisActor::BuildExponent(bool force)
         (labBounds[3] - labBounds[2]) * labelCos;
       labelMaxHeight = (labHeight > labelMaxHeight ? labHeight : labelMaxHeight);
       }
-    offset[0] += this->LabelOffset + this->ScreenSize * labelMaxHeight;
+    offset[1] += this->LabelOffset + this->ScreenSize * labelMaxHeight;
     }
 
   // ---------- title size ----------
@@ -1497,7 +1495,7 @@ void vtkAxisActor::BuildExponent(bool force)
   if (this->TitleVisibility &&
     this->TitleAlignLocation == this->ExponentLocation)
     {
-    offset[0] += this->TitleOffset + this->ScreenSize * titleBounds[3] - titleBounds[2];
+    offset[1] += this->TitleOffset + this->ScreenSize * titleBounds[3] - titleBounds[2];
     }
 
   // ---------- exponent size ----------
@@ -1505,7 +1503,7 @@ void vtkAxisActor::BuildExponent(bool force)
   this->ExponentActor->GetMapper()->GetBounds(exponentBounds);
   double halfExponentHeight = (exponentBounds[3] - exponentBounds[2]) * 0.5;
   double halfExponentWidth = (exponentBounds[1] - exponentBounds[0]) * 0.5;
-  offset[0] += this->ScreenSize * halfExponentHeight;
+  offset[1] += this->ScreenSize * halfExponentHeight;
 
   double *p1 = this->Point1Coordinate->GetValue();
   double *p2 = this->Point2Coordinate->GetValue();
@@ -1530,7 +1528,7 @@ void vtkAxisActor::BuildExponent(bool force)
         {
         pos[i] = p1[i];
         }
-      offset[1] += this->ScreenSize * halfExponentWidth + 3;
+      offset[0] += this->ScreenSize * halfExponentWidth + 3;
       break;
     case (VTK_ALIGN_POINT2):
       // Position to p2
@@ -1538,7 +1536,7 @@ void vtkAxisActor::BuildExponent(bool force)
         {
         pos[i] = p2[i];
         }
-      offset[1] += this->ScreenSize * halfExponentWidth + 3;
+      offset[0] += this->ScreenSize * halfExponentWidth + 3;
       break;
     }
 
@@ -1557,7 +1555,7 @@ void vtkAxisActor::BuildExponent(bool force)
 
   // Offset is: ExponentOffset + TitleOffset is visible + LabelOffset if visible
   // + ScreenSize of all
-  offset[0] *= offsetSign;
+  offset[1] *= offsetSign;
   this->ExponentActor->SetScreenOffsetVector(offset);
   this->ExponentProp3D->SetScreenOffsetVector(offset);
 
