@@ -151,7 +151,7 @@ public:
   // ScreenSize detemines the size of the text in terms of screen
   // pixels.
   // Default: 10.0.
-  void SetScreenSize(double screenSize);
+  vtkSetMacro(ScreenSize, double);
   vtkGetMacro(ScreenSize, double);
 
   // Description:
@@ -801,7 +801,7 @@ protected:
   // vtk object for arc Ticks
   vtkPolyData* ArcTickPolyData;
   vtkPolyData* ArcMinorTickPolyData;
-  vtkPolyDataMapper* ArcTickPolyDataMapper,
+  vtkPolyDataMapper* ArcTickPolyDataMapper;
   vtkPolyDataMapper* ArcMinorTickPolyDataMapper;
   vtkActor* ArcTickActor;
   vtkActor* ArcMinorTickActor;
