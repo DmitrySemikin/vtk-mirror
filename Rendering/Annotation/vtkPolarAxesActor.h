@@ -799,9 +799,12 @@ protected:
 
   // Description:
   // vtk object for arc Ticks
-  vtkPolyData* ArcTickPolyData, * ArcMinorTickPolyData;
-  vtkPolyDataMapper* ArcTickPolyDataMapper, * ArcMinorTickPolyDataMapper;
-  vtkActor* ArcTickActor, * ArcMinorTickActor;
+  vtkPolyData* ArcTickPolyData;
+  vtkPolyData* ArcMinorTickPolyData;
+  vtkPolyDataMapper* ArcTickPolyDataMapper,
+  vtkPolyDataMapper* ArcMinorTickPolyDataMapper;
+  vtkActor* ArcTickActor;
+  vtkActor* ArcMinorTickActor;
 
   // Description:
   // Text properties of polar axis title and labels
