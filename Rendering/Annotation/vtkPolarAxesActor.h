@@ -45,6 +45,7 @@ All rights reserve
 class vtkCamera;
 class vtkPolyData;
 class vtkPolyDataMapper;
+class vtkProperty;
 class vtkStringArray;
 class vtkTextProperty;
 
@@ -443,26 +444,26 @@ public:
   // Description:
   // Get/Set polar axis actor properties.
   virtual void SetPolarAxisProperty(vtkProperty *);
-  vtkProperty* GetPolarAxisProperty();
+  vtkGetObjectMacro(PolarAxisProperty, vtkProperty);
 
   // Description:
   // Get/Set last radial axis actor properties.
-  virtual void SetLastRadialAxisProperty(vtkProperty *);
-  vtkProperty* GetLastRadialAxisProperty();
+  virtual void SetLastRadialAxisProperty(vtkProperty* p);
+  vtkGetObjectMacro(LastRadialAxisProperty, vtkProperty);
 
   // Description:
   // Get/Set secondary radial axes actors properties.
-  virtual void SetSecondaryRadialAxesProperty(vtkProperty *);
-  vtkProperty* GetSecondaryRadialAxesProperty();
+  virtual void SetSecondaryRadialAxesProperty(vtkProperty* p);
+  vtkGetObjectMacro(SecondaryRadialAxesProperty, vtkProperty);
 
   // Description:
   // Get/Set principal polar arc actor property.
-  virtual void SetPolarArcsProperty(vtkProperty *);
+  virtual void SetPolarArcsProperty(vtkProperty* p);
   vtkProperty* GetPolarArcsProperty();
 
   // Description:
   // Get/Set secondary polar arcs actors property.
-  virtual void SetSecondaryPolarArcsProperty(vtkProperty *);
+  virtual void SetSecondaryPolarArcsProperty(vtkProperty* p);
   vtkProperty* GetSecondaryPolarArcsProperty();
 
   // Description:

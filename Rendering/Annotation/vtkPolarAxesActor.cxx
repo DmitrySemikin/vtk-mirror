@@ -41,6 +41,8 @@ vtkCxxSetObjectMacro(vtkPolarAxesActor, PolarAxisLabelTextProperty, vtkTextPrope
 vtkCxxSetObjectMacro(vtkPolarAxesActor, PolarAxisTitleTextProperty, vtkTextProperty);
 vtkCxxSetObjectMacro(vtkPolarAxesActor, LastRadialAxisTextProperty, vtkTextProperty);
 vtkCxxSetObjectMacro(vtkPolarAxesActor, SecondaryRadialAxesTextProperty, vtkTextProperty);
+vtkCxxSetObjectMacro(vtkPolarAxesActor, LastRadialAxisProperty, vtkProperty);
+vtkCxxSetObjectMacro(vtkPolarAxesActor, SecondaryRadialAxesProperty, vtkProperty);
 
 //-----------------------------------------------------------------------------
 void vtkPolarAxesActor::PrintSelf(ostream& os, vtkIndent indent)
@@ -1115,9 +1117,9 @@ void vtkPolarAxesActor::AutoComputeTicksProperties()
   double threshold = log10(1.5);
   double log10RangeLength = log10(rangeLength);
 
-  double stepPow10 = (log10RangeLength - floor(log10RangeLength) < threshold) ? floor(log10RangeLength) - 1.0: floor(log10RangeLength);
+  double stepPow10 = (log10RangeLength - std::floor(log10RangeLength) < threshold) ? std::floor(log10RangeLength) - 1.0: std::floor(log10RangeLength);
 
-  this->DeltaRangeMajor = pow(10.0, stepPow10);
+  this->DeltaRangeMajor = std::pow(10.0, stepPow10);
   this->DeltaRangeMinor = this->DeltaRangeMajor / 2.0;
 }
 //-----------------------------------------------------------------------------
@@ -1175,7 +1177,6 @@ void vtkPolarAxesActor::SetPolarAxisAttributes(vtkAxisActor* axis)
     axis->SetExponentLocation(vtkAxisActor::VTK_ALIGN_BOTTOM);
     axis->SetExponentVisibility(true);
     }
-
   else if (this->ExponentLocation == VTK_EXPONENT_EXTERN)
     {
     axis->SetExponentLocation(vtkAxisActor::VTK_ALIGN_POINT2);
@@ -1293,7 +1294,7 @@ void vtkPolarAxesActor::BuildRadialAxes()
 
   double minorThickness;
 
-  double alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
+  double alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: std::floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
   double alphaStop = angleSection + this->MinimumAngle + dAlpha;
 
   int n = (angleSection == 360.0)? 0:1;
@@ -1480,11 +1481,10 @@ void vtkPolarAxesActor::BuildArcTicks()
   // Create requested number of radial axes
   double dAlpha = this->DeltaAngleMajor;
   double alphaStart;
-  double alphaDeg;
 
-  alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
+  alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: std::floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
 
-  for (alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
+  for (double alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
     {
     double thetaEllipse = ComputeEllipseAngle(alphaDeg, this->Ratio);
     StoreTicksPtsFromParamEllipse(this->MaximumRadius, thetaEllipse, this->ArcMajorTickSize, this->ArcMajorTickPts);
@@ -1494,8 +1494,8 @@ void vtkPolarAxesActor::BuildArcTicks()
   // without running twice through the ellipse
 
   dAlpha = this->DeltaAngleMinor;
-  alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
-  for (alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
+  alphaStart = (originToPolarAxis) ? this->MinimumAngle + dAlpha: std::floor(this->MinimumAngle / dAlpha) * dAlpha + dAlpha;
+  for (double alphaDeg = alphaStart; alphaDeg < (angleSection + this->MinimumAngle); alphaDeg += dAlpha)
     {
     double thetaEllipse = ComputeEllipseAngle(alphaDeg, this->Ratio);
     StoreTicksPtsFromParamEllipse(this->MaximumRadius, thetaEllipse, this->ArcTickRatioSize * this->ArcMajorTickSize, this->ArcMinorTickPts);
@@ -1841,8 +1841,8 @@ void vtkPolarAxesActor::BuildPolarArcsLog()
   double base = 10.0;
   double log10Range0 = log10(axis->GetRange()[0]);
   double log10Range1 = log10(axis->GetRange()[1]);
-  double lowBound = pow(base, static_cast<int>(floor(log10Range0)));
-  double upBound = pow(base, static_cast<int>(ceil(log10Range1)));
+  double lowBound = std::pow(base, static_cast<int>(std::floor(log10Range0)));
+  double upBound = std::pow(base, static_cast<int>(ceil(log10Range1)));
 
   int i;
   double tickVal, tickRangeVal, indexTickRangeValue;
@@ -1979,8 +1979,8 @@ void vtkPolarAxesActor::BuildLabelsLog()
   double tickRangeVal;
   double log10Range0 = log10(axis->GetRange()[0]);
   double log10Range1 = log10(axis->GetRange()[1]);
-  double lowBound = pow(base, static_cast<int>(floor(log10Range0)));
-  double upBound = pow(base, static_cast<int>(ceil(log10Range1)));
+  double lowBound = std::pow(base, static_cast<int>(std::floor(log10Range0)));
+  double upBound = std::pow(base, static_cast<int>(ceil(log10Range1)));
 
   for (indexTickRangeValue = lowBound; indexTickRangeValue <= upBound; indexTickRangeValue *= base)
     {
@@ -2080,7 +2080,7 @@ std::string vtkPolarAxesActor::FindExponentAndAdjustValues(
     {
     if (*itDouble != 0.0)
       {
-      double exponent = floor(log10(fabs(*itDouble)));
+      double exponent = std::floor(log10(fabs(*itDouble)));
       exponentMean += exponent;
       count++;
       }
@@ -2118,7 +2118,7 @@ std::string vtkPolarAxesActor::FindExponentAndAdjustValues(
     {
     if (*itDouble != 0.0)
       {
-      *itDouble /= pow(10, exponentMean);
+      *itDouble /= std::pow(10, exponentMean);
       }
     }
 
@@ -2173,7 +2173,7 @@ void vtkPolarAxesActor::GetSignificantPartFromValues(vtkStringArray* valuesStr,
         }
 
       // get pow of ten of the value to set the precision of the label
-      int exponent = static_cast<int>(floor(log10(fabs(*itList))));
+      int exponent = static_cast<int>(std::floor(log10(fabs(*itList))));
       if (exponent < 0)
         {
         ss << std::fixed << std::setw(1) << setprecision(-exponent) << *itList;
@@ -2329,38 +2329,6 @@ void vtkPolarAxesActor::SetPolarAxisProperty(vtkProperty *prop)
 }
 
 //-----------------------------------------------------------------------------
-vtkProperty* vtkPolarAxesActor::GetPolarAxisProperty()
-{
-  return this->PolarAxisProperty;
-}
-
-//-----------------------------------------------------------------------------
-void vtkPolarAxesActor::SetLastRadialAxisProperty(vtkProperty * prop)
-{
-  this->LastRadialAxisProperty->DeepCopy(prop);
-  this->Modified();
-}
-
-//-----------------------------------------------------------------------------
-vtkProperty* vtkPolarAxesActor::GetLastRadialAxisProperty()
-{
-  return this->LastRadialAxisProperty;
-}
-
-//-----------------------------------------------------------------------------
-void vtkPolarAxesActor::SetSecondaryRadialAxesProperty(vtkProperty *prop)
-{
-  this->SecondaryRadialAxesProperty->DeepCopy(prop);
-  this->Modified();
-}
-
-//-----------------------------------------------------------------------------
-vtkProperty* vtkPolarAxesActor::GetSecondaryRadialAxesProperty()
-{
-  return this->SecondaryRadialAxesProperty;
-}
-
-//-----------------------------------------------------------------------------
 void vtkPolarAxesActor::SetPolarArcsProperty(vtkProperty * prop)
 {
   this->PolarArcsActor->SetProperty(prop);
@@ -2448,14 +2416,14 @@ double vtkPolarAxesActor::ComputeIdealStep(
   rawStep = rangeLength / subDivsRequired;
 
   // pow of 10 order of magnitude
-  pow10Start = floor(log10(rawStep));
+  pow10Start = std::floor(log10(rawStep));
   pow10End = -10.0;
   if (pow10End >= pow10Start)
     {
     pow10End -= 1.0;
     }
 
-  if (rawStep <= pow(10, pow10End))
+  if (rawStep <= std::pow(10, pow10End))
     {
     return 0.0;
     }
