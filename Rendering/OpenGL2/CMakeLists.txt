@@ -82,6 +82,7 @@ if (NOT DEFINED OPENGL_ES_VERSION)
     vtkDataTransferHelper.cxx
     vtkDualDepthPeelingPass.cxx # Needs GL_MAX
     vtkFrameBufferObject2.cxx
+    vtkOpenGLOcclusionQueryQueue.cxx # Needs GL_ANY_SAMPLE_PASSED
     vtkPixelBufferObject.cxx
     vtkRenderbuffer.cxx
     )
@@ -90,6 +91,7 @@ else()
     set(Module_SRCS ${Module_SRCS}
       vtkDualDepthPeelingPass.cxx # Needs GL_MAX
       vtkFrameBufferObject2.cxx
+      vtkOpenGLOcclusionQueryQueue.cxx # Needs GL_ANY_SAMPLE_PASSED
       vtkPixelBufferObject.cxx
       vtkRenderbuffer.cxx
       )

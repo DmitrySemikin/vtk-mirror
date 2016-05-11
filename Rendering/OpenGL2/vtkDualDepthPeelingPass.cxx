@@ -23,6 +23,7 @@
 #include "vtkOpenGLActor.h"
 #include "vtkOpenGLBufferObject.h"
 #include "vtkOpenGLError.h"
+#include "vtkOpenGLOcclusionQueryQueue.h"
 #include "vtkOpenGLRenderUtilities.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLShaderCache.h"
@@ -280,8 +281,8 @@ vtkDualDepthPeelingPass::vtkDualDepthPeelingPass()
     DepthSource(DepthA),
     DepthDestination(DepthB),
     CurrentStage(Inactive),
+    QueryFlushThreshold(3), // Will change for subsequent rendering...
     CurrentPeel(0),
-    OcclusionQueryId(0),
     WrittenPixels(0),
     OcclusionThreshold(0),
     RenderCount(0)
@@ -322,6 +323,8 @@ template <typename T> void DeleteHelper(T *& ptr)
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::FreeGLObjects()
 {
+  // don't delete the shader programs -- let the cache clean them up.
+
   if (this->Framebuffer)
     {
     this->Framebuffer->Delete();
@@ -338,7 +341,7 @@ void vtkDualDepthPeelingPass::FreeGLObjects()
   DeleteHelper(this->BackBlendVAO);
   DeleteHelper(this->BlendVAO);
 
-  // don't delete the shader programs -- let the cache clean them up.
+  this->QueryQueue->Reset();
 }
 
 //------------------------------------------------------------------------------
@@ -521,11 +524,14 @@ void vtkDualDepthPeelingPass::Prepare()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::InitializeOcclusionQuery()
 {
-  glGenQueries(1, &this->OcclusionQueryId);
+  this->QueryQueue->Reset();
 
   int numPixels = this->ViewportHeight * this->ViewportWidth;
   this->OcclusionThreshold = numPixels * this->OcclusionRatio;
   this->WrittenPixels = this->OcclusionThreshold + 1;
+
+  this->QueryQueue->SetPixelThreshold(this->OcclusionThreshold);
+  this->QueryQueue->SetFlushThreshold(this->QueryFlushThreshold);
 }
 
 //------------------------------------------------------------------------------
@@ -778,31 +784,40 @@ void vtkDualDepthPeelingPass::BlendBackBuffer()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::StartOcclusionQuery()
 {
-  // ES 3.0 only supports checking if *any* samples passed. We'll just use
-  // that query to stop peeling once all frags are processed, and ignore the
-  // requested occlusion ratio.
-#if GL_ES_VERSION_3_0 == 1
-  glBeginQuery(GL_ANY_SAMPLES_PASSED, this->OcclusionQueryId);
-#else // GL ES 3.0
-  glBeginQuery(GL_SAMPLES_PASSED, this->OcclusionQueryId);
-#endif // GL ES 3.0
+  // Reduce the flush threshhold based on whether we've exceed the number of
+  // passes expected.
+  if (this->QueryQueue->GetQueriesCompleted() >= this->QueryFlushThreshold)
+    {
+    // The new threshold is based on how many pixels remain:
+    int pixelsLeft =
+        this->QueryQueue->GetNumberOfPixelsWritten() - this->OcclusionThreshold;
+    if (pixelsLeft < 1000)
+      {
+      this->QueryQueue->SetFlushThreshold(1);
+      }
+    else if (pixelsLeft < 10000)
+      {
+      this->QueryQueue->SetFlushThreshold(2);
+      }
+    else
+      {
+      this->QueryQueue->SetFlushThreshold(3);
+      }
+    }
+  this->QueryQueue->StartQuery();
 }
 
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::EndOcclusionQuery()
 {
-#if GL_ES_VERSION_3_0 == 1
-  glEndQuery(GL_ANY_SAMPLES_PASSED);
-  GLuint anySamplesPassed;
-  glGetQueryObjectuiv(this->OcclusionQueryId, GL_QUERY_RESULT,
-                      &anySamplesPassed);
-  this->WrittenPixels = anySamplesPassed ? this->OcclusionThreshold + 1
-                                         : 0;
-#else // GL ES 3.0
-  glEndQuery(GL_SAMPLES_PASSED);
-  glGetQueryObjectuiv(this->OcclusionQueryId, GL_QUERY_RESULT,
-                      &this->WrittenPixels);
-#endif // GL ES 3.0
+  this->QueryQueue->EndQuery();
+
+  // Check to see if any queries finished:
+  this->QueryQueue->UpdateQueryStatuses();
+  if (this->QueryQueue->GetAnyQueriesFinished())
+    {
+    this->WrittenPixels = this->QueryQueue->GetNumberOfPixelsWritten();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -845,7 +860,7 @@ void vtkDualDepthPeelingPass::Finalize()
     }
 
   this->RenderState = NULL;
-  this->DeleteOcclusionQueryId();
+  this->FinalizeOcclusionQuery();
   this->SetCurrentStage(Inactive);
 
 #ifdef DEBUG_FRAME
@@ -964,7 +979,11 @@ void vtkDualDepthPeelingPass::BlendFinalImage()
 }
 
 //------------------------------------------------------------------------------
-void vtkDualDepthPeelingPass::DeleteOcclusionQueryId()
+void vtkDualDepthPeelingPass::FinalizeOcclusionQuery()
 {
-  glDeleteQueries(1, &this->OcclusionQueryId);
+  // Set the number of passes before we flush for the next frame. Cap at 8.
+  int passesNeeded = this->QueryQueue->GetQueriesNeededForPixelThreshold();
+  this->QueryFlushThreshold = std::min(8, passesNeeded);
+
+  this->QueryQueue->Reset();
 }

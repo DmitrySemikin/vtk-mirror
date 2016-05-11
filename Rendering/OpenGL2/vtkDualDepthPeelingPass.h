@@ -47,9 +47,11 @@
 
 #include "vtkRenderingOpenGL2Module.h" // For export macro
 #include "vtkDepthPeelingPass.h"
+#include "vtkNew.h" // For what it says.
 
 class vtkFrameBufferObject2;
 class vtkOpenGLBufferObject;
+class vtkOpenGLOcclusionQueryQueue;
 class vtkOpenGLVertexArrayObject;
 class vtkShaderProgram;
 class vtkTextureObject;
@@ -157,7 +159,7 @@ protected:
   void AlphaBlendRender();
 
   void BlendFinalImage();
-  void DeleteOcclusionQueryId();
+  void FinalizeOcclusionQuery();
 
   const vtkRenderState *RenderState;
 
@@ -181,8 +183,10 @@ protected:
   ShaderStage CurrentStage;
   vtkTimeStamp CurrentStageTimeStamp;
 
+  vtkNew<vtkOpenGLOcclusionQueryQueue> QueryQueue;
+  int QueryFlushThreshold;
+
   int CurrentPeel;
-  unsigned int OcclusionQueryId;
   unsigned int WrittenPixels;
   unsigned int OcclusionThreshold;
 
