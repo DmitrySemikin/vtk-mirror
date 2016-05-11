@@ -111,6 +111,7 @@ public:
   static void MarkEndEvent(const char *EventString);
 //BTX
   static void DumpLogWithIndents(ostream *os, double threshold);
+  static void DumpLogWithIndentsAndPercentages(ostream *os);
 //ETX
 
   // Description:
