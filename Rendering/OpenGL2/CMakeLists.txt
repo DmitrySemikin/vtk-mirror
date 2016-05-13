@@ -33,6 +33,7 @@ set(Module_SRCS
   vtkOpenGLActor.cxx
   vtkOpenGLBufferObject.cxx
   vtkOpenGLCamera.cxx
+  vtkOpenGLFenceSync.cxx
   vtkOpenGLGL2PSHelper.cxx
   vtkOpenGLGlyph3DHelper.cxx
   vtkOpenGLGlyph3DMapper.cxx
