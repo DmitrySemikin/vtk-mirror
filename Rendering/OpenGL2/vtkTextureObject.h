@@ -117,6 +117,16 @@ public:
     NumberOfDepthModeFormats
   };
 
+  // DepthStencil buffer formats
+  // Only one entry, but this could be extended for GL_DEPTH32F_STENCIL8
+  // at some point.
+  enum DepthStencilFormat
+  {
+    Depth24Stencil8 = 0,
+
+    NumberOfDepthStencilFormats
+  };
+
   static vtkTextureObject* New();
   vtkTypeMacro(vtkTextureObject, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent);
@@ -286,6 +296,9 @@ public:
   // Create a 2D depth texture but does not initialize its values.
   bool AllocateDepth(unsigned int width,unsigned int height,
                      int internalFormat);
+
+  bool AllocateDepthStencil(unsigned int width, unsigned int height,
+                            DepthStencilFormat internalFormat);
 
   // Description:
   // Create a 1D color texture but does not initialize its values.

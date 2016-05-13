@@ -366,6 +366,26 @@ void vtkFrameBufferObject2::AddRenDepthAttachment(
 }
 
 //----------------------------------------------------------------------------
+void vtkFrameBufferObject2::AddDepthStencilAttachment(unsigned int mode,
+                                                      vtkTextureObject *tex)
+{
+  unsigned int handle = (tex == NULL) ? 0 : tex->GetHandle();
+  this->AddTexDepthStencilAttachment(mode, handle);
+}
+
+//----------------------------------------------------------------------------
+void vtkFrameBufferObject2::AddTexDepthStencilAttachment(unsigned int mode,
+                                                         unsigned int handle)
+{
+  glFramebufferTexture2D((GLenum)mode,
+                         GL_DEPTH_STENCIL_ATTACHMENT,
+                         GL_TEXTURE_2D,
+                         handle,
+                         0);
+  vtkOpenGLCheckErrorMacro("failed at glFramebufferTexture2D");
+}
+
+//----------------------------------------------------------------------------
 void vtkFrameBufferObject2::AddDepthAttachment(
         unsigned int mode,
         vtkRenderbuffer* renbuf)

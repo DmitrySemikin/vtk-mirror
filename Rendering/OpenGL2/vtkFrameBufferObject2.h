@@ -176,6 +176,13 @@ public:
     { this->AddRenDepthAttachment(mode, 0U); }
 
   // Description:
+  // Directly assign/remove a texture/renderbuffer to depth attachments.
+  void AddDepthStencilAttachment(unsigned int mode, vtkTextureObject* tex);
+  void AddTexDepthStencilAttachment(unsigned int mode, unsigned int handle);
+  void RemoveTexDepthStencilAttachment(unsigned int mode)
+  { this->AddTexDepthStencilAttachment(mode, 0U); }
+
+  // Description:
   // Select a single specific draw or read buffer (zero based)
   void ActivateDrawBuffer(unsigned int id);
   void ActivateReadBuffer(unsigned int id);

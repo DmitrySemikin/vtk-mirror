@@ -191,6 +191,12 @@ static GLenum OpenGLDepthInternalFormat[5]=
 };
 
 //----------------------------------------------------------------------------
+static GLenum OpenGLDepthStencilFormat[] =
+{
+  GL_DEPTH24_STENCIL8
+};
+
+//----------------------------------------------------------------------------
 static GLenum OpenGLDepthInternalFormatType[5]=
 {
   GL_UNSIGNED_INT,
@@ -1622,6 +1628,51 @@ bool vtkTextureObject::AllocateDepth(unsigned int width, unsigned int height,
   if (!this->InternalFormat)
     {
     this->InternalFormat = OpenGLDepthInternalFormat[internalFormat];
+    }
+
+  this->Width = width;
+  this->Height = height;
+  this->Depth = 1;
+  this->NumberOfDimensions = 2;
+  this->Components = 1;
+
+  this->Context->ActivateTexture(this);
+  this->CreateTexture();
+  this->Bind();
+
+  glTexImage2D(
+          this->Target,
+          0,
+          static_cast<GLint>(this->InternalFormat),
+          static_cast<GLsizei>(this->Width),
+          static_cast<GLsizei>(this->Height),
+          0,
+          this->Format,
+          this->Type,
+          0);
+
+  vtkOpenGLCheckErrorMacro("failed at glTexImage2D");
+
+  this->Deactivate();
+  return true;
+}
+
+// ----------------------------------------------------------------------------
+bool vtkTextureObject::AllocateDepthStencil(unsigned int width,
+                                            unsigned int height,
+                                            DepthStencilFormat internalFormat)
+{
+  assert("pre: context_exists" && this->GetContext()!=0);
+  assert("pre: valid_internalFormat" && internalFormat >= 0
+         && internalFormat < NumberOfDepthStencilFormats);
+
+  this->Target = GL_TEXTURE_2D;
+  this->Format = GL_DEPTH_STENCIL;
+  this->Type = GL_UNSIGNED_INT_24_8;
+
+  if (!this->InternalFormat)
+    {
+    this->InternalFormat = OpenGLDepthStencilFormat[internalFormat];
     }
 
   this->Width = width;
