@@ -92,7 +92,7 @@ protected:
     DepthA, // RG32F min-max depth buffer
     DepthB, // RG32F min-max depth buffer
     OpaqueDepth, // Stores the depth map from the opaque passes
-    FragmentCount, // Counts the number of fragments per-pixel
+    FragmentCount, // Depth24Stencil8. Counts the number of fragments per-pixel
 
     NumberOfTextures
     };
@@ -139,6 +139,10 @@ protected:
   void InitializeOcclusionQuery();
   void CopyOpaqueDepthBuffer();
   void InitializeDepth();
+
+  // Setup the stencil buffer for reading
+  void EnableStencilForCurrentPass();
+  void DisableStencil();
 
   // Manage the fragment count fetch.
   void BeginFragmentCountTransfer();

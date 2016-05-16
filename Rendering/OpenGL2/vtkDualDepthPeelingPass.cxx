@@ -711,46 +711,75 @@ void vtkDualDepthPeelingPass::InitializeDepth()
 
   this->Textures[this->DepthDestination]->Deactivate();
 
-  // Detach the depth-stencil texture so we can query it asynchronously.
   glDisable(GL_STENCIL_TEST);
-  this->Framebuffer->RemoveTexDepthStencilAttachment(GL_DRAW_FRAMEBUFFER);
-
-  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
-    {
-    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
-                  << desc);
-    }
 
   // Start the stencil buffer transfer:
   this->BeginFragmentCountTransfer();
 }
 
 //------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::EnableStencilForCurrentPass()
+{
+  // Only process fragments for pixels that the complexity analysis indicates
+  // need processing for this peel.
+  GLuint pass = this->CurrentPeel + 1; // 0-index to 1-index
+  glEnable(GL_STENCIL_TEST);
+  // pass 1 handles stencil values >= 1, pass 2 handles >= 3, pass 3 >= 5, etc
+  glStencilFunc(GL_GEQUAL, pass * 2 - 1, 0);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+}
+
+//------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::DisableStencil()
+{
+  glDisable(GL_STENCIL_TEST);
+}
+
+//------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::BeginFragmentCountTransfer()
 {
+  // Detach the stencil texture from the draw fb
+  this->Framebuffer->RemoveTexDepthStencilAttachment(GL_DRAW_FRAMEBUFFER);
+
+  const char *desc = NULL;
+  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
+                  << desc);
+    }
+
+  // Reattach it to the read fb
   this->FragmentCountFB->Bind(GL_READ_FRAMEBUFFER);
   this->FragmentCountFB->AddDepthStencilAttachment(
         GL_READ_FRAMEBUFFER, this->Textures[FragmentCount]);
-  this->FragmentCountTransfer->Bind(vtkPixelBufferObject::PACKED_BUFFER);
 
-  const char *desc = NULL;
   if (!this->FragmentCountFB->GetFrameBufferStatus(GL_READ_FRAMEBUFFER, desc))
     {
     vtkErrorMacro("Depth peeling error detected: Stencil-read framebuffer "
                   "incomplete: " << desc);
     }
 
-
-  // Begin the async transfer GL --> PBO
+  // Start an async transfer of the stencil data from GPU -> CPU via a PBO.
+  this->FragmentCountTransfer->Bind(vtkPixelBufferObject::PACKED_BUFFER);
   glReadPixels(0, 0, this->ViewportWidth, this->ViewportHeight,
                GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, 0);
   vtkOpenGLCheckErrorMacro("Failed after glReadPixels");
-
   this->FragmentCountTransfer->UnBind();
+  this->FragmentCountFB->UnBind(GL_READ_FRAMEBUFFER);
 
   // Insert the fence into the command stream and flush the commands to GPU:
   this->FragmentCountFence->Mark();
   this->FragmentCountFence->Flush();
+
+  // Re-attach the stencil to the draw fb for limiting fragments during blends.
+  this->Framebuffer->AddDepthStencilAttachment(GL_DRAW_FRAMEBUFFER,
+                                               this->Textures[FragmentCount]);
+
+  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
+                  << desc);
+    }
 
 #ifdef DEBUG_FRAGMENTCOUNT
   std::cout << "Fragment count transfer started\n";
@@ -1002,6 +1031,9 @@ void vtkDualDepthPeelingPass::BlendBackBuffer()
     GLUtil::PrepFullScreenVAO(this->BackBlendVAO, this->BackBlendProgram);
     }
 
+  // Stencil out the regions that aren't important for this pass:
+  this->EnableStencilForCurrentPass();
+
   this->BackBlendProgram->SetUniformi(
         "newPeel", this->Textures[BackTemp]->GetTextureUnit());
 
@@ -1016,6 +1048,8 @@ void vtkDualDepthPeelingPass::BlendBackBuffer()
   this->BackBlendVAO->Release();
 
   this->Textures[BackTemp]->Deactivate();
+
+  this->DisableStencil();
 }
 
 //------------------------------------------------------------------------------
@@ -1102,7 +1136,6 @@ void vtkDualDepthPeelingPass::Finalize()
   this->NumberOfRenderedProps =
       this->TranslucentPass->GetNumberOfRenderedProps();
 
-  this->FragmentCountFB->UnBind(GL_READ_FRAMEBUFFER);
   this->FragmentCountFence->Reset();
   this->Framebuffer->UnBind(GL_DRAW_FRAMEBUFFER);
   this->BlendFinalImage();
@@ -1157,6 +1190,8 @@ void vtkDualDepthPeelingPass::AlphaBlendRender()
   glBlendEquation(GL_FUNC_ADD);
   glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+  this->EnableStencilForCurrentPass();
+
   this->SetCurrentStage(AlphaBlending);
   this->Framebuffer->ActivateDrawBuffer(Back);
   this->Textures[this->DepthSource]->Activate();
@@ -1166,6 +1201,8 @@ void vtkDualDepthPeelingPass::AlphaBlendRender()
   annotate("Alpha blend render end");
 
   this->Textures[this->DepthSource]->Deactivate();
+
+  this->DisableStencil();
 }
 
 //------------------------------------------------------------------------------
