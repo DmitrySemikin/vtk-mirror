@@ -23,11 +23,13 @@
 #include "vtkOpenGLActor.h"
 #include "vtkOpenGLBufferObject.h"
 #include "vtkOpenGLError.h"
+#include "vtkOpenGLFenceSync.h"
 #include "vtkOpenGLOcclusionQueryQueue.h"
 #include "vtkOpenGLRenderUtilities.h"
 #include "vtkOpenGLRenderWindow.h"
 #include "vtkOpenGLShaderCache.h"
 #include "vtkOpenGLVertexArrayObject.h"
+#include "vtkPixelBufferObject.h"
 #include "vtkRenderer.h"
 #include "vtkRenderState.h"
 #include "vtkShaderProgram.h"
@@ -35,6 +37,7 @@
 #include "vtkTypeTraits.h"
 
 #include <algorithm>
+#include <cmath>
 
 // Define to print debug statements to the OpenGL CS stream (useful for e.g.
 // apitrace debugging):
@@ -45,6 +48,9 @@
 
 // Define to output details about each frame:
 //#define DEBUG_FRAME
+
+// Define to debug fragment counting:
+//#define DEBUG_FRAGMENTCOUNT
 
 vtkStandardNewMacro(vtkDualDepthPeelingPass)
 
@@ -113,9 +119,8 @@ bool vtkDualDepthPeelingPass::ReplaceShaderValues(std::string &,
             "ivec2 pixel = ivec2(gl_FragCoord.xy);\n"
             "  float oDepth = texelFetch(opaqueDepth, pixel, 0).y;\n"
             "  if (oDepth != -1. && gl_FragCoord.z > oDepth)\n"
-            "    { // Ignore fragments that are occluded by opaque geometry:\n"
-            "    gl_FragData[1].xy = vec2(-1., oDepth);\n"
-            "    return;\n"
+            "    { // Discard fragments that are occluded by opaque geometry:\n"
+            "    discard;\n"
             "    }\n"
             "  else\n"
             "    {\n"
@@ -166,7 +171,17 @@ bool vtkDualDepthPeelingPass::ReplaceShaderValues(std::string &,
             "  // Default outputs (no data/change):\n"
             "\n"
             "  // This fragment is on a current peel:\n"
-            "  if (depth == minDepth)\n"
+            "  // Write to the back buffer if min=max (e.g. only a single\n"
+            "  // fragment to peel). This ensures that occlusion queries\n"
+            "  // are accurate.\n"
+            "  if (depth == maxDepth)\n"
+            "    { // Back peel:\n"
+            "    // Dump premultiplied fragment, it will be blended later:\n"
+            "    frag.rgb *= frag.a;\n"
+            "    gl_FragData[0] = frag;\n"
+            "    return;\n"
+            "    }\n"
+            "  else\n"
             "    { // Front peel:\n"
             "    // Clear the back color:\n"
             "    gl_FragData[0] = vec4(0.);\n"
@@ -180,13 +195,6 @@ bool vtkDualDepthPeelingPass::ReplaceShaderValues(std::string &,
             "    gl_FragData[1].rgb = front.a * frag.a * frag.rgb + front.rgb;\n"
             "    // Write out (1-alpha):\n"
             "    gl_FragData[1].a = 1. - (front.a * (1. - frag.a));\n"
-            "    return;\n"
-            "    }\n"
-            "  else // (depth == maxDepth)\n"
-            "    { // Back peel:\n"
-            "    // Dump premultiplied fragment, it will be blended later:\n"
-            "    frag.rgb *= frag.a;\n"
-            "    gl_FragData[0] = frag;\n"
             "    return;\n"
             "    }\n"
             );
@@ -275,13 +283,18 @@ vtkDualDepthPeelingPass::vtkDualDepthPeelingPass()
     BackBlendVAO(NULL),
     BlendProgram(NULL),
     BlendVAO(NULL),
+    FragmentCountFB(NULL),
+    FragmentCountTransfer(NULL),
+    FragmentCountFence(NULL),
     Framebuffer(NULL),
     FrontSource(FrontA),
     FrontDestination(FrontB),
     DepthSource(DepthA),
     DepthDestination(DepthB),
     CurrentStage(Inactive),
-    QueryFlushThreshold(3), // Will change for subsequent rendering...
+    LastFramePassCount(5), // Will change for subsequent rendering...
+    DepthComplexity(-1),
+    DepthComplexityPasses(-1),
     CurrentPeel(0),
     WrittenPixels(0),
     OcclusionThreshold(0),
@@ -340,6 +353,9 @@ void vtkDualDepthPeelingPass::FreeGLObjects()
   DeleteHelper(this->CopyDepthVAO);
   DeleteHelper(this->BackBlendVAO);
   DeleteHelper(this->BlendVAO);
+  DeleteHelper(this->FragmentCountFB);
+  DeleteHelper(this->FragmentCountTransfer);
+  DeleteHelper(this->FragmentCountFence);
 
   this->QueryQueue->Reset();
 }
@@ -387,6 +403,18 @@ void vtkDualDepthPeelingPass::Initialize(const vtkRenderState *s)
   // Allocate new textures if needed:
   if (!this->Framebuffer)
     {
+    vtkOpenGLRenderWindow *context =
+        static_cast<vtkOpenGLRenderWindow*>(
+          s->GetRenderer()->GetRenderWindow());
+    size_t numPixels = this->ViewportWidth * this->ViewportHeight;
+    this->FragmentCountFB = vtkFrameBufferObject2::New();
+    this->FragmentCountFB->SetContext(context);
+    this->FragmentCountTransfer = vtkPixelBufferObject::New();
+    this->FragmentCountTransfer->SetContext(context);
+    this->FragmentCountTransfer->Allocate(numPixels * sizeof(GLubyte),
+                                          vtkPixelBufferObject::PACKED_BUFFER);
+    this->FragmentCountFence = vtkOpenGLFenceSync::New();
+
     this->Framebuffer = vtkFrameBufferObject2::New();
 
     std::generate(this->Textures,
@@ -400,6 +428,7 @@ void vtkDualDepthPeelingPass::Initialize(const vtkRenderState *s)
     this->InitDepthTexture(this->Textures[DepthA], s);
     this->InitDepthTexture(this->Textures[DepthB], s);
     this->InitOpaqueDepthTexture(this->Textures[OpaqueDepth], s);
+    this->InitFragmentCountTexture(this->Textures[FragmentCount], s);
 
     this->InitFramebuffer(s);
     }
@@ -440,6 +469,16 @@ void vtkDualDepthPeelingPass::InitOpaqueDepthTexture(vtkTextureObject *tex,
 }
 
 //------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::InitFragmentCountTexture(vtkTextureObject *tex,
+                                                       const vtkRenderState *s)
+{
+  tex->SetContext(static_cast<vtkOpenGLRenderWindow*>(
+                    s->GetRenderer()->GetRenderWindow()));
+  tex->AllocateDepthStencil(this->ViewportWidth, this->ViewportHeight,
+                            vtkTextureObject::Depth24Stencil8);
+}
+
+//------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::InitFramebuffer(const vtkRenderState *s)
 {
   this->Framebuffer->SetContext(static_cast<vtkOpenGLRenderWindow*>(
@@ -465,6 +504,13 @@ void vtkDualDepthPeelingPass::InitFramebuffer(const vtkRenderState *s)
                                         this->Textures[DepthA]);
   this->Framebuffer->AddColorAttachment(GL_DRAW_FRAMEBUFFER, DepthB,
                                         this->Textures[DepthB]);
+
+  const char *desc = NULL;
+  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
+                  << desc);
+    }
 
   this->Framebuffer->UnBind(GL_DRAW_FRAMEBUFFER);
 }
@@ -492,10 +538,16 @@ void vtkDualDepthPeelingPass::Prepare()
   this->InitializeOcclusionQuery();
   this->CurrentPeel = 0;
   this->RenderCount = 0;
+  this->DepthComplexity = -1;
+  this->DepthComplexityPasses = -1;
 
   // Save the current FBO bindings to restore them later.
   this->Framebuffer->SaveCurrentBindings();
   this->Framebuffer->Bind(GL_DRAW_FRAMEBUFFER);
+
+  // Attach the fragment count buffer for initialization:
+  this->Framebuffer->AddDepthStencilAttachment(GL_DRAW_FRAMEBUFFER,
+                                               this->Textures[FragmentCount]);
 
   // The source front buffer must be initialized, since it simply uses additive
   // blending.
@@ -504,7 +556,9 @@ void vtkDualDepthPeelingPass::Prepare()
   unsigned int targets[2] = { Back, this->FrontSource };
   this->Framebuffer->ActivateDrawBuffers(targets, 2);
   glClearColor(0.f, 0.f, 0.f, 0.f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+  this->Framebuffer->RemoveTexDepthStencilAttachment(GL_DRAW_FRAMEBUFFER);
 
   // Fill both depth buffers with -1, -1. This lets us discard fragments in
   // CopyOpaqueDepthBuffers, which gives a moderate performance boost.
@@ -531,7 +585,6 @@ void vtkDualDepthPeelingPass::InitializeOcclusionQuery()
   this->WrittenPixels = this->OcclusionThreshold + 1;
 
   this->QueryQueue->SetPixelThreshold(this->OcclusionThreshold);
-  this->QueryQueue->SetFlushThreshold(this->QueryFlushThreshold);
 }
 
 //------------------------------------------------------------------------------
@@ -553,8 +606,7 @@ void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
   // and write to DepthSource using MAX blending, so we need both to have opaque
   // fragments (src/dst seem reversed because they're named for their usage in
   // PeelRender).
-  unsigned int targets[2] = { this->DepthSource, this->DepthDestination };
-  this->Framebuffer->ActivateDrawBuffers(targets, 2);
+  this->Framebuffer->ActivateDrawBuffer(this->DepthDestination);
   this->Textures[OpaqueDepth]->Activate();
 
   glDisable(GL_BLEND);
@@ -577,7 +629,7 @@ void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
           "    { // If no depth value has been written, discard the frag:\n"
           "    discard;\n"
           "    }\n"
-          "  gl_FragData[0] = gl_FragData[1] = vec4(-1, d, 0., 0.);\n"
+          "  gl_FragData[0] = vec4(-1, d, 0., 0.);\n"
           );
     this->CopyDepthProgram = renWin->GetShaderCache()->ReadyShaderProgram(
           GLUtil::GetFullScreenQuadVertexShader().c_str(),
@@ -617,7 +669,28 @@ void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::InitializeDepth()
 {
-  // Add the translucent geometry to our depth peeling buffer:
+  // Pre-peeling initialization. We render the translucent geometry and
+  // determine the first set of inner and outer peels. We also count the number
+  // of fragments using a stencil buffer, which allows us to determine how
+  // many passes will be needed and minimize the number of pixels processed
+  // during blending passes.
+
+  // Attach the depth-stencil buffer for counting fragments:
+  this->Framebuffer->AddDepthStencilAttachment(GL_DRAW_FRAMEBUFFER,
+                                               this->Textures[FragmentCount]);
+
+  const char *desc = NULL;
+  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
+                  << desc);
+    }
+
+  glDisable(GL_DEPTH_TEST);
+  // Setup stencil testing to count fragments:
+  glEnable(GL_STENCIL_TEST);
+  glStencilFunc(GL_ALWAYS, 0, 0);
+  glStencilOp(GL_KEEP, GL_INCR, GL_INCR);
 
   // We bind the front destination buffer as render target 0 -- the data we
   // write to it isn't used, but this makes it easier to work with the existing
@@ -637,13 +710,176 @@ void vtkDualDepthPeelingPass::InitializeDepth()
   annotate("Depth initialized");
 
   this->Textures[this->DepthDestination]->Deactivate();
+
+  // Detach the depth-stencil texture so we can query it asynchronously.
+  glDisable(GL_STENCIL_TEST);
+  this->Framebuffer->RemoveTexDepthStencilAttachment(GL_DRAW_FRAMEBUFFER);
+
+  if (!this->Framebuffer->GetFrameBufferStatus(GL_DRAW_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Draw framebuffer incomplete: "
+                  << desc);
+    }
+
+  // Start the stencil buffer transfer:
+  this->BeginFragmentCountTransfer();
+}
+
+//------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::BeginFragmentCountTransfer()
+{
+  this->FragmentCountFB->Bind(GL_READ_FRAMEBUFFER);
+  this->FragmentCountFB->AddDepthStencilAttachment(
+        GL_READ_FRAMEBUFFER, this->Textures[FragmentCount]);
+  this->FragmentCountTransfer->Bind(vtkPixelBufferObject::PACKED_BUFFER);
+
+  const char *desc = NULL;
+  if (!this->FragmentCountFB->GetFrameBufferStatus(GL_READ_FRAMEBUFFER, desc))
+    {
+    vtkErrorMacro("Depth peeling error detected: Stencil-read framebuffer "
+                  "incomplete: " << desc);
+    }
+
+
+  // Begin the async transfer GL --> PBO
+  glReadPixels(0, 0, this->ViewportWidth, this->ViewportHeight,
+               GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, 0);
+  vtkOpenGLCheckErrorMacro("Failed after glReadPixels");
+
+  this->FragmentCountTransfer->UnBind();
+
+  // Insert the fence into the command stream and flush the commands to GPU:
+  this->FragmentCountFence->Mark();
+  this->FragmentCountFence->Flush();
+
+#ifdef DEBUG_FRAGMENTCOUNT
+  std::cout << "Fragment count transfer started\n";
+#endif // DEBUG_FRAGMENTCOUNT
+}
+
+//------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::CheckFragmentCountTransfer()
+{
+  if (this->DepthComplexity >= 0)
+    { // Already completed.
+    return;
+    }
+
+#ifdef DEBUG_FRAGMENTCOUNT
+  std::cout << "Checking fragment count transfer status for peel "
+            << this->CurrentPeel << "\n";
+#endif // DEBUG_FRAGMENTCOUNT
+
+  // Are we done?
+  if (!this->FragmentCountFence->IsFinished())
+    {
+    // If we're less than 5 peels in, just keep waiting.
+    if (this->CurrentPeel < 5)
+      {
+#ifdef DEBUG_FRAGMENTCOUNT
+      std::cout << "Fragment count transfer not finished.\n";
+#endif // DEBUG_FRAGMENTCOUNT
+      return;
+      }
+
+#ifdef DEBUG_FRAGMENTCOUNT
+      std::cout << "Fragment count transfer not finished after 5 peels. "
+                   "Calling glFinish() to force results.\n";
+#endif // DEBUG_FRAGMENTCOUNT
+
+    // Otherwise, force a pipeline sync:
+    glFinish();
+    // Sanity check:
+    if (!this->FragmentCountFence->IsFinished())
+      {
+      vtkWarningMacro("Fence still not processed after glFinished().");
+      return;
+      }
+    }
+
+  this->ProcessFragmentCount();
+}
+
+//------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::ProcessFragmentCount()
+{
+  void *dataRaw = this->FragmentCountTransfer->MapBuffer(
+        vtkPixelBufferObject::PACKED_BUFFER);
+
+  if (dataRaw == NULL)
+    {
+    vtkErrorMacro("Unable to map stencil buffer.");
+    return;
+    }
+
+  unsigned char *data = static_cast<unsigned char*>(dataRaw);
+
+  // We'll count how many pixel are at a given complexity level. Map has 256
+  // entries, since we're using an 8-bit stencil buffer.
+  unsigned long long int pixelsAtComplexity[256];
+  std::fill(pixelsAtComplexity, pixelsAtComplexity + 256, 0);
+
+  // Tabulate how many pixels have a given complexity:
+  for (int i = 0; i < this->ViewportWidth; ++i)
+    {
+    for (int j = 0; j < this->ViewportHeight; ++j)
+      {
+      ++pixelsAtComplexity[data[j * this->ViewportWidth + i]];
+      }
+    }
+
+  // Update table to reflect that higher complexity pixels also count against
+  // lower complexity pixels (eg. a pixel with complexity 5 is also handled
+  // during the pass for complexity 2):
+  for (int i = 0; i < 255; ++i)
+    {
+    for (int j = i + 1; j < 256; ++j)
+      {
+      pixelsAtComplexity[i] += pixelsAtComplexity[j];
+      }
+    }
+
+  this->FragmentCountTransfer->UnmapBuffer(vtkPixelBufferObject::PACKED_BUFFER);
+  this->FragmentCountTransfer->UnBind();
+
+  // Find the first entry in the pixel/complexity map that satisfy the
+  // occlusion criteria. This will be our depth complexity.
+  for (int i = 0; i < 255; ++i)
+    {
+    if (pixelsAtComplexity[i] <= this->OcclusionThreshold)
+      {
+      this->DepthComplexity = i - 1;
+      break;
+      }
+    }
+
+  if (this->DepthComplexity >= 0)
+    {
+    // + 1 for integer rounding:
+    this->DepthComplexityPasses = (this->DepthComplexity + 1) / 2;
+    }
+
+#ifdef DEBUG_FRAGMENTCOUNT
+  std::cout << "Fragment count transfer completed. Complexity table:\n";
+  for (int i = 0; i <= this->DepthComplexity + 1; ++i)
+    {
+    std::cout << "Complexity: " << i << " pixels: " << pixelsAtComplexity[i]
+              << "\n";
+    }
+  std::cout << "Occlusion threshold of " << this->OcclusionThreshold
+            << " should be reached in " << this->DepthComplexityPasses
+            << " passes to cover a depth complexity of "
+            << this->DepthComplexity << ".\n";
+#endif // DEBUG_FRAGMENTCOUNT
 }
 
 //------------------------------------------------------------------------------
 bool vtkDualDepthPeelingPass::PeelingDone()
 {
-  return this->CurrentPeel >= this->MaximumNumberOfPeels ||
-         this->WrittenPixels <= this->OcclusionThreshold;
+  return (this->CurrentPeel >= this->MaximumNumberOfPeels ||
+          this->WrittenPixels <= this->OcclusionThreshold ||
+          (this->DepthComplexityPasses >= 0 &&
+           this->CurrentPeel >= this->DepthComplexityPasses));
 }
 
 //------------------------------------------------------------------------------
@@ -653,6 +889,7 @@ void vtkDualDepthPeelingPass::Peel()
   this->PeelRender();
   this->BlendBackBuffer();
   this->SwapTargets();
+  this->CheckFragmentCountTransfer();
   ++this->CurrentPeel;
 
 #ifdef DEBUG_PEEL
@@ -784,26 +1021,51 @@ void vtkDualDepthPeelingPass::BlendBackBuffer()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::StartOcclusionQuery()
 {
-  // Reduce the flush threshhold based on whether we've exceed the number of
-  // passes expected.
-  if (this->QueryQueue->GetQueriesCompleted() >= this->QueryFlushThreshold)
+  // Unfortunately, the stencil buffer we use to determine depth complexity
+  // during InitializeDepth seems to double count some fragments, so we may
+  // overestimate the number of passes needed. For this reason, we keep the
+  // number of passes needed for the last frame and check occlusion there as
+  // well.
+
+  // If we don't have depth complexity information, just use the last frame's
+  // info as an estimate:
+  int lowEstimate = this->LastFramePassCount;
+  int highEstimate = this->LastFramePassCount;
+
+  // Account for depth complexity info if available:
+  if (this->DepthComplexityPasses > 0)
     {
-    // The new threshold is based on how many pixels remain:
-    int pixelsLeft =
-        this->QueryQueue->GetNumberOfPixelsWritten() - this->OcclusionThreshold;
-    if (pixelsLeft < 1000)
+    if (this->DepthComplexityPasses <= this->LastFramePassCount)
       {
-      this->QueryQueue->SetFlushThreshold(1);
-      }
-    else if (pixelsLeft < 10000)
-      {
-      this->QueryQueue->SetFlushThreshold(2);
+      // Depth complexity says there are fewer passes needed than last time.
+      // The depth complexity value is a hard upper limit, so use it for both
+      // estimates:
+      lowEstimate = this->DepthComplexityPasses;
+      highEstimate = this->DepthComplexityPasses;
       }
     else
       {
-      this->QueryQueue->SetFlushThreshold(3);
+      // If it took fewer passes last time than we're estimating now, check
+      // both:
+      highEstimate = this->DepthComplexityPasses;
       }
     }
+
+  // Update the threshold based on the current pass:
+  if (this->CurrentPeel < lowEstimate)
+    {
+    this->QueryQueue->SetFlushThresholdInTotalQueries(lowEstimate);
+    }
+  else if (this->CurrentPeel < highEstimate)
+    {
+    this->QueryQueue->SetFlushThresholdInTotalQueries(highEstimate);
+    }
+  else
+    {
+    // If we've exceeded the high estimate, check every three passes:
+    this->QueryQueue->SetFlushThreshold(3);
+    }
+
   this->QueryQueue->StartQuery();
 }
 
@@ -840,6 +1102,8 @@ void vtkDualDepthPeelingPass::Finalize()
   this->NumberOfRenderedProps =
       this->TranslucentPass->GetNumberOfRenderedProps();
 
+  this->FragmentCountFB->UnBind(GL_READ_FRAMEBUFFER);
+  this->FragmentCountFence->Reset();
   this->Framebuffer->UnBind(GL_DRAW_FRAMEBUFFER);
   this->BlendFinalImage();
 
@@ -870,7 +1134,11 @@ void vtkDualDepthPeelingPass::Finalize()
             << "  - Occlusion Ratio: "
             << static_cast<float>(this->WrittenPixels) /
                static_cast<float>(this->ViewportWidth * this->ViewportHeight)
-            << " (target: " << this->OcclusionRatio << ")\n";
+            << " (target: " << this->OcclusionRatio << ")\n"
+            << "  - Predicted depth complexity: "  << this->DepthComplexity
+            << "\n"
+            << "  - Predicted number of passes: " << this->DepthComplexityPasses
+            << "\n";
 #endif // DEBUG_FRAME
 }
 
@@ -981,9 +1249,9 @@ void vtkDualDepthPeelingPass::BlendFinalImage()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::FinalizeOcclusionQuery()
 {
-  // Set the number of passes before we flush for the next frame. Cap at 8.
+  // Set the number of passes before we flush for the next frame.
   int passesNeeded = this->QueryQueue->GetQueriesNeededForPixelThreshold();
-  this->QueryFlushThreshold = std::min(8, passesNeeded);
+  this->LastFramePassCount = passesNeeded;
 
   this->QueryQueue->Reset();
 }

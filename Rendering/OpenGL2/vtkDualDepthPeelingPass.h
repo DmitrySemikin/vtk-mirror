@@ -51,8 +51,10 @@
 
 class vtkFrameBufferObject2;
 class vtkOpenGLBufferObject;
+class vtkOpenGLFenceSync;
 class vtkOpenGLOcclusionQueryQueue;
 class vtkOpenGLVertexArrayObject;
+class vtkPixelBufferObject;
 class vtkShaderProgram;
 class vtkTextureObject;
 
@@ -90,6 +92,7 @@ protected:
     DepthA, // RG32F min-max depth buffer
     DepthB, // RG32F min-max depth buffer
     OpaqueDepth, // Stores the depth map from the opaque passes
+    FragmentCount, // Counts the number of fragments per-pixel
 
     NumberOfTextures
     };
@@ -127,6 +130,7 @@ protected:
   void InitColorTexture(vtkTextureObject *tex, const vtkRenderState *s);
   void InitDepthTexture(vtkTextureObject *tex, const vtkRenderState *s);
   void InitOpaqueDepthTexture(vtkTextureObject *tex, const vtkRenderState *s);
+  void InitFragmentCountTexture(vtkTextureObject *tex, const vtkRenderState *s);
   void InitFramebuffer(const vtkRenderState *s);
 
   // Description:
@@ -135,6 +139,11 @@ protected:
   void InitializeOcclusionQuery();
   void CopyOpaqueDepthBuffer();
   void InitializeDepth();
+
+  // Manage the fragment count fetch.
+  void BeginFragmentCountTransfer();
+  void CheckFragmentCountTransfer();
+  void ProcessFragmentCount();
 
   bool PeelingDone();
 
@@ -172,6 +181,10 @@ protected:
   vtkShaderProgram *BlendProgram;
   vtkOpenGLVertexArrayObject *BlendVAO;
 
+  vtkFrameBufferObject2 *FragmentCountFB;
+  vtkPixelBufferObject *FragmentCountTransfer;
+  vtkOpenGLFenceSync *FragmentCountFence;
+
   vtkFrameBufferObject2 *Framebuffer;
   vtkTextureObject *Textures[NumberOfTextures];
 
@@ -184,7 +197,13 @@ protected:
   vtkTimeStamp CurrentStageTimeStamp;
 
   vtkNew<vtkOpenGLOcclusionQueryQueue> QueryQueue;
-  int QueryFlushThreshold;
+  int LastFramePassCount;
+
+  // Note that these are not necessarily the full depth complexity of the
+  // scene, they're just the depth complexity needed to hit the occlusion
+  // thresholds.
+  int DepthComplexity; // determined by reading the pixel buffer, -1 = uninit'd
+  int DepthComplexityPasses; // Number of passes req based on depth complexity
 
   int CurrentPeel;
   unsigned int WrittenPixels;
