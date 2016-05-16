@@ -35,6 +35,7 @@ existing tests to get an idea of what to do.
 #include "vtkRenderingOpenGLConfigure.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderer.h"
+#include "vtkTimerLog.h"
 #include "vtkNew.h"
 
 /*=========================================================================
@@ -524,9 +525,9 @@ Define a test for depth peeling transluscent geometry.
 class depthPeelingTest : public vtkRTTest
 {
   public:
-  depthPeelingTest(const char *name, bool withNormals)
+  depthPeelingTest(const char *name, int numActors)
     : vtkRTTest(name),
-      WithNormals(withNormals)
+      NumActors(numActors)
   {
   }
 
@@ -546,10 +547,7 @@ class depthPeelingTest : public vtkRTTest
     vtkNew<vtkParametricTorus> PB;
     vtkNew<vtkParametricFunctionSource> PFS;
     PFS->SetParametricFunction(PB.Get());
-    if (this->WithNormals == false)
-      {
-      PFS->GenerateNormalsOff();
-      }
+    PFS->GenerateNormalsOff();
     PFS->SetUResolution(ures * 50);
     PFS->SetVResolution(vres * 100);
     PFS->Update();
@@ -570,20 +568,27 @@ class depthPeelingTest : public vtkRTTest
     ren1->SetMaximumNumberOfPeels(100);
     ren1->SetOcclusionRatio(0.);
 
-    // Create a set of 10 colored translucent actors at slight offsets:
-    const int NUM_ACTORS = 10;
-    const unsigned char colors[NUM_ACTORS][4] = { { 255,   0,   0, 32 },
-                                                  {   0, 255,   0, 32 },
-                                                  {   0,   0, 255, 32 },
-                                                  { 128, 128,   0, 32 },
-                                                  {   0, 128, 128, 32 },
-                                                  { 128,   0, 128, 32 },
-                                                  { 128,  64,  64, 32 },
-                                                  {  64, 128,  64, 32 },
-                                                  {  64,  64, 128, 32 },
-                                                  {  64,  64,  64, 32 } };
+    // Create a set of colored translucent actors at slight offsets:
+    int numActors = this->NumActors;
+    // Limit to 10, since that's what we're generating colors for:
+    if (numActors > 10)
+      {
+      std::cerr << "Reducing number of actors in depth peeling test to 10.\n";
+      numActors = 10;
+      }
 
-    for (int i = 0; i < NUM_ACTORS; ++i)
+    const unsigned char colors[10][4] = { { 255,   0,   0, 32 },
+                                          {   0, 255,   0, 32 },
+                                          {   0,   0, 255, 32 },
+                                          { 128, 128,   0, 32 },
+                                          {   0, 128, 128, 32 },
+                                          { 128,   0, 128, 32 },
+                                          { 128,  64,  64, 32 },
+                                          {  64, 128,  64, 32 },
+                                          {  64,  64, 128, 32 },
+                                          {  64,  64,  64, 32 } };
+
+    for (int i = 0; i < numActors; ++i)
       {
       vtkNew<vtkActor> actor;
       actor->SetMapper(mapper.Get());
@@ -594,7 +599,7 @@ class depthPeelingTest : public vtkRTTest
 
       vtkNew<vtkTransform> xform;
       xform->Identity();
-      xform->RotateX(i * (180. / static_cast<double>(NUM_ACTORS)));
+      xform->RotateX(i * (180. / static_cast<double>(numActors)));
       actor->SetUserTransform(xform.Get());
 
       ren1->AddActor(actor.Get());
@@ -604,6 +609,14 @@ class depthPeelingTest : public vtkRTTest
     renWindow->SetSize(500, 500);
     ren1->SetBackground(0.2, 0.3, 0.5);
 
+//#define USE_DEPTH_PEELING_TIMER_LOG
+
+#ifdef USE_DEPTH_PEELING_TIMER_LOG
+    vtkTimerLog::SetMaxEntries(1000);
+    vtkTimerLog::LoggingOn();
+    vtkTimerLog::MarkStartEvent("First Frame");
+#endif // USE_DEPTH_PEELING_TIMER_LOG
+
     // draw the resulting scene
     double startTime = vtkTimerLog::GetUniversalTime();
     renWindow->Render();
@@ -611,10 +624,23 @@ class depthPeelingTest : public vtkRTTest
     ren1->GetActiveCamera()->Azimuth(90);
     ren1->ResetCameraClippingRange();
 
+#ifdef USE_DEPTH_PEELING_TIMER_LOG
+    vtkTimerLog::MarkEndEvent("First Frame");
+    vtkTimerLog::DumpLogWithIndentsAndPercentages(&std::cerr);
+    vtkTimerLog::ResetLog();
+    vtkTimerLog::MarkStartEvent("Subsequent Frame");
+#endif // USE_DEPTH_PEELING_TIMER_LOG
+
     int frameCount = 80;
     for (int i = 0; i < frameCount; i++)
       {
       renWindow->Render();
+#ifdef USE_DEPTH_PEELING_TIMER_LOG
+      vtkTimerLog::MarkEndEvent("Subsequent Frame");
+      vtkTimerLog::DumpLogWithIndentsAndPercentages(&std::cerr);
+      vtkTimerLog::ResetLog();
+      vtkTimerLog::MarkStartEvent("Subsequent Frame");
+#endif // USE_DEPTH_PEELING_TIMER_LOG
       ren1->GetActiveCamera()->Azimuth(1);
       ren1->GetActiveCamera()->Elevation(1);
       if ((vtkTimerLog::GetUniversalTime() - startTime - firstFrameTime) >
@@ -624,10 +650,17 @@ class depthPeelingTest : public vtkRTTest
         break;
         }
       }
+
+#ifdef USE_DEPTH_PEELING_TIMER_LOG
+    vtkTimerLog::MarkEndEvent("Subsequent Frame");
+    vtkTimerLog::DumpLogWithIndentsAndPercentages(&std::cerr);
+    vtkTimerLog::ResetLog();
+#endif // USE_DEPTH_PEELING_TIMER_LOG
+
     double subsequentFrameTime = (vtkTimerLog::GetUniversalTime() - startTime -
                                   firstFrameTime) / frameCount;
     double numTris = PFS->GetOutput()->GetPolys()->GetNumberOfCells();
-    numTris *= NUM_ACTORS;
+    numTris *= numActors;
 
     vtkRTTestResult result;
     result.Results["first frame time"] = firstFrameTime;
@@ -639,7 +672,7 @@ class depthPeelingTest : public vtkRTTest
     }
 
   protected:
-  bool WithNormals;
+  int NumActors;
 };
 
 #endif
