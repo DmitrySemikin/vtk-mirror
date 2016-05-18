@@ -40,6 +40,30 @@
 //    near and far accumulation textures.
 // 5. Blend all accumulation buffers over the opaque color buffer to produce the
 //    final image.
+//
+// There are a few new improvements over the published method that are used
+// to improve performance:
+//
+// - Delayed occlusion queries: Rather than check the occlusion ratio (which
+//   causes a full pipeline stall) after every pass, a
+//   vtkOpenGLOcclusionQueryQueue object is used to track the occlusion queries.
+//   These are only checked after significant numbers of passes; for example,
+//   queries are checked after the number of passes needed to complete the last
+//   frame, as there is typically little variation in depth complexity between
+//   frames.
+//
+// - Depth complexity analysis: During the pre-peeling initialization pass
+//   through the geometry, the stencil buffer is used to count the number of
+//   non-occluded transluscent fragments that will be rendered to each pixel.
+//   This information is asynchronously transferred to system memory while
+//   the first few peeling passes occur. When it is available, it is inspected
+//   to determine the exact number of passes needed to fully process the scene.
+//
+// - Stenciled fullscreen blend passes: At several points during peeling,
+//   full-screen textures need to be blended to produce either intermediate or
+//   final renderings. These passes re-use the stencil buffer used for depth
+//   complexity analysis to limit the blending operations to only those pixels
+//   which should have fragments from the current peel layers.
 
 
 #ifndef vtkDualDepthPeelingPass_h
@@ -132,6 +156,7 @@ protected:
   void InitOpaqueDepthTexture(vtkTextureObject *tex, const vtkRenderState *s);
   void InitFragmentCountTexture(vtkTextureObject *tex, const vtkRenderState *s);
   void InitFramebuffer(const vtkRenderState *s);
+  void InitFragmentCountPBO(const vtkRenderState *s);
 
   // Description:
   // Fill textures with initial values, bind the framebuffer.
@@ -162,6 +187,7 @@ protected:
   void BlendBackBuffer();
   void StartOcclusionQuery();
   void EndOcclusionQuery();
+  void UpdateOcclusionQueryQueue();
 
   // Description:
   // Swap the src/dest render targets:

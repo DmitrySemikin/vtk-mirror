@@ -34,14 +34,20 @@
 #include "vtkRenderState.h"
 #include "vtkShaderProgram.h"
 #include "vtkTextureObject.h"
+#include "vtkTimerLog.h"
 #include "vtkTypeTraits.h"
 
 #include <algorithm>
 #include <cmath>
+#include <sstream>
+#include <string>
 
 // Define to print debug statements to the OpenGL CS stream (useful for e.g.
 // apitrace debugging):
 //#define ANNOTATE_STREAM
+
+// Define to add start/end events to the vtkTimerLog.
+//#define TIMER_LOG
 
 // Define to output details about each peel:
 //#define DEBUG_PEEL
@@ -54,21 +60,60 @@
 
 vtkStandardNewMacro(vtkDualDepthPeelingPass)
 
-namespace
-{
+namespace {
+
+#ifdef ANNOTATE_STREAM
+// Write an entry to the OpenGL debug stream. This is handy for generating
+// apitrace logs to make it easier to identify what stage the rendering is in.
 void annotate(const std::string &str)
 {
-#ifdef ANNOTATE_STREAM
   vtkOpenGLStaticCheckErrorMacro("Error before glDebug.")
   glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER,
                        GL_DEBUG_SEVERITY_NOTIFICATION,
                        0, str.size(), str.c_str());
   vtkOpenGLClearErrorMacro();
-#else // ANNOTATE_STREAM
-  (void)str;
+}
+#endif // ANNOTATE_STREAM
+
+// Called at the start of an 'event'. If TIMER_LOG is defined, a timer event
+// is started. If ANNOTATE_STREAM is defined, a message is written to the
+// OpenGL debug log.
+void startEvent(const std::string &str)
+{
+  (void)str; // Prevent unused variable warnings
+#ifdef ANNOTATE_STREAM
+  annotate(std::string("Start event: ") + str);
+#endif // ANNOTATE_STREAM
+#ifdef TIMER_LOG
+  vtkTimerLog::MarkStartEvent(str.c_str());
+#endif // TIMER_LOG
+}
+
+// Called at the end of an 'event'. If TIMER_LOG is defined, the previously
+// start timer event is ended. If ANNOTATE_STREAM is defined, a message is
+// written to the OpenGL debug log.
+void endEvent(const std::string &str)
+{
+  (void)str; // Prevent unused variable warnings
+#ifdef TIMER_LOG
+  vtkTimerLog::MarkEndEvent(str.c_str());
+#endif // TIMER_LOG
+#ifdef ANNOTATE_STREAM
+  annotate(std::string("End event: ") + str);
 #endif // ANNOTATE_STREAM
 }
-}
+
+// RAII-ish object for ensuring that events are closed from functions that may
+// have multiple return points. Calls startEvent when constructed, and endEvent
+// when destroyed.
+struct EventMarker
+{
+  EventMarker(const std::string &str) : Event(str) { startEvent(this->Event); }
+  ~EventMarker() { endEvent(this->Event); }
+  std::string Event;
+};
+
+} // end anon namespace
 
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::PrintSelf(std::ostream &os, vtkIndent indent)
@@ -79,6 +124,8 @@ void vtkDualDepthPeelingPass::PrintSelf(std::ostream &os, vtkIndent indent)
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::Render(const vtkRenderState *s)
 {
+  EventMarker marker("vtkDDP::Render");
+
   // Setup vtkOpenGLRenderPass
   this->PreRender(s);
 
@@ -370,6 +417,7 @@ void vtkDualDepthPeelingPass::RenderTranslucentPass()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::Initialize(const vtkRenderState *s)
 {
+  EventMarker marker("vtkDDP::Initialize");
   this->RenderState = s;
 
   // Get current viewport size:
@@ -403,18 +451,6 @@ void vtkDualDepthPeelingPass::Initialize(const vtkRenderState *s)
   // Allocate new textures if needed:
   if (!this->Framebuffer)
     {
-    vtkOpenGLRenderWindow *context =
-        static_cast<vtkOpenGLRenderWindow*>(
-          s->GetRenderer()->GetRenderWindow());
-    size_t numPixels = this->ViewportWidth * this->ViewportHeight;
-    this->FragmentCountFB = vtkFrameBufferObject2::New();
-    this->FragmentCountFB->SetContext(context);
-    this->FragmentCountTransfer = vtkPixelBufferObject::New();
-    this->FragmentCountTransfer->SetContext(context);
-    this->FragmentCountTransfer->Allocate(numPixels * sizeof(GLubyte),
-                                          vtkPixelBufferObject::PACKED_BUFFER);
-    this->FragmentCountFence = vtkOpenGLFenceSync::New();
-
     this->Framebuffer = vtkFrameBufferObject2::New();
 
     std::generate(this->Textures,
@@ -431,6 +467,7 @@ void vtkDualDepthPeelingPass::Initialize(const vtkRenderState *s)
     this->InitFragmentCountTexture(this->Textures[FragmentCount], s);
 
     this->InitFramebuffer(s);
+    this->InitFragmentCountPBO(s);
     }
 }
 
@@ -516,8 +553,32 @@ void vtkDualDepthPeelingPass::InitFramebuffer(const vtkRenderState *s)
 }
 
 //------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::InitFragmentCountPBO(const vtkRenderState *s)
+{
+  vtkOpenGLRenderWindow *context =
+      static_cast<vtkOpenGLRenderWindow*>(
+        s->GetRenderer()->GetRenderWindow());
+  size_t numPixels = this->ViewportWidth * this->ViewportHeight;
+
+  this->FragmentCountFB = vtkFrameBufferObject2::New();
+  this->FragmentCountFB->SetContext(context);
+
+  // Allocate 32 bits per pixel for the depth/stencil data. We only need the
+  // stencil info, but async readback via PBO requires component size, type,
+  // and ordering to be the same in both GPU memory and the PBO. See
+  // http://stackoverflow.com/questions/11409693
+  this->FragmentCountTransfer = vtkPixelBufferObject::New();
+  this->FragmentCountTransfer->SetContext(context);
+  this->FragmentCountTransfer->Allocate(numPixels * 4 /* 32 bits */,
+                                        vtkPixelBufferObject::PACKED_BUFFER);
+
+  this->FragmentCountFence = vtkOpenGLFenceSync::New();
+}
+
+//------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::Prepare()
 {
+  EventMarker marker("vtkDDP::Prepare");
   // Prevent vtkOpenGLActor from messing with the depth mask:
   size_t numProps = this->RenderState->GetPropArrayCount();
   for (size_t i = 0; i < numProps; ++i)
@@ -590,6 +651,8 @@ void vtkDualDepthPeelingPass::InitializeOcclusionQuery()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
 {
+  EventMarker marker("vtkDDP::CopyOpaqueDepthBuffer");
+
   // Initialize the peeling depth buffer using the existing opaque depth buffer.
   // Note that the min component is stored as -depth, allowing
   // glBlendEquation = GL_MAX to be used during peeling.
@@ -657,9 +720,7 @@ void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
 
   this->CopyDepthVAO->Bind();
 
-  annotate("Copying opaque depth!");
   GLUtil::DrawFullScreenQuad();
-  annotate("Opaque depth copied!");
 
   this->CopyDepthVAO->Release();
 
@@ -669,6 +730,8 @@ void vtkDualDepthPeelingPass::CopyOpaqueDepthBuffer()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::InitializeDepth()
 {
+  EventMarker marker("vtkDDP::InitializeDepth");
+
   // Pre-peeling initialization. We render the translucent geometry and
   // determine the first set of inner and outer peels. We also count the number
   // of fragments using a stencil buffer, which allows us to determine how
@@ -705,9 +768,7 @@ void vtkDualDepthPeelingPass::InitializeDepth()
 
   glEnable(GL_BLEND);
   glBlendEquation(GL_MAX);
-  annotate("Initializing depth.");
   this->RenderTranslucentPass();
-  annotate("Depth initialized");
 
   this->Textures[this->DepthDestination]->Deactivate();
 
@@ -738,6 +799,8 @@ void vtkDualDepthPeelingPass::DisableStencil()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::BeginFragmentCountTransfer()
 {
+  EventMarker marker("vtkDDP::BeginFragmentCountTransfer");
+
   // Detach the stencil texture from the draw fb
   this->Framebuffer->RemoveTexDepthStencilAttachment(GL_DRAW_FRAMEBUFFER);
 
@@ -760,16 +823,27 @@ void vtkDualDepthPeelingPass::BeginFragmentCountTransfer()
     }
 
   // Start an async transfer of the stencil data from GPU -> CPU via a PBO.
+  // We fetch both the (garbage) depth info and the (useful) stencil info, since
+  // async readback via PBO requires the size, type, and order of components to
+  // match.
   this->FragmentCountTransfer->Bind(vtkPixelBufferObject::PACKED_BUFFER);
+
+  startEvent("glReadPixels");
   glReadPixels(0, 0, this->ViewportWidth, this->ViewportHeight,
-               GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, 0);
+               GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
   vtkOpenGLCheckErrorMacro("Failed after glReadPixels");
+  endEvent("glReadPixels");
+
   this->FragmentCountTransfer->UnBind();
   this->FragmentCountFB->UnBind(GL_READ_FRAMEBUFFER);
 
   // Insert the fence into the command stream and flush the commands to GPU:
+  startEvent("MarkFence");
   this->FragmentCountFence->Mark();
+  endEvent("MarkFence");
+  startEvent("FlushFence");
   this->FragmentCountFence->Flush();
+  endEvent("FlushFence");
 
   // Re-attach the stencil to the draw fb for limiting fragments during blends.
   this->Framebuffer->AddDepthStencilAttachment(GL_DRAW_FRAMEBUFFER,
@@ -794,6 +868,8 @@ void vtkDualDepthPeelingPass::CheckFragmentCountTransfer()
     return;
     }
 
+  EventMarker marker("vtkDDP::CheckFragmentCountTransfer");
+
 #ifdef DEBUG_FRAGMENTCOUNT
   std::cout << "Checking fragment count transfer status for peel "
             << this->CurrentPeel << "\n";
@@ -812,12 +888,15 @@ void vtkDualDepthPeelingPass::CheckFragmentCountTransfer()
       }
 
 #ifdef DEBUG_FRAGMENTCOUNT
-      std::cout << "Fragment count transfer not finished after 5 peels. "
-                   "Calling glFinish() to force results.\n";
+    std::cout << "Fragment count transfer not finished after 5 peels. "
+                 "Flushing first render pass to force results.\n";
 #endif // DEBUG_FRAGMENTCOUNT
 
-    // Otherwise, force a pipeline sync:
-    glFinish();
+    // Otherwise, request that the occlusion query queue flush the first render
+    // pass. This ensures that the fence (set in InitializeDepth) will be
+    // processed without having to flush the entire command stream.
+    this->QueryQueue->FlushToQuery(0);
+
     // Sanity check:
     if (!this->FragmentCountFence->IsFinished())
       {
@@ -826,12 +905,36 @@ void vtkDualDepthPeelingPass::CheckFragmentCountTransfer()
       }
     }
 
+  // We only reach this point when the fragment count buffer is ready.
+  // Processing this buffer takes a significant amount of time, so before we do,
+  // update the occlusion query queue and return early if possible:
+  this->UpdateOcclusionQueryQueue();
+  if (this->WrittenPixels <= this->OcclusionThreshold)
+    {
+#ifdef DEBUG_FRAGMENTCOUNT
+    std::cout << "Peeling completed before FragmentCount buffer ready.\n";
+#endif
+    return;
+    }
   this->ProcessFragmentCount();
 }
+
+namespace {
+// Memory layout of the depth/stencil buffer. Helper for processing.
+struct DepthStencil
+{
+  // Despite what everything I've read says, the packed Depth24Stencil8 format
+  // actually places the stencil data first...
+  unsigned char Stencil;
+  unsigned char Depth[3];
+};
+} // end anon namespace
 
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::ProcessFragmentCount()
 {
+  EventMarker marker("vtkDDP::ProcessFragmentCount");
+
   void *dataRaw = this->FragmentCountTransfer->MapBuffer(
         vtkPixelBufferObject::PACKED_BUFFER);
 
@@ -841,7 +944,7 @@ void vtkDualDepthPeelingPass::ProcessFragmentCount()
     return;
     }
 
-  unsigned char *data = static_cast<unsigned char*>(dataRaw);
+  DepthStencil *data = static_cast<DepthStencil*>(dataRaw);
 
   // We'll count how many pixel are at a given complexity level. Map has 256
   // entries, since we're using an 8-bit stencil buffer.
@@ -853,7 +956,7 @@ void vtkDualDepthPeelingPass::ProcessFragmentCount()
     {
     for (int j = 0; j < this->ViewportHeight; ++j)
       {
-      ++pixelsAtComplexity[data[j * this->ViewportWidth + i]];
+      ++pixelsAtComplexity[data[j * this->ViewportWidth + i].Stencil];
       }
     }
 
@@ -868,6 +971,8 @@ void vtkDualDepthPeelingPass::ProcessFragmentCount()
       }
     }
 
+  dataRaw = NULL;
+  data = NULL;
   this->FragmentCountTransfer->UnmapBuffer(vtkPixelBufferObject::PACKED_BUFFER);
   this->FragmentCountTransfer->UnBind();
 
@@ -905,20 +1010,34 @@ void vtkDualDepthPeelingPass::ProcessFragmentCount()
 //------------------------------------------------------------------------------
 bool vtkDualDepthPeelingPass::PeelingDone()
 {
-  return (this->CurrentPeel >= this->MaximumNumberOfPeels ||
-          this->WrittenPixels <= this->OcclusionThreshold ||
-          (this->DepthComplexityPasses >= 0 &&
-           this->CurrentPeel >= this->DepthComplexityPasses));
+  // Did we exceed the number of peels specified by either the user, or the
+  // depth complexity analysis?
+  this->CheckFragmentCountTransfer();
+  bool result = (this->CurrentPeel >= this->MaximumNumberOfPeels ||
+                 (this->DepthComplexityPasses >= 0 &&
+                  this->CurrentPeel >= this->DepthComplexityPasses));
+
+  // Only check the occlusion query queue if we aren't finished:
+  if (!result)
+    {
+    this->UpdateOcclusionQueryQueue();
+    result = this->WrittenPixels <= this->OcclusionThreshold;
+    }
+
+  return result;
 }
 
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::Peel()
 {
+  std::ostringstream event;
+  event << "vtkDDP::Peel (" << (this->CurrentPeel + 1) << ")";
+  EventMarker marker(event.str());
+
   this->InitializeTargets();
   this->PeelRender();
   this->BlendBackBuffer();
   this->SwapTargets();
-  this->CheckFragmentCountTransfer();
   ++this->CurrentPeel;
 
 #ifdef DEBUG_PEEL
@@ -931,6 +1050,8 @@ void vtkDualDepthPeelingPass::Peel()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::InitializeTargets()
 {
+  EventMarker marker("vtkDDP::InitializeTargets");
+
   // Initialize destination buffers to their minima, since we're MAX blending,
   // this ensures that valid outputs are captured.
   unsigned int destColorBuffers[2] = { this->FrontDestination, BackTemp };
@@ -946,6 +1067,8 @@ void vtkDualDepthPeelingPass::InitializeTargets()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::PeelRender()
 {
+  EventMarker marker("vtkDDP::PeelRender");
+
   // Enable the destination targets:
   unsigned int targets[3] = { BackTemp, this->FrontDestination,
                               this->DepthDestination };
@@ -959,9 +1082,7 @@ void vtkDualDepthPeelingPass::PeelRender()
   this->Textures[this->FrontSource]->Activate();
   this->Textures[this->DepthSource]->Activate();
 
-  annotate("Start peeling!");
   this->RenderTranslucentPass();
-  annotate("Peeling done!");
 
   this->Textures[this->FrontSource]->Deactivate();
   this->Textures[this->DepthSource]->Deactivate();
@@ -970,6 +1091,8 @@ void vtkDualDepthPeelingPass::PeelRender()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::BlendBackBuffer()
 {
+  EventMarker marker("vtkDDP::BlendBackBuffer");
+
   this->Framebuffer->ActivateDrawBuffer(Back);
   this->Textures[BackTemp]->Activate();
 
@@ -1040,9 +1163,7 @@ void vtkDualDepthPeelingPass::BlendBackBuffer()
   this->BackBlendVAO->Bind();
 
   this->StartOcclusionQuery();
-  annotate("Start blending back!");
   GLUtil::DrawFullScreenQuad();
-  annotate("Back blended!");
   this->EndOcclusionQuery();
 
   this->BackBlendVAO->Release();
@@ -1107,6 +1228,12 @@ void vtkDualDepthPeelingPass::StartOcclusionQuery()
 void vtkDualDepthPeelingPass::EndOcclusionQuery()
 {
   this->QueryQueue->EndQuery();
+}
+
+//------------------------------------------------------------------------------
+void vtkDualDepthPeelingPass::UpdateOcclusionQueryQueue()
+{
+  EventMarker marker("vtkDDP::UpdateOcclusionQueryQueue");
 
   // Check to see if any queries finished:
   this->QueryQueue->UpdateQueryStatuses();
@@ -1126,9 +1253,12 @@ void vtkDualDepthPeelingPass::SwapTargets()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::Finalize()
 {
+  EventMarker marker("vtkDDP::Finalize");
   // Mop up any unrendered fragments using simple alpha blending into the back
   // buffer.
-  if (this->WrittenPixels > 0)
+  if (this->WrittenPixels > 0 &&
+      (this->DepthComplexityPasses < 1 ||
+       this->CurrentPeel < this->DepthComplexityPasses))
     {
     this->AlphaBlendRender();
     }
@@ -1164,7 +1294,7 @@ void vtkDualDepthPeelingPass::Finalize()
   std::cout << "Depth peel done:\n"
             << "  - Number of peels: " << this->CurrentPeel << "\n"
             << "  - Number of geometry passes: " << this->RenderCount << "\n"
-            << "  - Occlusion Ratio: "
+            << "  - Last Peel Occlusion Ratio: "
             << static_cast<float>(this->WrittenPixels) /
                static_cast<float>(this->ViewportWidth * this->ViewportHeight)
             << " (target: " << this->OcclusionRatio << ")\n"
@@ -1178,6 +1308,8 @@ void vtkDualDepthPeelingPass::Finalize()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::AlphaBlendRender()
 {
+  EventMarker markerEvent("vtkDDP::AlphaBlendRender");
+
   /* This pass is mopping up the remaining fragments when we exceed the max
    * number of peels or hit the occlusion limit. We'll simply render all of the
    * remaining fragments into the back destination buffer using the
@@ -1196,9 +1328,7 @@ void vtkDualDepthPeelingPass::AlphaBlendRender()
   this->Framebuffer->ActivateDrawBuffer(Back);
   this->Textures[this->DepthSource]->Activate();
 
-  annotate("Alpha blend render start");
   this->RenderTranslucentPass();
-  annotate("Alpha blend render end");
 
   this->Textures[this->DepthSource]->Deactivate();
 
@@ -1208,6 +1338,7 @@ void vtkDualDepthPeelingPass::AlphaBlendRender()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::BlendFinalImage()
 {
+  EventMarker marker("vtkDDP::BlendFinalImage");
   this->Textures[this->FrontSource]->Activate();
   this->Textures[Back]->Activate();
 
@@ -1273,9 +1404,7 @@ void vtkDualDepthPeelingPass::BlendFinalImage()
 
   this->BlendVAO->Bind();
 
-  annotate("blending final!");
   GLUtil::DrawFullScreenQuad();
-  annotate("final blended!");
 
   this->BlendVAO->Release();
 
@@ -1286,9 +1415,21 @@ void vtkDualDepthPeelingPass::BlendFinalImage()
 //------------------------------------------------------------------------------
 void vtkDualDepthPeelingPass::FinalizeOcclusionQuery()
 {
-  // Set the number of passes before we flush for the next frame.
-  int passesNeeded = this->QueryQueue->GetQueriesNeededForPixelThreshold();
-  this->LastFramePassCount = passesNeeded;
+  // Get the number of passes need to reach the occlusion ratio:
+  int numPasses = this->QueryQueue->GetQueriesNeededForPixelThreshold();
+
+  // If == 0, we never hit the desired occlusion ratio (this happens when we
+  // hit the number of required number of passes as determined by the depth
+  // complexity analysis, as we don't do an additional pass to confirm that
+  // we've finished, so the query manager thinks we still need more).
+  // Alternatively, we may have hit the maximum number of peels specified by
+  // the user. In either case, just record the number of peels taken this time.
+  if (numPasses < 1)
+    {
+    numPasses = this->CurrentPeel;
+    }
+
+  this->LastFramePassCount = numPasses;
 
   this->QueryQueue->Reset();
 }
