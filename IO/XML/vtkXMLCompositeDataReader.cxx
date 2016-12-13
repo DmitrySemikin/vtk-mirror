@@ -77,6 +77,7 @@ vtkXMLCompositeDataReader::vtkXMLCompositeDataReader()
   : PieceDistribution(Block)
 {
   this->Internal = new vtkXMLCompositeDataReaderInternals;
+  this->EnableStreaming = false;
 }
 
 //----------------------------------------------------------------------------
@@ -378,7 +379,16 @@ void vtkXMLCompositeDataReader::ReadXMLData()
   }
   else
   {
-    this->Internal->HasUpdateRestriction = false;
+    if (!this->EnableStreaming)
+    {
+      this->Internal->HasUpdateRestriction = false;
+    }
+    else
+    {
+      this->Internal->HasUpdateRestriction = true;
+      this->Internal->UpdateIndices = std::set<int>();
+      this->Internal->UpdateIndices.insert(0);
+    }
   }
 
   // All processes create the entire tree structure however, but each one only

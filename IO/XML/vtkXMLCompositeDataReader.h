@@ -74,6 +74,18 @@ public:
   vtkCompositeDataSet* GetOutput(int);
   //@}
 
+  //@{
+  /**
+   * When this option is true the reader only reads he first block if the
+   * pipeline does not request any blocks in particular. If false (default), all
+   * blocks are read. This option is to be used with streaming components (eg.
+   * the streaming particles representation of ParaView).
+    */
+  vtkSetMacro(EnableStreaming, bool);
+  vtkGetMacro(EnableStreaming, bool);
+  vtkBooleanMacro(EnableStreaming, bool);
+  //@}
+
 protected:
   vtkXMLCompositeDataReader();
   ~vtkXMLCompositeDataReader() override;
@@ -141,6 +153,8 @@ protected:
 
   bool DataSetIsValidForBlockStrategy(unsigned int datasetIndex);
   bool DataSetIsValidForInterleaveStrategy(unsigned int datasetIndex);
+
+  bool EnableStreaming;
 
 private:
   vtkXMLCompositeDataReader(const vtkXMLCompositeDataReader&) = delete;

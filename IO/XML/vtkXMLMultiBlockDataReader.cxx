@@ -24,6 +24,7 @@
 #include "vtkMultiPieceDataSet.h"
 #include "vtkObjectFactory.h"
 #include "vtkSmartPointer.h"
+#include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkXMLDataElement.h"
 
 vtkStandardNewMacro(vtkXMLMultiBlockDataReader);
@@ -150,16 +151,29 @@ void vtkXMLMultiBlockDataReader::ReadComposite(vtkXMLDataElement* element,
         childDS.TakeReference(this->ReadDataObject(childXML, filePath));
         name = childXML->GetAttribute("name");
       }
+      double bnds[6];
+      bool hasBounds = (childXML->GetVectorAttribute("bounds", 6, bnds) == 6);
+
       // insert
       if (mblock)
       {
         mblock->SetBlock(index, childDS);
         mblock->GetMetaData(index)->Set(vtkCompositeDataSet::NAME(), name);
+        if (hasBounds)
+        {
+          mblock->GetMetaData(index)->Set(
+            vtkStreamingDemandDrivenPipeline::BOUNDS(), bnds, 6);
+        }
       }
       else if (mpiece)
       {
         mpiece->SetPiece(index, childDS);
         mpiece->GetMetaData(index)->Set(vtkCompositeDataSet::NAME(), name);
+        if (hasBounds)
+        {
+          mpiece->GetMetaData(index)->Set(
+            vtkStreamingDemandDrivenPipeline::BOUNDS(), bnds, 6);
+        }
       }
       dataSetIndex++;
     }
@@ -272,10 +286,22 @@ int vtkXMLMultiBlockDataReader::FillMetaData(vtkCompositeDataSet* metadata,
             extent, 6);
         }
       }
+
+      double bounds[6];
+      if (childXML->GetVectorAttribute("bounds", 6, bounds) == 6)
+      {
+        if (piece_metadata)
+        {
+          piece_metadata->Set(
+            vtkStreamingDemandDrivenPipeline::BOUNDS(), bounds, 6);
+        }
+      }
+
       if (this->ShouldReadDataSet(dataSetIndex))
       {
         this->SyncDataArraySelections(this, childXML, filePath);
       }
+
       dataSetIndex++;
     }
     // Child is a multiblock dataset itself. Create it.

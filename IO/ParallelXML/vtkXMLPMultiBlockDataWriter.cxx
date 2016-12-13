@@ -15,6 +15,7 @@
 #include "vtkXMLPMultiBlockDataWriter.h"
 
 #include "vtkDataObjectTreeIterator.h"
+#include "vtkDataSet.h"
 #include "vtkCompositeDataSet.h"
 #include "vtkInformationVector.h"
 #include "vtkMultiProcessController.h"
@@ -209,6 +210,15 @@ int vtkXMLPMultiBlockDataWriter::WriteComposite(
       name = iter->GetCurrentMetaData()->Get(vtkCompositeDataSet::NAME());
     }
 
+    double bnds[6];
+    bool hasBounds = false;
+    if (curDO && vtkDataSet::SafeDownCast(curDO))
+    {
+      vtkDataSet* ds = vtkDataSet::SafeDownCast(curDO);
+      ds->GetBounds(bnds);
+      hasBounds = true;
+    }
+
     if (curDO && curDO->IsA("vtkCompositeDataSet"))
     {
       // if node is a supported composite dataset
@@ -234,6 +244,10 @@ int vtkXMLPMultiBlockDataWriter::WriteComposite(
         {
           tag->SetAttribute("name", name);
         }
+        if (hasBounds)
+        {
+          tag->SetVectorAttribute("bounds", 6, bnds);
+        }
       }
       vtkCompositeDataSet* curCD
         = vtkCompositeDataSet::SafeDownCast(curDO);
@@ -256,6 +270,11 @@ int vtkXMLPMultiBlockDataWriter::WriteComposite(
       {
         datasetXML->SetAttribute("name", name);
       }
+      if (hasBounds)
+      {
+        datasetXML->SetVectorAttribute("bounds", 6, bnds);
+      }
+
       if (this->ParallelWriteNonCompositeData(
             curDO, datasetXML, currentFileIndex) )
       {

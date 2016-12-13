@@ -15,6 +15,7 @@
 #include "vtkXMLMultiBlockDataWriter.h"
 
 #include "vtkDataObjectTreeIterator.h"
+#include "vtkDataSet.h"
 #include "vtkInformation.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkObjectFactory.h"
@@ -73,9 +74,19 @@ int vtkXMLMultiBlockDataWriter::WriteComposite(vtkCompositeDataSet* compositeDat
   {
     vtkDataObject* curDO = iter->GetCurrentDataObject();
     const char *name = nullptr;
+
     if (iter->HasCurrentMetaData())
     {
       name = iter->GetCurrentMetaData()->Get(vtkCompositeDataSet::NAME());
+    }
+
+    double bnds[6];
+    bool hasBounds = false;
+    if (curDO && curDO->IsA("vtkDataSet"))
+    {
+      vtkDataSet* ds = vtkDataSet::SafeDownCast(curDO);
+      ds->GetBounds(bnds);
+      hasBounds = true;
     }
 
     if (curDO && curDO->IsA("vtkCompositeDataSet"))
@@ -86,6 +97,10 @@ int vtkXMLMultiBlockDataWriter::WriteComposite(vtkCompositeDataSet* compositeDat
       if (name)
       {
         tag->SetAttribute("name", name);
+      }
+      if (hasBounds)
+      {
+        tag->SetVectorAttribute("bounds", 6, bnds);
       }
 
       if (curDO->IsA("vtkMultiPieceDataSet"))
@@ -119,6 +134,11 @@ int vtkXMLMultiBlockDataWriter::WriteComposite(vtkCompositeDataSet* compositeDat
       {
         datasetXML->SetAttribute("name", name);
       }
+      if (hasBounds)
+      {
+        datasetXML->SetVectorAttribute("bounds", 6, bnds);
+      }
+
       vtkStdString fileName = this->CreatePieceFileName(writerIdx);
 
       this->SetProgressRange(progressRange, writerIdx, toBeWritten);
