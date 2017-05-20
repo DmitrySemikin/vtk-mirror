@@ -20,6 +20,7 @@
 #ifndef vtkImageInterpolatorInternals_h
 #define vtkImageInterpolatorInternals_h
 
+#include "vtkAbstractImageInterpolator.h"
 #include "vtkMath.h"
 
 // The interpolator info struct
@@ -30,7 +31,7 @@ struct vtkInterpolationInfo
   vtkIdType Increments[3];
   int ScalarType;
   int NumberOfComponents;
-  int BorderMode;
+  vtkImageBorderMode BorderMode;
   int InterpolationMode;
   void* ExtraInfo;
 
