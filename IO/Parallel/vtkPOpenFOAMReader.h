@@ -25,6 +25,9 @@
  * @par Thanks:
  * This class was developed by Takuya Oshima at Niigata University,
  * Japan (oshima@eng.niigata-u.ac.jp).
+ *
+ * Support of collated format introduced in OpenFOAM 5.x by
+ * SeongMo Yeon, South Korea (seongmo.yeon@gmail.com)
 */
 
 #ifndef vtkPOpenFOAMReader_h
@@ -40,7 +43,7 @@ class VTKIOPARALLEL_EXPORT vtkPOpenFOAMReader : public vtkOpenFOAMReader
 {
 public:
 
-  enum caseType { DECOMPOSED_CASE = 0, RECONSTRUCTED_CASE = 1 };
+  enum caseType { DECOMPOSED_CASE = 0, COLLATED_CASE = 1, RECONSTRUCTED_CASE = 2 };
 
   static vtkPOpenFOAMReader *New();
   vtkTypeMacro(vtkPOpenFOAMReader, vtkOpenFOAMReader);

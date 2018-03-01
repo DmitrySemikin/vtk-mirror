@@ -34,10 +34,207 @@
 #include "vtkStdString.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStringArray.h"
+#include <sstream>
 
 vtkStandardNewMacro(vtkPOpenFOAMReader);
 vtkCxxSetObjectMacro(vtkPOpenFOAMReader, Controller, vtkMultiProcessController);
 
+namespace
+{
+// Determing the number of processor<digit>/ directories
+int GuessNprocsDecomposed(vtkDirectory *dir, vtkStringArray *procNames)
+{
+  // search and list processor subdirectories
+  vtkIntArray *procNos = vtkIntArray::New();
+  for (int fileI = 0; fileI < dir->GetNumberOfFiles(); fileI++)
+  {
+    const vtkStdString subDir(dir->GetFile(fileI));
+    if (subDir.substr(0, 9) == "processor")
+    {
+      const vtkStdString procNoStr(subDir.substr(9));
+      size_t pos = 0;
+      const int procNo = std::stoi(procNoStr, &pos);
+      if (procNoStr.length() == pos && procNo >= 0)
+      {
+        procNos->InsertNextValue(procNo);
+        procNames->InsertNextValue(subDir);
+      }
+    }
+  }
+  procNos->Squeeze();
+  procNames->Squeeze();
+  // sort processor subdirectories by processor numbers
+  vtkSortDataArray::Sort(procNos, procNames);
+  procNos->Delete();
+
+  return procNames->GetNumberOfTuples();
+}
+
+// Determing the number of decomposed blocks
+int NextTokenHead(std::ifstream& ifs)
+{
+  for (;;)
+  {
+    int c;
+    while (isspace(c = ifs.get())); // isspace() accepts -1 as EOF
+    if (c == '/')
+    {
+      if ((c = ifs.get()) == '/')
+      {
+        while ((c = ifs.get()) != EOF && c != '\n');
+        if (c == EOF)
+        {
+          return c;
+        }
+      }
+      else if (c == '*')
+      {
+        for (;;)
+        {
+          while ((c = ifs.get()) != EOF && c != '*');
+          if (c == EOF)
+          {
+            return c;
+          }
+          else if ((c = ifs.get()) == '/')
+          {
+            break;
+          }
+          ifs.putback(c);
+        }
+      }
+      else
+      {
+        ifs.putback(c); // may be an EOF
+        return '/';
+      }
+    }
+    else // may be an EOF
+    {
+      return c;
+    }
+  }
+    #if defined(__hpux)
+  return EOF; // this line should not be executed; workaround for HP-UXia64-aCC
+    #endif
+}
+
+bool ReadExpecting(std::ifstream& ifs, const char expected)
+{
+  int c;
+  while (isspace(c = ifs.get()));
+  if (c == '/')
+  {
+    ifs.putback(c);
+    c = NextTokenHead(ifs);
+  }
+  if (c != expected)
+  {
+    return false;
+  }
+  return true;
+}
+
+// Read entry until semicolon and return true.
+// if closing brace found, put_back the character and return false
+bool ReadEntry(std::ifstream& ifs, std::string& keyword, std::string& element)
+{
+  std::stringstream ss;
+  while(char c = ifs.get())
+  {
+    if (c == '}')
+    {
+      ifs.putback(c);
+      return false;
+    }
+    else if (c == ';')
+    {
+      ss >> keyword >> element;
+      return true;
+    }
+    else
+    {
+      ss << c;
+    }
+  }
+}
+
+int GuessNprocsCollated(vtkDirectory *dir, vtkStdString& masterCasePath, vtkStringArray *procNames)
+{
+  // search and list processors subdirectory
+  for (int fileI = 0; fileI < dir->GetNumberOfFiles(); fileI++)
+  {
+    const vtkStdString subDir(dir->GetFile(fileI));
+    if ("processors" == subDir)
+    {
+      const vtkStdString boundaryFile = masterCasePath + vtkStdString("processors/constant/polyMesh/boundary");
+      std::ifstream ifs(boundaryFile);
+      vtkStdString word;
+      int procNo = 0;
+
+      // skip the comment block and reach to the first meaningful token, FoamFile
+      int c = NextTokenHead(ifs);
+      ifs.putback(c);
+      // FoamFile Header begin
+      ifs >> word; // word should contain FoamFile
+
+      // read FoamFile subDict entries
+      std::string keyword;
+      std::string element;
+      ReadExpecting(ifs, '{');
+      while(ReadEntry(ifs, keyword, element));
+      ReadExpecting(ifs, '}');
+      // FoamFile Header end
+
+      // Parsing the decomposed block data which consists of series of list as follows:
+      // intNumber(byteList)
+      // intNumber(byteList)
+      // ...
+      // where intNumber is exactly the size of byteList between the surrounding brackets.
+      // each byteList is nothing but an ordinary dictionary file which would be written
+      // to each processor directory in decomposed case.
+      while(1)
+      {
+        // skip any commend statement or block
+        c = NextTokenHead(ifs);
+        if (c == EOF)
+        {
+          break;
+        }
+        // get the first token
+        ifs.putback(c);
+        ifs >> word;
+        int byteSize;
+        size_t pos = 0;
+
+        // first token must be intNumber
+        byteSize = std::stoi(word, &pos);
+        if (word.length() != pos)
+        {
+          std::cerr << "Invalid byte size" << std::endl;
+          return -1;
+        }
+        // skip any comment statement or block and reach to an opening brace.
+        c = NextTokenHead(ifs);
+        // move the stream pointer by intNumber. it might work with seekg but not sure.
+        for (auto i=0; i<byteSize; ++i)
+        {
+          ifs.get();
+        }
+        // reach to the closing brace.
+        c = NextTokenHead(ifs);
+        // found decomposed block
+        procNames->InsertNextValue(vtkStdString("processor") + std::to_string(procNo));
+        ++procNo;
+      }
+      ifs.close();
+      break;
+    }
+  }
+  procNames->Squeeze();
+  return procNames->GetNumberOfTuples();
+}
+}
 //-----------------------------------------------------------------------------
 vtkPOpenFOAMReader::vtkPOpenFOAMReader()
 {
@@ -176,30 +373,16 @@ int vtkPOpenFOAMReader::RequestInformation(vtkInformation *request,
         this->BroadcastStatus(ret = 0);
         return 0;
       }
-      vtkIntArray *procNos = vtkIntArray::New();
-      for (int fileI = 0; fileI < dir->GetNumberOfFiles(); fileI++)
+      if (this->CaseType == DECOMPOSED_CASE)
       {
-        const vtkStdString subDir(dir->GetFile(fileI));
-        if (subDir.substr(0, 9) == "processor")
-        {
-          const vtkStdString procNoStr(subDir.substr(9, vtkStdString::npos));
-          char *conversionEnd;
-          const int procNo = strtol(procNoStr.c_str(), &conversionEnd, 10);
-          if (procNoStr.c_str() + procNoStr.length() == conversionEnd && procNo
-              >= 0)
-          {
-            procNos->InsertNextValue(procNo);
-            procNames->InsertNextValue(subDir);
-          }
-        }
+        GuessNprocsDecomposed(dir, procNames);
       }
-      procNos->Squeeze();
-      procNames->Squeeze();
+      else if (this->CaseType == COLLATED_CASE)
+      {
+        GuessNprocsCollated(dir, masterCasePath, procNames);
+      }
       dir->Delete();
 
-      // sort processor subdirectories by processor numbers
-      vtkSortDataArray::Sort(procNos, procNames);
-      procNos->Delete();
 
       // get time directories from the first processor subdirectory
       if (procNames->GetNumberOfTuples() > 0)
@@ -210,13 +393,30 @@ int vtkPOpenFOAMReader::RequestInformation(vtkInformation *request,
         masterReader->SetSkipZeroTime(this->SkipZeroTime);
         masterReader->SetUse64BitLabels(this->Use64BitLabels);
         masterReader->SetUse64BitFloats(this->Use64BitFloats);
-        if (!masterReader->MakeInformationVector(outputVector, procNames
-        ->GetValue(0)) || !masterReader->MakeMetaDataAtTimeStep(true))
+        int procNo = std::stoi(procNames->GetValue(0).substr(9));
+        masterReader->SetProcNo(procNo);
+
+        if (this->CaseType == DECOMPOSED_CASE)
         {
-          procNames->Delete();
-          masterReader->Delete();
-          this->BroadcastStatus(ret = 0);
-          return 0;
+          if (!masterReader->MakeInformationVector(outputVector, procNames
+              ->GetValue(0)) || !masterReader->MakeMetaDataAtTimeStep(true))
+          {
+            procNames->Delete();
+            masterReader->Delete();
+            this->BroadcastStatus(ret = 0);
+            return 0;
+          }
+        }
+        else if (this->CaseType == COLLATED_CASE)
+        {
+          if (!masterReader->MakeInformationVector(outputVector, "processors")
+            || !masterReader->MakeMetaDataAtTimeStep(true))
+          {
+            procNames->Delete();
+            masterReader->Delete();
+            this->BroadcastStatus(ret = 0);
+            return 0;
+          }
         }
         this->Superclass::Readers->AddItem(masterReader);
         timeValues = masterReader->GetTimeValues();
@@ -268,16 +468,35 @@ int vtkPOpenFOAMReader::RequestInformation(vtkInformation *request,
       subReader->SetParent(this);
       subReader->SetUse64BitLabels(this->Use64BitLabels);
       subReader->SetUse64BitFloats(this->Use64BitFloats);
+      int procNo = std::stoi(procNames->GetValue(procI).substr(9));
+      subReader->SetProcNo(procNo);
+
       // if getting metadata failed simply delete the reader instance
-      if (subReader->MakeInformationVector(nullptr, procNames->GetValue(procI))
-          && subReader->MakeMetaDataAtTimeStep(true))
+      if (this->CaseType == DECOMPOSED_CASE)
       {
-        this->Superclass::Readers->AddItem(subReader);
-      }
-      else
-      {
-        vtkWarningMacro(<<"Removing reader for processor subdirectory "
+        if (subReader->MakeInformationVector(nullptr, procNames->GetValue(procI))
+            && subReader->MakeMetaDataAtTimeStep(true))
+        {
+          this->Superclass::Readers->AddItem(subReader);
+        }
+        else
+        {
+          vtkWarningMacro(<<"Removing reader for processor subdirectory "
             << procNames->GetValue(procI).c_str());
+        }
+      }
+      else if (this->CaseType == COLLATED_CASE)
+      {
+        if (subReader->MakeInformationVector(NULL, "processors")
+            && subReader->MakeMetaDataAtTimeStep(true))
+        {
+          this->Superclass::Readers->AddItem(subReader);
+        }
+        else
+        {
+          vtkWarningMacro(<<"Removing reader for processor subdirectory "
+            << procNames->GetValue(procI).c_str());
+        }
       }
       subReader->Delete();
     }
