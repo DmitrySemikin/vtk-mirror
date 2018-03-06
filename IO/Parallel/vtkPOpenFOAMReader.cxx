@@ -216,11 +216,8 @@ int GuessNprocsCollated(vtkDirectory *dir, vtkStdString& masterCasePath, vtkStri
         }
         // skip any comment statement or block and reach to an opening brace.
         c = NextTokenHead(ifs);
-        // move the stream pointer by intNumber. it might work with seekg but not sure.
-        for (auto i=0; i<byteSize; ++i)
-        {
-          ifs.get();
-        }
+        // move the stream pointer by intNumber.
+        ifs.seekg(byteSize, std::ios_base:cur);
         // reach to the closing brace.
         c = NextTokenHead(ifs);
         // found decomposed block
