@@ -19,6 +19,8 @@
 #include "vtkNew.h"
 #include "vtkSMPTools.h"
 
+#include <cassert>
+
 vtkStandardNewMacro(vtkRandomPool);
 vtkCxxSetObjectMacro(vtkRandomPool,Sequence,vtkRandomSequence);
 
@@ -233,7 +235,7 @@ struct vtkRandomPoolInfo
     for (vtkIdType i=0; i < numThreads; ++i)
     {
       this->Sequencer[i] = ranSeq->NewInstance();
-      this->Sequencer[i]->Initialize(i);
+      assert(this->Sequencer[i] != nullptr);
     }
   }
 
@@ -281,7 +283,7 @@ static VTK_THREAD_RETURN_TYPE vtkRandomPool_ThreadedMethod( void *arg )
 const double * vtkRandomPool::
 GeneratePool()
 {
-  // Return if generation has already occured
+  // Return if generation has already occurred
   if ( this->GenerateTime > this->MTime )
   {
     return this->Pool;

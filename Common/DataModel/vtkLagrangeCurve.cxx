@@ -294,7 +294,6 @@ void vtkLagrangeCurve::Derivatives(
   double* vtkNotUsed(derivs))
 {
   // TODO: Fill me in?
-  return;
 }
 
 double* vtkLagrangeCurve::GetParametricCoords()
@@ -347,7 +346,7 @@ const int* vtkLagrangeCurve::GetOrder()
     int pointsPerAxis = static_cast<int>(npts); // number of points along each axis
     this->Order[0] = pointsPerAxis - 1; // order 1 is linear, 2 is quadratic, ...
     this->Order[1] = pointsPerAxis;
-    // this->CellScalars->SetNumberOfTuples(pointsPerAxis);
+    this->CellScalars->SetNumberOfTuples(pointsPerAxis);
     }
   return this->Order;
 }

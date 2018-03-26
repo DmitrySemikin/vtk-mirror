@@ -212,12 +212,6 @@ public:
     this->ImageSampleTexture.clear();
     this->ImageSampleTexNames.clear();
 
-    if (this->ImageSampleVBO)
-    {
-      this->ImageSampleVBO->Delete();
-      this->ImageSampleVBO = nullptr;
-    }
-
     if (this->ImageSampleVAO)
     {
       this->ImageSampleVAO->Delete();
@@ -528,7 +522,6 @@ public:
   std::vector<std::string> ImageSampleTexNames;
   vtkShaderProgram* ImageSampleProg = nullptr;
   vtkOpenGLVertexArrayObject* ImageSampleVAO = nullptr;
-  vtkOpenGLBufferObject* ImageSampleVBO = nullptr;
   size_t NumImageSampleDrawBuffers = 0;
   bool RebuildImageSampleProg = false;
   bool RenderPassAttached = false;
@@ -1296,13 +1289,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::RenderVolumeGeometry(
     this->CreateBufferObjects();
 
     // TODO: should really use the built in VAO class
-    // which handles these apple issues internally
-#ifdef __APPLE__
-    if (vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-#endif
-    {
-      glBindVertexArray(this->CubeVAOId);
-    }
+    glBindVertexArray(this->CubeVAOId);
 
     // Pass cube vertices to buffer object memory
     glBindBuffer(GL_ARRAY_BUFFER, this->CubeVBOId);
@@ -1323,20 +1310,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::RenderVolumeGeometry(
   }
   else
   {
-#ifdef __APPLE__
-    if (!vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-    {
-      glBindBuffer(GL_ARRAY_BUFFER, this->CubeVBOId);
-      prog->EnableAttributeArray("in_vertexPos");
-      prog->UseAttributeArray(
-        "in_vertexPos", 0, 0, VTK_FLOAT, 3, vtkShaderProgram::NoNormalize);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->CubeIndicesId);
-    }
-    else
-#endif
-    {
-      glBindVertexArray(this->CubeVAOId);
-    }
+    glBindVertexArray(this->CubeVAOId);
   }
 
   glDrawElements(GL_TRIANGLES,
@@ -1346,19 +1320,9 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::RenderVolumeGeometry(
 
   vtkOpenGLStaticCheckErrorMacro("Error after glDrawElements in"
                                  " RenderVolumeGeometry!");
-#ifdef __APPLE__
-  if (!vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-  {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-  else
-#endif
-  {
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
+  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 //----------------------------------------------------------------------------
@@ -1651,40 +1615,13 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::
   LoadRequireDepthTextureExtensions(vtkRenderWindow* vtkNotUsed(renWin))
 {
   // Reset the message stream for extensions
-  if (vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-  {
-    this->LoadDepthTextureExtensionsSucceeded = true;
-    return;
-  }
-
-  this->ExtensionsStringStream.str("");
-  this->ExtensionsStringStream.clear();
-
-#if GL_ES_VERSION_3_0 != 1
-  // Check for float texture support. This extension became core
-  // in 3.0
-  if (!glewIsSupported("GL_ARB_texture_float"))
-  {
-    this->ExtensionsStringStream << "Required extension "
-      << " GL_ARB_texture_float is not supported";
-    return;
-  }
-#endif
-
-  // NOTE: Support for depth sampler texture made into the core since version
-  // 1.4 and therefore we are no longer checking for it.
   this->LoadDepthTextureExtensionsSucceeded = true;
 }
 
 //----------------------------------------------------------------------------
 void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::CreateBufferObjects()
 {
-#ifdef __APPLE__
-  if (vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-#endif
-  {
-    glGenVertexArrays(1, &this->CubeVAOId);
-  }
+  glGenVertexArrays(1, &this->CubeVAOId);
   glGenBuffers(1, &this->CubeVBOId);
   glGenBuffers(1, &this->CubeIndicesId);
 }
@@ -1708,12 +1645,7 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::DeleteBufferObjects()
 
   if (this->CubeVAOId)
   {
-#ifdef __APPLE__
-    if (vtkOpenGLRenderWindow::GetContextSupportsOpenGL32())
-#endif
-    {
-      glDeleteVertexArrays(1, &this->CubeVAOId);
-    }
+    glDeleteVertexArrays(1, &this->CubeVAOId);
     this->CubeVAOId = 0;
   }
 }
@@ -1941,10 +1873,9 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal::EndImageSample(
 
     if (!this->ImageSampleVAO)
     {
-      this->ImageSampleVBO = vtkOpenGLBufferObject::New();
       this->ImageSampleVAO = vtkOpenGLVertexArrayObject::New();
       GLUtil::PrepFullScreenVAO(
-        this->ImageSampleVBO, this->ImageSampleVAO, this->ImageSampleProg);
+        win, this->ImageSampleVAO, this->ImageSampleProg);
     }
 
     vtkOpenGLState *ostate = win->GetState();
@@ -2323,12 +2254,6 @@ void vtkOpenGLGPUVolumeRayCastMapper::vtkInternal ::
     }
     this->ImageSampleTexture.clear();
     this->ImageSampleTexNames.clear();
-
-    if (this->ImageSampleVBO)
-    {
-      this->ImageSampleVBO->Delete();
-      this->ImageSampleVBO = nullptr;
-    }
 
     if (this->ImageSampleVAO)
     {

@@ -179,8 +179,8 @@ public:
 
   // the following is all extra stuff to work around the
   // fact that gl_PrimitiveID does not work correctly on
-  // Apple devices with AMD graphics hardware. See apple
-  // bug ID 20747550
+  // Apple Macs with AMD graphics hardware (before macOS 10.11).
+  // See <rdar://20747550>.
   static vtkPolyData *HandleAppleBug(
     vtkPolyData *poly,
     std::vector<float> &buffData);
@@ -289,13 +289,13 @@ protected:
     int fieldAssociation,
     int componentno);
 
-  // what coordinate shoudl be used for this texture
+  // what coordinate should be used for this texture
   std::string GetTextureCoordinateName(const char *tname);
 
   // the following is all extra stuff to work around the
   // fact that gl_PrimitiveID does not work correctly on
-  // Apple devices with AMD graphics hardware. See apple
-  // bug ID 20747550
+  // Apple Macs with AMD graphics hardware (before macOS 10.11).
+  // See <rdar://20747550>.
   bool HaveAppleBug;
   int HaveAppleBugForce; // 0 = default 1 = 0ff 2 = on
   std::vector<float> AppleBugPrimIDs;
@@ -556,7 +556,7 @@ protected:
   // a map from drawn triangles back to containing cell id
   std::vector<unsigned int> CellCellMap;
 
-  // used to occassionally invoke timers
+  // used to occasionally invoke timers
   unsigned int TimerQueryCounter;
 
 private:

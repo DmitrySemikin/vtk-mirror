@@ -38,12 +38,14 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkRenderPass.h"
 #include "vtkRenderState.h"
 #include "vtkRenderTimerLog.h"
+#include "vtkShaderProgram.h"
 #include "vtkShadowMapBakerPass.h"
 #include "vtkShadowMapPass.h"
 #include "vtkTexture.h"
 #include "vtkTextureObject.h"
 #include "vtkTexturedActor2D.h"
 #include "vtkTimerLog.h"
+#include "vtkTransform.h"
 #include "vtkTranslucentPass.h"
 #include "vtkTrivialProducer.h"
 #include "vtkUnsignedCharArray.h"
@@ -57,6 +59,10 @@ PURPOSE.  See the above copyright notice for more information.
 #include <list>
 #include <sstream>
 #include <string>
+
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 class vtkGLPickInfo
 {
@@ -84,52 +90,122 @@ vtkOpenGLRenderer::vtkOpenGLRenderer()
   this->BackgroundTexture = nullptr;
   this->HaveApplePrimitiveIdBugValue = false;
   this->HaveApplePrimitiveIdBugChecked = false;
+
+  this->LightingCount = -1;
+  this->LightingComplexity = -1;
 }
 
 // Ask lights to load themselves into graphics pipeline.
 int vtkOpenGLRenderer::UpdateLights ()
 {
-  vtkOpenGLClearErrorMacro();
-
-  VTK_SCOPED_RENDER_EVENT("vtkOpenGLRenderer::UpdateLights",
-                          this->GetRenderWindow()->GetRenderTimer());
-
+  // consider the lighting complexity to determine which case applies
+  // simple headlight, Light Kit, the whole feature set of VTK
+  vtkLightCollection *lc = this->GetLights();
   vtkLight *light;
-  float status;
-  int count = 0;
+
+  int lightingComplexity = 0;
+  int lightingCount = 0;
+
+  vtkMTimeType ltime = lc->GetMTime();
 
   vtkCollectionSimpleIterator sit;
-  for(this->Lights->InitTraversal(sit);
-      (light = this->Lights->GetNextLight(sit)); )
+  for(lc->InitTraversal(sit);
+      (light = lc->GetNextLight(sit)); )
   {
-    status = light->GetSwitch();
+    float status = light->GetSwitch();
     if (status > 0.0)
     {
-      count++;
+      ltime = vtkMath::Max(ltime, light->GetMTime());
+      lightingCount++;
+      if (lightingComplexity == 0)
+      {
+        lightingComplexity = 1;
+      }
+    }
+
+    if (lightingComplexity == 1
+        && (lightingCount > 1
+          || light->GetLightType() != VTK_LIGHT_TYPE_HEADLIGHT))
+    {
+      lightingComplexity = 2;
+    }
+    if (lightingComplexity < 3
+        && (light->GetPositional()))
+    {
+      lightingComplexity = 3;
     }
   }
 
-  if( !count )
+  // create alight if needed
+  if( !lightingCount )
   {
-    vtkDebugMacro(<<"No lights are on, creating one.");
-    this->CreateLight();
-  }
-
-  for(this->Lights->InitTraversal(sit);
-      (light = this->Lights->GetNextLight(sit)); )
-  {
-    status = light->GetSwitch();
-
-    // if the light is on then define it and bind it.
-    if (status > 0.0)
+    if (this->AutomaticLightCreation)
     {
-      light->Render(this,0);
+      vtkDebugMacro(<<"No lights are on, creating one.");
+      this->CreateLight();
+      lc->InitTraversal(sit);
+      light = lc->GetNextLight(sit);
+      ltime = lc->GetMTime();
+      lightingCount = 1;
+      lightingComplexity = light->GetLightType() == VTK_LIGHT_TYPE_HEADLIGHT ? 1 : 2;
+      ltime = vtkMath::Max(ltime, light->GetMTime());
     }
   }
 
-  vtkOpenGLCheckErrorMacro("failed after UpdateLights");
+  if (lightingComplexity != this->LightingComplexity ||
+      lightingCount != this->LightingCount)
+  {
+    this->LightingComplexity = lightingComplexity;
+    this->LightingCount = lightingCount;
 
-  return count;
+    this->LightingUpdateTime = ltime;
+
+    // rebuild the standard declarations
+    std::ostringstream toString;
+    switch (this->LightingComplexity)
+    {
+      case 0: // no lighting or RENDER_VALUES
+        this->LightingDeclaration = "";
+        break;
+
+      case 1:  // headlight
+        this->LightingDeclaration = "uniform vec3 lightColor0;\n";
+        break;
+
+      case 2: // light kit
+        toString.clear();
+        toString.str("");
+        for (int i = 0; i < this->LightingCount; ++i)
+        {
+          toString <<
+          "uniform vec3 lightColor" << i << ";\n"
+          "  uniform vec3 lightDirectionVC" << i << "; // normalized\n";
+        }
+        this->LightingDeclaration = toString.str();
+        break;
+
+      case 3: // positional
+        toString.clear();
+        toString.str("");
+        for (int i = 0; i < this->LightingCount; ++i)
+        {
+          toString <<
+          "uniform vec3 lightColor" << i << ";\n"
+          "uniform vec3 lightDirectionVC" << i << "; // normalized\n"
+          "uniform vec3 lightPositionVC" << i << ";\n"
+          "uniform vec3 lightAttenuation" << i << ";\n"
+          "uniform float lightConeAngle" << i << ";\n"
+          "uniform float lightExponent" << i << ";\n"
+          "uniform int lightPositional" << i << ";";
+        }
+        this->LightingDeclaration = toString.str();
+        break;
+    }
+  }
+
+  this->LightingUpdateTime = ltime;
+
+  return this->LightingCount;
 }
 
 // ----------------------------------------------------------------------------
@@ -643,8 +719,8 @@ void vtkOpenGLRenderer::DevicePickRender()
   this->RenderWindow->MakeCurrent();
   vtkOpenGLClearErrorMacro();
 
-  vtkOpenGLState *ostate = this->GetState();
 #if GL_ES_VERSION_3_0 != 1
+  vtkOpenGLState *ostate = this->GetState();
   bool msaaWasEnabled = false;
   if (this->RenderWindow->GetMultiSamples() > 0 && ostate->GetEnumState(GL_MULTISAMPLE))
   {
@@ -821,8 +897,14 @@ bool vtkOpenGLRenderer::HaveApplePrimitiveIdBug()
       vendor.find("AMD") != std::string::npos ||
       vendor.find("amd") != std::string::npos)
   {
-    // assume we have the bug
-    this->HaveApplePrimitiveIdBugValue = true;
+    // assume we have the bug if we are running on <= macOS 10.10.x
+    // Apple fixed this bug in OS X 10.11 beta 15A216g.
+    // kCFCoreFoundationVersionNumber10_10_Max = 1199, we use the raw number
+    // because the constant isn't present in older SDKs.
+    if (kCFCoreFoundationVersionNumber <= 1199)
+    {
+      this->HaveApplePrimitiveIdBugValue = true;
+    }
 
     // but exclude systems we know do not have it
     std::string renderer = (const char *)glGetString(GL_RENDERER);
@@ -851,6 +933,15 @@ bool vtkOpenGLRenderer::HaveApplePrimitiveIdBug()
       this->HaveApplePrimitiveIdBugValue = false;
     }
   }
+
+  // On all versions of macOS and with all GPUs,
+  // allow an env var to force the workaround to be used.
+  const char* forceWorkaround = std::getenv("VTK_FORCE_APPLE_PRIMITIVEID_WORKAROUND");
+  if (forceWorkaround)
+  {
+    this->HaveApplePrimitiveIdBugValue = true;
+  }
+
 #else
   this->HaveApplePrimitiveIdBugValue = false;
 #endif
@@ -903,8 +994,7 @@ bool vtkOpenGLRenderer::IsDualDepthPeelingSupported()
   // ES3 is not supported, see TestFramebufferPass.cxx for how to do it
   bool dualDepthPeelingSupported = false;
 #else
-  bool dualDepthPeelingSupported = context->GetContextSupportsOpenGL32() ||
-      (GLEW_ARB_texture_float && GLEW_ARB_texture_rg);
+  bool dualDepthPeelingSupported = true;
 #endif
 
   // There's a bug on current mesa master that prevents dual depth peeling
@@ -1000,4 +1090,116 @@ int vtkOpenGLRenderer::GetPickedIds(unsigned int atMost,
 vtkOpenGLState *vtkOpenGLRenderer::GetState()
 {
   return this->VTKWindow ? static_cast<vtkOpenGLRenderWindow *>(this->VTKWindow)->GetState() : nullptr;
+}
+
+const char *vtkOpenGLRenderer::GetLightingUniforms()
+{
+  return this->LightingDeclaration.c_str();
+}
+
+void vtkOpenGLRenderer::UpdateLightingUniforms(vtkShaderProgram *program)
+{
+  vtkMTimeType ptime = program->GetUniformGroupUpdateTime(vtkShaderProgram::LightingGroup);
+  vtkMTimeType ltime = this->LightingUpdateTime;
+
+  // for lighting complexity 2,3 camera has an impact
+  vtkCamera *cam = this->GetActiveCamera();
+  if (this->LightingComplexity > 1)
+  {
+    ltime = vtkMath::Max(ltime, cam->GetMTime());
+  }
+
+  if (ltime <= ptime)
+  {
+    return;
+  }
+
+  // for lightkit case there are some parameters to set
+  vtkTransform* viewTF = cam->GetModelViewTransformObject();
+
+  // bind some light settings
+  int numberOfLights = 0;
+  vtkLightCollection *lc = this->GetLights();
+  vtkLight *light;
+
+  vtkCollectionSimpleIterator sit;
+  float lightColor[3];
+  float lightDirection[3];
+  std::string lcolor("lightColor");
+  std::string ldir("lightDirectionVC");
+  std::string latten("lightAttenuation");
+  std::string lpositional("lightPositional");
+  std::string lpos("lightPositionVC");
+  std::string lexp("lightExponent");
+  std::string lcone("lightConeAngle");
+
+  std::ostringstream toString;
+  for (lc->InitTraversal(sit); (light = lc->GetNextLight(sit)); )
+  {
+    float status = light->GetSwitch();
+    if (status > 0.0)
+    {
+      toString.str("");
+      toString << numberOfLights;
+      std::string count = toString.str();
+
+      double *dColor = light->GetDiffuseColor();
+      double intensity = light->GetIntensity();
+      // if (renderLuminance)
+      // {
+      //   lightColor[0] = intensity;
+      //   lightColor[1] = intensity;
+      //   lightColor[2] = intensity;
+      // }
+      // else
+      {
+        lightColor[0] = dColor[0] * intensity;
+        lightColor[1] = dColor[1] * intensity;
+        lightColor[2] = dColor[2] * intensity;
+      }
+      program->SetUniform3f((lcolor + count).c_str(), lightColor);
+
+      // we are done unless we have non headlights
+      if (this->LightingComplexity >= 2)
+      {
+        // get required info from light
+        double *lfp = light->GetTransformedFocalPoint();
+        double *lp = light->GetTransformedPosition();
+        double lightDir[3];
+        vtkMath::Subtract(lfp,lp,lightDir);
+        vtkMath::Normalize(lightDir);
+        double *tDir = viewTF->TransformNormal(lightDir);
+        lightDirection[0] = tDir[0];
+        lightDirection[1] = tDir[1];
+        lightDirection[2] = tDir[2];
+
+        program->SetUniform3f((ldir + count).c_str(), lightDirection);
+
+        // we are done unless we have positional lights
+        if (this->LightingComplexity >= 3)
+        {
+          // if positional lights pass down more parameters
+          float lightAttenuation[3];
+          float lightPosition[3];
+          double *attn = light->GetAttenuationValues();
+          lightAttenuation[0] = attn[0];
+          lightAttenuation[1] = attn[1];
+          lightAttenuation[2] = attn[2];
+          double *tlp = viewTF->TransformPoint(lp);
+          lightPosition[0] = tlp[0];
+          lightPosition[1] = tlp[1];
+          lightPosition[2] = tlp[2];
+
+          program->SetUniform3f((latten + count).c_str(), lightAttenuation);
+          program->SetUniformi((lpositional + count).c_str(), light->GetPositional());
+          program->SetUniform3f((lpos + count).c_str(), lightPosition);
+          program->SetUniformf((lexp + count).c_str(), light->GetExponent());
+          program->SetUniformf((lcone + count).c_str(), light->GetConeAngle());
+        }
+      }
+      numberOfLights++;
+    }
+  }
+
+  program->SetUniformGroupUpdateTime(vtkShaderProgram::LightingGroup, ltime);
 }

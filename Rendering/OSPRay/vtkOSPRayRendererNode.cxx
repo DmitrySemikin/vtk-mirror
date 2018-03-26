@@ -25,6 +25,7 @@
 #include "vtkCollectionIterator.h"
 #include "vtkImageData.h"
 #include "vtkInformation.h"
+#include "vtkInformationDoubleKey.h"
 #include "vtkInformationDoubleVectorKey.h"
 #include "vtkInformationIntegerKey.h"
 #include "vtkInformationObjectBaseKey.h"
@@ -188,7 +189,8 @@ vtkInformationKeyMacro(vtkOSPRayRendererNode, RENDERER_TYPE, String);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, NORTH_POLE, DoubleVector);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, EAST_POLE, DoubleVector);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, MATERIAL_LIBRARY, ObjectBase);
-
+vtkInformationKeyMacro(vtkOSPRayRendererNode, VIEW_TIME, Double);
+vtkInformationKeyMacro(vtkOSPRayRendererNode, TIME_CACHE_SIZE, Integer);
 
 class vtkOSPRayRendererNodeInternals
 {
@@ -667,6 +669,58 @@ double * vtkOSPRayRendererNode::GetEastPole(vtkRenderer *renderer)
 }
 
 //----------------------------------------------------------------------------
+void vtkOSPRayRendererNode::SetViewTime(double value, vtkRenderer *renderer)
+{
+  if (!renderer)
+  {
+    return;
+  }
+  vtkInformation *info = renderer->GetInformation();
+  info->Set(vtkOSPRayRendererNode::VIEW_TIME(), value);
+}
+
+//----------------------------------------------------------------------------
+double vtkOSPRayRendererNode::GetViewTime(vtkRenderer *renderer)
+{
+  if (!renderer)
+  {
+    return 0;
+  }
+  vtkInformation *info = renderer->GetInformation();
+  if (info && info->Has(vtkOSPRayRendererNode::VIEW_TIME()))
+  {
+    return (info->Get(vtkOSPRayRendererNode::VIEW_TIME()));
+  }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
+void vtkOSPRayRendererNode::SetTimeCacheSize(int value, vtkRenderer *renderer)
+{
+  if (!renderer)
+  {
+    return;
+  }
+  vtkInformation *info = renderer->GetInformation();
+  info->Set(vtkOSPRayRendererNode::TIME_CACHE_SIZE(), value);
+}
+
+//----------------------------------------------------------------------------
+int vtkOSPRayRendererNode::GetTimeCacheSize(vtkRenderer *renderer)
+{
+  if (!renderer)
+  {
+    return 0;
+  }
+  vtkInformation *info = renderer->GetInformation();
+  if (info && info->Has(vtkOSPRayRendererNode::TIME_CACHE_SIZE()))
+  {
+    return (info->Get(vtkOSPRayRendererNode::TIME_CACHE_SIZE()));
+  }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 void vtkOSPRayRendererNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
@@ -1090,7 +1144,6 @@ void vtkOSPRayRendererNode::Render(bool prepass)
     ospSet1i(oRenderer, "backgroundEnabled", ren->GetErase());
     if (this->CompositeOnGL)
     {
-      OSPTexture2D glDepthTex=nullptr;
       vtkRenderWindow *rwin =
       vtkRenderWindow::SafeDownCast(ren->GetVTKWindow());
       int viewportX, viewportY;
@@ -1125,7 +1178,7 @@ void vtkOSPRayRendererNode::Render(bool prepass)
       cameraDir.z -= cameraPos[2];
       cameraDir = ospray::opengl::normalize(cameraDir);
 
-      glDepthTex = ospray::opengl::getOSPDepthTextureFromOpenGLPerspective
+      OSPTexture2D glDepthTex = ospray::opengl::getOSPDepthTextureFromOpenGLPerspective
         (fovy, aspect, zNear, zFar,
          (osp::vec3f&)cameraDir, (osp::vec3f&)cameraUp,
          this->GetZBuffer(), ODepthBuffer, viewportWidth, viewportHeight);
