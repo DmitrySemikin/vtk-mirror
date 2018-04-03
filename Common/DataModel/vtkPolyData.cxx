@@ -1109,10 +1109,17 @@ void vtkPolyData::GetCellPoints(vtkIdType cellId, vtkIdList *ptIds)
   }
 
   this->vtkPolyData::GetCellPoints(cellId, npts, pts);
-  ptIds->InsertId (npts-1,pts[npts-1]);
-  for (i=0; i<npts-1; i++)
+  if ( npts < 1 )
   {
-    ptIds->SetId(i,pts[i]);
+    ptIds->Reset();
+  }
+  else
+  {
+    ptIds->InsertId(npts-1,pts[npts-1]);
+    for (i=0; i<npts-1; i++)
+    {
+      ptIds->SetId(i,pts[i]);
+    }
   }
 }
 
@@ -2219,7 +2226,7 @@ int vtkPolyData::GetScalarFieldCriticalIndex (vtkIdType pointId,
     for(int i = 0; i < triangleNb; i++)
     {
       vtkCell *c = this->GetCell(triangleList->GetId(i));
-      pointList = c->GetPointIds();;
+      pointList = c->GetPointIds();
       int pointNb = pointList->GetNumberOfIds();
 
       if(pointList->IsId(pointId) >= 0)
