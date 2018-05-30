@@ -278,7 +278,6 @@ void vtkImageMapToWindowLevelColorsExecute(
 
   T   lower, upper;
   unsigned char lower_val, upper_val, result_val;
-  unsigned short ushort_val;
   vtkImageMapToWindowLevelClamps( inData, self->GetWindow(),
                                   self->GetLevel(),
                                   lower, upper, lower_val, upper_val );
@@ -327,44 +326,6 @@ void vtkImageMapToWindowLevelColorsExecute(
           static_cast<unsigned char *>(outPtr1),
           dataType,extX,numberOfComponents,
           outputFormat);
-
-        for (idxX = 0; idxX < extX; idxX++)
-        {
-          if (*iptr <= lower)
-          {
-            ushort_val = lower_val;
-          }
-          else if (*iptr >= upper)
-          {
-            ushort_val = upper_val;
-          }
-          else
-          {
-            ushort_val = static_cast<unsigned char>((*iptr + shift)*scale);
-          }
-          *optr = static_cast<unsigned char>((*optr * ushort_val) >> 8);
-          switch (outputFormat)
-          {
-            case VTK_RGBA:
-              *(optr+1) = static_cast<unsigned char>(
-                (*(optr+1) * ushort_val) >> 8);
-              *(optr+2) = static_cast<unsigned char>(
-                (*(optr+2) * ushort_val) >> 8);
-              *(optr+3) = 255;
-              break;
-            case VTK_RGB:
-              *(optr+1) = static_cast<unsigned char>(
-                (*(optr+1) * ushort_val) >> 8);
-              *(optr+2) = static_cast<unsigned char>(
-                (*(optr+2) * ushort_val) >> 8);
-              break;
-            case VTK_LUMINANCE_ALPHA:
-              *(optr+1) = 255;
-              break;
-          }
-          iptr += numberOfComponents;
-          optr += numberOfOutputComponents;
-        }
       }
       else
       {

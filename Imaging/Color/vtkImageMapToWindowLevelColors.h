@@ -26,15 +26,8 @@
  *    unsigned char, and if the Window/Level is set to 255.0/127.5, then
  *    the input data will be passed directly to the output.
  * -# If a lookup table is provided, then the first component of the
- *    input data is mapped through the lookup table (using the Range of
- *    the lookup table), and the resulting color is modulated according
- *    to the Window/Level.  For example, if the input value is 500 and
- *    the Window/Level are 2000/1000, the output value will be RGB*0.25
- *    where RGB is the color assigned by the lookup table and 0.25 is
- *    the modulation factor.
- * See SetWindow() and SetLevel() for the equations used for modulation.
- * To map scalars through a lookup table without modulating the resulting
- * color, use vtkImageMapToColors instead of this filter.
+ *    input data is mapped through the lookup table using the Range of
+ *    the lookup table.  The Window and Level are ignored in this case.
  * @sa
  * vtkLookupTable vtkScalarsToColors
 */
@@ -55,9 +48,9 @@ public:
 
   //@{
   /**
-   * Set / Get the Window to use -> modulation will be performed on the
-   * color based on (S - (L - W/2))/W where S is the scalar value, L is
-   * the level and W is the window.
+   * Set / Get the Window to use. The output will be a gray value based
+   * based on (S - (L - W/2))/W where S is the scalar value, L is the
+   * level and W is the window.
    */
   vtkSetMacro( Window, double );
   vtkGetMacro( Window, double );
@@ -65,9 +58,9 @@ public:
 
   //@{
   /**
-   * Set / Get the Level to use -> modulation will be performed on the
-   * color based on (S - (L - W/2))/W where S is the scalar value, L is
-   * the level and W is the window.
+   * Set / Get the Level to use. The output will be a gray value based
+   * based on (S - (L - W/2))/W where S is the scalar value, L is the
+   * level and W is the window.
    */
   vtkSetMacro( Level, double );
   vtkGetMacro( Level, double );
