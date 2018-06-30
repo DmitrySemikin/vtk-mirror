@@ -110,6 +110,15 @@ public:
   static double DegreesFromRadians( double radians);
   //@}
 
+  //@{
+  /**
+  * Returns the sign of the value (-1, 0, 1)
+  */
+  static float Sign(float x);
+  static double Sign(double x);
+  static int Sign(int x);
+  //@}
+
   /**
    * Rounds a float to the nearest integer.
    */
@@ -309,7 +318,45 @@ public:
   static double Gaussian( double mean, double std );
 
   /**
-   * Addition of two 3-vectors (float version). Result is stored in c according to c = a + b.
+   * Sets a vector to the value of another vector
+   */
+  static void Set(const float a[3], float b[3]) {
+    for (int i = 0; i < 3; ++i)
+    {
+      b[i] = a[i];
+    }
+  }
+
+  /**
+   * Sets a vector to the value of another vector
+   */
+  static void Set(const double a[3], double b[3]) {
+    for (int i = 0; i < 3; ++i)
+    {
+      b[i] = a[i];
+    }
+  }
+
+  /**
+   * Sets a vector to the value of another vector
+   */
+  static void Set(float x, float y, float z, float b[3]) {
+     b[0] = x;
+     b[1] = y;
+     b[2] = z;
+  }
+
+  /**
+   * Sets a vector to the value of another vector
+   */
+  static void Set(double x, double y, double z, double b[3]) {
+     b[0] = x;
+     b[1] = y;
+     b[2] = z;
+  }
+
+  /**
+   * Addition of two 3-vectors (float version). Result is stored in c.
    */
   static void Add(const float a[3], const float b[3], float c[3]) {
     for (int i = 0; i < 3; ++i)
@@ -360,6 +407,17 @@ public:
   }
 
   /**
+   * Multiplies a 3-vector by a scalar (float version).
+   * Returns the value as b = a * s.
+   */
+  static void MultiplyScalar(float a[3], float s, float b[3]) {
+    for (int i = 0; i < 3; ++i)
+    {
+      b[i] = a[i] * s;
+    }
+  }
+
+  /**
    * Multiplies a 2-vector by a scalar (float version).
    * This modifies the input 2-vector.
    */
@@ -368,6 +426,15 @@ public:
     {
       a[i] *= s;
     }
+  }
+
+  /**
+   * Multiplies a 2-vector by a scalar (float version).
+   * Returns the value as b = a * s.
+   */
+  static void MultiplyScalar2D(float a[2], float s, float b[2]) {
+     for (int i = 0; i < 2; ++i)
+        b[i] = a[i] * s;
   }
 
   /**
@@ -382,6 +449,17 @@ public:
   }
 
   /**
+   * Multiplies a 3-vector by a scalar (double version).
+   * Returns the value as b = a * s.
+   */
+  static void MultiplyScalar(double a[3], double s, double b[3]) {
+    for (int i = 0; i < 3; ++i)
+    {
+      b[i] = a[i] * s;
+    }
+  }
+
+  /**
    * Multiplies a 2-vector by a scalar (double version).
    * This modifies the input 2-vector.
    */
@@ -390,6 +468,15 @@ public:
     {
       a[i] *= s;
     }
+  }
+
+  /**
+   * Multiplies a 2-vector by a scalar (double version).
+   * Returns the value as b = a * s.
+   */
+  static void MultiplyScalar2D(double a[2], double s, double b[2]) {
+     for (int i = 0; i < 2; ++i)
+        b[i] = a[i] * s;
   }
 
   /**
@@ -1301,6 +1388,24 @@ inline float vtkMath::DegreesFromRadians( float x )
 inline double vtkMath::DegreesFromRadians( double x )
 {
   return x * 57.29577951308232;
+}
+
+//----------------------------------------------------------------------------
+inline float vtkMath::Sign(float x)
+{
+   return (x > 0.0f) ? 1.0f : ((x < 0.0f) ? -1.0f : 0.0f);
+}
+
+//----------------------------------------------------------------------------
+inline double vtkMath::Sign(double x)
+{
+   return (x > 0.0) ? 1.0 : ((x < 0.0) ? -1.0 : 0.0);
+}
+
+//----------------------------------------------------------------------------
+inline int vtkMath::Sign(int x)
+{
+   return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
 }
 
 //----------------------------------------------------------------------------
