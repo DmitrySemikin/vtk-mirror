@@ -410,7 +410,7 @@ public:
    * Multiplies a 3-vector by a scalar (float version).
    * Returns the value as b = a * s.
    */
-  static void MultiplyScalar(float a[3], float s, float b[3]) {
+  static void MultiplyScalar(const float a[3], float s, float b[3]) {
     for (int i = 0; i < 3; ++i)
     {
       b[i] = a[i] * s;
@@ -432,7 +432,7 @@ public:
    * Multiplies a 2-vector by a scalar (float version).
    * Returns the value as b = a * s.
    */
-  static void MultiplyScalar2D(float a[2], float s, float b[2]) {
+  static void MultiplyScalar2D(const float a[2], float s, float b[2]) {
      for (int i = 0; i < 2; ++i)
         b[i] = a[i] * s;
   }
@@ -452,7 +452,7 @@ public:
    * Multiplies a 3-vector by a scalar (double version).
    * Returns the value as b = a * s.
    */
-  static void MultiplyScalar(double a[3], double s, double b[3]) {
+  static void MultiplyScalar(const double a[3], double s, double b[3]) {
     for (int i = 0; i < 3; ++i)
     {
       b[i] = a[i] * s;
@@ -474,7 +474,7 @@ public:
    * Multiplies a 2-vector by a scalar (double version).
    * Returns the value as b = a * s.
    */
-  static void MultiplyScalar2D(double a[2], double s, double b[2]) {
+  static void MultiplyScalar2D(const double a[2], double s, double b[2]) {
      for (int i = 0; i < 2; ++i)
         b[i] = a[i] * s;
   }
