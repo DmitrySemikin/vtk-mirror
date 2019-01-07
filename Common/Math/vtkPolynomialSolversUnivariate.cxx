@@ -1749,7 +1749,7 @@ int vtkPolynomialSolversUnivariate::FerrariSolve(double* c, double* r, int* m, d
   nr1 = 1;
   for (i = 1; i < nr; ++i)
   {
-    if (unsorted[2 * i] == unsorted[2 * i - 2])
+    if (AreEqual(unsorted[2 * i], unsorted[2 * i - 2], 1.0e-15))
     {
       m[i - 1] += static_cast<int>(unsorted[2 * i + 1]);
       continue;
