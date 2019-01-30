@@ -62,7 +62,7 @@ public:
    * (numFace0Pts, id1, id2, id3, numFace1Pts,id1, id2, id3, ...)
    * Make sure you have called Allocate() before calling this method
    */
-  vtkIdType InsertNextCell(int type, vtkIdType npts, const vtkIdType ptIds[]) VTK_SIZEHINT(ptIds, npts);
+  vtkIdType InsertNextCell(int type, vtkIdType npts, const vtkIdType ptIds[]);
 
   /**
    * Insert/create cell in object by a list of point ids defining
