@@ -3480,18 +3480,24 @@ void vtkOpenGLPolyDataMapper::ProcessSelectorPixelBuffers(
           inval = convertToCells(offset, stride, inval);
         }
         vtkIdType outval = inval;
-        if (this->CellCellMap.size())
+        bool OK = false;
+        if (inval < this->CellCellMap.size())
         {
+          OK = true;
           outval = this->CellCellMap[outval];
         }
-        if (cellArrayId)
+        if (cellArrayId && outval < cellArrayId->GetNumberOfTuples())
         {
+          OK = true;
           outval = cellArrayId->GetValue(outval);
         }
-        outval++;
-        clowdata[pos] = outval & 0xff;
-        clowdata[pos + 1] = (outval & 0xff00) >> 8;
-        clowdata[pos + 2] = (outval & 0xff0000) >> 16;
+        if (OK)
+        {
+          outval++;
+          clowdata[pos] = outval & 0xff;
+          clowdata[pos + 1] = (outval & 0xff00) >> 8;
+          clowdata[pos + 2] = (outval & 0xff0000) >> 16;
+        }
       }
     }
   }

@@ -46,11 +46,17 @@ public:
   vtkGetMacro(Constant, double);
   //@}
 
+  void SetConstants(int numconstants, double* values);
+  int GetNumConstants() { return this->NumConstants; };
+  double* GetConstants() { return this->Constants; };
+
 protected:
   vtkImageConstantPad();
-  ~vtkImageConstantPad() override {}
+  ~vtkImageConstantPad();
 
   double Constant;
+  int NumConstants;
+  double* Constants;
 
   void ThreadedRequestData(vtkInformation* request, vtkInformationVector** inputVector,
     vtkInformationVector* outputVector, vtkImageData*** inData, vtkImageData** outData, int ext[6],

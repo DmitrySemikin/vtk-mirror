@@ -5,7 +5,6 @@ vtk_module(vtkRenderingLabel
     vtkIOXML
     vtkTestingCore
     vtkTestingRendering
-    vtkRenderingOpenGL2
     vtkInteractionStyle
   KIT
     vtkRendering
@@ -15,9 +14,13 @@ vtk_module(vtkRenderingLabel
     vtkCommonExecutionModel
     vtkRenderingCore
     vtkRenderingFreeType
+    vtkRenderingOpenGL2
   PRIVATE_DEPENDS
     vtkCommonMath
     vtkCommonSystem
     vtkCommonTransforms
     vtkFiltersGeneral
+    vtkImagingCore
+    vtkIOImage
+    vtkIOXML
   )

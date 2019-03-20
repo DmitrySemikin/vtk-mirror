@@ -1,6 +1,7 @@
 vtk_add_test_cxx(vtkRenderingLabelCxxTests tests
   TestClipLabels.cxx
   TestDynamic2DLabelMapper.cxx
+  TestLabeledDataMappers.cxx
   TestLabelPlacer.cxx
   TestLabelPlacer2D.cxx
   TestLabelPlacerCoincidentPoints.cxx

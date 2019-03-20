@@ -1,4 +1,5 @@
 set(Module_SRCS
+  vtkFastLabeledDataMapper.cxx
   vtkLabeledDataMapper.cxx
   vtkLabeledTreeMapDataMapper.cxx
   vtkLabelHierarchyAlgorithm.cxx

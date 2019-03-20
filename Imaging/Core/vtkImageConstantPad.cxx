@@ -27,6 +27,26 @@ vtkStandardNewMacro(vtkImageConstantPad);
 vtkImageConstantPad::vtkImageConstantPad()
 {
   this->Constant = 0.0;
+  this->NumConstants = 0;
+  this->Constants = nullptr;
+}
+
+//----------------------------------------------------------------------------
+vtkImageConstantPad::~vtkImageConstantPad()
+{
+  delete[] this->Constants;
+}
+
+//----------------------------------------------------------------------------
+void vtkImageConstantPad::SetConstants(int numCon, double* Cons)
+{
+  delete[] this->Constants;
+  this->NumConstants = numCon;
+  this->Constants = new double[numCon];
+  for (int i = 0; i < numCon; i++)
+  {
+    this->Constants[i] = Cons[i];
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -40,8 +60,19 @@ void vtkImageConstantPadExecute(vtkImageConstantPad* self, vtkImageData* inData,
   vtkIdType inIncX, inIncY, inIncZ;
   vtkIdType outIncX, outIncY, outIncZ;
   T constant;
-  int inMinX, inMaxX, inMaxC;
   constant = static_cast<T>(self->GetConstant());
+  T* constants;
+  int numConstants = self->GetNumConstants();
+  if (numConstants > 0)
+  {
+    constants = new T[numConstants];
+    double* sConsts = self->GetConstants();
+    for (int i = 0; i < numConstants; i++)
+    {
+      constants[i] = static_cast<T>(sConsts[i]);
+    }
+  }
+  int inMinX, inMaxX, inMaxC;
   int state0, state1, state2, state3;
   unsigned long count = 0;
   unsigned long target;
@@ -95,24 +126,50 @@ void vtkImageConstantPadExecute(vtkImageConstantPad* self, vtkImageData* inData,
       }
       else
       {
-        for (idxX = 0; idxX <= maxX; idxX++)
+        if (self->GetNumConstants() == 0)
         {
-          state1 = (state2 || idxX < inMinX || idxX > inMaxX);
-          for (idxC = 0; idxC < maxC; idxC++)
+          for (idxX = 0; idxX <= maxX; idxX++)
           {
-            // Pixel operation
-            // Copy Pixel
-            state0 = (state1 || idxC >= inMaxC);
-            if (state0)
+            state1 = (state2 || idxX < inMinX || idxX > inMaxX);
+            for (idxC = 0; idxC < maxC; idxC++)
             {
-              *outPtr = constant;
+              // Pixel operation
+              // Copy Pixel
+              state0 = (state1 || idxC >= inMaxC);
+              if (state0)
+              {
+                *outPtr = constant;
+              }
+              else
+              {
+                *outPtr = *inPtr;
+                inPtr++;
+              }
+              outPtr++;
             }
-            else
+          }
+        }
+        else
+        {
+          for (idxX = 0; idxX <= maxX; idxX++)
+          {
+            state1 = (state2 || idxX < inMinX || idxX > inMaxX);
+            for (idxC = 0; idxC < maxC; idxC++)
             {
-              *outPtr = *inPtr;
-              inPtr++;
+              // Pixel operation
+              // Copy Pixel
+              state0 = (state1 || idxC >= inMaxC);
+              if (state0)
+              {
+                *outPtr = self->GetConstants()[idxC];
+              }
+              else
+              {
+                *outPtr = *inPtr;
+                inPtr++;
+              }
+              outPtr++;
             }
-            outPtr++;
           }
         }
       }
