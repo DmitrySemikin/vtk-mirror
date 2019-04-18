@@ -93,6 +93,8 @@ static int TestRGBToHSV();
 static int TestInf();
 static int TestNegInf();
 static int TestNan();
+static int TestSet();
+static int TestSign();
 
 int UnitTestMath(int,char *[])
 {
@@ -166,6 +168,8 @@ int UnitTestMath(int,char *[])
   status += TestInf();
   status += TestNegInf();
   status += TestNan();
+  status += TestSet();
+  status += TestSign();
   if (status != 0)
   {
     return EXIT_FAILURE;
@@ -745,34 +749,41 @@ int TestAddSubtract()
 }
 
 template<typename T>
-int MultiplyScalar()
+int MultiplyScalar(bool inPlace)
 {
-  int status = 0;
-  // first T
-  T da[3], db[3];
-  for (int n = 0; n < 100000; ++n)
+  int failures = 0;
+
+  T ta[3], tb[3];
+  for (int n = 0; n < 1000; ++n)
   {
     for (int i = 0; i < 3; ++i)
     {
-      da[i] = vtkMath::Random(-10.0, 10.0);
-      db[i] = da[i];
+      ta[i] = vtkMath::Random(-10.0, 10.0);
+      tb[i] = ta[i];
     }
     T scale = vtkMath::Random();
-    vtkMath::MultiplyScalar(da, scale);
+  if (inPlace)
+  {
+    vtkMath::MultiplyScalar(ta, scale);
+  }
+  else
+  {
+    vtkMath::MultiplyScalar(ta, scale, ta);
+  }
 
     for (int i = 0; i < 3; ++i)
     {
       if (!vtkMathUtilities::FuzzyCompare(
-            da[i], db[i] * scale,
-            std::numeric_limits<T>::epsilon() * (T) 256.0))
+            ta[i], tb[i] * scale,
+            std::numeric_limits<T>::epsilon() * static_cast<T>(256.0)))
       {
-        std::cout << " MultiplyScalar got " << da[i]
-                  << " but expected " << db[i] * scale;
+        std::cout << " MultiplyScalar got " << ta[i]
+                  << " but expected " << tb[i] * scale;
+        failures++;
       }
     }
   }
-
-  return status;
+  return static_cast<int>(failures != 0);
 }
 
 int TestMultiplyScalar()
@@ -780,8 +791,10 @@ int TestMultiplyScalar()
   int status = 0;
   std::cout << "MultiplyScalar..";
 
-  status += MultiplyScalar<double>();
-  status += MultiplyScalar<float>();
+  status += MultiplyScalar<double>(false);
+  status += MultiplyScalar<float>(false);
+  status += MultiplyScalar<double>(true);
+  status += MultiplyScalar<float>(true);
 
   if (status)
   {
@@ -794,59 +807,52 @@ int TestMultiplyScalar()
   return status;
 }
 
+template<typename T>
+int MultiplyScalar2D(bool inPlace)
+{
+  int failures = 0;
+
+  T ta[2], tb[2];
+  for (int n = 0; n < 1000; ++n)
+  {
+    for (int i = 0; i < 2; ++i)
+    {
+      ta[i] = vtkMath::Random(-10.0, 10.0);
+      tb[i] = ta[i];
+    }
+    T scale = vtkMath::Random();
+    if (inPlace)
+    {
+      vtkMath::MultiplyScalar2D(ta, scale);
+    }
+    else
+    {
+      vtkMath::MultiplyScalar2D(ta, scale, ta);
+    }
+    for (int i = 0; i < 2; ++i)
+    {
+      if (!vtkMathUtilities::FuzzyCompare(
+        ta[i], tb[i] * scale,
+        std::numeric_limits<T>::epsilon() * static_cast<T>(256.0)))
+      {
+        std::cout << " MultiplyScalar2D got " << ta[i]
+          << " but expected " << tb[i] * scale;
+        failures++;
+      }
+    }
+  }
+  return static_cast<int>(failures != 0);
+}
+
 int TestMultiplyScalar2D()
 {
   int status = 0;
   std::cout << "MultiplyScalar2D..";
 
-  // now 2D
-  // first double
-  double da[2], db[2];
-  for (int n = 0; n < 100000; ++n)
-  {
-    for (int i = 0; i < 2; ++i)
-    {
-      da[i] = vtkMath::Random(-10.0, 10.0);
-      db[i] = da[i];
-    }
-    double scale = vtkMath::Random();
-    vtkMath::MultiplyScalar2D(da, scale);
-
-    for (int i = 0; i < 2; ++i)
-    {
-      if (!vtkMathUtilities::FuzzyCompare(
-            da[i], db[i] * scale,
-            std::numeric_limits<double>::epsilon() * 256.0))
-      {
-        std::cout << " MultiplyScalar2D got " << da[i]
-                  << " but expected " << db[i] * scale;
-      }
-    }
-  }
-
-  // then float
-  float fa[2], fb[2];
-  for (int n = 0; n < 100000; ++n)
-  {
-    for (int i = 0; i < 2; ++i)
-    {
-      fa[i] = vtkMath::Random(-10.0, 10.0);
-      fb[i] = fa[i];
-    }
-    float scale = vtkMath::Random();
-    vtkMath::MultiplyScalar2D(fa, scale);
-
-    for (int i = 0; i < 2; ++i)
-    {
-      if (!vtkMathUtilities::FuzzyCompare(
-            fa[i], fb[i] * scale,
-            std::numeric_limits<float>::epsilon() * 256.0f))
-      {
-        std::cout << " MultiplyScalar2D got " << fa[i]
-                  << " but expected " << fb[i] * scale;
-      }
-    }
-  }
+  status += MultiplyScalar2D<double>(false);
+  status += MultiplyScalar2D<float>(false);
+  status += MultiplyScalar2D<double>(true);
+  status += MultiplyScalar2D<float>(true);
 
   if (status)
   {
@@ -3833,6 +3839,101 @@ int TestNan()
 {
   int status = 0;
   std::cout << "Nan..";
+
+  if (status)
+  {
+    std::cout << "..FAILED" << std::endl;
+  }
+  else
+  {
+    std::cout << ".PASSED" << std::endl;
+  }
+  return status;
+}
+
+template<typename T>
+int Set(bool fromVector)
+{
+  int failures = 0;
+
+  T ta[3], tb[3];
+  for (int n = 0; n < 1000; ++n)
+  {
+    for (int i = 0; i < 3; ++i)
+    {
+      ta[i] = vtkMath::Random(-10.0, 10.0);
+      tb[i] = vtkMath::Random(-10.0, 10.0);
+    }
+    if (fromVector)
+    {
+      vtkMath::Set(ta, tb);
+    }
+    else
+    {
+      vtkMath::Set(ta[0], ta[1], ta[2], tb);
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+      if (!vtkMathUtilities::FuzzyCompare(
+        ta[i], tb[i],
+        std::numeric_limits<T>::epsilon() * static_cast<T>(256.0)))
+      {
+        std::cout << " Set got " << ta[i] << " but expected " << tb[i];
+        failures++;
+      }
+    }
+  }
+  return static_cast<int>(failures != 0);
+}
+
+int TestSet()
+{
+  int status = 0;
+  std::cout << "Set..";
+
+  status += Set<double>(false);
+  status += Set<float>(false);
+  status += Set<double>(true);
+  status += Set<float>(true);
+
+  if (status)
+  {
+    std::cout << "..FAILED" << std::endl;
+  }
+  else
+  {
+    std::cout << ".PASSED" << std::endl;
+  }
+  return status;
+}
+
+template<typename T>
+int Sign()
+{
+  int failures = 0;
+  for (int n = 0; n < 1000; ++n)
+  {
+    T x = vtkMath::Random(-10.0, 10.0);
+    T sign = vtkMath::Sign(x);
+    T expected = x < 0 ? -1 : x > 0 ? 1 : 0;
+
+    if (sign != expected)
+    {
+      std::cout << " Sign got " << sign << " but expected " << expected;
+      failures++;
+    }
+  }
+  return static_cast<int>(failures != 0);
+}
+
+int TestSign()
+{
+  int status = 0;
+  std::cout << "Sign..";
+
+  status += Sign<double>();
+  status += Sign<float>();
+  status += Sign<int>();
 
   if (status)
   {
