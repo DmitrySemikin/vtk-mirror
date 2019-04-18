@@ -112,7 +112,7 @@ public:
 
   //@{
   /**
-  * Returns the sign of the value (-1, 0, 1)
+  * Return the sign of the value (-1, 0, 1)
   */
   static float Sign(float x);
   static double Sign(double x);
@@ -318,7 +318,7 @@ public:
   static double Gaussian( double mean, double std );
 
   /**
-   * Sets a vector to the value of another vector
+   * Set vector values to another vector.
    */
   static void Set(const float a[3], float b[3]) {
     for (int i = 0; i < 3; ++i)
@@ -328,7 +328,7 @@ public:
   }
 
   /**
-   * Sets a vector to the value of another vector
+   * Set vector values to another vector.
    */
   static void Set(const double a[3], double b[3]) {
     for (int i = 0; i < 3; ++i)
@@ -338,7 +338,7 @@ public:
   }
 
   /**
-   * Sets a vector to the value of another vector
+   * Set values to a vector.
    */
   static void Set(float x, float y, float z, float b[3]) {
      b[0] = x;
@@ -347,7 +347,7 @@ public:
   }
 
   /**
-   * Sets a vector to the value of another vector
+   * Set values to a vector.
    */
   static void Set(double x, double y, double z, double b[3]) {
      b[0] = x;
@@ -407,7 +407,7 @@ public:
   }
 
   /**
-   * Multiplies a 3-vector by a scalar (float version).
+   * Multiply a 3-vector by a scalar (float version).
    * Returns the value as b = a * s.
    */
   static void MultiplyScalar(const float a[3], float s, float b[3]) {
@@ -429,8 +429,8 @@ public:
   }
 
   /**
-   * Multiplies a 2-vector by a scalar (float version).
-   * Returns the value as b = a * s.
+   * Multiply a 2-vector by a scalar (float version).
+   * Return the value as b = a * s.
    */
   static void MultiplyScalar2D(const float a[2], float s, float b[2]) {
      for (int i = 0; i < 2; ++i)
@@ -449,8 +449,8 @@ public:
   }
 
   /**
-   * Multiplies a 3-vector by a scalar (double version).
-   * Returns the value as b = a * s.
+   * Multiply a 3-vector by a scalar (double version).
+   * Return the value as b = a * s.
    */
   static void MultiplyScalar(const double a[3], double s, double b[3]) {
     for (int i = 0; i < 3; ++i)
@@ -471,8 +471,8 @@ public:
   }
 
   /**
-   * Multiplies a 2-vector by a scalar (double version).
-   * Returns the value as b = a * s.
+   * Multiply a 2-vector by a scalar (double version).
+   * Return the value as b = a * s.
    */
   static void MultiplyScalar2D(const double a[2], double s, double b[2]) {
      for (int i = 0; i < 2; ++i)
