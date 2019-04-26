@@ -79,11 +79,30 @@ int GuessNprocsCollated(vtkDirectory *dir, vtkStringArray *procNames)
     const vtkStdString subDir(dir->GetFile(fileI));
     if (subDir.substr(0, 10) == "processors")
     {
-      int end = ( subDir.find_first_of("_", 10) == std::string::npos) ? subDir.size() - 10: subDir.find_first_of("_", 10) - 9;
-      const vtkStdString procNoStr(subDir.substr(10, end));
+      auto underscorePos = subDir.find("_");
+      if (underscorePos != std::string::npos) underscorePos -= 10;
+      const vtkStdString procNoStr(subDir.substr(10, underscorePos));
       size_t pos = 0;
-      const int procNo = std::stoi(procNoStr, &pos);
-      if (procNoStr.length() == pos && procNo >= 0)
+      int procNo = -1;
+
+      // check if there is additional info. about rank
+      auto hypenPos = subDir.find("-");
+
+      if (hypenPos != std::string::npos)
+      {
+        // with rank information
+        // the following rank information is used for sorting
+        const int rank1 = std::stoi(subDir.substr(11 + underscorePos, hypenPos - underscorePos - 11));
+        // const int rank2 = std::stoi(subDir.substr(hypenPos + 1));
+        procNo = rank1;
+      }
+      else
+      {
+        // no rank information
+        procNo = std::stoi(procNoStr, &pos);
+      }
+
+      if (procNo >= 0)
       {
         procNos->InsertNextValue(procNo);
         procNames->InsertNextValue(subDir);
@@ -257,7 +276,37 @@ int vtkPOpenFOAMReader::RequestInformation(vtkInformation *request,
         masterReader->SetSkipZeroTime(this->SkipZeroTime);
         masterReader->SetUse64BitLabels(this->Use64BitLabels);
         masterReader->SetUse64BitFloats(this->Use64BitFloats);
-        int procNo = std::stoi(procNames->GetValue(0).substr(9));
+        int procNo = -1;
+        if (this->CaseType == DECOMPOSED_CASE)
+        {
+          procNo = std::stoi(procNames->GetValue(0).substr(9));
+        }
+        else if (this->CaseType == COLLATED_CASE)
+        {
+          auto underscorePos = subDir.find("_");
+          if (underscorePos != std::string::npos) underscorePos -= 10;
+          const vtkStdString procNoStr(subDir.substr(10, underscorePos));
+          size_t pos = 0;
+          int procNo = -1;
+
+          // check if there is additional info. about rank
+          auto hypenPos = subDir.find("-");
+
+          if (hypenPos != std::string::npos)
+          {
+            // with rank information
+            // the following rank information is used for sorting
+            const int rank1 = std::stoi(subDir.substr(11 + underscorePos, hypenPos - underscorePos - 11));
+            const int rank2 = std::stoi(subDir.substr(hypenPos + 1));
+            procNo = rank2 - rank1 + 1;
+          }
+          else
+          {
+            // no rank information
+            procNo = std::stoi(procNoStr, &pos);
+          }
+        }
+
         masterReader->SetProcNo(procNo);
 
         if (this->CaseType == DECOMPOSED_CASE)
