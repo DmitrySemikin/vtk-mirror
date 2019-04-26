@@ -558,7 +558,7 @@ int vtkDelaunay3D::RequestData(
     int hasNei, j, k;
     double x1[3], x2[3], x3[3];
     vtkDelaunayTetra *tetra;
-    static int edge[6][2] = {{0,1},{1,2},{2,0},{0,3},{1,3},{2,3}};
+    static const int edge[6][2] = {{0,1},{1,2},{2,0},{0,3},{1,3},{2,3}};
 
     edges = vtkEdgeTable::New();
     edges->InitEdgeInsertion(numPoints+6);
@@ -760,7 +760,7 @@ int vtkDelaunay3D::RequestData(
 // tetrahedronalizations of points. Its purpose is construct an initial
 // Delaunay triangulation into which to inject other points. You must
 // specify the center of a cubical bounding box and its length, as well
-// as the numer of points to insert. The method returns a pointer to
+// as the number of points to insert. The method returns a pointer to
 // an unstructured grid. Use this pointer to manipulate the mesh as
 // necessary. You must delete (with Delete()) the mesh when done.
 // Note: This initialization method places points forming bounding octahedron

@@ -111,9 +111,9 @@ vtkPyramid::~vtkPyramid()
 }
 
 //----------------------------------------------------------------------------
-int vtkPyramid::EvaluatePosition(double x[3], double closestPoint[3],
+int vtkPyramid::EvaluatePosition(const double x[3], double closestPoint[3],
                                  int& subId, double pcoords[3],
-                                 double& dist2, double *weights)
+                                 double& dist2, double weights[])
 {
   subId = 0;
   // There are problems searching for the apex point so we check if
@@ -292,7 +292,7 @@ int vtkPyramid::EvaluatePosition(double x[3], double closestPoint[3],
 }
 
 //----------------------------------------------------------------------------
-void vtkPyramid::EvaluateLocation(int& vtkNotUsed(subId), double pcoords[3],
+void vtkPyramid::EvaluateLocation(int& vtkNotUsed(subId), const double pcoords[3],
                                 double x[3], double *weights)
 {
   int i, j;
@@ -314,7 +314,7 @@ void vtkPyramid::EvaluateLocation(int& vtkNotUsed(subId), double pcoords[3],
 //----------------------------------------------------------------------------
 // Returns the closest face to the point specified. Closeness is measured
 // parametrically.
-int vtkPyramid::CellBoundary(int vtkNotUsed(subId), double pcoords[3],
+int vtkPyramid::CellBoundary(int vtkNotUsed(subId), const double pcoords[3],
                            vtkIdList *pts)
 {
   int i;
@@ -398,7 +398,7 @@ void vtkPyramid::Contour(double value, vtkDataArray *cellScalars,
                          vtkCellData *inCd, vtkIdType cellId,
                          vtkCellData *outCd)
 {
-  static int CASE_MASK[5] = {1,2,4,8,16};
+  static const int CASE_MASK[5] = {1,2,4,8,16};
   TRIANGLE_CASES *triCase;
   EDGE_LIST  *edge;
   int i, j, index, *vert, v1, v2, newCellId;
@@ -469,6 +469,15 @@ void vtkPyramid::Contour(double value, vtkDataArray *cellScalars,
       }
     }
   }
+}
+
+//----------------------------------------------------------------------------
+// Return the case table for table-based isocontouring (aka marching cubes
+// style implementations). A linear 3D cell with N vertices will have 2**N
+// cases. The cases list three edges in order to produce one output triangle.
+int *vtkPyramid::GetTriangleCases(int caseId)
+{
+  return triCases[caseId].edges;
 }
 
 //----------------------------------------------------------------------------
@@ -543,7 +552,7 @@ vtkCell *vtkPyramid::GetFace(int faceId)
 //----------------------------------------------------------------------------
 // Intersect faces against line.
 //
-int vtkPyramid::IntersectWithLine(double p1[3], double p2[3], double tol, double& t,
+int vtkPyramid::IntersectWithLine(const double p1[3], const double p2[3], double tol, double& t,
                                double x[3], double pcoords[3], int& subId)
 {
   int intersection=0;
@@ -656,8 +665,8 @@ int vtkPyramid::Triangulate(int vtkNotUsed(index), vtkIdList *ptIds, vtkPoints *
 }
 
 //----------------------------------------------------------------------------
-void vtkPyramid::Derivatives(int subId, double pcoords[3],
-                             double *values, int dim, double *derivs)
+void vtkPyramid::Derivatives(int subId, const double pcoords[3],
+                             const double *values, int dim, double *derivs)
 {
   if(pcoords[2] > .999)
   {
@@ -711,7 +720,7 @@ void vtkPyramid::Derivatives(int subId, double pcoords[3],
 //----------------------------------------------------------------------------
 // Compute iso-parametric interpolation functions for pyramid
 //
-void vtkPyramid::InterpolationFunctions(double pcoords[3], double sf[5])
+void vtkPyramid::InterpolationFunctions(const double pcoords[3], double sf[5])
 {
   double rm, sm, tm;
 
@@ -727,7 +736,7 @@ void vtkPyramid::InterpolationFunctions(double pcoords[3], double sf[5])
 }
 
 //----------------------------------------------------------------------------
-void vtkPyramid::InterpolationDerivs(double pcoords[3], double derivs[15])
+void vtkPyramid::InterpolationDerivs(const double pcoords[3], double derivs[15])
 {
   double rm, sm, tm;
 
@@ -762,7 +771,7 @@ void vtkPyramid::InterpolationDerivs(double pcoords[3], double derivs[15])
 // matrix. Returns 9 elements of 3x3 inverse Jacobian plus interpolation
 // function derivatives. Returns 0 if no inverse exists.
 // Note for pyramid: the inverse Jacobian is undefined at the apex.
-int vtkPyramid::JacobianInverse(double pcoords[3], double **inverse, double derivs[15])
+int vtkPyramid::JacobianInverse(const double pcoords[3], double **inverse, double derivs[15])
 {
   int i, j;
   double *m[3], m0[3], m1[3], m2[3];

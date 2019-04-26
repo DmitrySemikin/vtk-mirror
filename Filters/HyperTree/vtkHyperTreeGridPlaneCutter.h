@@ -31,10 +31,11 @@
  * vtkHyperTreeGrid vtkHyperTreeGridAlgorithm
  *
  * @par Thanks:
- * This class was written by Philippe Pebay on a idea of Guénolé Harel and Jacques-Bernard Lekien, 2016
+ * This class was written by Philippe Pebay on a idea of Guenole Harel and Jacques-Bernard Lekien, 2016
  * This class was modified by Rogeli Grima Torres, 2016
- * This work was supported by Commissariat a l'Energie Atomique (CEA/DIF)
- *
+ * This class was modified by Jacques-Bernard Lekien, 2018
+ * This work was supported by Commissariat a l'Energie Atomique
+ * CEA, DAM, DIF, F-91297 Arpajon, France.
 */
 
 #ifndef vtkHyperTreeGridPlaneCutter_h
@@ -43,11 +44,12 @@
 #include "vtkFiltersHyperTreeModule.h" // For export macro
 #include "vtkHyperTreeGridAlgorithm.h"
 
-class vtkHyperTreeGridCursor;
 class vtkCellArray;
 class vtkCutter;
 class vtkIdList;
 class vtkPoints;
+class vtkHyperTreeGridNonOrientedGeometryCursor;
+class vtkHyperTreeGridNonOrientedMooreSuperCursor;
 
 class VTKFILTERSHYPERTREE_EXPORT vtkHyperTreeGridPlaneCutter : public vtkHyperTreeGridAlgorithm
 {
@@ -91,17 +93,17 @@ protected:
   /**
    * Recursively descend into tree down to leaves, cutting primal cells
    */
-  void RecursivelyProcessTreePrimal( vtkHyperTreeGridCursor*, vtkBitArray* );
+  void RecursivelyProcessTreePrimal( vtkHyperTreeGridNonOrientedGeometryCursor* );
 
   /**
    * Recursively decide whether cell is intersected by plane
    */
-  bool RecursivelyPreProcessTree( vtkHyperTreeGridCursor*, vtkBitArray* );
+  bool RecursivelyPreProcessTree( vtkHyperTreeGridNonOrientedGeometryCursor* );
 
   /**
    * Recursively descend into tree down to leaves, cutting dual cells
    */
-  void RecursivelyProcessTreeDual( vtkHyperTreeGridCursor*, vtkBitArray* );
+  void RecursivelyProcessTreeDual( vtkHyperTreeGridNonOrientedMooreSuperCursor* );
 
   /**
    * Check if a cursor is intersected by a plane
@@ -161,6 +163,11 @@ protected:
    * Cutter to be used on dual cells
    */
   vtkCutter* Cutter;
+
+  /**
+   * material Mask
+   */
+  vtkBitArray* InMask;
 
 private:
   vtkHyperTreeGridPlaneCutter(const vtkHyperTreeGridPlaneCutter&) = delete;

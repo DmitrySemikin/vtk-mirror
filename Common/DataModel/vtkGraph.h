@@ -504,6 +504,15 @@ public:
    */
   virtual void Squeeze();
 
+  /**
+   * Return the actual size of the data in kibibytes (1024 bytes). This number
+   * is valid only after the pipeline has updated. The memory size
+   * returned is guaranteed to be greater than or equal to the
+   * memory required to represent the data (e.g., extra space in
+   * arrays, etc. are not included in the return value).
+   */
+  unsigned long GetActualMemorySize() override;
+
   //@{
   /**
    * Retrieve a graph from an information vector.
@@ -547,8 +556,8 @@ public:
    * The size of the pts array is 3*npts, and holds the x,y,z
    * location of each edge control point.
    */
-  void SetEdgePoints(vtkIdType e, vtkIdType npts, double* pts);
-  void GetEdgePoints(vtkIdType e, vtkIdType& npts, double*& pts);
+  void SetEdgePoints(vtkIdType e, vtkIdType npts, const double pts[]) VTK_SIZEHINT(pts, 3 * npts);
+  void GetEdgePoints(vtkIdType e, vtkIdType& npts, double*& pts) VTK_SIZEHINT(pts, 3 * npts);
   //@}
 
   /**
@@ -571,14 +580,14 @@ public:
    * This assumes there is already a point at location i, and simply
    * overwrites it.
    */
-  void SetEdgePoint(vtkIdType e, vtkIdType i, double x[3]);
+  void SetEdgePoint(vtkIdType e, vtkIdType i, const double x[3]);
   void SetEdgePoint(vtkIdType e, vtkIdType i, double x, double y, double z)
     { double p[3] = {x, y, z}; this->SetEdgePoint(e, i, p); }
 
   /**
    * Adds a point to the end of the list of edge points for a certain edge.
    */
-  void AddEdgePoint(vtkIdType e, double x[3]);
+  void AddEdgePoint(vtkIdType e, const double x[3]);
   void AddEdgePoint(vtkIdType e, double x, double y, double z)
     { double p[3] = {x, y, z}; this->AddEdgePoint(e, p); }
 

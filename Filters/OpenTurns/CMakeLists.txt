@@ -1,20 +1,31 @@
 find_package(OpenTURNS 1.8 REQUIRED)
+# XXX(fixme)
 include(${OPENTURNS_USE_FILE})
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/vtkOTConfig.h.in
-  ${CMAKE_CURRENT_BINARY_DIR}/vtkOTConfig.h)
+set(classes
+  vtkOTDensityMap
+  vtkOTFilter
+  vtkOTKernelSmoothing
+  vtkOTScatterPlotMatrix
+  vtkOTUtilities)
 
-set(Module_SRCS
-    vtkOTDensityMap.cxx
-    vtkOTFilter.cxx
-    vtkOTKernelSmoothing.cxx
-    vtkOTScatterPlotMatrix.cxx
-    ${CMAKE_CURRENT_BINARY_DIR}/${vtk-module}ObjectFactory.cxx
-    vtkOTUtilities.cxx)
+vtk_object_factory_declare(
+  BASE vtkScatterPlotMatrix
+  OVERRIDE vtkOTScatterPlotMatrix)
 
-include(vtkObjectFactory)
-vtk_add_override(vtkScatterPlotMatrix vtkOTScatterPlotMatrix)
-vtk_object_factory_configure("${vtk_module_overrides}")
+vtk_object_factory_configure(
+  SOURCE_FILE vtk_object_factory_source
+  HEADER_FILE vtk_object_factory_header
+  EXPORT_MACRO "VTKFILTERSOPENTURNS_EXPORT")
 
-vtk_module_library(vtkFiltersOpenTurns ${Module_SRCS})
-target_link_libraries(vtkFiltersOpenTurns LINK_PRIVATE ${OPENTURNS_LIBRARIES})
+vtk_module_add_module(VTK::FiltersOpenTurns
+  CLASSES ${classes}
+  SOURCES ${vtk_object_factory_source}
+  PRIVATE_HEADERS ${vtk_object_factory_header})
+
+vtk_module_link(VTK::FiltersOpenTurns
+  PRIVATE
+    ${OPENTURNS_LIBRARIES})
+vtk_module_include(VTK::FiltersOpenTurns
+  PRIVATE
+    ${OPENTURNS_INCLUDE_DIRS})

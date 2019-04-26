@@ -8,10 +8,13 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   TestAMRBox.cxx
   TestBiQuadraticQuad.cxx
   TestCompositeDataSets.cxx
+  TestCompositeDataSetRange.cxx
   TestComputeBoundingSphere.cxx
   TestDataArrayDispatcher.cxx
   TestDataObject.cxx
+  TestDataObjectTreeRange.cxx
   TestDispatchers.cxx
+  TestFieldList.cxx
   TestGenericCell.cxx
   TestGraph.cxx
   TestGraph2.cxx
@@ -19,6 +22,7 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   TestHigherOrderCell.cxx
   TestImageDataFindCell.cxx
   TestImageDataInterpolation.cxx
+  TestImageDataOrientation.cxx
   TestImageIterator.cxx
   TestInterpolationDerivs.cxx
   TestInterpolationFunctions.cxx
@@ -38,6 +42,7 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   TestPolyhedronConvexity.cxx
   TestQuadraticPolygon.cxx
   TestRect.cxx
+  TestSelectionExpression.cxx
   TestSelectionSubtract.cxx
   TestSortFieldData.cxx
   TestTable.cxx
@@ -72,8 +77,10 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   UnitTestTriangleIntersection.cxx
   )
 vtk_add_test_cxx(vtkCommonDataModelCxxTests data_tests
+  TestImageDataOrientation2.cxx,NO_DATA
   TestLagrangeTriangle.cxx
   TestLagrangeTetra.cxx
+  TestLagrangeWedge.cxx
   quadraticIntersection.cxx
   TestCellIterators.cxx,NO_VALID,NO_OUTPUT
   TestCellLocator.cxx,NO_DATA
@@ -89,19 +96,19 @@ list(APPEND data_tests TestPolyhedron2.cxx TestPolyhedronContouring.cxx TestPoly
 vtk_add_test_cxx(vtkCommonDataModelCxxTests output_tests
   TestKdTreeRepresentation.cxx,NO_DATA
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedron2
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedron2
   COMMAND vtkCommonDataModelCxxTests TestPolyhedron2
   -D DATA{../Data/polyhedron_mesh.vtu}
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedronContouring
-  COMMAND ${vtk-module}CxxTests TestPolyhedronContouring
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedronContouring
+  COMMAND vtkCommonDataModelCxxTests TestPolyhedronContouring
    DATA{../Data/cell_850113.vtu} DATA{../Data/cell_12851_26.vtu}
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedronCutter
-  COMMAND ${vtk-module}CxxTests TestPolyhedronCutter
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedronCutter
+  COMMAND vtkCommonDataModelCxxTests TestPolyhedronCutter
   DATA{../Data/onePolyhedron.vtu} DATA{../Data/sliceOfPolyhedron.vtu}
   )
 

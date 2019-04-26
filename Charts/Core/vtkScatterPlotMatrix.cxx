@@ -34,6 +34,7 @@
 #include "vtkPlot.h"
 #include "vtkPlotPoints.h"
 #include "vtkPlotPoints3D.h"
+#include "vtkPoints2D.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkStdString.h"
 #include "vtkStringArray.h"
@@ -203,7 +204,7 @@ public:
   vtkVector2i                NextActivePlot;
 
   vtkNew<vtkChartXYZ> BigChart3D;
-  vtkNew<vtkAxis>     TestAxis;   // Used to get ranges/numer of ticks
+  vtkNew<vtkAxis>     TestAxis;   // Used to get ranges/number of ticks
   vtkSmartPointer<vtkTooltipItem> TooltipItem;
   vtkSmartPointer<vtkStringArray> IndexedLabelsArray;
 };
@@ -398,6 +399,18 @@ bool vtkScatterPlotMatrix::Paint(vtkContext2D *painter)
   this->Update();
   bool ret = this->Superclass::Paint(painter);
   this->ResizeBigChart();
+
+  if (this->Title)
+  {
+    // As the BigPlot can take some spaces on the top of the chart
+    // we draw the title on the bottom where there is always room for it.
+    vtkNew<vtkPoints2D> rect;
+    rect->InsertNextPoint(0, 0);
+    rect->InsertNextPoint(this->GetScene()->GetSceneWidth(), 10);
+    painter->ApplyTextProp(this->TitleProperties);
+    painter->DrawStringRect(rect, this->Title);
+  }
+
   return ret;
 }
 
@@ -648,7 +661,7 @@ void vtkScatterPlotMatrix::AdvanceAnimation()
 
   // 1: Remove decoration from the big chart.
   // 2: Set three dimensions to plot in the BigChart3D.
-  // 3: Make BigChart inivisible, and BigChart3D visible.
+  // 3: Make BigChart invisible, and BigChart3D visible.
   // 4: Rotate between the two dimensions we are transitioning between.
   //    -> Loop from start to end angle to complete the effect.
   // 5: Make the new dimensionality active, update BigChart.
@@ -774,8 +787,13 @@ void vtkScatterPlotMatrix::AdvanceAnimation()
       this->Private->Interactor->DestroyTimer(this->Private->TimerId);
       this->Private->TimerId = 0;
       this->Private->TimerCallbackInitialized = false;
+      this->Animating = false;
+
+      // Make sure the active plot is redrawn completely after the animation
+      this->Modified();
+      this->ActivePlotValid = false;
+      this->Update();
     }
-    this->Animating = false;
   }
 }
 

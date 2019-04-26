@@ -220,7 +220,7 @@ bool vtkAMRResampleFilter::FoundDonor(
 {
   assert( "pre: donor grid is nullptr" && (donorGrid != nullptr) );
   double gbounds[6];
-  // Lets do a trival spatial check
+  // Lets do a trivial spatial check
   this->NumberOfBlocksTested++;
   donorGrid->GetBounds(gbounds);
   if ((q[0] < gbounds[0]) || (q[0] > gbounds[1]) ||
@@ -294,7 +294,7 @@ void vtkAMRResampleFilter::CopyData(
     vtkDataArray *srcArray    = src->GetArray( arrayIdx );
     assert( "pre: target array is nullptr!" && (targetArray != nullptr) );
     assert( "pre: source array is nullptr!" && (srcArray != nullptr) );
-    assert( "pre: targer/source array number of components mismatch!" &&
+    assert( "pre: target/source array number of components mismatch!" &&
             (targetArray->GetNumberOfComponents()==
              srcArray->GetNumberOfComponents() ) );
     assert( "pre: target/source array names mismatch!" &&
@@ -343,7 +343,7 @@ void vtkAMRResampleFilter::TransferToCellCenters(
         vtkUniformGrid *g, vtkOverlappingAMR *amrds )
 {
   assert( "pre: uniform grid is nullptr" && (g != nullptr) );
-  assert( "pre: AMR data-strucutre is nullptr" && (amrds != nullptr) );
+  assert( "pre: AMR data-structure is nullptr" && (amrds != nullptr) );
 
   // STEP 0: Get the first block so that we know the arrays
 //  vtkUniformGrid *refGrid = amrds->GetDataSet(0,0);
@@ -851,7 +851,7 @@ void vtkAMRResampleFilter::TransferSolution(
     vtkUniformGrid *g, vtkOverlappingAMR *amrds)
 {
   assert( "pre: uniform grid is nullptr" && (g != nullptr) );
-  assert( "pre: AMR data-strucutre is nullptr" && (amrds != nullptr) );
+  assert( "pre: AMR data-structure is nullptr" && (amrds != nullptr) );
 
   if( this->TransferToNodes == 1 )
   {

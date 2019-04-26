@@ -23,15 +23,19 @@ PURPOSE.  See the above copyright notice for more information.
 #include  "vtkDataSet.h"
 #include  "vtkDirectedAcyclicGraph.h"
 #include  "vtkDirectedGraph.h"
+#include  "vtkExplicitStructuredGrid.h"
 #include  "vtkGenericDataSet.h"
 #include  "vtkGraph.h"
 #include  "vtkHierarchicalBoxDataSet.h"
 #include  "vtkOverlappingAMR.h"
 #include  "vtkNonOverlappingAMR.h"
 #include  "vtkHyperTreeGrid.h"
+#include  "vtkUniformHyperTreeGrid.h"
 #include  "vtkImageData.h"
 #include  "vtkMultiBlockDataSet.h"
 #include  "vtkMultiPieceDataSet.h"
+#include  "vtkPartitionedDataSet.h"
+#include  "vtkPartitionedDataSetCollection.h"
 #include  "vtkPath.h"
 #include  "vtkPiecewiseFunction.h"
 #include  "vtkPointSet.h"
@@ -45,6 +49,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include  "vtkTree.h"
 #include  "vtkUndirectedGraph.h"
 #include  "vtkUniformGrid.h"
+#include  "vtkUniformHyperTreeGrid.h"
 #include  "vtkUnstructuredGrid.h"
 
 #include  "vtkArrayData.h"
@@ -93,6 +98,10 @@ static const char* vtkDataObjectTypesStrings[] = {
   "vtkPistonDataObject", // OBSOLETE
   "vtkPath",
   "vtkUnstructuredGridBase",
+  "vtkPartitionedDataSet",
+  "vtkPartitionedDataSetCollection",
+  "vtkUniformHyperTreeGrid",
+  "vtkExplicitStructuredGrid",
   nullptr
 };
 
@@ -216,6 +225,10 @@ vtkDataObject* vtkDataObjectTypes::NewDataObject(const char* type)
   {
     return vtkHyperTreeGrid::New();
   }
+  else if(strcmp(type, "vtkUniformHyperTreeGrid") == 0)
+  {
+    return vtkUniformHyperTreeGrid::New();
+  }
   else if(strcmp(type, "vtkTable") == 0)
   {
     return vtkTable::New();
@@ -267,6 +280,22 @@ vtkDataObject* vtkDataObjectTypes::NewDataObject(const char* type)
   else if(strcmp(type, "vtkPath") == 0)
   {
     return vtkPath::New();
+  }
+  else if(strcmp(type, "vtkPartitionedDataSet") == 0)
+  {
+    return vtkPartitionedDataSet::New();
+  }
+  else if(strcmp(type, "vtkPartitionedDataSetCollection") == 0)
+  {
+    return vtkPartitionedDataSetCollection::New();
+  }
+  else if(strcmp(type, "vtkUniformHyperTreeGrid") == 0)
+  {
+    return vtkUniformHyperTreeGrid::New();
+  }
+  else if(strcmp(type, "vtkExplicitStructuredGrid") == 0)
+  {
+    return vtkExplicitStructuredGrid::New();
   }
 
   vtkGenericWarningMacro("NewDataObject(): You are trying to instantiate DataObjectType \"" << type

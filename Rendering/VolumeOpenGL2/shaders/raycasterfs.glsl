@@ -38,8 +38,6 @@ vec4 g_fragColor = vec4(0.0);
 /// Uniforms, attributes, and globals
 ///
 //////////////////////////////////////////////////////////////////////////////
-vec3 g_dataPos;
-vec3 g_terminatePos;
 vec3 g_dirStep;
 vec4 g_srcColor;
 vec4 g_eyePosObj;
@@ -48,6 +46,18 @@ bool g_skip;
 float g_currentT;
 float g_terminatePointMax;
 
+// These describe the entire ray for this scene, not just the current depth
+// peeling segment. These are texture coordinates.
+vec3 g_rayOrigin; // Entry point of volume or clip point
+vec3 g_rayTermination; // Termination point (depth, clip, etc)
+
+// These describe the current segment. If not peeling, they are initialized to
+// the ray endpoints.
+vec3 g_dataPos;
+vec3 g_terminatePos;
+
+//VTK::CustomUniforms::Dec
+
 //VTK::Output::Dec
 
 //VTK::Base::Dec
@@ -55,6 +65,8 @@ float g_terminatePointMax;
 //VTK::Termination::Dec
 
 //VTK::Cropping::Dec
+
+//VTK::Clipping::Dec
 
 //VTK::Shading::Dec
 
@@ -86,8 +98,6 @@ float g_terminatePointMax;
 
 uniform float in_scale;
 uniform float in_bias;
-
-//VTK::Clipping::Dec
 
 //////////////////////////////////////////////////////////////////////////////
 ///
@@ -134,6 +144,7 @@ vec4 NDCToWindow(const float xNDC, const float yNDC, const float zNDC)
  * { start + i * step }, where i is an integer. If @a ceiling
  * is true, the sample located further in the direction of @a step is used,
  * otherwise the sample location closer to the eye is used.
+ * This function assumes both start and pos already have jittering applied.
  */
 vec3 ClampToSampleLocation(vec3 start, vec3 step, vec3 pos, bool ceiling)
 {
@@ -193,9 +204,9 @@ void initializeRayCast()
 
   //VTK::Base::Init
 
-  //VTK::Terminate::Init
-
   //VTK::Cropping::Init
+
+  //VTK::Terminate::Init
 
   //VTK::Clipping::Init
 

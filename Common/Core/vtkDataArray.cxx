@@ -71,7 +71,7 @@ struct DeepCopyWorker
                   vtkSOADataArrayTemplate<ValueType> *dst)
   {
     vtkIdType numTuples = src->GetNumberOfTuples();
-    for (int comp; comp < src->GetNumberOfComponents(); ++comp)
+    for (int comp = 0; comp < src->GetNumberOfComponents(); ++comp)
     {
       ValueType *srcBegin = src->GetComponentArrayPointer(comp);
       ValueType *srcEnd = srcBegin + numTuples;
@@ -1632,10 +1632,13 @@ void vtkDataArray::ComputeRange(double range[2], int comp)
 // call modified on superclass
 void vtkDataArray::Modified()
 {
-    vtkInformation *info = this->GetInformation();
-    // Clear key-value pairs that are now out of date.
-    info->Remove(L2_NORM_RANGE());
-    info->Remove(L2_NORM_FINITE_RANGE());
+    if ( this->HasInformation() )
+    {
+        // Clear key-value pairs that are now out of date.
+        vtkInformation *info = this->GetInformation();
+        info->Remove(L2_NORM_RANGE());
+        info->Remove(L2_NORM_FINITE_RANGE());
+    }
     this->Superclass::Modified();
 }
 

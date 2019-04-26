@@ -518,7 +518,7 @@ int vtkScalarBarActor::RebuildLayoutIfNeeded(vtkViewport* viewport)
         viewport->GetVTKWindow()->GetMTime() > this->BuildTime))
   {
     // if the viewport has changed we may - or may not need
-    // to rebuild, it depends on if the projected coords chage
+    // to rebuild, it depends on if the projected coords change
     int size[2];
     int* barOrigin;
     barOrigin = this->PositionCoordinate->GetComputedViewportValue(viewport);
@@ -644,7 +644,7 @@ int vtkScalarBarActor::RenderOpaqueGeometry(vtkViewport* viewport)
 //-----------------------------------------------------------------------------
 // Description:
 // Does this prop have some translucent polygonal geometry?
-int vtkScalarBarActor::HasTranslucentPolygonalGeometry()
+vtkTypeBool vtkScalarBarActor::HasTranslucentPolygonalGeometry()
 { // TODO: Handle case when IndexedLookup is true and any colors in the palette
   // have an alpha value, as the color swatches drawn by
   // this->P->AnnotationBoxesActor have 1 translucent triangle for each

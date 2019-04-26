@@ -240,7 +240,7 @@ void vtkFieldData::Initialize()
 
 //----------------------------------------------------------------------------
 // Allocate data for each array.
-int vtkFieldData::Allocate(vtkIdType sz, vtkIdType ext)
+vtkTypeBool vtkFieldData::Allocate(vtkIdType sz, vtkIdType ext)
 {
   int i;
   int status = 0;
@@ -838,7 +838,7 @@ void vtkFieldData::SetNumberOfTuples(const vtkIdType number)
 //----------------------------------------------------------------------------
 // Set the jth tuple in source field data at the ith location.
 // Set operations
-// mean that no range chaecking is performed, so they're faster.
+// means that no range checking is performed, so they're faster.
 void vtkFieldData::SetTuple(const vtkIdType i, const vtkIdType j,
   vtkFieldData* source)
 {

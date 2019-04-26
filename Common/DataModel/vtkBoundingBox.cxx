@@ -174,14 +174,20 @@ void vtkBoundingBox::SetMaxPoint(double x, double y, double z)
 }
 
 // ---------------------------------------------------------------------------
+void vtkBoundingBox::Inflate(double delX, double delY, double delZ)
+{
+  this->MinPnt[0] -= delX;
+  this->MaxPnt[0] += delX;
+  this->MinPnt[1] -= delY;
+  this->MaxPnt[1] += delY;
+  this->MinPnt[2] -= delZ;
+  this->MaxPnt[2] += delZ;
+}
+
+// ---------------------------------------------------------------------------
 void vtkBoundingBox::Inflate(double delta)
 {
-  this->MinPnt[0] -= delta;
-  this->MaxPnt[0] += delta;
-  this->MinPnt[1] -= delta;
-  this->MaxPnt[1] += delta;
-  this->MinPnt[2] -= delta;
-  this->MaxPnt[2] += delta;
+  this->Inflate(delta, delta, delta);
 }
 
 // ---------------------------------------------------------------------------
@@ -227,7 +233,7 @@ void vtkBoundingBox::Inflate()
 // ---------------------------------------------------------------------------
 int vtkBoundingBox::IntersectBox(const vtkBoundingBox &bbox)
 {
-  // if either box is not valid don't do the opperation
+  // if either box is not valid don't do the operation
   if (!(this->IsValid() && bbox.IsValid()))
   {
     return 0;
@@ -371,45 +377,45 @@ double vtkBoundingBox::GetDiagonalLength() const
 // If the box is not valid, it stays unchanged.
 // If the scalar factor is negative, bounds are flipped: for example,
 // if (xMin,xMax)=(-2,4) and sx=-3, (xMin,xMax) becomes (-12,6).
-void vtkBoundingBox::Scale(double sx,
-                           double sy,
-                           double sz)
+void vtkBoundingBox::Scale(double sx, double sy, double sz)
 {
   if(this->IsValid())
   {
-      if(sx>=0.0)
-      {
-          this->MinPnt[0]*=sx;
-          this->MaxPnt[0]*=sx;
-      }
-      else
-      {
-          double tmp=this->MinPnt[0];
-          this->MinPnt[0]=sx*this->MaxPnt[0];
-          this->MaxPnt[0]=sx*tmp;
-      }
-      if(sy>=0.0)
-      {
-          this->MinPnt[1]*=sy;
-          this->MaxPnt[1]*=sy;
-      }
-      else
-      {
-          double tmp=this->MinPnt[1];
-          this->MinPnt[1]=sy*this->MaxPnt[1];
-          this->MaxPnt[1]=sy*tmp;
-      }
-      if(sz>=0.0)
-      {
-          this->MinPnt[2]*=sz;
-          this->MaxPnt[2]*=sz;
-      }
-      else
-      {
-          double tmp=this->MinPnt[2];
-          this->MinPnt[2]=sz*this->MaxPnt[2];
-          this->MaxPnt[2]=sz*tmp;
-      }
+    if(sx>=0.0)
+    {
+      this->MinPnt[0]*=sx;
+      this->MaxPnt[0]*=sx;
+    }
+    else
+    {
+      double tmp=this->MinPnt[0];
+      this->MinPnt[0]=sx*this->MaxPnt[0];
+      this->MaxPnt[0]=sx*tmp;
+    }
+
+    if(sy>=0.0)
+    {
+      this->MinPnt[1]*=sy;
+      this->MaxPnt[1]*=sy;
+    }
+    else
+    {
+      double tmp=this->MinPnt[1];
+      this->MinPnt[1]=sy*this->MaxPnt[1];
+      this->MaxPnt[1]=sy*tmp;
+    }
+
+    if(sz>=0.0)
+    {
+      this->MinPnt[2]*=sz;
+      this->MaxPnt[2]*=sz;
+    }
+    else
+    {
+      double tmp=this->MinPnt[2];
+      this->MinPnt[2]=sz*this->MaxPnt[2];
+      this->MaxPnt[2]=sz*tmp;
+    }
   }
 }
 
@@ -417,6 +423,38 @@ void vtkBoundingBox::Scale(double sx,
 void vtkBoundingBox::Scale(double s[3])
 {
   this->Scale(s[0],s[1],s[2]);
+}
+
+// ---------------------------------------------------------------------------
+void vtkBoundingBox::ScaleAboutCenter(double s)
+{
+  this->ScaleAboutCenter(s,s,s);
+}
+
+// ---------------------------------------------------------------------------
+// Scale the box around the bounding box center point.
+void vtkBoundingBox::ScaleAboutCenter(double sx, double sy, double sz)
+{
+  if(this->IsValid())
+  {
+    double center[3];
+    this->GetCenter(center);
+
+    this->MinPnt[0] = center[0] + sx*(this->MinPnt[0] - center[0]);
+    this->MaxPnt[0] = center[0] + sx*(this->MaxPnt[0] - center[0]);
+
+    this->MinPnt[1] = center[1] + sy*(this->MinPnt[1] - center[1]);
+    this->MaxPnt[1] = center[1] + sy*(this->MaxPnt[1] - center[1]);
+
+    this->MinPnt[2] = center[2] + sz*(this->MinPnt[2] - center[2]);
+    this->MaxPnt[2] = center[2] + sz*(this->MaxPnt[2] - center[2]);
+  }
+}
+
+// ---------------------------------------------------------------------------
+void vtkBoundingBox::ScaleAboutCenter(double s[3])
+{
+  this->ScaleAboutCenter(s[0],s[1],s[2]);
 }
 
 // ---------------------------------------------------------------------------
@@ -446,6 +484,7 @@ ComputeDivisions(vtkIdType totalBins, double bounds[6], int divs[3]) const
     if ( lengths[i] > max )
     {
       maxIdx = i;
+      max = lengths[i];
     }
     if ( lengths[i] > zeroDetectionTolerance )
     {
@@ -501,9 +540,7 @@ ComputeDivisions(vtkIdType totalBins, double bounds[6], int divs[3]) const
       bounds[2*i+1] = this->MaxPnt[i] + delta;
     }
   }
-
-  // Safe to return
-  return (divs[0] * divs[1] * divs[2]);
+  return static_cast<vtkIdType>(divs[0])*divs[1]*divs[2];
 }
 
 // ---------------------------------------------------------------------------

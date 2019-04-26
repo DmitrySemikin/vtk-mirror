@@ -30,6 +30,7 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkMeanValueCoordinatesInterpolator.h"
 #include "vtkCellData.h"
 #include "vtkVector.h"
+#include "vtkMath.h"
 
 #include <map>
 #include <set>
@@ -276,7 +277,7 @@ void vtkPolyhedron::ConstructLocator()
 
 
 //----------------------------------------------------------------------------
-void vtkPolyhedron::ComputeParametricCoordinate(double x[3], double pc[3])
+void vtkPolyhedron::ComputeParametricCoordinate(const double x[3], double pc[3])
 {
   this->ComputeBounds();
   double *bounds = this->Bounds;
@@ -288,7 +289,7 @@ void vtkPolyhedron::ComputeParametricCoordinate(double x[3], double pc[3])
 
 //----------------------------------------------------------------------------
 void vtkPolyhedron::
-ComputePositionFromParametricCoordinate(double pc[3], double x[3])
+ComputePositionFromParametricCoordinate(const double pc[3], double x[3])
 {
   this->ComputeBounds();
   double *bounds = this->Bounds;
@@ -567,7 +568,7 @@ vtkIdType *vtkPolyhedron::GetFaces()
 }
 
 //----------------------------------------------------------------------------
-int vtkPolyhedron::IntersectWithLine(double p1[3], double p2[3], double tol,
+int vtkPolyhedron::IntersectWithLine(const double p1[3], const double p2[3], double tol,
   double& tMin, double xMin[3],
   double pc[3], int& subId)
 {
@@ -633,7 +634,7 @@ int vtkPolyhedron::IntersectWithLine(double p1[3], double p2[3], double tol,
    // Compute parametric coordinates
   this->ComputeParametricCoordinate(xMin, pc);
 
-  return numHits;
+  return (numHits > 0);
 }
 
 #define VTK_MAX_ITER 10    //Maximum iterations for ray-firing
@@ -641,7 +642,7 @@ int vtkPolyhedron::IntersectWithLine(double p1[3], double p2[3], double tol,
 
 //----------------------------------------------------------------------------
 // Shoot random rays and count the number of intersections
-int vtkPolyhedron::IsInside(double x[3], double tolerance)
+int vtkPolyhedron::IsInside(const double x[3], double tolerance)
 {
   // do a quick bounds check
   this->ComputeBounds();
@@ -963,7 +964,7 @@ bool vtkPolyhedron::IsConvex()
 }
 
 //----------------------------------------------------------------------------
-int vtkPolyhedron::CellBoundary(int vtkNotUsed(subId), double pcoords[3],
+int vtkPolyhedron::CellBoundary(int vtkNotUsed(subId), const double pcoords[3],
   vtkIdList *pts)
 {
   double x[3], n[3], o[3], v[3];
@@ -1027,9 +1028,9 @@ int vtkPolyhedron::CellBoundary(int vtkNotUsed(subId), double pcoords[3],
 }
 
 //----------------------------------------------------------------------------
-int vtkPolyhedron::EvaluatePosition(double x[3], double * closestPoint,
+int vtkPolyhedron::EvaluatePosition(const double x[3], double closestPoint[3],
   int & vtkNotUsed(subId), double pcoords[3],
-  double & minDist2, double * weights)
+  double & minDist2, double weights[])
 {
   // compute parametric coordinates
   this->ComputeParametricCoordinate(x, pcoords);
@@ -1070,7 +1071,7 @@ int vtkPolyhedron::EvaluatePosition(double x[3], double * closestPoint,
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyhedron::EvaluateLocation(int & vtkNotUsed(subId), double pcoords[3],
+void vtkPolyhedron::EvaluateLocation(int & vtkNotUsed(subId), const double pcoords[3],
   double x[3], double * weights)
 {
   this->ComputePositionFromParametricCoordinate(pcoords, x);
@@ -1079,8 +1080,8 @@ void vtkPolyhedron::EvaluateLocation(int & vtkNotUsed(subId), double pcoords[3],
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyhedron::Derivatives(int vtkNotUsed(subId), double pcoords[3],
-  double *values, int dim, double *derivs)
+void vtkPolyhedron::Derivatives(int vtkNotUsed(subId), const double pcoords[3],
+  const double *values, int dim, double *derivs)
 {
   int i, j, k, idx;
   for (j = 0; j < dim; j++)
@@ -1172,7 +1173,7 @@ double *vtkPolyhedron::GetParametricCoords()
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyhedron::InterpolateFunctions(double x[3], double *sf)
+void vtkPolyhedron::InterpolateFunctions(const double x[3], double *sf)
 {
   // construct polydata, the result is stored in this->PolyData,
   // the cell array is stored in this->Polys
@@ -1188,7 +1189,7 @@ void vtkPolyhedron::InterpolateFunctions(double x[3], double *sf)
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyhedron::InterpolateDerivs(double x[3], double *derivs)
+void vtkPolyhedron::InterpolateDerivs(const double x[3], double *derivs)
 {
   (void)x;
   (void)derivs;
@@ -1359,7 +1360,7 @@ the *unwanted* triangulation instead of the desired one because it prioritizes t
 inner angles close to 60 degrees, even though it then ends with a triangle with a very large
 internal angle (up to 180 degrees).
 
-Therefore the preffered approach is to triangulate a polygon using a fan triangulation that gives the smallest
+Therefore the preferred approach is to triangulate a polygon using a fan triangulation that gives the smallest
 range of internal angles. This approach will always choose to triangulate starting at (6) in the
 example given above. If (6) is moved out-of-plane as it were (see TestPolyhedron5.cxx) then the
 tetrahedralization gives a face triangulation that includes the edge (1)-(4), but triangulates the face
@@ -1488,16 +1489,13 @@ void CalculateAngles(const vtkIdType* tri, vtkPoints* phPoints, const vtkPointId
     right.Set(p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]);
     left.Normalize(); right.Normalize();
 
-#define PI		3.14159265358979323846
-#define TO_DEGREES (180.0/PI);
-
     double dot = left.Dot(right);
     // rounding errors can occur in the vtkVector3d::Dot function,
     // clamp to [-1, 1] (i.e. the input range for the acos function)
     dot = min( 1.0, dot);
     dot = max(-1.0, dot);
 
-    double angle = acos(dot)*TO_DEGREES;
+    double angle = acos(dot)*180.0/vtkMath::Pi();
 
     minAngle = min(angle, minAngle);
     maxAngle = max(angle, maxAngle);
@@ -2183,11 +2181,11 @@ void vtkPolyhedron::Clip(double value,
       faceStream->InsertNextId(nFacePoints);
       for (int j = 0; j < nFacePoints; ++j)
       {
-        faceStream->InsertNextId(face->GetPointId(j));
         face->GetPoints()->GetPoint(j, x);
 
         vtkIdType id(-1);
         locator->InsertUniquePoint(x, id);
+        faceStream->InsertNextId(id);
         outPd->CopyData(inPd, face->GetPointId(j), id);
       }
     }

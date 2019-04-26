@@ -85,19 +85,24 @@ void vtkPolyLineWidget::SelectAction(vtkAbstractWidget *w)
   e[1] = static_cast<double>(Y);
   self->WidgetRep->StartWidgetInteraction(e);
   int interactionState = self->WidgetRep->GetInteractionState();
-  if ( interactionState == vtkPolyLineRepresentation::Outside )
+  if ( interactionState == vtkPolyLineRepresentation::Outside && !self->Interactor->GetAltKey())
   {
     return;
   }
-
   // We are definitely selected
   self->WidgetState = vtkPolyLineWidget::Active;
   self->GrabFocus(self->EventCallbackCommand);
 
-  if (interactionState == vtkPolyLineRepresentation::OnLine &&
+  if (self->Interactor->GetAltKey())
+  {
+    // push point.
+    reinterpret_cast<vtkPolyLineRepresentation*>(self->WidgetRep)->
+      SetInteractionState(vtkPolyLineRepresentation::Pushing);
+  }
+  else if (interactionState == vtkPolyLineRepresentation::OnLine &&
     self->Interactor->GetControlKey())
   {
-    // Add point.
+    // insert point.
     reinterpret_cast<vtkPolyLineRepresentation*>(self->WidgetRep)->
       SetInteractionState(vtkPolyLineRepresentation::Inserting);
   }
@@ -218,6 +223,10 @@ void vtkPolyLineWidget::EndSelectAction(vtkAbstractWidget *w)
   e[1] = static_cast<double>(Y);
 
   self->WidgetRep->EndWidgetInteraction(e);
+
+  // EndWidgetInteraction for this widget can modify/add/remove points
+  // Make sure the representation is updated
+  self->InvokeEvent(vtkCommand::InteractionEvent, nullptr);
 
   // Return state to not active
   self->WidgetState = vtkPolyLineWidget::Start;

@@ -29,7 +29,6 @@
 
 class vtkOpenGLActor;
 class vtkOpenGLPolyDataMapper;
-class vtkOpenGLRenderer;
 
 class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLSkybox : public vtkSkybox
 {
@@ -48,9 +47,13 @@ protected:
   ~vtkOpenGLSkybox() override;
 
   int LastProjection;
+  float LastCameraPosition[3];
+
+  void UpdateUniforms(vtkObject*, unsigned long, void*);
 
   vtkNew<vtkOpenGLPolyDataMapper> CubeMapper;
   vtkNew<vtkOpenGLActor> OpenGLActor;
+  vtkRenderer *CurrentRenderer;
 
 private:
   vtkOpenGLSkybox(const vtkOpenGLSkybox&) = delete;

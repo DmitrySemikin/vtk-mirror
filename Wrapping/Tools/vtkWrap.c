@@ -65,7 +65,8 @@ int vtkWrap_IsVoidPointer(ValueInfo *val)
 int vtkWrap_IsCharPointer(ValueInfo *val)
 {
   unsigned int t = (val->Type & VTK_PARSE_BASE_TYPE);
-  return (t == VTK_PARSE_CHAR && vtkWrap_IsPointer(val));
+  return (t == VTK_PARSE_CHAR && vtkWrap_IsPointer(val) &&
+          (val->Type & VTK_PARSE_ZEROCOPY) == 0);
 }
 
 int vtkWrap_IsPODPointer(ValueInfo *val)
@@ -78,6 +79,12 @@ int vtkWrap_IsPODPointer(ValueInfo *val)
 int vtkWrap_IsZeroCopyPointer(ValueInfo *val)
 {
   return (vtkWrap_IsPointer(val) && (val->Type & VTK_PARSE_ZEROCOPY) != 0);
+}
+
+int vtkWrap_IsStdVector(ValueInfo *val)
+{
+  return ((val->Type & VTK_PARSE_BASE_TYPE) == VTK_PARSE_UNKNOWN &&
+          val->Class && strncmp(val->Class, "std::vector<", 12) == 0);
 }
 
 int vtkWrap_IsVTKObject(ValueInfo *val)
@@ -140,7 +147,6 @@ int vtkWrap_IsNumeric(ValueInfo *val)
     case VTK_PARSE_SHORT:
     case VTK_PARSE_INT:
     case VTK_PARSE_LONG:
-    case VTK_PARSE_ID_TYPE:
     case VTK_PARSE_LONG_LONG:
     case VTK_PARSE___INT64:
     case VTK_PARSE_SIGNED_CHAR:
@@ -187,7 +193,6 @@ int vtkWrap_IsInteger(ValueInfo *val)
     case VTK_PARSE_SHORT:
     case VTK_PARSE_INT:
     case VTK_PARSE_LONG:
-    case VTK_PARSE_ID_TYPE:
     case VTK_PARSE_LONG_LONG:
     case VTK_PARSE___INT64:
     case VTK_PARSE_UNSIGNED_CHAR:
@@ -560,7 +565,7 @@ int vtkWrap_HasPublicDestructor(ClassInfo *data)
     func = data->Functions[i];
 
     if (vtkWrap_IsDestructor(data, func) &&
-        func->Access != VTK_ACCESS_PUBLIC)
+        (func->Access != VTK_ACCESS_PUBLIC || func->IsDeleted))
     {
       return 0;
     }
@@ -584,7 +589,7 @@ int vtkWrap_HasPublicCopyConstructor(ClassInfo *data)
         func->NumberOfParameters == 1 &&
         func->Parameters[0]->Class &&
         strcmp(func->Parameters[0]->Class, data->Name) == 0 &&
-        func->Access != VTK_ACCESS_PUBLIC)
+        (func->Access != VTK_ACCESS_PUBLIC || func->IsDeleted))
     {
       return 0;
     }
@@ -674,7 +679,8 @@ void vtkWrap_FindCountHints(
            strcmp(theFunc->Name, "GetTypedTuple") == 0) &&
           theFunc->ReturnValue && theFunc->ReturnValue->Count == 0 &&
           theFunc->NumberOfParameters == 1 &&
-          theFunc->Parameters[0]->Type == VTK_PARSE_ID_TYPE)
+          vtkWrap_IsScalar(theFunc->Parameters[0]) &&
+          vtkWrap_IsInteger(theFunc->Parameters[0]))
       {
         theFunc->ReturnValue->CountHint = countMethod;
       }
@@ -685,7 +691,8 @@ void vtkWrap_FindCountHints(
                 strcmp(theFunc->Name, "InsertTuple") == 0 ||
                 strcmp(theFunc->Name, "InsertTypedTuple") == 0) &&
                theFunc->NumberOfParameters == 2 &&
-               theFunc->Parameters[0]->Type == VTK_PARSE_ID_TYPE &&
+               vtkWrap_IsScalar(theFunc->Parameters[0]) &&
+               vtkWrap_IsInteger(theFunc->Parameters[0]) &&
                theFunc->Parameters[1]->Count == 0)
       {
         theFunc->Parameters[1]->CountHint = countMethod;
@@ -834,7 +841,7 @@ void vtkWrap_ExpandTypedefs(
       for (j = 0; j < funcInfo->NumberOfParameters; j++)
       {
         vtkParseHierarchy_ExpandTypedefsInValue(
-          hinfo, funcInfo->Parameters[j], finfo->Strings, data->Name);
+          hinfo, funcInfo->Parameters[j], finfo->Strings, funcInfo->Class);
 #ifndef VTK_PARSE_LEGACY_REMOVE
         if (j < MAX_ARGS)
         {
@@ -858,7 +865,7 @@ void vtkWrap_ExpandTypedefs(
       if (funcInfo->ReturnValue)
       {
         vtkParseHierarchy_ExpandTypedefsInValue(
-          hinfo, funcInfo->ReturnValue, finfo->Strings, data->Name);
+          hinfo, funcInfo->ReturnValue, finfo->Strings, funcInfo->Class);
 #ifndef VTK_PARSE_LEGACY_REMOVE
         if (!vtkWrap_IsFunction(funcInfo->ReturnValue))
         {
@@ -948,7 +955,6 @@ const char *vtkWrap_GetTypeName(ValueInfo *val)
     case VTK_PARSE_UNSIGNED_SHORT: return "unsigned short";
     case VTK_PARSE_UNSIGNED_LONG:  return "unsigned long";
     case VTK_PARSE_UNSIGNED_CHAR:  return "unsigned char";
-    case VTK_PARSE_ID_TYPE:        return "vtkIdType";
     case VTK_PARSE_LONG_LONG:      return "long long";
     case VTK_PARSE___INT64:        return "__int64";
     case VTK_PARSE_UNSIGNED_LONG_LONG: return "unsigned long long";
@@ -1021,15 +1027,11 @@ void vtkWrap_DeclareVariable(
       fprintf(fp,"const ");
     }
   }
-  /* do the same for "const char *" with initializer */
+  /* do the same for "const char *" arguments */
   else
   {
     if ((val->Type & VTK_PARSE_CONST) != 0 &&
-        aType == VTK_PARSE_CHAR_PTR &&
-        val->Value &&
-        strcmp(val->Value, "0") != 0 &&
-        strcmp(val->Value, "nullptr") != 0 &&
-        strcmp(val->Value, "NULL") != 0)
+        aType == VTK_PARSE_CHAR_PTR)
     {
       fprintf(fp,"const ");
     }
@@ -1152,7 +1154,7 @@ void vtkWrap_DeclareVariableSize(
   if (val->NumberOfDimensions > 1)
   {
     fprintf(fp,
-            "  static int %s%s[%d] = ",
+            "  static size_t %s%s[%d] = ",
             name, idx, val->NumberOfDimensions);
 
     for (j = 0; j < val->NumberOfDimensions; j++)
@@ -1165,14 +1167,14 @@ void vtkWrap_DeclareVariableSize(
   else if (val->Count != 0 || val->CountHint || vtkWrap_IsPODPointer(val))
   {
     fprintf(fp,
-            "  %sint %s%s = %d;\n",
+            "  %ssize_t %s%s = %d;\n",
             ((val->Count == 0 || val->Value != 0) ? "" : "const "),
             name, idx, (val->Count == 0 ? 0 : val->Count));
   }
   else if (val->NumberOfDimensions == 1)
   {
     fprintf(fp,
-            "  const int %s%s = %s;\n",
+            "  const size_t %s%s = %s;\n",
             name, idx, val->Dimensions[0]);
   }
 }

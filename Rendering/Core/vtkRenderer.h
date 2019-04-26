@@ -45,6 +45,7 @@ class vtkCuller;
 class vtkActor;
 class vtkActor2D;
 class vtkCamera;
+class vtkFrameBufferObjectBase;
 class vtkInformation;
 class vtkLightCollection;
 class vtkCullerCollection;
@@ -295,7 +296,7 @@ public:
    * Subclasses of vtkRenderer that can deal with, e.g. hidden line removal must
    * override this method.
    */
-  virtual void DeviceRenderOpaqueGeometry();
+  virtual void DeviceRenderOpaqueGeometry(vtkFrameBufferObjectBase* fbo = nullptr);
 
   /**
    * Render translucent polygonal geometry. Default implementation just call
@@ -306,7 +307,7 @@ public:
    * will be rendered here as well.
    * It updates boolean ivar LastRenderingUsedDepthPeeling.
    */
-  virtual void DeviceRenderTranslucentPolygonalGeometry();
+  virtual void DeviceRenderTranslucentPolygonalGeometry(vtkFrameBufferObjectBase* fbo = nullptr);
 
   /**
    * Internal method temporarily removes lights before reloading them
@@ -578,7 +579,7 @@ public:
    * automatically created by the renderer. It returns 0 if the
    * ActiveCamera does not yet exist.
    */
-  int IsActiveCameraCreated()
+  vtkTypeBool IsActiveCameraCreated()
     { return (this->ActiveCamera != nullptr); }
 
 
@@ -662,11 +663,23 @@ public:
 
   //@{
   /**
-   * Set/Get the texture to be used for the background. If set
-   * and enabled this gets the priority over the gradient background.
+   * Set/Get the texture to be used for the monocular or stereo left eye
+   * background. If set and enabled this gets the priority over the gradient
+   * background.
    */
+  virtual void SetLeftBackgroundTexture(vtkTexture*);
+  vtkTexture* GetLeftBackgroundTexture();
   virtual void SetBackgroundTexture(vtkTexture*);
   vtkGetObjectMacro(BackgroundTexture, vtkTexture);
+  //@}
+
+  //@{
+  /**
+  * Set/Get the texture to be used for the right eye background. If set
+  * and enabled this gets the priority over the gradient background.
+  */
+  virtual void SetRightBackgroundTexture(vtkTexture*);
+  vtkGetObjectMacro(RightBackgroundTexture, vtkTexture);
   //@}
 
   //@{
@@ -736,10 +749,6 @@ protected:
   vtkRenderer();
   ~vtkRenderer() override;
 
-  // internal method for doing a render for picking purposes
-  virtual void PickRender(vtkPropCollection *props);
-  virtual void PickGeometry();
-
   // internal method to expand bounding box to consider model transform
   // matrix or model view transform matrix based on whether or not deering
   // frustum is used.
@@ -758,16 +767,16 @@ protected:
   vtkRenderWindow    *RenderWindow;
   double              AllocatedRenderTime;
   double              TimeFactor;
-  vtkTypeBool                TwoSidedLighting;
-  int                AutomaticLightCreation;
-  vtkTypeBool                BackingStore;
+  vtkTypeBool         TwoSidedLighting;
+  int                 AutomaticLightCreation;
+  vtkTypeBool         BackingStore;
   unsigned char      *BackingImage;
-  int                BackingStoreSize[2];
-  vtkTimeStamp       RenderTime;
+  int                 BackingStoreSize[2];
+  vtkTimeStamp        RenderTime;
 
   double              LastRenderTimeInSeconds;
 
-  vtkTypeBool                LightFollowCamera;
+  vtkTypeBool         LightFollowCamera;
 
   // Allocate the time for each prop
   void               AllocateTime();
@@ -780,10 +789,6 @@ protected:
   // of all props when rendering
   vtkProp            **PropArray;
   int                PropArrayCount;
-
-  // A temporary list used for picking
-  vtkAssemblyPath    **PathArray;
-  int                PathArrayCount;
 
   // Indicates if the renderer should receive events from an interactor.
   // Typically only used in conjunction with transparent renderers.
@@ -839,7 +844,7 @@ protected:
    * geometry. This includes both vtkActors and vtkVolumes
    * Returns the number of props that rendered geometry.
    */
-  virtual int UpdateGeometry();
+  virtual int UpdateGeometry(vtkFrameBufferObjectBase* fbo = nullptr);
 
   /**
    * Ask all props to update and draw any translucent polygonal
@@ -963,6 +968,7 @@ protected:
 
   bool TexturedBackground;
   vtkTexture* BackgroundTexture;
+  vtkTexture* RightBackgroundTexture;
 
   friend class vtkRenderPass;
   vtkRenderPass *Pass;

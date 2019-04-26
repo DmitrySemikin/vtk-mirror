@@ -13,6 +13,10 @@
 
 =========================================================================*/
 
+//
+// Note if you fix this test to fill in all the empty tests
+// then remove the cppcheck suppression in VTKcppcheckSuppressions.txt
+//
 #include "vtkMath.h"
 #include "vtkMathUtilities.h"
 #include "vtkSmartPointer.h"
@@ -23,12 +27,10 @@
 #include <vector>
 
 static int TestPi();
-#if 0
-static int TestDoublePi();
-static int TestDoubleTwoPi();
-#endif
 static int TestDegreesFromRadians();
+#ifndef VTK_LEGACY_REMOVE
 static int TestRound();
+#endif
 static int TestFloor();
 static int TestCeil();
 static int TestCeilLog2();
@@ -98,13 +100,10 @@ int UnitTestMath(int,char *[])
 
   status += TestPi();
 
-#if 0
-  status += TestDoublePi(); // legacy
-  status += TestDoubleTwoPi(); // legacy
-#endif
-
   status += TestDegreesFromRadians();
+#ifndef VTK_LEGACY_REMOVE
   status += TestRound();
+#endif
   status += TestFloor();
   status += TestCeil();
   status += TestCeilLog2();
@@ -202,56 +201,6 @@ int TestPi()
   return status;
 }
 
-#if 0
-// Validate by comparing to atan/4
-int TestDoublePi()
-{
-  int status = 0;
-  std::cout << "DoublePi..";
-
-  if (vtkMath::DoublePi() != std::atan(1.0) * 4.0)
-  {
-    std::cout << "Expected " << vtkMath::Pi()
-              << " but got " << std::atan(1.0) * 4.0;
-    ++status;
-  }
-
-  if (status)
-  {
-    std::cout << "..FAILED" << std::endl;
-  }
-  else
-  {
-    std::cout << ".PASSED" << std::endl;
-  }
-  return status;
-}
-
-// Validate by comparing to atan/4 * 2
-int TestDoubleTwoPi()
-{
-  int status = 0;
-  std::cout << "DoubleTwoPi..";
-
-  if (vtkMath::DoubleTwoPi() != std::atan(1.0) * 4.0 * 2.0)
-  {
-    std::cout << "Expected " << vtkMath::Pi() * 2.0
-              << " but got " << std::atan(1.0) * 4.0 * 2.0;
-    ++status;
-  }
-
-  if (status)
-  {
-    std::cout << "..FAILED" << std::endl;
-  }
-  else
-  {
-    std::cout << ".PASSED" << std::endl;
-  }
-  return status;
-}
-#endif
-
 // Validate against RadiansFromDegress
 int TestDegreesFromRadians()
 {
@@ -304,6 +253,7 @@ int TestDegreesFromRadians()
   return status;
 }
 
+#ifndef VTK_LEGACY_REMOVE
 // Validate with http://en.wikipedia.org/wiki/Rounding#Rounding_to_integer
 int TestRound()
 {
@@ -368,6 +318,7 @@ int TestRound()
   }
   return status;
 }
+#endif
 
 // Validate with http://en.wikipedia.org/wiki/Floor_and_ceiling_functions
 int TestFloor()
@@ -532,18 +483,33 @@ int TestNearestPowerOfTwo()
 
   std::vector<vtkTypeUInt64> values;
   std::vector<int> expecteds;
-  int largestPower = std::numeric_limits<int>::digits;
+
+  values.push_back(0);
+  expecteds.push_back(1);
+
+  int numDigits = std::numeric_limits<int>::digits;
   vtkTypeUInt64 shifted = 1;
-  for ( int p = 1; p < largestPower; ++p)
+  for ( int p = 0; p < numDigits; ++p)
   {
-    shifted *= 2;
-    values.push_back(shifted); expecteds.push_back(shifted);
-    values.push_back(shifted + 1); expecteds.push_back(shifted * 2);
-    if (shifted !=2 )
+    values.push_back(shifted);
+    expecteds.push_back(shifted);
+    if (shifted <= INT_MAX/2 )
     {
-      values.push_back(shifted - 1); expecteds.push_back(shifted);
+      values.push_back(shifted + 1);
+      expecteds.push_back(shifted * 2);
     }
+    if (shifted != 2 )
+    {
+      values.push_back(shifted - 1);
+      expecteds.push_back(shifted);
+    }
+
+    shifted *= 2;
   }
+
+  values.push_back(INT_MAX);
+  expecteds.push_back(INT_MIN);
+
   for ( size_t i = 0; i < values.size(); ++i)
   {
     int result = vtkMath::NearestPowerOfTwo(values[i]);
@@ -3482,7 +3448,7 @@ int TestGetAdjustedScalarRange()
   if (range[0] != uc->GetDataTypeMin() ||
       range[1] != uc->GetDataTypeMax())
   {
-    std::cout << " GetAjustedScalarRange(unsigned char) expected "
+    std::cout << " GetAdjustedScalarRange(unsigned char) expected "
               << uc->GetDataTypeMin() << ", " << uc->GetDataTypeMax()
               << " but got " << range[0] << ", " << range[1]
               << std::endl;
@@ -3509,7 +3475,7 @@ int TestGetAdjustedScalarRange()
   if (range[0] != us->GetDataTypeMin() ||
       range[1] != us->GetDataTypeMax())
   {
-    std::cout << " GetAjustedScalarRange(unsigned short) expected "
+    std::cout << " GetAdjustedScalarRange(unsigned short) expected "
               << us->GetDataTypeMin() << ", " << us->GetDataTypeMax()
               << " but got " << range[0] << ", " << range[1]
               << std::endl;
@@ -3520,7 +3486,7 @@ int TestGetAdjustedScalarRange()
   if (range[0] != us->GetDataTypeMin() ||
       range[1] != 4095.0)
   {
-    std::cout << " GetAjustedScalarRange(unsigned short) expected "
+    std::cout << " GetAdjustedScalarRange(unsigned short) expected "
               << us->GetDataTypeMin() << ", " << 4095.0
               << " but got " << range[0] << ", " << range[1]
               << std::endl;
@@ -3531,7 +3497,7 @@ int TestGetAdjustedScalarRange()
   if (range[0] != us->GetDataTypeMin() ||
       range[1] >= uc->GetDataTypeMax())
   {
-    std::cout << " GetAjustedScalarRange(unsigned short) expected "
+    std::cout << " GetAdjustedScalarRange(unsigned short) expected "
               << us->GetDataTypeMin() << ", " << ">= " << uc->GetDataTypeMax()
               << " but got " << range[0] << ", " << range[1]
               << std::endl;
@@ -3541,7 +3507,7 @@ int TestGetAdjustedScalarRange()
   // Test nullptr array
   if (vtkMath::GetAdjustedScalarRange(nullptr, 1000, nullptr))
   {
-    std::cout << " GetAjustedScalarRange with a nullptr array expected "
+    std::cout << " GetAdjustedScalarRange with a nullptr array expected "
               << 0
               << " but got " << 1
               << std::endl;

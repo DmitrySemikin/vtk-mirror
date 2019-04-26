@@ -228,10 +228,8 @@ void vtkSobelGradientMagnitudePass::Render(const vtkRenderState *s)
   cout << "gx1 TOid=" << this->Gx1->GetHandle() <<endl;
   cout << "gy1 TOid=" << this->Gy1->GetHandle() <<endl;
 #endif
-  this->FrameBufferObject->AddColorAttachment(
-    this->FrameBufferObject->GetDrawMode(), 0,this->Gx1);
-  this->FrameBufferObject->AddColorAttachment(
-    this->FrameBufferObject->GetDrawMode(), 1,this->Gy1);
+  this->FrameBufferObject->AddColorAttachment(0,this->Gx1);
+  this->FrameBufferObject->AddColorAttachment(1,this->Gy1);
   unsigned int indices[2]={0,1};
   this->FrameBufferObject->ActivateDrawBuffers(indices,2);
 
@@ -453,9 +451,9 @@ void vtkSobelGradientMagnitudePass::Render(const vtkRenderState *s)
 #endif
 
   // Prepare blitting
-  ostate->glDisable(GL_BLEND);
-  ostate->glDisable(GL_DEPTH_TEST);
-  ostate->glDisable(GL_SCISSOR_TEST);
+  ostate->vtkglDisable(GL_BLEND);
+  ostate->vtkglDisable(GL_DEPTH_TEST);
+  ostate->vtkglDisable(GL_SCISSOR_TEST);
 
   // Trigger a draw on Gy1 (could be called on Gx1).
   this->Gy1->CopyToFrameBuffer(extraPixels, extraPixels,

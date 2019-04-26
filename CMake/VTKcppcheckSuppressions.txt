@@ -13,11 +13,14 @@
 //=========================================================================
 
 // This file contains enough suppressions to result in no cppcheck warnings,
-// at least on macOS with cppcheck 1.82.
+// at least on macOS with cppcheck 1.86 with the flags below.
 
 // To run:
 // cd /path/to/VTK/
-// cppcheck --platform=unspecified --enable=style -q --suppressions-list=CMake/VTKcppcheckSuppressions.txt --template='{id},{file}:{line},{severity},{message}' -j8 .
+// cppcheck --platform=unspecified --enable=style -q --library=qt --library=posix --library=gnu --library=bsd --library=windows --suppressions-list=CMake/VTKcppcheckSuppressions.txt --template='{id},{file}:{line},{severity},{message}' -j8 -I Common/Core .
+// or
+// cd /path/to/VTK-bin/
+// cppcheck --project=compile_commands.json --platform=unspecified --enable=style -q --library=qt --library=posix --library=gnu --library=bsd --library=windows --suppressions-list=../VTK/CMake/VTKcppcheckSuppressions.txt --template='{id},{file}:{line},{severity},{message}' -j8
 
 // Suppress everything from ThirdParty.
 *:ThirdParty/*
@@ -26,6 +29,13 @@
 *:Utilities/KWSys/*
 *:Utilities/MetaIO/*
 *:Utilities/DICOMParser/*
+*:Remote/WikiExamples/*
+
+// If cppcheck itself crashes, well, that's its problem, ignore that.
+cppcheckError
+
+// When analyzing different define possibilities, it will sometimes hit a #error line
+preprocessorErrorDirective
 
 // Can't fix in portable way for all VTK-supported platforms.
 duplicateExpression:IO/PostgreSQL/vtkPostgreSQLQuery.cxx
@@ -34,8 +44,17 @@ unpreciseMathCall
 // Using reallocf() would be a good solution, but it's not available on all platforms.
 memleakOnRealloc
 
+// Using strtok_r() would be a good solution, but it's not available on all platforms.
+strtokCalled
+
 // VTK assumes IEEE 754 floats, so this warning isn't useful.
 memsetClassFloat
+
+// Gives too many false positives with << stream operator.
+shiftNegative
+
+// These are too stylistic
+useStlAlgorithm
 
 // Gives too many false positives.
 assertWithSideEffect
@@ -165,6 +184,7 @@ uninitMemberVar:Filters/ParallelGeometry/vtkPDataSetGhostGenerator.cxx
 uninitMemberVar:Filters/ParallelGeometry/vtkPStructuredGridConnectivity.cxx
 uninitMemberVar:Filters/ParallelGeometry/vtkPUnstructuredGridGhostCellsGenerator.cxx
 uninitMemberVar:Filters/Points/vtkEuclideanClusterExtraction.cxx
+uninitMemberVar:Filters/Points/vtkExtractEnclosedPoints.cxx
 uninitMemberVar:Filters/Points/vtkSPHInterpolator.cxx
 uninitMemberVar:Filters/Points/vtkSPHKernel.cxx
 uninitMemberVar:Filters/SMP/Testing/Cxx/TestSMPWarp.cxx
@@ -347,13 +367,23 @@ uninitMemberVar:Web/WebGLExporter/vtkWebGLExporter.cxx
 uninitMemberVar:Web/WebGLExporter/vtkWebGLObject.cxx
 uninitMemberVar:Web/WebGLExporter/vtkWebGLWidget.cxx
 uninitMemberVar:Wrapping/PythonCore/vtkPythonOverload.cxx
-uninitMemberVar:Filters/Points/vtkExtractEnclosedPoints.cxx
 
-// Many warnings
+// Many warnings, these could be fixed automatically with clang-tidy
+cstyleCast:Common/Core/vtkTypeFloat32ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeFloat64ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeInt16ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeInt32ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeInt64ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeInt8ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeUInt16ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeUInt32ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeUInt64ArrayJava.cxx
+cstyleCast:Common/Core/vtkTypeUInt8ArrayJava.cxx
 cstyleCast:Common/DataModel/vtkIterativeClosestPointTransform.cxx
 cstyleCast:Common/DataModel/vtkReebGraph.cxx
 cstyleCast:Common/Transforms/vtkLandmarkTransform.cxx
 cstyleCast:Common/Transforms/vtkThinPlateSplineTransform.cxx
+cstyleCast:Domains/ChemistryOpenGL2/vtkDomainsChemistryOpenGL2ObjectFactoryJava.cxx
 cstyleCast:Examples/Android/JavaVTK/jni/main.cxx
 cstyleCast:Examples/Android/VolumeRender/jni/main.cxx
 cstyleCast:Examples/GUI/Win32/SampleMFC/SampleView.h
@@ -367,8 +397,11 @@ cstyleCast:Filters/Hybrid/vtkBSplineTransform.cxx
 cstyleCast:Filters/Hybrid/vtkGridTransform.cxx
 cstyleCast:Filters/Parallel/vtkPMaskPoints.cxx
 cstyleCast:Filters/ParallelImaging/vtkExtractPiece.cxx
+cstyleCast:Interaction/Style/vtkInteractionStyleObjectFactoryJava.cxx
 cstyleCast:IO/Exodus/vtkExodusIIReader.cxx
 cstyleCast:IO/Export/vtkRIBExporter.cxx
+cstyleCast:IO/ExportOpenGL2/vtkIOExportOpenGL2ObjectFactoryJava.cxx
+cstyleCast:IO/ExportPDF/vtkIOExportPDFObjectFactoryJava.cxx
 cstyleCast:IO/Legacy/vtkDataReader.cxx
 cstyleCast:IO/MINC/vtkMINCImageWriter.cxx
 cstyleCast:IO/MINC/vtkMNITransformReader.cxx
@@ -384,9 +417,9 @@ cstyleCast:IO/Xdmf2/vtkXdmfWriter.cxx
 cstyleCast:Parallel/Core/vtkMultiProcessController.cxx
 cstyleCast:Parallel/MPI/vtkMPIController.cxx
 cstyleCast:Parallel/MPI/vtkMPIController.h
-cstyleCast:Rendering/OSPRay/vtkOSPRayActorNode.cxx
-cstyleCast:Rendering/OSPRay/vtkOSPRayPolyDataMapperNode.cxx
-cstyleCast:Rendering/OSPRay/vtkOSPRayVolumeNode.cxx
+cstyleCast:Rendering/ContextOpenGL2/vtkRenderingContextOpenGL2ObjectFactoryJava.cxx
+cstyleCast:Rendering/FreeType/vtkRenderingFreeTypeObjectFactoryJava.cxx
+cstyleCast:Rendering/GL2PSOpenGL2/vtkRenderingGL2PSOpenGL2ObjectFactoryJava.cxx
 cstyleCast:Rendering/OpenGL2/vtkAndroidRenderWindowInteractor.cxx
 cstyleCast:Rendering/OpenGL2/vtkOpenGLGlyph3DMapper.cxx
 cstyleCast:Rendering/OpenGL2/vtkOpenGLLabeledContourMapper.cxx
@@ -394,12 +427,17 @@ cstyleCast:Rendering/OpenGL2/vtkOpenGLPointGaussianMapper.cxx
 cstyleCast:Rendering/OpenGL2/vtkOpenGLPolyDataMapper.cxx
 cstyleCast:Rendering/OpenGL2/vtkOpenGLSphereMapper.cxx
 cstyleCast:Rendering/OpenGL2/vtkOpenGLStickMapper.cxx
+cstyleCast:Rendering/OpenGL2/vtkRenderingOpenGL2ObjectFactoryJava.cxx
 cstyleCast:Rendering/OpenGL2/vtkWin32OpenGLRenderWindow.cxx
 cstyleCast:Rendering/OpenGL2/vtkWin32RenderWindowInteractor.cxx
 cstyleCast:Rendering/OptiX/vtkOptiXActorNode.cxx
 cstyleCast:Rendering/OptiX/vtkOptiXPolyDataMapperNode.cxx
+cstyleCast:Rendering/OSPRay/vtkOSPRayActorNode.cxx
+cstyleCast:Rendering/OSPRay/vtkOSPRayPolyDataMapperNode.cxx
+cstyleCast:Rendering/OSPRay/vtkOSPRayVolumeNode.cxx
 cstyleCast:Rendering/Parallel/vtkParallelRenderManager.cxx
 cstyleCast:Rendering/Volume/vtkUnstructuredGridBunykRayCastFunction.cxx
+cstyleCast:Rendering/VolumeOpenGL2/vtkRenderingVolumeOpenGL2ObjectFactoryJava.cxx
 cstyleCast:Web/WebGLExporter/vtkWebGLExporter.cxx
 cstyleCast:Wrapping/Java/vtkJavaUtil.cxx
 cstyleCast:Wrapping/PythonCore/PyVTKObject.cxx
@@ -415,8 +453,8 @@ noExplicitConstructor
 invalidscanf
 
 // Many warnings
-unreadVariable:CMake/vtkTestvfw32Capture.cxx
 unreadVariable:Charts/Core/Testing/Cxx/TestFreeTypeRender.cxx
+unreadVariable:CMake/vtkTestvfw32Capture.cxx
 unreadVariable:Common/Core/Testing/Cxx/TestSparseArrayValidation.cxx
 unreadVariable:Common/DataModel/Testing/Cxx/TestAMRBox.cxx
 unreadVariable:Common/DataModel/Testing/Cxx/TestComputeBoundingSphere.cxx
@@ -452,6 +490,13 @@ unreadVariable:Filters/Points/vtkStatisticalOutlierRemoval.cxx
 unreadVariable:Filters/ReebGraph/Testing/Cxx/TestReebGraph.cxx
 unreadVariable:Filters/Sources/Testing/Cxx/TestPolyLineSource.cxx
 unreadVariable:Filters/Statistics/vtkKMeansDistanceFunctor.cxx
+unreadVariable:Imaging/Stencil/vtkLassoStencilSource.cxx
+unreadVariable:Imaging/Stencil/vtkPolyDataToImageStencil.cxx
+unreadVariable:Interaction/Widgets/Testing/Cxx/ScaledBoxWidget2.cxx
+unreadVariable:Interaction/Widgets/Testing/Cxx/TestDijkstraImageGeodesicPath.cxx
+unreadVariable:Interaction/Widgets/Testing/Cxx/vtkBiDimensionalRepresentation2DTest1.cxx
+unreadVariable:Interaction/Widgets/Testing/Cxx/vtkSeedRepresentationTest1.cxx
+unreadVariable:Interaction/Widgets/vtkImageOrthoPlanes.cxx
 unreadVariable:IO/ADIOS/Testing/Cxx/TestADIOSSphereWR.cxx
 unreadVariable:IO/Exodus/vtkExodusIIReader.cxx
 unreadVariable:IO/Export/vtkVRMLExporter.cxx
@@ -466,20 +511,12 @@ unreadVariable:IO/LSDyna/vtkLSDynaReader.cxx
 unreadVariable:IO/MySQL/Testing/Cxx/TestMySQLDatabase.cxx
 unreadVariable:IO/SQL/Testing/Cxx/TestSQLiteDatabase.cxx
 unreadVariable:IO/Video/vtkMILVideoSource.cxx
-unreadVariable:Imaging/Stencil/vtkLassoStencilSource.cxx
-unreadVariable:Imaging/Stencil/vtkPolyDataToImageStencil.cxx
-unreadVariable:Interaction/Widgets/Testing/Cxx/ScaledBoxWidget2.cxx
-unreadVariable:Interaction/Widgets/Testing/Cxx/TestDijkstraImageGeodesicPath.cxx
-unreadVariable:Interaction/Widgets/Testing/Cxx/vtkBiDimensionalRepresentation2DTest1.cxx
-unreadVariable:Interaction/Widgets/Testing/Cxx/vtkSeedRepresentationTest1.cxx
-unreadVariable:Interaction/Widgets/vtkImageOrthoPlanes.cxx
 unreadVariable:Rendering/Annotation/vtkAxisActor.cxx
 unreadVariable:Rendering/Annotation/vtkCaptionActor2D.cxx
 unreadVariable:Rendering/External/vtkExternalOpenGLRenderWindow.cxx
-unreadVariable:Rendering/LOD/vtkQuadricLODActor.cxx
 unreadVariable:Rendering/Label/vtkLabelPlacementMapper.cxx
 unreadVariable:Rendering/Label/vtkLabelPlacer.cxx
-unreadVariable:Rendering/OSPRay/vtkOSPRayMaterialLibrary.cxx
+unreadVariable:Rendering/LOD/vtkQuadricLODActor.cxx
 unreadVariable:Rendering/OpenGL2/vtkOpenGLFramebufferObject.cxx
 unreadVariable:Rendering/OpenGL2/vtkOpenGLGlyph3DHelper.cxx
 unreadVariable:Rendering/OpenGL2/vtkOpenGLPolyDataMapper.cxx
@@ -488,6 +525,7 @@ unreadVariable:Rendering/OpenGL2/vtkPixelBufferObject.cxx
 unreadVariable:Rendering/OpenGL2/vtkWin32OpenGLRenderWindow.cxx
 unreadVariable:Rendering/OpenVR/vtkOpenVRFollower.cxx
 unreadVariable:Rendering/OpenVR/vtkOpenVRRenderWindow.cxx
+unreadVariable:Rendering/OSPRay/vtkOSPRayMaterialLibrary.cxx
 unreadVariable:Rendering/Tk/vtkTkImageViewerWidget.cxx
 unreadVariable:Rendering/VolumeOpenGL2/vtkVolumeShaderComposer.h
 unreadVariable:Utilities/ParseOGLExt/ParseOGLExt.cxx
@@ -496,12 +534,22 @@ unreadVariable:Web/WebGLExporter/vtkWebGLWidget.cxx
 unreadVariable:Wrapping/PythonCore/PyVTKObject.cxx
 unreadVariable:Wrapping/PythonCore/vtkPythonOverload.cxx
 
+// 48 warnings
+noOperatorEq
+
 // Many warnings
 noCopyConstructor:Common/Core/Testing/Cxx/TestCxxFeatures.cxx
 noCopyConstructor:Common/DataModel/vtkDataObjectTreeIterator.cxx
 noCopyConstructor:Common/DataModel/vtkPolygon.cxx
 noCopyConstructor:Common/DataModel/vtkStaticCellLocator.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator2D.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator2D.cxx
+noCopyConstructor:Common/DataModel/vtkStaticPointLocator2D.cxx
 noCopyConstructor:Common/ExecutionModel/vtkSpanSpace.cxx
+noCopyConstructor:Common/ExecutionModel/vtkSphereTree.cxx
 noCopyConstructor:Common/Misc/vtkHeap.cxx
 noCopyConstructor:Filters/Core/vtkDecimatePolylineFilter.cxx
 noCopyConstructor:Filters/Core/vtkDecimatePro.h
@@ -514,18 +562,26 @@ noCopyConstructor:Filters/General/vtkIntersectionPolyDataFilter.cxx
 noCopyConstructor:Filters/General/vtkTableBasedClipDataSet.cxx
 noCopyConstructor:Filters/General/vtkUncertaintyTubeFilter.cxx
 noCopyConstructor:Filters/ParallelFlowPaths/vtkPLagrangianParticleTracker.cxx
+noCopyConstructor:Filters/Points/vtkHierarchicalBinningFilter.cxx
+noCopyConstructor:Filters/Points/vtkHierarchicalBinningFilter.cxx
+noCopyConstructor:Filters/Points/vtkHierarchicalBinningFilter.cxx
+noCopyConstructor:GUISupport/Qt/Testing/Cxx/QTestApp.cxx
 noCopyConstructor:GUISupport/Qt/Testing/Cxx/QTestApp.h
+noCopyConstructor:IO/ADIOS/ADIOSReader.cxx
 noCopyConstructor:IO/ADIOS/ADIOSReader.h
+noCopyConstructor:IO/ADIOS/ADIOSWriter.cxx
 noCopyConstructor:IO/ADIOS/ADIOSWriter.h
 noCopyConstructor:IO/Export/vtkPOVExporter.cxx
 noCopyConstructor:IO/GeoJSON/vtkGeoJSONWriter.cxx
 noCopyConstructor:IO/Geometry/vtkCGMWriter.cxx
+noCopyConstructor:IO/LSDyna/LSDynaFamily.cxx
 noCopyConstructor:IO/LSDyna/LSDynaFamily.h
 noCopyConstructor:IO/LSDyna/vtkLSDynaPart.cxx
 noCopyConstructor:IO/LSDyna/vtkLSDynaPartCollection.cxx
 noCopyConstructor:IO/SegY/vtkSegYReader.h
 noCopyConstructor:IO/Xdmf2/vtkXdmfWriter.cxx
 noCopyConstructor:IO/Xdmf3/vtkXdmf3Reader.cxx
+noCopyConstructor:Rendering/LICOpenGL2/vtkSurfaceLICHelper.cxx
 noCopyConstructor:Rendering/LICOpenGL2/vtkSurfaceLICHelper.h
 noCopyConstructor:Rendering/Volume/vtkUnstructuredGridVolumeZSweepMapper.cxx
 
@@ -534,62 +590,59 @@ redundantAssignment:Filters/General/vtkBoxClipDataSet.cxx
 redundantAssignment:*/Testing/*
 
 // 13 warnings
-useInitializationList:Filters/MomentInvariants/vtkMomentsTensor.h
-useInitializationList:Interaction/Widgets/vtkBalloonWidget.cxx
-useInitializationList:IO/Exodus/vtkExodusIIWriter.h
-useInitializationList:IO/Import/vtkOBJImporter.cxx
-useInitializationList:IO/Import/vtkOBJImporterInternals.cxx
-useInitializationList:IO/TRUCHAS/vtkTRUCHASReader.cxx
-useInitializationList:IO/XML/vtkXMLReader.cxx
-useInitializationList:Rendering/Core/vtkTextActor3D.cxx
-useInitializationList:Rendering/OpenGL2/vtkValuePass.cxx
-useInitializationList:Rendering/OpenVR/vtkOpenVROverlay.cxx
-useInitializationList:Utilities/Benchmarks/vtkRenderTimings.h
-useInitializationList:Utilities/ParseOGLExt/ParseOGLExt.cxx
-useInitializationList:Filters/Core/Testing/Cxx/TestAppendFilter.cxx
+useInitializationList:*
 
-// False positives.
-AssignmentAddressToInteger:IO/Exodus/vtkExodusIIReader.cxx
-CastIntegerToAddressAtReturn:Geovis/Core/vtkGeoTreeNode.h
-copyCtorPointerCopying:IO/NetCDF/vtkSLACReader.cxx
-duplicateExpression:Rendering/Annotation/vtkScalarBarActor.cxx
-knownConditionTrueFalse:IO/Exodus/vtkExodusIIReader.cxx
-knownConditionTrueFalse:IO/Geometry/Testing/Cxx/TestIncrementalOctreePointLocator.cxx
-memleak:Examples/Infovis/Cxx/MultiView.cxx
-memleak:Imaging/Hybrid/vtkSurfaceReconstructionFilter.cxx
-memleak:Rendering/OpenGL2/vtkOpenGLRenderTimerLog.cxx
-operatorEqVarError:Filters/General/vtkHyperStreamline.cxx
-redundantAssignment:Wrapping/Tools/vtkParsePreprocess.c
-stlIfStrFind:Infovis/Core/vtkPipelineGraphSource.cxx
-stlIfStrFind:Rendering/OpenGL2/vtkOpenGLRenderer.cxx
-unsafeClassCanLeak:Filters/General/vtkDensifyPolyData.cxx
-unsafeClassCanLeak:GUISupport/Qt/QVTKInteractorInternal.h
-unsafeClassCanLeak:Interaction/Widgets/vtkBiDimensionalRepresentation.h
-unusedStructMember:Common/Misc/vtkHeap.cxx
-unusedStructMember:IO/Infovis/vtkTulipReader.cxx
-uselessAssignmentArg:Common/DataModel/vtkReebGraph.cxx
+// intentional use of std::move for Testing
+knownConditionTrueFalse:Common/Core/Testing/Cxx/TestNew.cxx
+accessMoved:Common/Core/Testing/Cxx/TestNew.cxx
+accessMoved:Common/Core/Testing/Cxx/TestSmartPointer.cxx
+knownConditionTrueFalse:Common/Core/Testing/Cxx/TestWeakPointer.cxx
+accessMoved:Common/Core/Testing/Cxx/TestWeakPointer.cxx
+
+// simplified testing code
+knownConditionTrueFalse:Common/Core/Testing/Cxx/TestObserversPerformance.cxx
+
+// intentional comparison of diff containers
+mismatchingContainerExpression:Common/Core/Testing/Cxx/TestDataArrayTupleRange.cxx
+
+// lots of placeholder code for future tests
+knownConditionTrueFalse:Common/Core/Testing/Cxx/UnitTestMath.cxx
+
+// False positive: Condition 'this->FileIndex<0' is always true
+// <https://trac.cppcheck.net/ticket/8924>
+knownConditionTrueFalse:IO/AMR/vtkAMRFlashReaderInternal.cxx
+
+// False positive: Deallocation of an auto-variable results in undefined behaviour
+// <https://trac.cppcheck.net/ticket/8923>
+autovarInvalidDeallocation:Wrapping/Tools/vtkParseHierarchy.c
+
+// False positive: Code 'C++ cast <...' is invalid C code
+// <https://trac.cppcheck.net/ticket/8925>
+syntaxError:Rendering/OpenGL2/vtkCocoaGLView.mm
+
+// False positive: Assignment of function parameter has no effect outside the function. Did you forget dereferencing it?
 uselessAssignmentPtrArg:Wrapping/Tools/vtkParse.tab.c
 
-// false positive: <https://trac.cppcheck.net/ticket/8346>
-syntaxError:Accelerators/Vtkm/vtkmlib/Portals.hxx
-syntaxError:Common/Math/vtkQuaternion.txx
-syntaxError:Rendering/OpenGL2/vtkOpenGLVertexBufferObject.cxx
-
-// false positive: <https://trac.cppcheck.net/ticket/8367>
-CastIntegerToAddressAtReturn:Common/ExecutionModel/vtkAlgorithm.h
-
-// Not worth fixing, but not actually false positives.
-knownConditionTrueFalse:Rendering/Label/vtkLabeledTreeMapDataMapper.cxx
-duplicateExpression:Common/Math/Testing/Cxx/TestPolynomialSolversUnivariate.cxx
-knownConditionTrueFalse:Common/Core/Testing/Cxx/UnitTestMath.cxx
-knownConditionTrueFalse:GUISupport/Qt/QVTKWidget.cxx
-knownConditionTrueFalse:Rendering/OpenGL/vtkXGPUInfoList.cxx
-knownConditionTrueFalse:Rendering/OpenGL2/vtkOpenGLRenderWindow.cxx
-knownConditionTrueFalse:Rendering/OpenGL2/vtkOpenGLShaderCache.cxx
-knownConditionTrueFalse:Filters/Parallel/Testing/Cxx/UnitTestPMaskPoints.cxx
-knownConditionTrueFalse:Rendering/OSPRay/vtkOSPRayRendererNode.cxx
-nullPointer:Wrapping/Tools/lex.yy.c
-passedByValue:Filters/General/vtkYoungsMaterialInterface.cxx
+// Not technically false positives, but there's no bug here and no clear way to rework the code in a better way
+duplicateCondition:Wrapping/Tools/vtkParse.tab.c
+redundantAssignment:Wrapping/Tools/lex.yy.c
+redundantAssignment:Wrapping/Tools/vtkParsePreprocess.c
+syntaxError:CMake/patches/3.10/FindMPI/test_mpi.c
+constArgument:Wrapping/Tools/vtkParsePreprocess.c
+unreadVariable:Wrapping/Tools/lex.yy.c
+unreadVariable:Wrapping/Tools/vtkParse.tab.c
+unreadVariable:Wrapping/Tools/vtkParseExtras.c
+unreadVariable:Wrapping/Tools/vtkParseHierarchy.c
+unreadVariable:Wrapping/Tools/vtkParseJavaBeans.c
+unreadVariable:Wrapping/Tools/vtkParseMain.c
+unreadVariable:Wrapping/Tools/vtkParseMerge.c
+unreadVariable:Wrapping/Tools/vtkParsePreprocess.c
+unreadVariable:Wrapping/Tools/vtkParseString.c
+unreadVariable:Wrapping/Tools/vtkWrapHierarchy.c
+unreadVariable:Wrapping/Tools/vtkWrapJava.c
+unreadVariable:Wrapping/Tools/vtkWrapPythonMethodDef.c
+unreadVariable:Wrapping/Tools/vtkWrapText.c
+nullPointerRedundantCheck:Wrapping/Tools/lex.yy.c
 
 // 4 warnings, should fix!
 invalidPointerCast:Rendering/GL2PSOpenGL2/vtkOpenGLGL2PSHelperImpl.cxx
@@ -619,9 +672,7 @@ noConstructor:Filters/ParallelDIY2/vtkPResampleWithDataSet.cxx
 noConstructor:Rendering/Core/Testing/Cxx/TestInteractorTimers.cxx
 
 // Need someone that knows this code...
+syntaxError:Examples/GUI/Win32/vtkBorland/ProjectDemo/Project_vtkDemo.cpp
 memleak:Wrapping/Tools/vtkParsePreprocess.c
-redundantAssignment:IO/Image/vtkJPEGReader.cxx
-knownConditionTrueFalse:IO/Exodus/vtkExodusIIWriter.cxx
-knownConditionTrueFalse:Filters/ParallelFlowPaths/Testing/Cxx/TestPStreamGeometry.cxx
-knownConditionTrueFalse:Rendering/Label/vtkLabelSizeCalculator.cxx
-redundantAssignment:Rendering/OSPRay/vtkOSPRayRendererNode.cxx
+duplicateAssignExpression:Wrapping/Tools/vtkWrapText.c
+nullPointer:Wrapping/Tools/lex.yy.c

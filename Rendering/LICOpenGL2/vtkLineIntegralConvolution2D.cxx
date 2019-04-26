@@ -275,14 +275,14 @@ public:
     vtkOpenGLState *ostate = fbo->GetContext()->GetState();
 
     //attach
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, this->LICTexture0);
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 1U, this->SeedTexture0);
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 2U, this->LICTexture1);
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 3U, this->SeedTexture1);
+    fbo->AddColorAttachment(0U, this->LICTexture0);
+    fbo->AddColorAttachment(1U, this->SeedTexture0);
+    fbo->AddColorAttachment(2U, this->LICTexture1);
+    fbo->AddColorAttachment(3U, this->SeedTexture1);
     unsigned int num = 4U;
     if (clearEETex)
     {
-      fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 4U, this->EETexture);
+      fbo->AddColorAttachment(4U, this->EETexture);
       num = 5U;
     }
     fbo->ActivateDrawBuffers(num);
@@ -290,8 +290,8 @@ public:
 
     // clear the parts of the screen which we will modify
     // initially mask all fragments
-    ostate->glClearColor(0.0, 1.0, 0.0, 0.0);
-    ostate->glEnable(GL_SCISSOR_TEST);
+    ostate->vtkglClearColor(0.0, 1.0, 0.0, 0.0);
+    ostate->vtkglEnable(GL_SCISSOR_TEST);
     size_t nBlocks = extents.size();
     for (size_t e=0; e<nBlocks; ++e)
     {
@@ -307,13 +307,11 @@ public:
       unsigned int extSize[2];
       ext.Size(extSize);
 
-      ostate->glScissor(ext[0], ext[2], extSize[0], extSize[1]);
-      ostate->glClear(GL_COLOR_BUFFER_BIT);
+      ostate->vtkglScissor(ext[0], ext[2], extSize[0], extSize[1]);
+      ostate->vtkglClear(GL_COLOR_BUFFER_BIT);
     }
-    ostate->glDisable(GL_SCISSOR_TEST);
-    // detach
-    // detach
-    fbo->RemoveTexColorAttachments(GL_DRAW_FRAMEBUFFER, num);
+    ostate->vtkglDisable(GL_SCISSOR_TEST);
+    fbo->RemoveColorAttachments(num);
     fbo->DeactivateDrawBuffers();
   }
 
@@ -328,14 +326,14 @@ public:
     vtkOpenGLState *ostate = fbo->GetContext()->GetState();
 
     //attach
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, tex);
+    fbo->AddColorAttachment(0U, tex);
     fbo->ActivateDrawBuffers(1);
     DEBUG3CheckFrameBufferStatusMacro(GL_DRAW_FRAMEBUFFER);
 
     // clear the parts of the screen which we will modify
     // initially mask all fragments
-    ostate->glClearColor(0.0, 1.0, 0.0, 0.0);
-    ostate->glEnable(GL_SCISSOR_TEST);
+    ostate->vtkglClearColor(0.0, 1.0, 0.0, 0.0);
+    ostate->vtkglEnable(GL_SCISSOR_TEST);
     size_t nBlocks = extents.size();
     for (size_t e=0; e<nBlocks; ++e)
     {
@@ -351,12 +349,12 @@ public:
       unsigned int extSize[2];
       ext.Size(extSize);
 
-      ostate->glScissor(ext[0], ext[2], extSize[0], extSize[1]);
-      ostate->glClear(GL_COLOR_BUFFER_BIT);
+      ostate->vtkglScissor(ext[0], ext[2], extSize[0], extSize[1]);
+      ostate->vtkglClear(GL_COLOR_BUFFER_BIT);
     }
-    ostate->glDisable(GL_SCISSOR_TEST);
+    ostate->vtkglDisable(GL_SCISSOR_TEST);
     // detach
-    fbo->RemoveTexColorAttachments(GL_DRAW_FRAMEBUFFER, 1);
+    fbo->RemoveColorAttachments(1);
     fbo->DeactivateDrawBuffers();
   }
 
@@ -953,8 +951,7 @@ void StreamingFindMinMax(
 {
   size_t nExtents = extents.size();
   // initiate download of each region
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, tex);
-  fbo->AddColorAttachment(GL_READ_FRAMEBUFFER, 0U, tex);
+  fbo->AddColorAttachment(0U, tex);
   fbo->ActivateDrawBuffer(0U);
   fbo->ActivateReadBuffer(0U);
   fbo->CheckFrameBufferStatus(GL_FRAMEBUFFER);
@@ -970,8 +967,8 @@ void StreamingFindMinMax(
   }
   fbo->DeactivateDrawBuffers();
   fbo->DeactivateReadBuffer();
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
-  fbo->RemoveTexColorAttachment(GL_READ_FRAMEBUFFER, 0U);
+  fbo->RemoveColorAttachment(0U);
+  fbo->RemoveColorAttachment(0U);
   // search each region
   for (size_t q=0; q<nExtents; ++q)
   {
@@ -1512,7 +1509,7 @@ vtkTextureObject *vtkLineIntegralConvolution2D::Execute(
   this->FBO->Bind(GL_FRAMEBUFFER);
   this->FBO->InitializeViewport(computeTexSize[0], computeTexSize[1]);
 
-  // initialize the buffer mananger. Textures are assigned
+  // initialize the buffer manager. Textures are assigned
   // and bound to individual units. These textures and units
   // are active and bound for the remainder of this execution.
   vtkLICPingPongBufferManager bufs(
@@ -1548,9 +1545,9 @@ vtkTextureObject *vtkLineIntegralConvolution2D::Execute(
     this->VTShader->Program->SetUniformi("texVectors", bufs.GetVectorTextureUnit());
     vtkOpenGLCheckErrorMacro("failed");
     // essential to initialize the entire buffer
-    ostate->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    ostate->vtkglClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     vtkOpenGLCheckErrorMacro("failed");
-    ostate->glClear(GL_COLOR_BUFFER_BIT);
+    ostate->vtkglClear(GL_COLOR_BUFFER_BIT);
     vtkOpenGLCheckErrorMacro("failed");
     size_t nVectorExtents = vectorExtents.size();
     for (size_t q=0; q<nVectorExtents; ++q)
@@ -1817,7 +1814,7 @@ vtkTextureObject *vtkLineIntegralConvolution2D::Execute(
     this->StartTimerEvent("vtkLineIntegralConvolution::Integrate2");
     #endif
 
-    // in pass 2 lic is comuted by convolving edge-enhanced result of pass 1
+    // in pass 2 lic is computed by convolving edge-enhanced result of pass 1
     // rather than noise. This gives the result a nice smooth look, since the
     // input is fairly smooth fewer steps are needed.
 

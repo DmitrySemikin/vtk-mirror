@@ -167,7 +167,7 @@ public:
   /**
    * If this node is not a leaf node, there are leaf nodes below it whose
    * regions represent a partitioning of this region.  The IDs of these
-   * leaf nodes form a contigous set.  Get the first of the first point's
+   * leaf nodes form a contiguous set.  Get the first of the first point's
    * ID that is contained in this node.
    */
   vtkGetMacro(MinID, int);
@@ -203,7 +203,7 @@ public:
    * Use the possibly smaller bounds of the points within the region
    * if useDataBounds is non-zero.
    */
-  int ContainsPoint(double x, double y, double z, int useDataBounds);
+  vtkTypeBool ContainsPoint(double x, double y, double z, int useDataBounds);
 
   /**
    * Calculate the distance squared from any point to the boundary of this

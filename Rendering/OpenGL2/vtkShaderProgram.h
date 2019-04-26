@@ -258,7 +258,7 @@ public:
   // maps of std::string are super slow when calling find
   // with a string literal or const char * as find
   // forces construction/copy/destruction of a
-  // std::sting copy of the const char *
+  // std::string copy of the const char *
   // In spite of the doubters this can really be a
   // huge CPU hog.
   struct cmp_str
@@ -306,6 +306,10 @@ public:
   vtkMTimeType GetUniformGroupUpdateTime(int);
   //@}
 
+  // returns the location for a uniform or attribute in
+  // this program. Is cached for performance.
+  int FindUniform(const char *name);
+  int FindAttributeArray(const char *name);
 
 protected:
   vtkShaderProgram();
@@ -396,9 +400,6 @@ protected:
   friend class VertexArrayObject;
 
 private:
-  int FindAttributeArray(const char *name);
-  int FindUniform(const char *name);
-
   vtkShaderProgram(const vtkShaderProgram&) = delete;
   void operator=(const vtkShaderProgram&) = delete;
 

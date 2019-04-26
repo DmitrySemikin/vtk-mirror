@@ -180,7 +180,7 @@ void vtkOpenGLVertexArrayObject::Bind()
                                 BUFFER_OFFSET(attrIt->Offset + attrIt->Stride*i/attrIt->Size));
           if (attrIt->Divisor > 0)
           {
-#if GL_ES_VERSION_3_0 == 1
+#ifdef GL_ES_VERSION_3_0
             glVertexAttribDivisor(attrIt->Index+i, 1);
 #else
             if (GLEW_ARB_instanced_arrays)
@@ -216,7 +216,7 @@ void vtkOpenGLVertexArrayObject::Release()
         {
           if (attrIt->Divisor > 0)
           {
-#if GL_ES_VERSION_3_0 == 1
+#ifdef GL_ES_VERSION_3_0
             glVertexAttribDivisor(attrIt->Index+i, 0);
 #else
             if (GLEW_ARB_instanced_arrays)
@@ -314,7 +314,7 @@ bool vtkOpenGLVertexArrayObject::AddAttributeArrayWithDivisor(vtkShaderProgram *
 
   const GLchar *namePtr = static_cast<const GLchar *>(name.c_str());
   VertexAttributes attribs;
-  attribs.Index = glGetAttribLocation(this->Internal->HandleProgram, namePtr);
+  attribs.Index = program->FindAttributeArray(namePtr);
   attribs.Offset = offset;
   attribs.Stride = static_cast<GLsizei>(stride);
   attribs.Type = convertTypeToGL(elementType);
@@ -340,7 +340,7 @@ bool vtkOpenGLVertexArrayObject::AddAttributeArrayWithDivisor(vtkShaderProgram *
 
   if (divisor > 0)
   {
-#if GL_ES_VERSION_3_0 == 1
+#ifdef GL_ES_VERSION_3_0
     glVertexAttribDivisor(attribs.Index, 1);
 #else
     if (GLEW_ARB_instanced_arrays)
@@ -414,7 +414,7 @@ bool vtkOpenGLVertexArrayObject::AddAttributeMatrixWithDivisor(
                           BUFFER_OFFSET(offset + tupleOffset * i));
     if (divisor > 0)
     {
-#if GL_ES_VERSION_3_0 == 1
+#ifdef GL_ES_VERSION_3_0
       glVertexAttribDivisor(attribs.Index+i, 1);
 #else
       if (GLEW_ARB_instanced_arrays)

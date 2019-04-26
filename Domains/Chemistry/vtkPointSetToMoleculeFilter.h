@@ -26,13 +26,25 @@
 #ifndef vtkPointSetToMoleculeFilter_h
 #define vtkPointSetToMoleculeFilter_h
 
+#include "vtkDomainsChemistryModule.h" // For export macro
 #include "vtkMoleculeAlgorithm.h"
 
-class VTK_EXPORT vtkPointSetToMoleculeFilter : public vtkMoleculeAlgorithm
+class VTKDOMAINSCHEMISTRY_EXPORT vtkPointSetToMoleculeFilter : public vtkMoleculeAlgorithm
 {
 public:
   static vtkPointSetToMoleculeFilter* New();
   vtkTypeMacro(vtkPointSetToMoleculeFilter, vtkMoleculeAlgorithm);
+
+  //@{
+  /**
+   * Get/Set if the filter should look for lines in input cells and convert them
+   * into bonds.
+   * default is ON.
+   */
+  vtkGetMacro(ConvertLinesIntoBonds, bool);
+  vtkSetMacro(ConvertLinesIntoBonds, bool);
+  vtkBooleanMacro(ConvertLinesIntoBonds, bool);
+  //@}
 
 protected:
   vtkPointSetToMoleculeFilter();
@@ -42,6 +54,7 @@ protected:
 
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
+  bool ConvertLinesIntoBonds;
 private:
   vtkPointSetToMoleculeFilter(const vtkPointSetToMoleculeFilter&) = delete;
   void operator=(const vtkPointSetToMoleculeFilter&) = delete;

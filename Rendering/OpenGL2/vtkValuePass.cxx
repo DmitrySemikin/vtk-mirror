@@ -25,6 +25,7 @@
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLBufferObject.h"
+#include "vtkOpenGLCellToVTKCellMap.h"
 #include "vtkOpenGLError.h"
 #include "vtkOpenGLFramebufferObject.h"
 #include "vtkOpenGLPolyDataMapper.h"
@@ -443,14 +444,12 @@ void vtkValuePass::PopulateCellCellMap(const vtkRenderState *s)
         prims[3] = poly->GetStrips();
         int representation = property->GetRepresentation();
         vtkPoints *points = poly->GetPoints();
-        std::vector<vtkIdType> aCellCellMap;
-        vtkOpenGLPolyDataMapper::MakeCellCellMap
-          (aCellCellMap,
-           cpdm->GetHaveAppleBug(),
-           poly, prims, representation, points);
-        for (size_t c = 0; c < aCellCellMap.size(); ++c)
+        vtkNew<vtkOpenGLCellToVTKCellMap> aCellCellMap;
+        aCellCellMap->Update(
+           prims, representation, points);
+        for (size_t c = 0; c < aCellCellMap->GetSize(); ++c)
         {
-          this->ImplFloat->CellCellMap.push_back(aCellCellMap[c]+offset);
+          this->ImplFloat->CellCellMap.push_back(aCellCellMap->GetValue(c)+offset);
         }
         offset += poly->GetNumberOfCells();
       }
@@ -465,10 +464,13 @@ void vtkValuePass::PopulateCellCellMap(const vtkRenderState *s)
       prims[3] = poly->GetStrips();
       int representation = property->GetRepresentation();
       vtkPoints *points = poly->GetPoints();
-      vtkOpenGLPolyDataMapper::MakeCellCellMap
-          (this->ImplFloat->CellCellMap,
-           pdm->GetHaveAppleBug(),
-           poly, prims, representation, points);
+      vtkNew<vtkOpenGLCellToVTKCellMap> aCellCellMap;
+      aCellCellMap->Update(
+          prims, representation, points);
+      for (size_t c = 0; c < aCellCellMap->GetSize(); ++c)
+      {
+        this->ImplFloat->CellCellMap.push_back(aCellCellMap->GetValue(c));
+      }
     }
 
     break; //only ever draw one actor at a time in value mode so OK
@@ -524,7 +526,7 @@ void vtkValuePass::RenderOpaqueGeometry(const vtkRenderState *s)
     vtkDataArray* dataArray = this->GetCurrentArray(mapper, this->PassState);
     if (!dataArray)
     {
-      vtkErrorMacro("Invalid data array from GetScalars()!");
+      // this is OK, happens on internal nodes of multiblock for example
       continue;
     }
 
@@ -577,17 +579,17 @@ void vtkValuePass::BeginPass(vtkRenderer* ren)
     static_cast<vtkOpenGLRenderer*>(ren)->GetState();
 
   // Clear buffers
-  ostate->glClearDepth(1.0);
+  ostate->vtkglClearDepth(1.0);
   if (this->RenderingMode == vtkValuePass::FLOATING_POINT)
   {
-    ostate->glClearColor(vtkMath::Nan(),vtkMath::Nan(),vtkMath::Nan(),0.0);
+    ostate->vtkglClearColor(vtkMath::Nan(),vtkMath::Nan(),vtkMath::Nan(),0.0);
   }
   else
   {
-    ostate->glClearColor(0.0, 0.0, 0.0, 0.0);
+    ostate->vtkglClearColor(0.0, 0.0, 0.0, 0.0);
   }
 
-  ostate->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  ostate->vtkglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 //------------------------------------------------------------------------------
@@ -658,10 +660,8 @@ bool vtkValuePass::InitializeFBO(vtkRenderer* ren)
   this->ImplFloat->ValueFBO->Bind(GL_FRAMEBUFFER);
   this->ImplFloat->ValueFBO->InitializeViewport(size[0], size[1]);
   /* GL_COLOR_ATTACHMENT0 */
-  this->ImplFloat->ValueFBO->AddColorAttachment(GL_FRAMEBUFFER,
-    0, this->ImplFloat->ValueRBO);
-  this->ImplFloat->ValueFBO->AddDepthAttachment(GL_FRAMEBUFFER,
-    this->ImplFloat->DepthRBO);
+  this->ImplFloat->ValueFBO->AddColorAttachment(0, this->ImplFloat->ValueRBO);
+  this->ImplFloat->ValueFBO->AddDepthAttachment(this->ImplFloat->DepthRBO);
 
   // Verify FBO
   if(!this->ImplFloat->ValueFBO->CheckFrameBufferStatus(GL_FRAMEBUFFER))
@@ -704,7 +704,7 @@ void vtkValuePass::ReleaseFBO(vtkWindow* win)
 //-----------------------------------------------------------------------------
 bool vtkValuePass::IsFloatingPointModeSupported()
 {
-#if GL_ES_VERSION_3_0 == 1
+#ifdef GL_ES_VERSION_3_0
   return true;
 #else
   return true;
@@ -744,7 +744,7 @@ void vtkValuePass::GetFloatImageData(int const format, int const width,
 
   // Calling pack alignment ensures any window size can be grabbed.
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
   glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
 #endif
 
@@ -1071,12 +1071,6 @@ vtkDataArray* vtkValuePass::GetCurrentArray(vtkMapper* mapper,
     {
       abstractArray->Delete();
     }
-  }
-
-  if (!abstractArray)
-  {
-    vtkErrorMacro("Scalar array " << arrayPar->ArrayName << " with Id = "
-      << arrayPar->ArrayId << " not found.");
   }
 
   vtkDataArray* dataArray = vtkArrayDownCast<vtkDataArray>(abstractArray);

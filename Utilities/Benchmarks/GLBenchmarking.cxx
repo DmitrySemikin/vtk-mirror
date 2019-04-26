@@ -13,11 +13,6 @@
 
 =========================================================================*/
 
-#include "vtkAutoInit.h"
-//VTK_MODULE_INIT(vtkRenderingFreeType)
-//VTK_MODULE_INIT(vtkRenderingOpenGL2)
-//VTK_MODULE_INIT(vtkRenderingContextOpenGL2)
-
 #include "vtkActor.h"
 #include "vtkAxis.h"
 #include "vtkCamera.h"
@@ -71,7 +66,7 @@ public:
   {
   }
 
-  virtual vtkIdType Build(vtkRenderer *renderer, const vtkVector2i &res)
+  vtkIdType Build(vtkRenderer *renderer, const vtkVector2i &res) override
   {
     //vtkVector2i res(20, 50);
     vtkNew<vtkParametricBoy> parametricShape;

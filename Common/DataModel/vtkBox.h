@@ -99,7 +99,7 @@ public:
    * dir[3] is NOT normalized.  Valid intersections will only occur between
    * 0<=t<=1.)
    */
-  static char IntersectBox(double bounds[6], double origin[3], double dir[3],
+  static char IntersectBox(double bounds[6], const double origin[3], double dir[3],
                            double coord[3], double& t);
 
   /**
@@ -127,7 +127,7 @@ public:
    * The function returns non-zero if the plane and box intersect; zero
    * otherwise.
    */
-  static int IntersectWithPlane(double bounds[6], double origin[3],
+  static vtkTypeBool IntersectWithPlane(double bounds[6], double origin[3],
                                 double normal[3]);
 
   /**
@@ -141,7 +141,7 @@ public:
    * vtkPoints array layout and is organized as (xyz, xyz, xyz, xyz, xyz,
    * xyz).
    */
-  static int IntersectWithPlane(double bounds[6], double origin[3],
+  static vtkTypeBool IntersectWithPlane(double bounds[6], double origin[3],
                                 double normal[3], double xints[18]);
 
 protected:

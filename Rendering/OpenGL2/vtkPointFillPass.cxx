@@ -30,6 +30,7 @@
 #include "vtkOpenGLState.h"
 #include "vtkOpenGLVertexArrayObject.h"
 #include "vtkTextureObject.h"
+#include "vtkMath.h"
 
 #include "vtkPointFillPassFS.h"
 #include "vtkTextureObjectVS.h"
@@ -43,7 +44,7 @@ vtkPointFillPass::vtkPointFillPass()
   this->Pass1=nullptr;
   this->Pass1Depth=nullptr;
   this->QuadHelper = nullptr;
-  this->MinimumCandidateAngle = 1.5*3.1415926;
+  this->MinimumCandidateAngle = 1.5*vtkMath::Pi();
   this->CandidatePointRatio = 0.99;
 }
 
@@ -153,7 +154,7 @@ void vtkPointFillPass::Render(const vtkRenderState *s)
     return;
   }
 
-  renWin->GetState()->glDisable(GL_BLEND);
+  renWin->GetState()->vtkglDisable(GL_BLEND);
 //  glDisable(GL_DEPTH_TEST);
 
   this->Pass1->Activate();

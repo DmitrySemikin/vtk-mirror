@@ -23,7 +23,8 @@
  !!! license.
 =========================================================================*/
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
+#include <QtGui/QSurfaceFormat>
 
 #include "vtkGenericOpenGLRenderWindow.h"
 #include "vtkImageViewer.h"
@@ -42,7 +43,7 @@ int main(int argc, char** argv)
   QVTKOpenGLWidget widget;
   widget.resize(256,256);
   vtkNew<vtkGenericOpenGLRenderWindow> renWin;
-  widget.SetRenderWindow(renWin);
+  widget.setRenderWindow(renWin);
 
   vtkNew<vtkPNGReader> reader;
   char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/vtk.png");

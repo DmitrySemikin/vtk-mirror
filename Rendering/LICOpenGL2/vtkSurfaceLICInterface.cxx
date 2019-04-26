@@ -195,30 +195,30 @@ void vtkSurfaceLICInterface::PrepareForGeometry()
   vtkOpenGLFramebufferObject *fbo = this->Internals->FBO;
   fbo->SaveCurrentBindings();
   fbo->Bind(GL_FRAMEBUFFER);
-  fbo->AddDepthAttachment(GL_DRAW_FRAMEBUFFER, this->Internals->DepthImage);
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, this->Internals->GeometryImage);
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 1U, this->Internals->VectorImage);
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 2U, this->Internals->MaskVectorImage);
+  fbo->AddDepthAttachment(this->Internals->DepthImage);
+  fbo->AddColorAttachment(0U, this->Internals->GeometryImage);
+  fbo->AddColorAttachment(1U, this->Internals->VectorImage);
+  fbo->AddColorAttachment(2U, this->Internals->MaskVectorImage);
   fbo->ActivateDrawBuffers(3);
   vtkCheckFrameBufferStatusMacro(GL_FRAMEBUFFER);
 
   // clear internal color and depth buffers
   // the LIC'er requires *all* fragments in the vector
   // texture to be initialized to 0
-  ostate->glDisable(GL_BLEND);
-  ostate->glEnable(GL_DEPTH_TEST);
-  ostate->glDisable(GL_SCISSOR_TEST);
-  ostate->glClearColor(0.0, 0.0, 0.0, 0.0);
-  ostate->glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+  ostate->vtkglDisable(GL_BLEND);
+  ostate->vtkglEnable(GL_DEPTH_TEST);
+  ostate->vtkglDisable(GL_SCISSOR_TEST);
+  ostate->vtkglClearColor(0.0, 0.0, 0.0, 0.0);
+  ostate->vtkglClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 }
 
 void vtkSurfaceLICInterface::CompletedGeometry()
 {
   vtkOpenGLFramebufferObject *fbo = this->Internals->FBO;
-  fbo->RemoveRenDepthAttachment(GL_DRAW_FRAMEBUFFER);
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 1U);
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 2U);
+  fbo->RemoveDepthAttachment();
+  fbo->RemoveColorAttachment(0U);
+  fbo->RemoveColorAttachment(1U);
+  fbo->RemoveColorAttachment(2U);
   fbo->DeactivateDrawBuffers();
   fbo->UnBind(GL_FRAMEBUFFER);
 
@@ -484,7 +484,7 @@ void vtkSurfaceLICInterface::ApplyLIC()
     #ifdef vtkSurfaceLICMapperTIME
     this->EndTimerEvent("vtkSurfaceLICMapper::ScatterLIC");
     #endif
-    #if vtkSurfaceLICMapperDEBUG >= 2
+    #if vtkSurfaceLICInterfaceDEBUG >= 2
     vtkTextureIO::Write(
           mpifn(comm,"slicp_new_lic.vtm"),
           this->Internals->LICImage,
@@ -508,14 +508,14 @@ void vtkSurfaceLICInterface::CombineColorsAndLIC()
   fbo->SaveCurrentBindings();
   fbo->Bind(GL_FRAMEBUFFER);
   fbo->InitializeViewport(this->Internals->Viewsize[0], this->Internals->Viewsize[1]);
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, this->Internals->RGBColorImage);
-  fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 1U, this->Internals->HSLColorImage);
+  fbo->AddColorAttachment(0U, this->Internals->RGBColorImage);
+  fbo->AddColorAttachment(1U, this->Internals->HSLColorImage);
   fbo->ActivateDrawBuffers(2U);
   vtkCheckFrameBufferStatusMacro(GL_FRAMEBUFFER);
 
   // clear the parts of the screen which we will modify
-  ostate->glEnable(GL_SCISSOR_TEST);
-  ostate->glClearColor(0.0, 0.0, 0.0, 0.0);
+  ostate->vtkglEnable(GL_SCISSOR_TEST);
+  ostate->vtkglClearColor(0.0, 0.0, 0.0, 0.0);
   size_t nBlocks = this->Internals->BlockExts.size();
   for (size_t e=0; e<nBlocks; ++e)
   {
@@ -526,10 +526,10 @@ void vtkSurfaceLICInterface::CombineColorsAndLIC()
     unsigned int extSize[2];
     ext.Size(extSize);
 
-    ostate->glScissor(ext[0], ext[2], extSize[0], extSize[1]);
-    ostate->glClear(GL_COLOR_BUFFER_BIT);
+    ostate->vtkglScissor(ext[0], ext[2], extSize[0], extSize[1]);
+    ostate->vtkglClear(GL_COLOR_BUFFER_BIT);
   }
-  ostate->glDisable(GL_SCISSOR_TEST);
+  ostate->vtkglDisable(GL_SCISSOR_TEST);
 
   this->Internals->VectorImage->Activate();
   this->Internals->GeometryImage->Activate();
@@ -612,7 +612,7 @@ void vtkSurfaceLICInterface::CombineColorsAndLIC()
     LMaxMinDiff = LMax-LMin;
 
     // normalize shader
-    fbo->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, this->Internals->RGBColorImage);
+    fbo->AddColorAttachment(0U, this->Internals->RGBColorImage);
     fbo->ActivateDrawBuffer(0U);
     vtkCheckFrameBufferStatusMacro(GL_DRAW_FRAMEBUFFER);
 
@@ -646,13 +646,13 @@ void vtkSurfaceLICInterface::CombineColorsAndLIC()
     this->Internals->HSLColorImage->Deactivate();
     this->Internals->LICImage->Deactivate();
 
-    fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
+    fbo->RemoveColorAttachment(0U);
     fbo->DeactivateDrawBuffers();
   }
   else
   {
-    fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
-    fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 1U);
+    fbo->RemoveColorAttachment(0U);
+    fbo->RemoveColorAttachment(1U);
     fbo->DeactivateDrawBuffers();
   }
 
@@ -679,15 +679,15 @@ void vtkSurfaceLICInterface::CopyToScreen()
   glDrawBuffer(this->PrevDrawBuf);
 
 
-  ostate->glDisable(GL_BLEND);
-  ostate->glDisable(GL_SCISSOR_TEST);
-  ostate->glEnable(GL_DEPTH_TEST);
+  ostate->vtkglDisable(GL_BLEND);
+  ostate->vtkglDisable(GL_SCISSOR_TEST);
+  ostate->vtkglEnable(GL_DEPTH_TEST);
 
   // Viewport transformation for 1:1 'pixel=texel=data' mapping.
   // Note this is not enough for 1:1 mapping, because depending on the
   // primitive displayed (point,line,polygon), the rasterization rules
   // are different.
-  ostate->glViewport(0, 0, this->Internals->Viewsize[0],
+  ostate->vtkglViewport(0, 0, this->Internals->Viewsize[0],
         this->Internals->Viewsize[1]);
 
   this->Internals->DepthImage->Activate();

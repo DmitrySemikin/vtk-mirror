@@ -187,6 +187,7 @@ stream_stride_block(const bitstream* s)
 #ifdef BIT_STREAM_STRIDED
   return s->mask + 1;
 #else
+  (void)s;
   return 1;
 #endif
 }
@@ -198,6 +199,7 @@ stream_stride_delta(const bitstream* s)
 #ifdef BIT_STREAM_STRIDED
   return s->delta / (s->mask + 1);
 #else
+  (void)s;
   return 0;
 #endif
 }
@@ -387,6 +389,21 @@ stream_flush(bitstream* s)
   return bits;
 }
 
+/* copy n bits from one bit stream to another */
+inline_ void
+stream_copy(bitstream* dst, bitstream* src, size_t n)
+{
+  while (n > wsize) {
+    word w = (word)stream_read_bits(src, wsize);
+    stream_write_bits(dst, w, wsize);
+    n -= wsize;
+  }
+  if (n) {
+    word w = (word)stream_read_bits(src, (uint)n);
+    stream_write_bits(dst, w, (uint)n);
+  }
+}
+
 #ifdef BIT_STREAM_STRIDED
 /* set block size in number of words and spacing in number of blocks */
 inline_ int
@@ -405,9 +422,9 @@ stream_set_stride(bitstream* s, size_t block, ptrdiff_t delta)
 inline_ bitstream*
 stream_open(void* buffer, size_t bytes)
 {
-  bitstream* s = malloc(sizeof(bitstream));
+  bitstream* s = (bitstream*)malloc(sizeof(bitstream));
   if (s) {
-    s->begin = buffer;
+    s->begin = (word*)buffer;
     s->end = s->begin + bytes / sizeof(word);
 #ifdef BIT_STREAM_STRIDED
     stream_set_stride(s, 0, 0);
@@ -422,4 +439,14 @@ inline_ void
 stream_close(bitstream* s)
 {
   free(s);
+}
+
+/* make a copy of bit stream to shared memory buffer */
+inline_ bitstream*
+stream_clone(const bitstream* s)
+{
+  bitstream* c = (bitstream*)malloc(sizeof(bitstream));
+  if (c)
+    *c = *s;
+  return c;
 }

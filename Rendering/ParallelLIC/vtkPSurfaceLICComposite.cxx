@@ -86,7 +86,7 @@ string mpifn(int rank, const char *fn)
 // this is a non-scalable operation so
 // only use it for debugging.
 
-// #define DUPLICATE_COMMUNICATOR
+#define DUPLICATE_COMMUNICATOR 0
 
 // ***************************************************************************
 static
@@ -1210,7 +1210,7 @@ int vtkPSurfaceLICComposite::BuildProgram(float *vectors)
     }
   }
 
-  #if vtkSurfaceLICCompoisteDEBUG>=2
+  #if vtkPSurfaceLICCompositeDEBUG>=2
   cerr << *this << endl;
   #endif
 
@@ -1366,13 +1366,13 @@ int vtkPSurfaceLICComposite::Gather(
 
   this->FBO->SaveCurrentBindings();
   this->FBO->Bind(GL_FRAMEBUFFER);
-  this->FBO->AddColorAttachment(GL_DRAW_FRAMEBUFFER, 0U, newImage);
+  this->FBO->AddColorAttachment(0U, newImage);
   this->FBO->ActivateDrawBuffer(0U);
 
   vtkRenderbuffer *depthBuf = vtkRenderbuffer::New();
   depthBuf->SetContext(this->Context);
   depthBuf->CreateDepthAttachment(winExtSize[0], winExtSize[1]);
-  this->FBO->AddDepthAttachment(GL_DRAW_FRAMEBUFFER, depthBuf);
+  this->FBO->AddDepthAttachment(depthBuf);
 
   vtkCheckFrameBufferStatusMacro(GL_FRAMEBUFFER);
 
@@ -1381,10 +1381,10 @@ int vtkPSurfaceLICComposite::Gather(
   this->FBO->InitializeViewport(winExtSize[0], winExtSize[1]);
 
   vtkOpenGLState *ostate = this->Context->GetState();
-  ostate->glEnable(GL_DEPTH_TEST);
-  ostate->glDisable(GL_SCISSOR_TEST);
-  ostate->glClearColor(0.0, 0.0, 0.0, 0.0);
-  ostate->glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  ostate->vtkglEnable(GL_DEPTH_TEST);
+  ostate->vtkglDisable(GL_SCISSOR_TEST);
+  ostate->vtkglClearColor(0.0, 0.0, 0.0, 0.0);
+  ostate->vtkglClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
   this->Context->GetShaderCache()->ReadyShaderProgram(
     this->CompositeShader->Program);
@@ -1531,8 +1531,8 @@ int vtkPSurfaceLICComposite::Gather(
   }
 
   this->FBO->DeactivateDrawBuffers();
-  this->FBO->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
-  this->FBO->RemoveRenDepthAttachment(GL_DRAW_FRAMEBUFFER);
+  this->FBO->RemoveColorAttachment(0U);
+  this->FBO->RemoveDepthAttachment();
   this->FBO->UnBind(GL_FRAMEBUFFER);
   depthBuf->Delete();
 

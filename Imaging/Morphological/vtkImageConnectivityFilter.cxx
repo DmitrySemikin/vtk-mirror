@@ -372,12 +372,6 @@ public:
 class vtkICF::Seed
 {
 public:
-  Seed() {
-    pos[0] = 0; pos[1] = 0; pos[2] = 0; value = 0; }
-
-  Seed(int i, int j, int k) {
-    pos[0] = i; pos[1] = j; pos[2] = k; value = 0; }
-
   Seed(int i, int j, int k, int v) {
     pos[0] = i; pos[1] = j; pos[2] = k; value = v; }
 
@@ -387,10 +381,8 @@ public:
     pos[2] = seed.pos[2];
     value = seed.value; };
 
-  const int &operator[](int i) const { return pos[i]; }
   int &operator[](int i) { return pos[i]; }
 
-  const int &operator*() const { return value; }
   int &operator*() { return value; }
 
   vtkICF::Seed &operator=(const vtkICF::Seed& seed) {
@@ -1192,7 +1184,7 @@ void vtkICF::SeededExecute(
   outData->GetExtent(outExt);
 
   // Indexing will go from 0 to maxIdX, and the lower limit if "extent" will
-  // be subracted from outExt.  If outExt was the same as extent, then nullptr
+  // be subtracted from outExt.  If outExt was the same as extent, then nullptr
   // is returned, else outExt is returned.
   int maxIdx[3];
   int *outLimits = vtkICF::ZeroBaseExtent(extent, outExt, maxIdx);
@@ -1277,7 +1269,7 @@ void vtkICF::SeedlessExecute(
   outData->GetExtent(outExt);
 
   // Indexing will go from 0 to maxIdX, and the lower limit if "extent" will
-  // be subracted from outExt.  If outExt was the same as extent, then nullptr
+  // be subtracted from outExt.  If outExt was the same as extent, then nullptr
   // is returned, else outExt is returned.
   int maxIdx[3];
   int *outLimits = vtkICF::ZeroBaseExtent(extent, outExt, maxIdx);

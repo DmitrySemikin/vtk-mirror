@@ -130,6 +130,19 @@ vtkWebApplication::~vtkWebApplication()
 }
 
 //----------------------------------------------------------------------------
+void vtkWebApplication::SetNumberOfEncoderThreads(vtkTypeUInt32 numThreads)
+{
+  this->Internals->Encoder->SetMaxThreads(numThreads);
+  this->Internals->Encoder->Initialize();
+}
+
+//----------------------------------------------------------------------------
+vtkTypeUInt32 vtkWebApplication::GetNumberOfEncoderThreads()
+{
+  return this->Internals->Encoder->GetMaxThreads();
+}
+
+//----------------------------------------------------------------------------
 bool vtkWebApplication::GetHasImagesBeingProcessed(vtkRenderWindow* view)
 {
   const vtkInternals::ImageCacheValueType& value = this->Internals->ImageCache[view];
@@ -165,7 +178,6 @@ vtkUnsignedCharArray* vtkWebApplication::StillRender(vtkRenderWindow* view, int 
     value.Data != nullptr /* FIXME SEB &&
     view->HasDirtyRepresentation() == false */)
   {
-    //cout <<  "Reusing cache" << endl;
     bool latest = this->Internals->Encoder->GetLatestOutput(this->Internals->ObjectIdMap->GetGlobalId(view), value.Data);
     value.HasImagesBeingProcessed = !latest;
     return value.Data;
@@ -197,7 +209,9 @@ vtkUnsignedCharArray* vtkWebApplication::StillRender(vtkRenderWindow* view, int 
   //vtkTimerLog::MarkEndEvent("StillRenderToString");
   //vtkTimerLog::DumpLogWithIndents(&cout, 0.0);
 
-  this->Internals->Encoder->PushAndTakeReference(this->Internals->ObjectIdMap->GetGlobalId(view), image, quality);
+  this->Internals->Encoder->PushAndTakeReference(
+    this->Internals->ObjectIdMap->GetGlobalId(view), image, quality,
+    this->ImageEncoding);
   assert(image == nullptr);
 
   if (value.Data == nullptr)
@@ -215,7 +229,8 @@ vtkUnsignedCharArray* vtkWebApplication::StillRender(vtkRenderWindow* view, int 
 }
 
 //----------------------------------------------------------------------------
-const char* vtkWebApplication::StillRenderToString(vtkRenderWindow* view, vtkMTimeType time, int quality)
+const char* vtkWebApplication::StillRenderToString(
+  vtkRenderWindow* view, vtkMTimeType time, int quality)
 {
   vtkUnsignedCharArray* array = this->StillRender(view, quality);
   if (array && array->GetMTime() != time)
@@ -225,6 +240,19 @@ const char* vtkWebApplication::StillRenderToString(vtkRenderWindow* view, vtkMTi
     return reinterpret_cast<char*>(array->GetPointer(0));
   }
   return nullptr;
+}
+
+ //----------------------------------------------------------------------------
+vtkUnsignedCharArray* vtkWebApplication::StillRenderToBuffer(
+  vtkRenderWindow* view, vtkMTimeType time, int quality)
+{
+  vtkUnsignedCharArray* array = this->StillRender(view, quality);
+  if (array && array->GetMTime() != time)
+  {
+    this->LastStillRenderToMTime = array->GetMTime();
+    return array;
+  }
+  return NULL;
 }
 
 //----------------------------------------------------------------------------

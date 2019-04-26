@@ -150,18 +150,16 @@ void vtkSSAAPass::Render(const vtkRenderState *s)
   vtkRenderState s2(r);
   s2.SetPropArrayAndCount(s->GetPropArray(),s->GetPropArrayCount());
   s2.SetFrameBuffer(this->FrameBufferObject);
-
-  this->FrameBufferObject->AddColorAttachment(
-    this->FrameBufferObject->GetBothMode(), 0,this->Pass1);
+  this->FrameBufferObject->Bind();
+  this->FrameBufferObject->AddColorAttachment(0,this->Pass1);
   this->FrameBufferObject->ActivateDrawBuffer(0);
 
-  this->FrameBufferObject->AddDepthAttachment(
-    this->FrameBufferObject->GetBothMode());
+  this->FrameBufferObject->AddDepthAttachment();
   this->FrameBufferObject->StartNonOrtho(w,h);
-  ostate->glViewport(0, 0, w, h);
-  ostate->glScissor(0, 0, w, h);
+  ostate->vtkglViewport(0, 0, w, h);
+  ostate->vtkglScissor(0, 0, w, h);
 
-  ostate->glEnable(GL_DEPTH_TEST);
+  ostate->vtkglEnable(GL_DEPTH_TEST);
   this->DelegatePass->Render(&s2);
   this->NumberOfRenderedProps +=
     this->DelegatePass->GetNumberOfRenderedProps();
@@ -181,8 +179,7 @@ void vtkSSAAPass::Render(const vtkRenderState *s)
                           VTK_UNSIGNED_CHAR,false);
   }
 
-  this->FrameBufferObject->AddColorAttachment(
-    this->FrameBufferObject->GetBothMode(), 0,this->Pass2);
+  this->FrameBufferObject->AddColorAttachment(0,this->Pass2);
   this->FrameBufferObject->Start(width,h);
 
   // Use a subsample shader, do it horizontally. this->Pass1 is the source
@@ -238,8 +235,8 @@ void vtkSSAAPass::Render(const vtkRenderState *s)
   this->SSAAProgram->Program->SetUniformf("texelWidthOffset", 0.375/width);
   this->SSAAProgram->Program->SetUniformf("texelHeightOffset", 0.0);
 
-  ostate->glDisable(GL_BLEND);
-  ostate->glDisable(GL_DEPTH_TEST);
+  ostate->vtkglDisable(GL_BLEND);
+  ostate->vtkglDisable(GL_DEPTH_TEST);
 
   this->FrameBufferObject->RenderQuad(0,width-1,0,h-1,
     this->SSAAProgram->Program, this->SSAAProgram->VAO);

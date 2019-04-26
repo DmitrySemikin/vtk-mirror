@@ -780,6 +780,14 @@ void vtkPointHandleRepresentation3D::CreateDefaultProperties()
 }
 
 //----------------------------------------------------------------------
+void vtkPointHandleRepresentation3D::SetVisibility(vtkTypeBool visible)
+{
+  this->Actor->SetVisibility(visible);
+  // Forward to superclass
+  this->Superclass::SetVisibility(visible);
+}
+
+//----------------------------------------------------------------------
 void vtkPointHandleRepresentation3D::BuildRepresentation()
 {
   // The net effect is to resize the handle
@@ -884,7 +892,7 @@ int vtkPointHandleRepresentation3D::RenderTranslucentPolygonalGeometry(
   return this->Actor->RenderTranslucentPolygonalGeometry(viewport);
 }
 //-----------------------------------------------------------------------------
-int vtkPointHandleRepresentation3D::HasTranslucentPolygonalGeometry()
+vtkTypeBool vtkPointHandleRepresentation3D::HasTranslucentPolygonalGeometry()
 {
   this->BuildRepresentation();
   return this->Actor->HasTranslucentPolygonalGeometry();

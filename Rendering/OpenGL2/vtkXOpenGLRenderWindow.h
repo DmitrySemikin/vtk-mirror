@@ -74,12 +74,15 @@ public:
   /**
    * Change the window to fill the entire screen.
    */
-  void SetFullScreen(int) override;
+  void SetFullScreen(vtkTypeBool) override;
 
   /**
    * Resize the window.
    */
   void WindowRemap() override;
+
+  // Call X funcs to map unmap
+  void SetShowWindow(bool val) override;
 
   /**
    * Set the preferred window size to full screen.
@@ -91,6 +94,11 @@ public:
    */
   void SetSize(int,int) override;
   void SetSize(int a[2]) override { this->SetSize(a[0], a[1]); }
+  /**
+   * Specify the size of the rendering window in pixels but do not resize
+   * the XWindow. Useful when resizing is done interactively.
+   */
+  void SetSizeNoXResize(int,int);
 
   //@{
   /**
@@ -108,7 +116,7 @@ public:
    * overrides the superclass method since this class can actually check
    * whether the window has been realized yet.
    */
-  void SetStereoCapableWindow(int capable) override;
+  void SetStereoCapableWindow(vtkTypeBool capable) override;
 
   /**
    * Make this window the current OpenGL context.
@@ -267,28 +275,23 @@ public:
   /**
    * Set this RenderWindow's X window id to a pre-existing window.
    */
-  void SetWindowInfo(char *info) override;
+  void SetWindowInfo(const char *info) override;
 
   /**
    * Set the window info that will be used after WindowRemap()
    */
-  void SetNextWindowInfo(char *info) override;
+  void SetNextWindowInfo(const char *info) override;
 
   /**
    * Sets the X window id of the window that WILL BE created.
    */
-  void SetParentInfo(char *info) override;
+  void SetParentInfo(const char *info) override;
 
   /**
    * This computes the size of the render window
    * before calling the supper classes render
    */
   void Render() override;
-
-  /**
-   * Render without displaying the window.
-   */
-  void SetOffScreenRendering(int i) override;
 
   //@{
   /**
@@ -306,7 +309,7 @@ public:
    * Set the number of vertical syncs required between frames.
    * A value of 0 means swap buffers as quickly as possible
    * regardless of the vertical refresh. A value of 1 means swap
-   * buffers in sync with the vertical refresh to elimiate tearing.
+   * buffers in sync with the vertical refresh to eliminate tearing.
    * A value of -1 means use a value of 1 unless we missed a frame
    * in which case swap immediately. Returns true if the call
    * succeeded.
@@ -350,9 +353,6 @@ protected:
 
   void CreateAWindow() override;
   void DestroyWindow() override;
-  void CreateOffScreenWindow(int width, int height);
-  void DestroyOffScreenWindow();
-  void ResizeOffScreenWindow(int width, int height);
   void CloseDisplay();
 
 

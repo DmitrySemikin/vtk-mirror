@@ -423,7 +423,7 @@ void vtkLabeledContourMapper::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 
   os << indent << "SkipDistance: " << this->SkipDistance << "\n"
-     << indent << "LabelVisiblity: " << (this->LabelVisibility ? "On\n"
+     << indent << "LabelVisibility: " << (this->LabelVisibility ? "On\n"
                                                                : "Off\n")
      << indent << "NumberOfTextActors: " << this->NumberOfTextActors << "\n"
      << indent << "NumberOfUsedTextActors: "
@@ -1309,6 +1309,11 @@ bool vtkLabeledContourMapper::Private::NextLabel(
     rStraight = straight.Norm();
     segmentLengths.push_back(rSegment);
     rAccum += rSegment;
+    if (rStraight == 0.0)
+    {
+      ++curIdx;
+      continue;
+    }
     smoothness = calculateSmoothness(rAccum, rStraight);
 
     // Are we still dealing with a reasonably smooth line?

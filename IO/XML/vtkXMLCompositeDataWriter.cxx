@@ -35,6 +35,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStructuredGrid.h"
 #include "vtkTable.h"
+#include "vtkHyperTreeGrid.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkXMLDataElement.h"
 #include "vtkXMLDataObjectWriter.h"
@@ -270,7 +271,8 @@ int vtkXMLCompositeDataWriter::WriteNonCompositeData(
 
   vtkDataSet* curDS = vtkDataSet::SafeDownCast(dObj);
   vtkTable* curTable = vtkTable::SafeDownCast(dObj);
-  if (!curDS && !curTable)
+  vtkHyperTreeGrid* curHTG = vtkHyperTreeGrid::SafeDownCast(dObj);
+  if (!curDS && !curTable && !curHTG)
   {
     if (dObj)
     {
@@ -328,12 +330,10 @@ int vtkXMLCompositeDataWriter::WriteData()
     this->Internal->Root->PrintXML(os, indent);
   }
 
+  // We want to avoid using appended data mode as it
+  // is not supported in meta formats.
   int dataMode = this->DataMode;
-  if (dataMode == vtkXMLWriter::Ascii)
-  {
-    this->DataMode = vtkXMLWriter::Ascii;
-  }
-  else
+  if (dataMode == vtkXMLWriter::Appended)
   {
     this->DataMode = vtkXMLWriter::Binary;
   }
@@ -479,7 +479,8 @@ void vtkXMLCompositeDataWriter::CreateWriters(vtkCompositeDataSet* hdInput)
     vtkSmartPointer<vtkXMLWriter>& writer = this->Internal->Writers[i];
     vtkDataSet* ds = vtkDataSet::SafeDownCast(iter->GetCurrentDataObject());
     vtkTable* table = vtkTable::SafeDownCast(iter->GetCurrentDataObject());
-    if (ds == nullptr && table == nullptr)
+    vtkHyperTreeGrid* htg = vtkHyperTreeGrid::SafeDownCast(iter->GetCurrentDataObject());
+    if (ds == nullptr && table == nullptr && htg == nullptr)
     {
       writer = nullptr;
       continue;

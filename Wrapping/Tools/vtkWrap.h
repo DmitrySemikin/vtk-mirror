@@ -48,6 +48,7 @@ int vtkWrap_IsVoidPointer(ValueInfo *val);
 int vtkWrap_IsCharPointer(ValueInfo *val);
 int vtkWrap_IsPODPointer(ValueInfo *val);
 int vtkWrap_IsZeroCopyPointer(ValueInfo *val);
+int vtkWrap_IsStdVector(ValueInfo *val);
 int vtkWrap_IsVTKObject(ValueInfo *val);
 int vtkWrap_IsSpecialObject(ValueInfo *val);
 int vtkWrap_IsPythonObject(ValueInfo *val);
@@ -282,3 +283,4 @@ char *vtkWrap_SafeSuperclassName(const char *name);
 #endif
 
 #endif
+/* VTK-HeaderTest-Exclude: vtkWrap.h */

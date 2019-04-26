@@ -43,6 +43,7 @@ All rights reserve
 #include "vtkAxisActor.h"                 // access to enum values
 #include "vtkRenderingAnnotationModule.h" // For export macro
 #include <list>                           // To process exponent list as reference
+#include <string> // used for ivar
 
 class vtkCamera;
 class vtkPolyData;
@@ -734,7 +735,7 @@ protected:
 
   /**
    * Set Range and PolarAxis members value to build axis ticks
-   * this fonction doesn't actually build PolarAxis ticks, it set the DeltaRangeMajor and DeltaMajor
+   * this function doesn't actually build PolarAxis ticks, it set the DeltaRangeMajor and DeltaMajor
    * attributes
    * then PolarAxis itself is in charge of ticks drawing
    */

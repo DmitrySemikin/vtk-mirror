@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkOpenGLTexture.h"
 #include "vtkTextureObject.h"
+#include "vtkOpenGLState.h"
 
 #include "vtkOpenGLHelper.h"
 
@@ -24,7 +25,6 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLRenderer.h"
-#include "vtkOpenGLState.h"
 #include "vtkPointData.h"
 #include "vtkRenderWindow.h"
 #include "vtkOpenGLRenderWindow.h"
@@ -131,9 +131,14 @@ void vtkOpenGLTexture::Load(vtkRenderer *ren)
 {
   vtkOpenGLRenderWindow* renWin =
     static_cast<vtkOpenGLRenderWindow*>(ren->GetRenderWindow());
+  vtkOpenGLState *ostate = renWin->GetState();
 
   if (!this->ExternalTextureObject)
   {
+    if (this->GetInputDataObject(0, 0) == nullptr)
+    {
+        return;
+    }
     vtkImageData *input = this->GetInput();
     int numIns = 1;
     vtkMTimeType inputTime = input->GetMTime();
@@ -264,7 +269,7 @@ void vtkOpenGLTexture::Load(vtkRenderer *ren)
 
         // -- decide whether the texture needs to be resampled --
         GLint maxDimGL;
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxDimGL);
+        ostate->vtkglGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxDimGL);
         vtkOpenGLCheckErrorMacro("failed at glGetIntegerv");
         // if larger than permitted by the graphics library then must resample
         bool resampleNeeded = xsize > maxDimGL || ysize > maxDimGL;
@@ -277,7 +282,7 @@ void vtkOpenGLTexture::Load(vtkRenderer *ren)
         {
           vtkDebugMacro(<< "Resampling texture to power of two for OpenGL");
           resultData[i] = this->ResampleToPowerOfTwo(xsize, ysize, dataPtr[i],
-                                                  bytesPerPixel);
+                                                  bytesPerPixel, maxDimGL);
         }
         else
         {
@@ -383,11 +388,10 @@ void vtkOpenGLTexture::Load(vtkRenderer *ren)
 
   if (this->PremultipliedAlpha)
   {
-    vtkOpenGLState *ostate = renWin->GetState();
     ostate->GetBlendFuncState(this->PrevBlendParams);
 
     // make the blend function correct for textures premultiplied by alpha.
-    ostate->glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    ostate->vtkglBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
   }
 
   vtkOpenGLCheckErrorMacro("failed after Load");
@@ -396,21 +400,24 @@ void vtkOpenGLTexture::Load(vtkRenderer *ren)
 // ----------------------------------------------------------------------------
 void vtkOpenGLTexture::PostRender(vtkRenderer *ren)
 {
-  this->TextureObject->Deactivate();
+  if (this->TextureObject)
+  {
+    this->TextureObject->Deactivate();
+  }
 
   if (this->GetInput() && this->PremultipliedAlpha)
   {
     vtkOpenGLRenderWindow* renWin =
       static_cast<vtkOpenGLRenderWindow*>(ren->GetRenderWindow());
     // restore the blend function
-    renWin->GetState()->glBlendFuncSeparate(
+    renWin->GetState()->vtkglBlendFuncSeparate(
       this->PrevBlendParams[0], this->PrevBlendParams[1],
       this->PrevBlendParams[2], this->PrevBlendParams[3]);
   }
 }
 
 // ----------------------------------------------------------------------------
-static int FindPowerOfTwo(int i)
+static int FindPowerOfTwo(int i, int maxDimGL)
 {
   int size = vtkMath::NearestPowerOfTwo(i);
 
@@ -418,8 +425,6 @@ static int FindPowerOfTwo(int i)
   // suggestions)]
   // limit the size of the texture to the maximum allowed by OpenGL
   // (slightly more graceful than texture failing but not ideal)
-  GLint maxDimGL;
-  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxDimGL);
   if (size < 0 || size > maxDimGL)
   {
     size = maxDimGL ;
@@ -435,7 +440,8 @@ static int FindPowerOfTwo(int i)
 unsigned char *vtkOpenGLTexture::ResampleToPowerOfTwo(int &xs,
                                                       int &ys,
                                                       unsigned char *dptr,
-                                                      int bpp)
+                                                      int bpp,
+                                                      int maxDimGL)
 {
   unsigned char *tptr, *p, *p1, *p2, *p3, *p4;
   vtkIdType jOffset, iIdx, jIdx;
@@ -443,8 +449,8 @@ unsigned char *vtkOpenGLTexture::ResampleToPowerOfTwo(int &xs,
   int yInIncr = xs;
   int xInIncr = 1;
 
-  int xsize = FindPowerOfTwo(xs);
-  int ysize = FindPowerOfTwo(ys);
+  int xsize = FindPowerOfTwo(xs, maxDimGL);
+  int ysize = FindPowerOfTwo(ys, maxDimGL);
   if (this->RestrictPowerOf2ImageSmaller)
   {
     if (xsize > xs)
@@ -545,7 +551,7 @@ void vtkOpenGLTexture::PrintSelf(ostream& os, vtkIndent indent)
 // ----------------------------------------------------------------------------
 int vtkOpenGLTexture::IsTranslucent()
 {
-  if (this->ExternalTextureObject)
+  if (this->ExternalTextureObject && this->TextureObject)
   {
     // If number of components are 1, 2, or 4 then mostly
     // we can assume that the data can be used as alpha values.

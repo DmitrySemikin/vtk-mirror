@@ -144,7 +144,7 @@ vtkExtractEnclosedPoints::vtkExtractEnclosedPoints()
   this->SetNumberOfInputPorts(2);
 
   this->CheckSurface = false;
-  this->Tolerance = 0.0001;
+  this->Tolerance = 0.001;
 }
 
 //----------------------------------------------------------------------------
@@ -255,7 +255,7 @@ FillInputPortInformation(int port, vtkInformation *info)
 {
   if (port == 0)
   {
-    info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+    info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   }
   else if (port == 1)
   {

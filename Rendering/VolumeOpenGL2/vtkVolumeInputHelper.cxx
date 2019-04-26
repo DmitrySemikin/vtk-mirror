@@ -139,7 +139,7 @@ int vtkVolumeInputHelper::UpdateOpacityTransferFunction(vtkRenderer* ren, vtkVol
     samplingDist,
     componentRange,
     volumeProperty->GetScalarOpacityUnitDistance(component),
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
     filterVal,
 #else
     vtkTextureObject::Nearest,
@@ -188,7 +188,7 @@ int vtkVolumeInputHelper::UpdateColorTransferFunction(vtkRenderer* ren, vtkVolum
   this->RGBTables->GetTable(component)->Update(
     volumeProperty->GetRGBTransferFunction(component),
     componentRange,
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
     filterVal,
 #else
     vtkTextureObject::Nearest,
@@ -246,7 +246,7 @@ int vtkVolumeInputHelper::UpdateGradientOpacityTransferFunction(vtkRenderer* ren
     samplingDist,
     componentRange,
     volumeProperty->GetScalarOpacityUnitDistance(component),
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
     filterVal,
 #else
     vtkTextureObject::Nearest,
@@ -265,7 +265,7 @@ void vtkVolumeInputHelper::UpdateTransferFunction2D(vtkRenderer* ren,
     component : 0;
 
   vtkImageData* transfer2D = prop->GetTransferFunction2D(lutIndex);
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
   int const interp = prop->GetInterpolationType() == VTK_LINEAR_INTERPOLATION ?
     vtkTextureObject::Linear : vtkTextureObject::Nearest;
 #else
@@ -374,11 +374,13 @@ void vtkVolumeInputHelper::CreateTransferFunction1D(vtkRenderer* ren, const int 
   this->RGBTablesMap.clear();
   this->GradientOpacityTablesMap.clear();
 
+  std::ostringstream idx;
+  idx << index;
+
+  this->GradientCacheName = "g_gradients_" + idx.str();
+
   for (int i = 0; i < numActiveLuts; ++i)
   {
-    std::ostringstream idx;
-    idx << index;
-
     std::ostringstream comp;
     comp << "[" << i << "]";
 
@@ -392,7 +394,6 @@ void vtkVolumeInputHelper::CreateTransferFunction1D(vtkRenderer* ren, const int 
     {
       this->GradientOpacityTablesMap[i] =
         "in_gradientTransferFunc_" + idx.str() + comp.str();
-      this->GradientCacheName += "g_gradients_" + idx.str();
     }
   }
 
@@ -411,16 +412,17 @@ void vtkVolumeInputHelper::CreateTransferFunction2D(vtkRenderer* ren,
     vtkSmartPointer<vtkOpenGLTransferFunctions2D>::New();
   this->TransferFunctions2D->Create(num);
 
+  std::ostringstream idx;
+  idx << index;
+
+  this->GradientCacheName = "g_gradients_" + idx.str();
+
   for (unsigned int i = 0; i < num; i++)
   {
-    std::ostringstream idx;
-    idx << index;
-
     std::ostringstream comp;
     comp << "[" << i << "]";
 
     this->TransferFunctions2DMap[i] = "in_transfer2D_" + idx.str() + comp.str();
-    this->GradientCacheName += "g_gradients_" + idx.str();
   }
 
   this->LutInit.Modified();

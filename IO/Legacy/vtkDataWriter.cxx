@@ -127,6 +127,10 @@ vtkDataWriter::~vtkDataWriter()
 // Open a vtk data file. Returns nullptr if error.
 ostream *vtkDataWriter::OpenVTKFile()
 {
+  // Save current locale settings and set standard one to
+  // avoid locale issues - for instance with the decimal separator.
+  this->CurrentLocale = std::locale::global(std::locale::classic());
+
   ostream *fptr;
 
   if ((!this->WriteToOutputString) && ( !this->FileName ))
@@ -1073,7 +1077,7 @@ int vtkDataWriter::WriteArray(ostream *fp, int dataType, vtkAbstractArray *data,
       else
       {
         unsigned char *cptr=
-          static_cast<vtkUnsignedCharArray *>(data)->GetPointer(0);
+          static_cast<vtkBitArray *>(data)->GetPointer(0);
         fp->write(reinterpret_cast<char *>(cptr),
                   (sizeof(unsigned char))*((num-1)/8+1));
 
@@ -2228,6 +2232,9 @@ void vtkDataWriter::WriteData()
 void vtkDataWriter::CloseVTKFile(ostream *fp)
 {
   vtkDebugMacro(<<"Closing vtk file\n");
+
+  // Restore the previous locale settings
+  std::locale::global(this->CurrentLocale);
 
   if ( fp != nullptr )
   {

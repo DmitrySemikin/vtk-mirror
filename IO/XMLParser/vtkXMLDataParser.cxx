@@ -476,13 +476,8 @@ void vtkXMLDataParser::PerformByteSwap(void* data, size_t numWords,
 //----------------------------------------------------------------------------
 int vtkXMLDataParser::ReadCompressionHeader()
 {
-#if defined(VTK_HAS_STD_UNIQUE_PTR)
   std::unique_ptr<vtkXMLDataHeader>
     ch(vtkXMLDataHeader::New(this->HeaderType, 3));
-#else
-  std::auto_ptr<vtkXMLDataHeader>
-    ch(vtkXMLDataHeader::New(this->HeaderType, 3));
-#endif
 
   this->DataStream->StartReading();
 
@@ -602,13 +597,9 @@ size_t vtkXMLDataParser::ReadUncompressedData(unsigned char* data,
                                               size_t wordSize)
 {
   // First read the length of the data.
-#if defined(VTK_HAS_STD_UNIQUE_PTR)
   std::unique_ptr<vtkXMLDataHeader>
     uh(vtkXMLDataHeader::New(this->HeaderType, 1));
-#else
-  std::auto_ptr<vtkXMLDataHeader>
-    uh(vtkXMLDataHeader::New(this->HeaderType, 1));
-#endif
+
   size_t const headerSize = uh->DataSize();
   size_t r = this->DataStream->Read(uh->Data(), headerSize);
   if(r < headerSize)
@@ -896,7 +887,10 @@ size_t vtkXMLDataParser::ReadAsciiData(void* buffer,
   this->UpdateProgress(0.5);
 
   // Copy the data from the pre-parsed ascii data buffer.
-  memcpy(buffer, this->AsciiDataBuffer+startByte, actualBytes);
+  if (buffer && actualBytes)
+  {
+    memcpy(buffer, this->AsciiDataBuffer+startByte, actualBytes);
+  }
 
   this->UpdateProgress(1);
 
@@ -1186,6 +1180,10 @@ void vtkXMLDataParser::FreeAsciiBuffer()
     vtkTemplateMacro(
       vtkXMLDataParserFreeAsciiBuffer(static_cast<VTK_TT*>(buffer))
       );
+
+    case VTK_BIT:
+      vtkXMLDataParserFreeAsciiBuffer(static_cast<unsigned char *>(buffer));
+      break;
   }
   this->AsciiDataBuffer = nullptr;
 }

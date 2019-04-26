@@ -33,6 +33,8 @@
 
 #include "vtkOpenVROverlayInternal.h"
 
+#include "OpenVRDashboard.h"
+
 #include <cmath>
 
 vtkStandardNewMacro(vtkOpenVROverlay);
@@ -45,7 +47,6 @@ vtkOpenVROverlay::vtkOpenVROverlay()
   this->CurrentTextureData = nullptr;
   this->LastSpot = nullptr;
   this->SessionName = "";
-  this->SavedCameraPoses.resize(10);
   this->VRSystem = nullptr;
   this->DashboardImageFileName = "OpenVRDashboard.jpg";
   this->LastCameraPoseIndex = -1;
@@ -67,11 +68,12 @@ vtkOpenVROverlay::~vtkOpenVROverlay()
   }
 }
 
-vtkOpenVRCameraPose *vtkOpenVROverlay::GetSavedCameraPose(size_t i)
+vtkOpenVRCameraPose *vtkOpenVROverlay::GetSavedCameraPose(int i)
 {
-  if (i < this->SavedCameraPoses.size())
+  auto p = this->SavedCameraPoses.find(i);
+  if (p != this->SavedCameraPoses.end())
   {
-    return &(this->SavedCameraPoses[i]);
+    return &(p->second);
   }
   return nullptr;
 }
@@ -80,14 +82,14 @@ void vtkOpenVROverlay::WriteCameraPoses(ostream& os)
 {
   vtkNew<vtkXMLDataElement> topel;
   topel->SetName("CameraPoses");
-  for (size_t i = 0; i < this->SavedCameraPoses.size(); ++i)
+  for (auto p : this->SavedCameraPoses)
   {
-    vtkOpenVRCameraPose &pose = this->SavedCameraPoses[i];
+    vtkOpenVRCameraPose &pose = p.second;
     if (pose.Loaded)
     {
       vtkNew<vtkXMLDataElement> el;
       el->SetName("CameraPose");
-      el->SetIntAttribute("PoseNumber", static_cast<int>(i + 1));
+      el->SetIntAttribute("PoseNumber", p.first);
       el->SetVectorAttribute("Position", 3, pose.Position);
       el->SetDoubleAttribute("Distance", pose.Distance);
       el->SetDoubleAttribute("MotionFactor", pose.MotionFactor);
@@ -136,16 +138,21 @@ void vtkOpenVROverlay::ReadCameraPoses(istream &is)
   vtkXMLDataElement *topel =
     vtkXMLUtilities::ReadElementFromStream(is);
 
+  this->ReadCameraPoses(topel);
+  topel->Delete();
+}
+
+void vtkOpenVROverlay::ReadCameraPoses(vtkXMLDataElement *topel)
+{
+  this->SavedCameraPoses.clear();
   if (topel)
   {
     int numPoses = topel->GetNumberOfNestedElements();
-    this->SavedCameraPoses.resize(numPoses > 10 ? numPoses : 10);
     for (size_t i = 0; i < numPoses; i++)
     {
       vtkXMLDataElement *el = topel->GetNestedElement(static_cast<int>(i));
       int poseNum = 0;
       el->GetScalarAttribute("PoseNumber", poseNum);
-      poseNum--;  // zero indexed
       el->GetVectorAttribute("Position", 3,
         this->SavedCameraPoses[poseNum].Position);
       el->GetVectorAttribute("InitialViewUp", 3,
@@ -162,29 +169,37 @@ void vtkOpenVROverlay::ReadCameraPoses(istream &is)
         this->SavedCameraPoses[poseNum].MotionFactor);
       this->SavedCameraPoses[poseNum].Loaded = true;
     }
-    topel->Delete();
+  }
+}
+
+void vtkOpenVROverlay::SetSavedCameraPose(int i, vtkOpenVRCameraPose *pose)
+{
+  if (pose)
+  {
+    this->SavedCameraPoses[i] = *pose;
   }
 }
 
 void vtkOpenVROverlay::SaveCameraPose(int slot)
 {
-  vtkOpenVRCameraPose *pose = this->GetSavedCameraPose(slot);
+  vtkOpenVRCameraPose *pose = &this->SavedCameraPoses[slot];
   vtkRenderer *ren = static_cast<vtkRenderer *>(
     this->Window->GetRenderers()->GetItemAsObject(0));
   pose->Set(static_cast<vtkOpenVRCamera *>(ren->GetActiveCamera()), this->Window);
-  // this->WriteCameraPoses();
+  this->InvokeEvent(vtkCommand::SaveStateEvent, reinterpret_cast<void *>(slot));
 }
 
 void vtkOpenVROverlay::LoadCameraPose(int slot)
 {
-  this->LastCameraPoseIndex = slot;
   vtkOpenVRCameraPose *pose = this->GetSavedCameraPose(slot);
   if (pose && pose->Loaded)
   {
+    this->LastCameraPoseIndex = slot;
     vtkRenderer *ren = static_cast<vtkRenderer *>(
       this->Window->GetRenderers()->GetItemAsObject(0));
     pose->Apply(static_cast<vtkOpenVRCamera *>(ren->GetActiveCamera()), this->Window);
     ren->ResetCameraClippingRange();
+    this->InvokeEvent(vtkCommand::LoadStateEvent, reinterpret_cast<void *>(slot));
   }
 }
 
@@ -195,14 +210,36 @@ void vtkOpenVROverlay::LoadNextCameraPose()
     return;
   }
 
-  int newPose = (this->LastCameraPoseIndex + 1) % this->SavedCameraPoses.size();
-  int count = 0;
-  while (!this->SavedCameraPoses[newPose].Loaded && count < this->SavedCameraPoses.size())
+  int nextValue = -1;
+  int firstValue = this->LastCameraPoseIndex;
+  // find the next pose index in the map
+  for (auto p : this->SavedCameraPoses)
   {
-    newPose = (newPose + 1) % this->SavedCameraPoses.size();
-    count++;
+    if (p.first < firstValue)
+    {
+      firstValue = p.first;
+    }
+    if (p.first > this->LastCameraPoseIndex)
+    {
+      nextValue = p.first;
+      // is there anything lower than nextValue but still larger than current
+      for (auto p2 : this->SavedCameraPoses)
+      {
+        if (p2.first > this->LastCameraPoseIndex && p2.first < nextValue)
+        {
+          nextValue = p2.first;
+        }
+      }
+      break;
+    }
   }
-  this->LoadCameraPose(newPose);
+
+  if (nextValue == -1)
+  {
+    nextValue = firstValue;
+  }
+
+  this->LoadCameraPose(nextValue);
 }
 
 void vtkOpenVROverlay::Show()
@@ -214,6 +251,13 @@ void vtkOpenVROverlay::Show()
 void vtkOpenVROverlay::Hide()
 {
   vr::VROverlay()->HideOverlay(this->OverlayHandle);
+}
+
+void vtkOpenVROverlay::SetDashboardImageData(vtkJPEGReader *imgReader)
+{
+  imgReader->SetMemoryBuffer(OpenVRDashboard);
+  imgReader->SetMemoryBufferLength(sizeof(OpenVRDashboard));
+  imgReader->Update();
 }
 
 void vtkOpenVROverlay::Create(vtkOpenVRRenderWindow *win)
@@ -262,39 +306,45 @@ void vtkOpenVROverlay::Create(vtkOpenVRRenderWindow *win)
 
   // if dashboard image exists use it
   vtkNew<vtkJPEGReader> imgReader;
-  if (imgReader->CanReadFile(this->DashboardImageFileName.c_str()))
+  if (!this->DashboardImageFileName.empty()
+      && imgReader->CanReadFile(this->DashboardImageFileName.c_str()))
   {
     imgReader->SetFileName(this->DashboardImageFileName.c_str());
     imgReader->Update();
-    vtkImageData *id = imgReader->GetOutput();
-    int dims[3];
-    id->GetDimensions(dims);
-    int numC = id->GetPointData()->GetScalars()->GetNumberOfComponents();
-
-    this->OriginalTextureData = new unsigned char[dims[0]*dims[1]*4];
-    this->CurrentTextureData = new unsigned char[dims[0]*dims[1]*4];
-    unsigned char *dataPtr = this->OriginalTextureData;
-    unsigned char *inPtr = static_cast<unsigned char *>(
-      id->GetPointData()->GetScalars()->GetVoidPointer(0));
-    for (int j = 0; j < dims[1]; j++)
-    {
-      for (int i = 0; i < dims[0]; i++)
-      {
-        *(dataPtr++) = *(inPtr++);
-        *(dataPtr++) = *(inPtr++);
-        *(dataPtr++) = *(inPtr++);
-        *(dataPtr++) = (numC == 4 ? *(inPtr++) : 255.0);
-      }
-    }
-    memcpy(this->CurrentTextureData, this->OriginalTextureData, dims[0]*dims[1]*4);
-    this->OverlayTexture->Create2DFromRaw(
-      dims[0], dims[1],
-      4,  VTK_UNSIGNED_CHAR,
-      const_cast<void *>(static_cast<const void *const>(
-        this->OriginalTextureData)));
-
-    this->SetupSpots();
   }
+  else // use compiled in dashboard
+  {
+    this->SetDashboardImageData(imgReader);
+  }
+
+  vtkImageData *id = imgReader->GetOutput();
+  int dims[3];
+  id->GetDimensions(dims);
+  int numC = id->GetPointData()->GetScalars()->GetNumberOfComponents();
+
+  this->OriginalTextureData = new unsigned char[dims[0]*dims[1]*4];
+  this->CurrentTextureData = new unsigned char[dims[0]*dims[1]*4];
+  unsigned char *dataPtr = this->OriginalTextureData;
+  unsigned char *inPtr = static_cast<unsigned char *>(
+    id->GetPointData()->GetScalars()->GetVoidPointer(0));
+  for (int j = 0; j < dims[1]; j++)
+  {
+    for (int i = 0; i < dims[0]; i++)
+    {
+      *(dataPtr++) = *(inPtr++);
+      *(dataPtr++) = *(inPtr++);
+      *(dataPtr++) = *(inPtr++);
+      *(dataPtr++) = (numC == 4 ? *(inPtr++) : 255.0);
+    }
+  }
+  memcpy(this->CurrentTextureData, this->OriginalTextureData, dims[0]*dims[1]*4);
+  this->OverlayTexture->Create2DFromRaw(
+    dims[0], dims[1],
+    4,  VTK_UNSIGNED_CHAR,
+    const_cast<void *>(static_cast<const void *const>(
+      this->OriginalTextureData)));
+
+  this->SetupSpots();
 
   int width = this->OverlayTexture->GetWidth();
   int height = this->OverlayTexture->GetHeight();

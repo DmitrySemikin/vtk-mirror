@@ -19,6 +19,7 @@ vtk_add_test_cxx(vtkFiltersGeneralCxxTests tests
   TestBooleanOperationPolyDataFilter2.cxx
   TestBooleanOperationPolyDataFilter.cxx
   TestLoopBooleanPolyDataFilter.cxx
+  TestCellValidator.cxx,NO_VALID
   TestContourTriangulatorCutter.cxx
   TestContourTriangulator.cxx
   TestContourTriangulatorMarching.cxx
@@ -66,5 +67,5 @@ vtk_test_cxx_executable(vtkFiltersGeneralCxxTests all_tests
 if(NOT VTK_TEST_TIMEOUT_TestYoungsMaterialInterface)
   set(VTK_TEST_TIMEOUT_TestYoungsMaterialInterface 300)
 endif()
-set_tests_properties(vtkFiltersGeneralCxx-TestYoungsMaterialInterface
+set_tests_properties(VTK::FiltersGeneralCxx-TestYoungsMaterialInterface
   PROPERTIES TIMEOUT ${VTK_TEST_TIMEOUT_TestYoungsMaterialInterface})

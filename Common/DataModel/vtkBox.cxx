@@ -308,7 +308,7 @@ void vtkBox::EvaluateGradient(double x[3], double n[3])
 // directions, coord[3] is the location of hit, and t is the parametric
 // coordinate along line. (Notes: the intersection ray dir[3] is NOT
 // normalized.  Valid intersections will only occur between 0<=t<=1.)
-char vtkBox::IntersectBox (double bounds[6], double origin[3], double dir[3],
+char vtkBox::IntersectBox (double bounds[6], const double origin[3], double dir[3],
                            double coord[3], double& t)
 {
   bool    inside=true;
@@ -511,7 +511,7 @@ int vtkBox::IntersectWithLine(const double bounds[6],
 }
 
 //----------------------------------------------------------------------------
-int vtkBox::
+vtkTypeBool vtkBox::
 IntersectWithPlane(double bounds[6], double origin[3], double normal[3])
 {
   // Evaluate the eight points. If there is a sign change, then there is an
@@ -568,7 +568,7 @@ namespace {
 // number of intersections ranges from [3,6]. The memory layout for xout[18]
 // is consistent with the vtkPoints array and is organized as (xyz, xyz, xyz,
 // xyz, xyz, xyz).
-int vtkBox::
+vtkTypeBool vtkBox::
 IntersectWithPlane(double bounds[6], double origin[3], double normal[3],
                    double xout[18])
 {
@@ -687,7 +687,7 @@ IntersectWithPlane(double bounds[6], double origin[3], double normal[3],
     ++numOutInts;
     do
       {
-        i1++;
+        ++i1;
       }
     while ( i1 != IntPoints.end() && (i1->T - i0->T) < 0.001 );
     i0 = i1;

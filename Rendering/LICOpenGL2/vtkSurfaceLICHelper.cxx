@@ -32,8 +32,12 @@
 #include "vtkCompositeDataSet.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkSurfaceLICComposite.h"
+#include "vtkImageData.h"
+#include "vtkTextureObject.h"
 
 #include <vector>
+
+#define vtkSurfaceLICHelperDEBUG 0
 
 // Description
 // find min/max of unmasked fragments across all regions
@@ -58,8 +62,8 @@ void vtkSurfaceLICHelper::StreamingFindMinMax(
           GL_FLOAT,
           GL_RGBA);
   }
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 0U);
-  fbo->RemoveTexColorAttachment(GL_DRAW_FRAMEBUFFER, 1U);
+  fbo->RemoveColorAttachment(0U);
+  fbo->RemoveColorAttachment(1U);
   fbo->DeactivateDrawBuffers();
   fbo->DeactivateReadBuffer();
   // map search and release each region
@@ -82,7 +86,7 @@ void vtkSurfaceLICHelper::StreamingFindMinMax(
     pbo->Delete();
     pbo = nullptr;
   }
-  #if vtkSurfaceLICMapperDEBUG >= 1
+  #if vtkSurfaceLICHelperDEBUG >= 1
   cerr << "min=" << min << " max=" << max << endl;
   #endif
 }
@@ -376,10 +380,10 @@ bool vtkSurfaceLICHelper::VisibilityTest(double ndcBBox[24])
 // Description:
 // Given world space bounds,
 // compute bounding boxes in clip and normalized device
-// coordinates and perform view frustum visiblity test.
+// coordinates and perform view frustum visibility test.
 // return true if the bounds are visible. If so the passed
 // in extent object is initialized with the corresponding
-//screen space extents.
+// screen space extents.
 bool vtkSurfaceLICHelper::ProjectBounds(
         double PMV[16],
         int viewsize[2],

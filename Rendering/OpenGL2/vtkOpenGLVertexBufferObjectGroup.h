@@ -64,6 +64,7 @@
 #include "vtkObject.h"
 #include <map> // for methods
 #include <vector> // for ivars
+#include <string> // for ivars
 
 class vtkDataArray;
 class vtkOpenGLVertexArrayObject;
@@ -148,7 +149,7 @@ public:
   void AppendDataArray(const char *attribute, vtkDataArray *da, int destType);
 
   /**
-   * using the data arays in this group
+   * using the data arrays in this group
    * build all the VBOs, once this has been called the
    * reference to the data arrays will be freed.
    */
@@ -180,6 +181,8 @@ protected:
 
   std::map<std::string, vtkOpenGLVertexBufferObject*> UsedVBOs;
   std::map<std::string, std::vector<vtkDataArray*> > UsedDataArrays;
+  std::map<std::string, std::map<vtkDataArray*, vtkIdType> > UsedDataArrayMaps;
+  std::map<std::string, vtkIdType> UsedDataArraySizes;
 
 private:
   vtkOpenGLVertexBufferObjectGroup(const vtkOpenGLVertexBufferObjectGroup&) = delete;

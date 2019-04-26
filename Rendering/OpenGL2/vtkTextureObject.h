@@ -58,7 +58,7 @@ public:
 
 // ClampToBorder is not supported in ES 2.0
 // Wrap values.
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
   enum
   {
     ClampToEdge=0,
@@ -210,6 +210,7 @@ public:
   /**
    * Create a 2D depth texture using a raw pointer.
    * This is a blocking call. If you can, use PBO instead.
+   * raw can be null in order to allocate texture without initialization.
    */
   bool CreateDepthFromRaw(unsigned int width, unsigned int height,
                           int internalFormat, int rawType,
@@ -231,7 +232,7 @@ public:
                          int numComps, int dataType, void *data[6]);
 
 // 1D  textures are not supported in ES 2.0 or 3.0
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
 
   /**
    * Create a 1D texture using the PBO.
@@ -315,6 +316,11 @@ public:
                      int internalFormat);
 
   /**
+   * Create a 2D septh stencil texture but does not initialize its values.
+   */
+  bool AllocateDepthStencil(unsigned int width, unsigned int height);
+
+  /**
    * Create a 1D color texture but does not initialize its values.
    * Internal format is deduced from numComps and vtkType.
    */
@@ -325,7 +331,7 @@ public:
    * Internal format is deduced from numComps and vtkType.
    */
   bool Allocate2D(unsigned int width, unsigned int height, int numComps,
-                  int vtkType);
+                  int vtkType, int level = 0);
 
   /**
    * Create a 3D color texture but does not initialize its values.

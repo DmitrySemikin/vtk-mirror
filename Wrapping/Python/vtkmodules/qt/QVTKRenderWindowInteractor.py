@@ -38,6 +38,9 @@ Changes by Alex Tsui, Apr. 2015
 
 Changes by Fabian Wenzel, Jan. 2016
  Support for Python3
+
+Changes by Tobias Hänel, Sep. 2018
+ Support for PySide2
 """
 
 # Check whether a specific PyQt implementation was chosen
@@ -65,14 +68,18 @@ if PyQtImpl is None:
         PyQtImpl = "PyQt5"
     except ImportError:
         try:
-            import PyQt4
-            PyQtImpl = "PyQt4"
+            import PySide2
+            PyQtImpl = "PySide2"
         except ImportError:
             try:
-                import PySide
-                PyQtImpl = "PySide"
+                import PyQt4
+                PyQtImpl = "PyQt4"
             except ImportError:
-                raise ImportError("Cannot load either PyQt or PySide")
+                try:
+                    import PySide
+                    PyQtImpl = "PySide"
+                except ImportError:
+                    raise ImportError("Cannot load either PyQt or PySide")
 
 if PyQtImpl == "PyQt5":
     if QVTKRWIBase == "QGLWidget":
@@ -80,11 +87,24 @@ if PyQtImpl == "PyQt5":
     from PyQt5.QtWidgets import QWidget
     from PyQt5.QtWidgets import QSizePolicy
     from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import QCursor
     from PyQt5.QtCore import Qt
     from PyQt5.QtCore import QTimer
     from PyQt5.QtCore import QObject
     from PyQt5.QtCore import QSize
     from PyQt5.QtCore import QEvent
+elif PyQtImpl == "PySide2":
+    if QVTKRWIBase == "QGLWidget":
+        from PySide2.QtOpenGL import QGLWidget
+    from PySide2.QtWidgets import QWidget
+    from PySide2.QtWidgets import QSizePolicy
+    from PySide2.QtWidgets import QApplication
+    from PySide2.QtGui import QCursor
+    from PySide2.QtCore import Qt
+    from PySide2.QtCore import QTimer
+    from PySide2.QtCore import QObject
+    from PySide2.QtCore import QSize
+    from PySide2.QtCore import QEvent
 elif PyQtImpl == "PyQt4":
     if QVTKRWIBase == "QGLWidget":
         from PyQt4.QtOpenGL import QGLWidget
@@ -379,16 +399,39 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
 
         return ctrl, shift
 
+    @staticmethod
+    def _getPixelRatio():
+        if PyQtImpl in ["PyQt5", "PySide2"]:
+            # Source: https://stackoverflow.com/a/40053864/3388962
+            pos = QCursor.pos()
+            for screen in QApplication.screens():
+                rect = screen.geometry()
+                if rect.contains(pos):
+                    return screen.devicePixelRatio()
+            # Should never happen, but try to find a good fallback.
+            return QApplication.devicePixelRatio()
+        else:
+            # Qt4 seems not to provide any cross-platform means to get the
+            # pixel ratio.
+            return 1.
+
+    def _setEventInformation(self, x, y, ctrl, shift,
+                             key, repeat=0, keysum=None):
+        scale = self._getPixelRatio()
+        self._Iren.SetEventInformation(int(round(x*scale)),
+                                       int(round((self.height()-y-1)*scale)),
+                                       ctrl, shift, key, repeat, keysum)
+
     def enterEvent(self, ev):
         ctrl, shift = self._GetCtrlShift(ev)
-        self._Iren.SetEventInformationFlipY(self.__saveX, self.__saveY,
-                                            ctrl, shift, chr(0), 0, None)
+        self._setEventInformation(self.__saveX, self.__saveY,
+                                  ctrl, shift, chr(0), 0, None)
         self._Iren.EnterEvent()
 
     def leaveEvent(self, ev):
         ctrl, shift = self._GetCtrlShift(ev)
-        self._Iren.SetEventInformationFlipY(self.__saveX, self.__saveY,
-                                            ctrl, shift, chr(0), 0, None)
+        self._setEventInformation(self.__saveX, self.__saveY,
+                                  ctrl, shift, chr(0), 0, None)
         self._Iren.LeaveEvent()
 
     def mousePressEvent(self, ev):
@@ -396,8 +439,8 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         repeat = 0
         if ev.type() == QEvent.MouseButtonDblClick:
             repeat = 1
-        self._Iren.SetEventInformationFlipY(ev.x(), ev.y(),
-                                            ctrl, shift, chr(0), repeat, None)
+        self._setEventInformation(ev.x(), ev.y(),
+                                  ctrl, shift, chr(0), repeat, None)
 
         self._ActiveButton = ev.button()
 
@@ -410,8 +453,8 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
 
     def mouseReleaseEvent(self, ev):
         ctrl, shift = self._GetCtrlShift(ev)
-        self._Iren.SetEventInformationFlipY(ev.x(), ev.y(),
-                                            ctrl, shift, chr(0), 0, None)
+        self._setEventInformation(ev.x(), ev.y(),
+                                  ctrl, shift, chr(0), 0, None)
 
         if self._ActiveButton == Qt.LeftButton:
             self._Iren.LeftButtonReleaseEvent()
@@ -427,8 +470,8 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         self.__saveY = ev.y()
 
         ctrl, shift = self._GetCtrlShift(ev)
-        self._Iren.SetEventInformationFlipY(ev.x(), ev.y(),
-                                            ctrl, shift, chr(0), 0, None)
+        self._setEventInformation(ev.x(), ev.y(),
+                                  ctrl, shift, chr(0), 0, None)
         self._Iren.MouseMoveEvent()
 
     def keyPressEvent(self, ev):
@@ -442,8 +485,8 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         if shift and len(keySym) == 1 and keySym.isalpha():
             keySym = keySym.upper()
 
-        self._Iren.SetEventInformationFlipY(self.__saveX, self.__saveY,
-                                            ctrl, shift, key, 0, keySym)
+        self._setEventInformation(self.__saveX, self.__saveY,
+                                  ctrl, shift, key, 0, keySym)
         self._Iren.KeyPressEvent()
         self._Iren.CharEvent()
 
@@ -454,8 +497,8 @@ class QVTKRenderWindowInteractor(QVTKRWIBaseClass):
         else:
             key = chr(0)
 
-        self._Iren.SetEventInformationFlipY(self.__saveX, self.__saveY,
-                                            ctrl, shift, key, 0, None)
+        self._setEventInformation(self.__saveX, self.__saveY,
+                                  ctrl, shift, key, 0, None)
         self._Iren.KeyReleaseEvent()
 
     def wheelEvent(self, ev):

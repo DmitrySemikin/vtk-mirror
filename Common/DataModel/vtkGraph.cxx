@@ -765,6 +765,19 @@ void vtkGraph::Squeeze()
 }
 
 //----------------------------------------------------------------------------
+unsigned long vtkGraph::GetActualMemorySize()
+{
+  unsigned long size = this->Superclass::GetActualMemorySize();
+  size += this->EdgeData->GetActualMemorySize();
+  size += this->VertexData->GetActualMemorySize();
+  if (this->Points)
+  {
+    size += this->Points->GetActualMemorySize();
+  }
+  return size;
+}
+
+//----------------------------------------------------------------------------
 vtkGraph *vtkGraph::GetData(vtkInformation *info)
 {
   return info? vtkGraph::SafeDownCast(info->Get(DATA_OBJECT())) : nullptr;
@@ -870,7 +883,7 @@ void vtkGraph::BuildEdgeList()
 }
 
 //----------------------------------------------------------------------------
-void vtkGraph::SetEdgePoints(vtkIdType e, vtkIdType npts, double* pts)
+void vtkGraph::SetEdgePoints(vtkIdType e, vtkIdType npts, const double pts[])
 {
   if (vtkDistributedGraphHelper *helper = this->GetDistributedGraphHelper())
   {
@@ -1020,7 +1033,7 @@ double* vtkGraph::GetEdgePoint(vtkIdType e, vtkIdType i)
 }
 
 //----------------------------------------------------------------------------
-void vtkGraph::SetEdgePoint(vtkIdType e, vtkIdType i, double x[3])
+void vtkGraph::SetEdgePoint(vtkIdType e, vtkIdType i, const double x[3])
 {
   if (vtkDistributedGraphHelper *helper = this->GetDistributedGraphHelper())
   {
@@ -1094,7 +1107,7 @@ void vtkGraph::ClearEdgePoints(vtkIdType e)
 }
 
 //----------------------------------------------------------------------------
-void vtkGraph::AddEdgePoint(vtkIdType e, double x[3])
+void vtkGraph::AddEdgePoint(vtkIdType e, const double x[3])
 {
   if (vtkDistributedGraphHelper *helper = this->GetDistributedGraphHelper())
   {

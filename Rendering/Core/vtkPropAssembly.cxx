@@ -109,7 +109,7 @@ int vtkPropAssembly::RenderTranslucentPolygonalGeometry(vtkViewport *ren)
 
 // Description:
 // Does this prop have some translucent polygonal geometry?
-int vtkPropAssembly::HasTranslucentPolygonalGeometry()
+vtkTypeBool vtkPropAssembly::HasTranslucentPolygonalGeometry()
 {
   vtkProp *prop;
   vtkAssemblyPath *path;
@@ -262,7 +262,7 @@ double *vtkPropAssembly::GetBounds()
 
       if ( bounds != nullptr )
       {
-        //  For the purposes of GetBounds, an object is visisble only if
+        //  For the purposes of GetBounds, an object is visible only if
         //  its visibility is on and it has visible parts.
         if (!partVisible)
         {

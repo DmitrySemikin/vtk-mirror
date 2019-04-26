@@ -311,7 +311,7 @@ public:
       int &LocalAssignedCount);
 
     /**
-     * give each one a uniqu ID. We need to use MPI to find out
+     * give each one a unique ID. We need to use MPI to find out
      * who is using which numbers.
      */
     virtual void AssignUniqueIds(
@@ -376,7 +376,7 @@ public:
     int           RequestIndex;
 
     // Track which process we are
-    int           UpdatePiece;
+    int           UpdatePieceId;
     int           UpdateNumPieces;
 
     // Important for Caching of Cells/Ids/Weights etc

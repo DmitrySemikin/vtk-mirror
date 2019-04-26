@@ -30,9 +30,11 @@
 
 #include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
+#include <vector> // for method args
 
 class vtkAssemblyPath;
 class vtkAssemblyPaths;
+class vtkHardwareSelector;
 class vtkMatrix4x4;
 class vtkPropCollection;
 class vtkViewport;
@@ -40,6 +42,7 @@ class vtkWindow;
 class vtkInformation;
 class vtkInformationIntegerKey;
 class vtkInformationDoubleVectorKey;
+class vtkShaderProperty;
 
 class VTKRENDERINGCORE_EXPORT vtkProp : public vtkObject
 {
@@ -285,7 +288,7 @@ public:
    * polygonal geometry will return true.
    * Default implementation return false.
    */
-  virtual int HasTranslucentPolygonalGeometry()
+  virtual vtkTypeBool HasTranslucentPolygonalGeometry()
     { return 0; }
 
   /**
@@ -405,6 +408,14 @@ public:
   virtual bool GetSupportsSelection()
     { return false; }
 
+  /**
+   * allows a prop to update a selections color buffers
+   *
+   */
+  virtual void ProcessSelectorPixelBuffers(
+    vtkHardwareSelector * /* sel */,
+    std::vector<unsigned int> & /* pixeloffsets */) { };
+
   //@{
   /**
    * Get the number of consumers
@@ -420,6 +431,14 @@ public:
   void RemoveConsumer(vtkObject *c);
   vtkObject *GetConsumer(int i);
   int IsConsumer(vtkObject *c);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the shader property.
+   */
+  virtual void SetShaderProperty(vtkShaderProperty *property);
+  virtual vtkShaderProperty *GetShaderProperty();
   //@}
 
 protected:
@@ -445,6 +464,9 @@ protected:
   vtkAssemblyPaths *Paths;
 
   vtkInformation *PropertyKeys;
+
+  // User-defined shader replacement and uniform variables
+  vtkShaderProperty *ShaderProperty;
 
 private:
   vtkProp(const vtkProp&) = delete;

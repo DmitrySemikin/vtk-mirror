@@ -51,6 +51,7 @@
 #include "vtkAbstractMapper3D.h"
 #include "vtkSystemIncludes.h" // For VTK_COLOR_MODE_DEFAULT and _MAP_SCALARS
 #include "vtkSmartPointer.h" // needed for vtkSmartPointer.
+#include <vector> // for method args
 
 #define VTK_RESOLVE_OFF 0
 #define VTK_RESOLVE_POLYGON_OFFSET 1
@@ -64,15 +65,17 @@
 #define VTK_MATERIALMODE_DIFFUSE  2
 #define VTK_MATERIALMODE_AMBIENT_AND_DIFFUSE  3
 
-class vtkWindow;
-class vtkRenderer;
 class vtkActor;
 class vtkDataSet;
 class vtkDataObject;
 class vtkFloatArray;
+class vtkHardwareSelector;
 class vtkImageData;
+class vtkProp;
+class vtkRenderer;
 class vtkScalarsToColors;
 class vtkUnsignedCharArray;
+class vtkWindow;
 
 class VTKRENDERINGCORE_EXPORT vtkMapper : public vtkAbstractMapper3D
 {
@@ -83,7 +86,7 @@ public:
   /**
    * Make a shallow copy of this mapper.
    */
-  void ShallowCopy(vtkAbstractMapper *m);
+  void ShallowCopy(vtkAbstractMapper *m) override;
 
   /**
    * Overload standard modified time function. If lookup table is modified,
@@ -479,6 +482,14 @@ public:
    */
   virtual bool GetSupportsSelection()
     { return false; }
+
+  /**
+   * allows a mapper to update a selections color buffers
+   * Called from a prop which in turn is called from the selector
+   */
+  virtual void ProcessSelectorPixelBuffers(vtkHardwareSelector * /* sel */,
+    std::vector<unsigned int> & /* pixeloffsets */,
+    vtkProp * /* prop */) { };
 
   /**
    * Returns if we can use texture maps for scalar coloring. Note this doesn't

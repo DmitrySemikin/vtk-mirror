@@ -1336,8 +1336,11 @@ int vtkDataSetSurfaceFilter::DataSetExecute(vtkDataSet *input,
           pts->InsertId(i,pt);
         }
         newCellId = output->InsertNextCell(cell->GetCellType(), pts);
-        outputCD->CopyData(cd,cellId,newCellId);
-        this->RecordOrigCellId(newCellId, cellId);
+        if (newCellId > 0)
+        {
+          outputCD->CopyData(cd,cellId,newCellId);
+          this->RecordOrigCellId(newCellId, cellId);
+        }
         break;
       case 3:
         for (j=0; j < cell->GetNumberOfFaces(); j++)
@@ -1359,8 +1362,11 @@ int vtkDataSetSurfaceFilter::DataSetExecute(vtkDataSet *input,
               pts->InsertId(i,pt);
             }
             newCellId = output->InsertNextCell(face->GetCellType(), pts);
-            outputCD->CopyData(cd,cellId,newCellId);
-            this->RecordOrigCellId(newCellId, cellId);
+            if (newCellId > 0)
+            {
+              outputCD->CopyData(cd,cellId,newCellId);
+              this->RecordOrigCellId(newCellId, cellId);
+            }
           }
         }
         break;
@@ -1757,6 +1763,26 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(vtkDataSet *dataSetInput,
         this->InsertQuadInHash(ids[5], ids[0], ids[6], ids[11], cellId);
         this->InsertPolygonInHash (ids, 6, cellId);
         this->InsertPolygonInHash (&ids[6], 6, cellId);
+        break;
+
+      case VTK_PYRAMID:
+        pointIdList = cellIter->GetPointIds();
+        ids = pointIdList->GetPointer(0);
+        this->InsertQuadInHash(ids[3], ids[2], ids[1], ids[0], cellId);
+        this->InsertTriInHash(ids[0], ids[1], ids[4], cellId);
+        this->InsertTriInHash(ids[1], ids[2], ids[4], cellId);
+        this->InsertTriInHash(ids[2], ids[3], ids[4], cellId);
+        this->InsertTriInHash(ids[3], ids[0], ids[4], cellId);
+        break;
+
+      case VTK_WEDGE:
+        pointIdList = cellIter->GetPointIds();
+        ids = pointIdList->GetPointer(0);
+        this->InsertQuadInHash(ids[0], ids[2], ids[5], ids[3], cellId);
+        this->InsertQuadInHash(ids[1], ids[0], ids[3], ids[4], cellId);
+        this->InsertQuadInHash(ids[2], ids[1], ids[4], ids[5], cellId);
+        this->InsertTriInHash(ids[0], ids[1], ids[2], cellId);
+        this->InsertTriInHash(ids[3], ids[5], ids[4], cellId);
         break;
 
       case VTK_PIXEL:
@@ -2432,7 +2458,7 @@ void vtkDataSetSurfaceFilter::InsertPolygonInHash(vtkIdType* ids,
       {
         // if the first two points match loop through forwards
         // checking all points
-        if (tab[1] == quad->ptArray[1])
+        if (numPts > 1 && tab[1] == quad->ptArray[1])
         {
           for (int i = 2; i < numPts; ++i)
           {

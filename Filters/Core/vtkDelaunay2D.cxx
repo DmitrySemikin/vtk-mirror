@@ -950,6 +950,7 @@ int vtkDelaunay2D::RequestData(
     if (this->Transform)
     {
       this->Transform->UnRegister(this);
+      this->Transform->Delete();
       this->Transform = nullptr;
     }
   }
@@ -1417,7 +1418,7 @@ void vtkDelaunay2D::FillPolygons(vtkCellArray *polys, int *triUse)
               triUse[neiId] = 0;
               nextFront->InsertNextId(neiId);
             }
-          }//mark all neigbors
+          }//mark all neighbors
         }//for all edges of cell
       } //all cells in front
 
@@ -1459,8 +1460,8 @@ int vtkDelaunay2D::FillInputPortInformation(int port, vtkInformation* info)
 }
 
 //----------------------------------------------------------------------------
-vtkAbstractTransform * vtkDelaunay2D::ComputeBestFittingPlane(
-  vtkPointSet *input)
+vtkAbstractTransform* vtkDelaunay2D::
+ComputeBestFittingPlane(vtkPointSet *input)
 {
   vtkIdType numPts=input->GetNumberOfPoints();
   double m[9], v[3], x[3];
@@ -1478,6 +1479,32 @@ vtkAbstractTransform * vtkDelaunay2D::ComputeBestFittingPlane(
   for (i=0; i<3; i++)
   {
     normal[i] = 0.0;
+  }
+
+  //  Get minimum width of bounding box.
+  const double *bounds = input->GetBounds();
+  double length = input->GetLength();
+  int dir = 0;
+  double w;
+
+  for (w=length, i=0; i<3; i++)
+  {
+    normal[i] = 0.0;
+    if ( (bounds[2*i+1] - bounds[2*i]) < w )
+    {
+      dir = i;
+      w = bounds[2*i+1] - bounds[2*i];
+    }
+  }
+
+  //  If the bounds is perpendicular to one of the axes, then can
+  //  quickly compute normal.
+  //
+  normal[dir] = 1.0;
+  bool normal_computed = false;
+  if (w <= (length*tolerance))
+  {
+    normal_computed = true;
   }
 
   //  Compute least squares approximation.
@@ -1516,7 +1543,7 @@ vtkAbstractTransform * vtkDelaunay2D::ComputeBestFittingPlane(
   //  Solve linear system using Kramers rule
   //
   c1 = m; c2 = m+3; c3 = m+6;
-  if ( (det = vtkMath::Determinant3x3 (c1,c2,c3)) > tolerance )
+  if (!normal_computed && (det = vtkMath::Determinant3x3 (c1,c2,c3)) > tolerance )
   {
     normal[0] =  vtkMath::Determinant3x3 (v,c2,c3) / det;
     normal[1] =  vtkMath::Determinant3x3 (c1,v,c3) / det;

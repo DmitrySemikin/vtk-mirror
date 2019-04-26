@@ -448,15 +448,15 @@ int vtkImageDataLIC2D::RequestData(
     drawFbo->SetContext(this->Context);
     drawFbo->SaveCurrentBindings();
     drawFbo->Bind(GL_FRAMEBUFFER);
-    drawFbo->AddColorAttachment(GL_FRAMEBUFFER, 0U, magVectorTex);
+    drawFbo->AddColorAttachment(0U, magVectorTex);
     drawFbo->ActivateDrawBuffer(0U);
     //drawFbo->AddColorAttachment(vtkgl::FRAMEBUFFER_EXT, 0U, vectorTex);
     //drawFbo->ActivateReadBuffer(0U);
     drawFbo->CheckFrameBufferStatus(GL_FRAMEBUFFER);
     drawFbo->InitializeViewport(magVectorSize[0], magVectorSize[1]);
 
-    this->Context->GetState()->glClearColor(0.0, 0.0, 0.0, 0.0);
-    this->Context->GetState()->glClear(GL_COLOR_BUFFER_BIT);
+    this->Context->GetState()->vtkglClearColor(0.0, 0.0, 0.0, 0.0);
+    this->Context->GetState()->vtkglClear(GL_COLOR_BUFFER_BIT);
 
     float tcoords[] = {
       0.0f, 0.0f,
@@ -624,7 +624,7 @@ int vtkImageDataLIC2D::RequestData(
   #endif
 
   // transfer lic from texture to vtk array
-  vtkIdType nOutTups = magLicExtent.Size();
+  vtkIdType nOutTups = static_cast<vtkIdType>(magLicExtent.Size());
   vtkFloatArray *licOut = vtkFloatArray::New();
   licOut->SetNumberOfComponents(3);
   licOut->SetNumberOfTuples(nOutTups);

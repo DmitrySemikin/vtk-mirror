@@ -35,6 +35,7 @@
 
 class vtkIdList;
 class vtkOpenGLBufferObject;
+class vtkOpenGLFramebufferObject;
 class vtkOpenGLHardwareSupport;
 class vtkOpenGLShaderCache;
 class vtkOpenGLVertexBufferObjectCache;
@@ -52,6 +53,11 @@ class VTKRENDERINGOPENGL2_EXPORT vtkOpenGLRenderWindow : public vtkRenderWindow
 public:
   vtkTypeMacro(vtkOpenGLRenderWindow, vtkRenderWindow);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+
+  /**
+   * Begin the rendering process.
+   */
+  void Start(void) override;
 
   /**
    * What rendering backend has the user requested
@@ -127,7 +133,7 @@ public:
   void ActivateTexture(vtkTextureObject *);
 
   /**
-   * Deactive a previously activated texture
+   * Deactivate a previously activated texture
    */
   void DeactivateTexture(vtkTextureObject *);
 
@@ -152,6 +158,13 @@ public:
    */
   int GetColorBufferSizes(int *rgba) override;
 
+  /**
+   * Get the internal format of current attached texture or render buffer.
+   * attachmentPoint is the index of attachment.
+   * Returns 0 if not able to determine.
+   */
+  int GetColorBufferInternalFormat(int attachmentPoint);
+
   //@{
   /**
    * Set the size of the window in screen coordinates in pixels.
@@ -170,14 +183,6 @@ public:
 
   // Initialize VTK for rendering in a new OpenGL context
   virtual void OpenGLInitContext();
-
-  //@{
-  /**
-   * Get if the context includes opengl core profile 3.2 support
-   */
-  static bool GetContextSupportsOpenGL32();
-  void SetContextSupportsOpenGL32(bool val);
-  //@}
 
   /**
    * Get the major and minor version numbers of the OpenGL context we are using
@@ -261,9 +266,9 @@ public:
 
   //@{
   /**
-   * Returns the current default FBO (0 when OffScreenRendering is inactive).
+   * Returns the offscreen framebuffer object if any
    */
-  vtkGetMacro(FrameBufferObject, unsigned int);
+  vtkGetObjectMacro(OffScreenFramebuffer, vtkOpenGLFramebufferObject);
   //@}
 
   /**
@@ -336,15 +341,6 @@ public:
     return this->OpenGLSupportMessage;
   }
 
-  // Create and bind offscreen rendering buffers without destroying the current
-  // OpenGL context. This allows to temporary switch to offscreen rendering
-  // (ie. to make a screenshot even if the window is hidden).
-  // Return if the creation was successful (1) or not (0).
-  // Note: This function requires that the device supports OpenGL framebuffer extension.
-  // The function has no effect if OffScreenRendering is ON.
-  int SetUseOffScreenBuffers(bool offScreen) override;
-  bool GetUseOffScreenBuffers() override;
-
   /**
    * Does this render window support OpenGL? 0-false, 1-true
    */
@@ -414,7 +410,7 @@ public:
    * Set the number of vertical syncs required between frames.
    * A value of 0 means swap buffers as quickly as possible
    * regardless of the vertical refresh. A value of 1 means swap
-   * buffers in sync with the vertical refresh to elimiate tearing.
+   * buffers in sync with the vertical refresh to eliminate tearing.
    * A value of -1 means use a value of 1 unless we missed a frame
    * in which case swap immediately. Returns true if the call
    * succeeded.
@@ -430,6 +426,32 @@ public:
   // It consists of normalized display
   // coordinates for a quad and tcoords
   vtkOpenGLBufferObject *GetTQuad2DVBO();
+
+  // Activate and return thje texture unit for a generic 2d 64x64
+  // float greyscale noise texture ranging from 0 to 1. The texture is
+  // generated using PerlinNoise.  This textur eunit will automatically
+  // be deactivated at the end of the render process.
+  int GetNoiseTextureUnit();
+
+  /**
+   * Update the system, if needed, due to stereo rendering. For some stereo
+   * methods, subclasses might need to switch some hardware settings here.
+   */
+  void StereoUpdate() override;
+
+  /**
+   * Intermediate method performs operations required between the rendering
+   * of the left and right eye.
+   */
+  void StereoMidpoint() override;
+
+  /**
+   * Handle opengl specific code and calls superclass
+   */
+  void Render() override;
+
+  // does the current read buffer require resolving for reading pixels
+  bool GetCurrentBufferNeedsResolving();
 
 protected:
   vtkOpenGLRenderWindow();
@@ -454,45 +476,16 @@ protected:
   virtual int ReadPixels(const vtkRecti& rect, int front, int glFormat, int glType, void* data, int right=0);
 
   /**
-   * Create an offScreen window based on OpenGL framebuffer extension.
+   * Create the offScreen framebuffer
    * Return if the creation was successful or not.
    * \pre positive_width: width>0
    * \pre positive_height: height>0
    * \pre not_initialized: !OffScreenUseFrameBuffer
    * \post valid_result: (result==0 || result==1)
-   * && (result implies OffScreenUseFrameBuffer)
    */
-  int CreateHardwareOffScreenWindow(int width, int height);
-
-  int CreateHardwareOffScreenBuffers(int width, int height, bool bind = false);
-  void BindHardwareOffScreenBuffers();
-
-  /**
-   * Destroy an offscreen window based on OpenGL framebuffer extension.
-   * \pre initialized: OffScreenUseFrameBuffer
-   * \post destroyed: !OffScreenUseFrameBuffer
-   */
-  void DestroyHardwareOffScreenWindow();
-
-  void UnbindHardwareOffScreenBuffers();
-  void DestroyHardwareOffScreenBuffers();
-
-  /**
-   * Flag telling if a framebuffer-based offscreen is currently in use.
-   */
-  int OffScreenUseFrameBuffer;
-
-  //@{
-  /**
-   * Variables used by the framebuffer-based offscreen method.
-   */
-  int NumberOfFrameBuffers;
-  unsigned int TextureObjects[4]; // really GLuint
-  unsigned int FrameBufferObject; // really GLuint
-  unsigned int DepthRenderBufferObject; // really GLuint
-  int HardwareBufferSize[2];
-  bool HardwareOffScreenBuffersBind;
-  //@}
+  int CreateOffScreenFramebuffer(int width, int height);
+  vtkOpenGLFramebufferObject *OffScreenFramebuffer;
+  bool OffScreenFramebufferBound;
 
   /**
    * Create a not-off-screen window.
@@ -556,6 +549,9 @@ protected:
 
   // used for fast quad rendering
   vtkOpenGLBufferObject *TQuad2DVBO;
+
+  // noise texture
+  vtkTextureObject *NoiseTextureObject;
 
 private:
   vtkOpenGLRenderWindow(const vtkOpenGLRenderWindow&) = delete;

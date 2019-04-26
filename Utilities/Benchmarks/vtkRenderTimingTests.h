@@ -55,12 +55,12 @@ class surfaceTest : public vtkRTTest
     this->WithNormals = withNormals;
   }
 
-  const char *GetSummaryResultName() { return "Mtris/sec"; }
+  const char *GetSummaryResultName() override { return "Mtris/sec"; }
 
-  const char *GetSecondSummaryResultName() { return "Mtris"; }
+  const char *GetSecondSummaryResultName() override { return "Mtris"; }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int ures, vres;
     ats->GetSequenceNumbers(ures,vres);
@@ -159,12 +159,12 @@ class glyphTest : public vtkRTTest
   {
   }
 
-  const char *GetSummaryResultName() { return "Mtris/sec"; }
+  const char *GetSummaryResultName() override { return "Mtris/sec"; }
 
-  const char *GetSecondSummaryResultName() { return "triangles"; }
+  const char *GetSecondSummaryResultName() override { return "triangles"; }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int res1, res2, res3, res4;
     ats->GetSequenceNumbers(res1, res2, res3, res4);
@@ -247,7 +247,6 @@ class glyphTest : public vtkRTTest
 };
 
 
-#ifdef HAVE_CHEMISTRY
 /*=========================================================================
 Define a test for molecules
 =========================================================================*/
@@ -257,8 +256,6 @@ Define a test for molecules
 #include "vtkPointLocator.h"
 #include "vtkMath.h"
 
-VTK_MODULE_INIT(vtkDomainsChemistryOpenGL2);
-
 class moleculeTest : public vtkRTTest
 {
   public:
@@ -267,14 +264,14 @@ class moleculeTest : public vtkRTTest
     this->AtomsOnly = atomsOnly;
   }
 
-  const char *GetSummaryResultName() {
+  const char *GetSummaryResultName() override {
     return this->AtomsOnly ? "Atoms/sec" : "Atoms+Bonds/sec"; }
 
-  const char *GetSecondSummaryResultName() {
+  const char *GetSecondSummaryResultName() override {
     return this->AtomsOnly ? "Atoms" : "Atoms+Bonds"; }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int res1;
     ats->GetSequenceNumbers(res1);
@@ -385,7 +382,6 @@ class moleculeTest : public vtkRTTest
   protected:
     bool AtomsOnly;
 };
-#endif
 
 /*=========================================================================
 Define a test for volume rendering
@@ -406,18 +402,18 @@ class volumeTest : public vtkRTTest
     this->WithShading = withShading;
     }
 
-  const char *GetSummaryResultName()
+  const char *GetSummaryResultName() override
     {
     return "Mvoxels/sec" ;
     }
 
-  const char *GetSecondSummaryResultName()
+  const char *GetSecondSummaryResultName() override
     {
     return "Mvoxels";
     }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int res1, res2, res3;
     ats->GetSequenceNumbers(res1,res2,res3);
@@ -529,12 +525,12 @@ class depthPeelingTest : public vtkRTTest
   {
   }
 
-  const char *GetSummaryResultName() { return "subsequent frame time"; }
+  const char *GetSummaryResultName() override { return "subsequent frame time"; }
 
-  const char *GetSecondSummaryResultName() { return "first frame time"; }
+  const char *GetSecondSummaryResultName() override { return "first frame time"; }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int ures, vres;
     ats->GetSequenceNumbers(ures,vres);
@@ -655,12 +651,12 @@ class manyActorTest : public vtkRTTest
   {
   }
 
-  const char *GetSummaryResultName() { return "actors"; }
+  const char *GetSummaryResultName() override { return "actors"; }
 
-  const char *GetSecondSummaryResultName() { return "frames/sec"; }
+  const char *GetSecondSummaryResultName() override { return "frames/sec"; }
 
-  virtual vtkRTTestResult Run(vtkRTTestSequence *ats,
-      int /*argc*/, char * /* argv */[])
+  vtkRTTestResult Run(vtkRTTestSequence *ats,
+      int /*argc*/, char * /* argv */[]) override
     {
     int ures, vres;
     ats->GetSequenceNumbers(ures,vres);
@@ -743,3 +739,4 @@ class manyActorTest : public vtkRTTest
 };
 
 #endif
+// VTK-HeaderTest-Exclude: vtkRenderTimingTests.h

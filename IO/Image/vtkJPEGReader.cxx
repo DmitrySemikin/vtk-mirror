@@ -90,9 +90,9 @@ extern "C" void skip_input_data (j_decompress_ptr cinfo, long num_bytes)
 
 // Read JPEG image from a memory buffer
 #if JPEG_LIB_VERSION >= 80 || defined(MEM_SRCDST_SUPPORTED)
-extern "C" void jMemSrc (j_decompress_ptr cinfo, void* buffer, long nbytes)
+extern "C" void jMemSrc (j_decompress_ptr cinfo, const void* buffer, long nbytes)
 #else
-extern "C" void jpeg_mem_src (j_decompress_ptr cinfo, void* buffer, long nbytes)
+extern "C" void jpeg_mem_src (j_decompress_ptr cinfo, const void* buffer, long nbytes)
 #endif
 {
   cinfo->src = (struct jpeg_source_mgr *)
@@ -172,7 +172,7 @@ void vtkJPEGReader::ExecuteInformation()
     else
     {
       vtkErrorWithObjectMacro(this, "libjpeg could not read file from memory buffer: "
-                              << static_cast<void*>(this->MemoryBuffer));
+                              << (this->MemoryBuffer ? "<ptr>" : "(null)"));
     }
     return;
   }
@@ -300,14 +300,18 @@ int vtkJPEGReaderUpdate2(vtkJPEGReader *self, OT *outPtr,
     JDIMENSION linesRead = jpeg_read_scanlines(&cinfo, row_pointers, maxChunk);
 
     // copy the data into the outPtr
-    OT *outPtr2 = outPtr + (cinfo.output_height - cinfo.output_scanline)*outInc[1];
+    long destLine = cinfo.output_height - cinfo.output_scanline;
     for (unsigned int i = 0; i < linesRead; ++i)
     {
-      memcpy(outPtr2,
-             row_pointers[linesRead - i - 1]
-             + outExt[0]*cinfo.output_components,
-             outSize);
-      outPtr2 += outInc[1];
+      if (destLine >= outExt[2] && destLine <= outExt[3])
+      {
+        OT *outPtr2 = outPtr + (destLine - outExt[2])*outInc[1];
+        memcpy(outPtr2,
+               row_pointers[linesRead - i - 1]
+               + outExt[0]*cinfo.output_components,
+               outSize);
+      }
+      destLine++;
     }
   }
 

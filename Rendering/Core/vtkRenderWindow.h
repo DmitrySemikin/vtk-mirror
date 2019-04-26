@@ -301,7 +301,7 @@ public:
    * actually rendering in stereo mode.
    */
   vtkGetMacro(StereoType,int);
-  vtkSetMacro(StereoType,int);
+  void SetStereoType(int);
   void SetStereoTypeToCrystalEyes()
     {this->SetStereoType(VTK_STEREO_CRYSTAL_EYES);}
   void SetStereoTypeToRedBlue()
@@ -478,9 +478,15 @@ public:
   virtual int CheckAbortStatus();
   //@}
 
-  vtkGetMacro(IsPicking,vtkTypeBool);
-  vtkSetMacro(IsPicking,vtkTypeBool);
-  vtkBooleanMacro(IsPicking,vtkTypeBool);
+  //@{
+  /**
+   * @deprecated in VTK 8.3
+   */
+  VTK_LEGACY(vtkTypeBool GetIsPicking());
+  VTK_LEGACY(void SetIsPicking(vtkTypeBool));
+  VTK_LEGACY(void IsPickingOn());
+  VTK_LEGACY(void IsPickingOff());
+  //@}
 
   /**
    * Check to see if a mouse button has been pressed.  All other events
@@ -555,9 +561,9 @@ public:
   void *GetGenericParentId() override = 0;
   void *GetGenericContext() override = 0;
   void *GetGenericDrawable() override = 0;
-  void SetWindowInfo(char *) override = 0;
-  virtual void SetNextWindowInfo(char *) = 0;
-  void SetParentInfo(char *) override = 0;
+  void SetWindowInfo(const char *) override = 0;
+  virtual void SetNextWindowInfo(const char *) = 0;
+  void SetParentInfo(const char *) override = 0;
   //@}
 
   /**
@@ -669,17 +675,6 @@ public:
     return 0;
   }
 
-  /**
-   * Create and bind offscreen rendering buffers without destroying the current
-   * OpenGL context. This allows to temporary switch to offscreen rendering
-   * (ie. to make a screenshot even if the window is hidden).
-   * Return if the creation was successful (1) or not (0).
-   * Note: This function requires that the device supports OpenGL framebuffer extension.
-   * The function has no effect if OffScreenRendering is ON.
-   */
-  virtual int SetUseOffScreenBuffers(bool) { return 0; }
-  virtual bool GetUseOffScreenBuffers() { return false; }
-
   //@{
   /**
    * Set/Get if we want this window to use the sRGB color space.
@@ -721,7 +716,6 @@ protected:
   int   NeverRendered;
   int   NumberOfLayers;
   int CurrentCursor;
-  vtkTypeBool IsPicking;
   float AnaglyphColorSaturation;
   int AnaglyphColorMask[2];
   int MultiSamples;

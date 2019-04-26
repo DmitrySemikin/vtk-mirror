@@ -40,7 +40,6 @@ vtkAbstractObjectFactoryNewMacro(vtkRenderWindow)
 // buffering turned on, stereo capable off.
 vtkRenderWindow::vtkRenderWindow()
 {
-  this->IsPicking = 0;
   this->Borders = 1;
   this->FullScreen = 0;
   this->OldScreen[0] = this->OldScreen[1] = 0;
@@ -78,7 +77,8 @@ vtkRenderWindow::vtkRenderWindow()
   this->UseSRGBColorSpace = false;
 
 #ifdef VTK_DEFAULT_RENDER_WINDOW_OFFSCREEN
-  this->OffScreenRendering = 1;
+  this->ShowWindow = false;
+  this->UseOffScreenBuffers = true;
 #endif
   this->DeviceIndex = 0;
   this->SharedRenderWindow = nullptr;
@@ -190,6 +190,19 @@ void vtkRenderWindow::SetDesiredUpdateRate(double rate)
   }
 }
 
+//----------------------------------------------------------------------------
+void vtkRenderWindow::SetStereoType(int stereoType)
+{
+  if (this->StereoType == stereoType)
+  {
+    return;
+  }
+
+  this->StereoType = stereoType;
+  this->InvokeEvent(vtkCommand::WindowStereoTypeChangedEvent);
+
+  this->Modified();
+}
 
 //----------------------------------------------------------------------------
 //
@@ -411,7 +424,6 @@ void vtkRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 
   os << indent << "Borders: " << (this->Borders ? "On\n":"Off\n");
-  os << indent << "IsPicking: " << (this->IsPicking ? "On\n":"Off\n");
   os << indent << "Double Buffer: " << (this->DoubleBuffer ? "On\n":"Off\n");
   os << indent << "Full Screen: " << (this->FullScreen ? "On\n":"Off\n");
   os << indent << "Renderers:\n";
@@ -456,14 +468,14 @@ void vtkRenderWindow::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 // Update the system, if needed, due to stereo rendering. For some stereo
 // methods, subclasses might need to switch some hardware settings here.
-void vtkRenderWindow::StereoUpdate(void)
+void vtkRenderWindow::StereoUpdate()
 {
 }
 
 //----------------------------------------------------------------------------
 // Intermediate method performs operations required between the rendering
 // of the left and right eye.
-void vtkRenderWindow::StereoMidpoint(void)
+void vtkRenderWindow::StereoMidpoint()
 {
   vtkRenderer * aren;
   /* For IceT stereo */
@@ -489,7 +501,7 @@ void vtkRenderWindow::StereoMidpoint(void)
 //----------------------------------------------------------------------------
 // Handles work required once both views have been rendered when using
 // stereo rendering.
-void vtkRenderWindow::StereoRenderComplete(void)
+void vtkRenderWindow::StereoRenderComplete()
 {
   switch (this->StereoType)
   {
@@ -775,7 +787,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
         // set up the pointers
         // right starts on x = 1 on even scanlines
         // right starts on x = 0 on odd scanlines
-        if(y % 2) {
+        if (y % 2 == 0) {
           left = sleft + y * 3 * size[0] + 3;
           right = sright + y * 3 * size[0] + 3;
         }
@@ -865,7 +877,7 @@ void vtkRenderWindow::StereoRenderComplete(void)
 }
 
 //----------------------------------------------------------------------------
-void vtkRenderWindow::CopyResultFrame(void)
+void vtkRenderWindow::CopyResultFrame()
 {
   if (this->ResultFrame)
   {
@@ -984,3 +996,23 @@ const char *vtkRenderWindow::GetStereoTypeAsString()
       return "";
   }
 }
+
+#if !defined(VTK_LEGACY_REMOVE)
+vtkTypeBool vtkRenderWindow::GetIsPicking()
+{
+  VTK_LEGACY_BODY(vtkRenderWindow::GetIsPicking, "VTK 8.3");
+  return false;
+}
+void vtkRenderWindow::SetIsPicking(vtkTypeBool)
+{
+  VTK_LEGACY_BODY(vtkRenderWindow::SetIsPicking, "VTK 8.3");
+}
+void vtkRenderWindow::IsPickingOn()
+{
+  VTK_LEGACY_BODY(vtkRenderWindow::IsPickingOn, "VTK 8.3");
+}
+void vtkRenderWindow::IsPickingOff()
+{
+  VTK_LEGACY_BODY(vtkRenderWindow::IsPickingOff, "VTK 8.3");
+}
+#endif

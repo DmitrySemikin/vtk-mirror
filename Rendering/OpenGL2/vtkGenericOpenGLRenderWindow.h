@@ -79,6 +79,9 @@ public:
   void SetBackRightBuffer(unsigned int);
   // }@
 
+  void SetDefaultFrameBufferId(unsigned int);
+  void SetOwnContext(int);
+
   //! no-op (for API compat with OpenGL1).
   void PushState() {}
   //! no-op (for API compat with OpenGL1).
@@ -94,17 +97,16 @@ public:
   void* GetGenericParentId() override;
   void* GetGenericContext() override;
   void* GetGenericDrawable() override;
-  void SetWindowInfo(char*) override;
-  void SetParentInfo(char*) override;
+  void SetWindowInfo(const char*) override;
+  void SetParentInfo(const char*) override;
   int* GetScreenSize() VTK_SIZEHINT(2) override;
-  void Start() override;
   void HideCursor() override;
   void ShowCursor() override;
   void SetFullScreen(vtkTypeBool) override;
   void WindowRemap() override;
   int  GetEventPending() override;
   void SetNextWindowId(void*) override;
-  void SetNextWindowInfo(char*) override;
+  void SetNextWindowInfo(const char*) override;
   void CreateAWindow() override;
   void DestroyWindow() override;
   // }@
@@ -135,7 +137,7 @@ public:
 
   //@{
   /**
-   * Specificy a non-zero line width to force the hardware line width determined
+   * Specify a non-zero line width to force the hardware line width determined
    * by the window.
    */
   vtkSetClampMacro(ForceMaximumHardwareLineWidth, float, 0, VTK_FLOAT_MAX);
@@ -157,12 +159,23 @@ public:
   vtkSetVector2Macro(ScreenSize,int);
 
   /**
-  * Overridden to invoke vtkCommand::StartPickEvent and
-  * vtkCommand::EndPickEvent.
-  */
-  void SetIsPicking(vtkTypeBool isPicking) override;
+   * Overridden to invoke vtkCommand::CursorChangedEvent
+   */
+  void SetCurrentCursor(int cShape) override;
+
+  // since we are using an external context it must
+  // specify if the window is mapped or not.
+  vtkSetMacro(Mapped, vtkTypeBool);
 
 protected:
+  /**
+   * Overridden to not attempt to read pixels if `this->ReadyForRendering` is
+   * false. In that case, this method will simply return `VTK_ERROR`. Otherwise,
+   * the superclass' implementation will be called.
+   */
+  int ReadPixels(
+    const vtkRecti& rect, int front, int glFormat, int glType, void* data, int right) override;
+
   int DirectStatus;
   int SupportsOpenGLStatus;
   bool CurrentStatus;

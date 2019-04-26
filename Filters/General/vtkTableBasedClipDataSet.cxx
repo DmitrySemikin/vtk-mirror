@@ -105,7 +105,7 @@ public:
   vtkTableBasedClipperEdgeHashEntry();
   virtual ~vtkTableBasedClipperEdgeHashEntry() = default;
 
-  int      GetPointId(void) { return ptId; };
+  int      GetPointId() { return ptId; };
   void     SetInfo( int, int, int );
   void     SetNext( vtkTableBasedClipperEdgeHashEntry * n ) { next = n; };
   bool     IsMatch( int i1, int i2 )
@@ -1482,13 +1482,13 @@ void vtkTableBasedClipperVolumeFromVolume::
   int cellId = 0;
   int nlists;
 
-  int ncells    = 0;
-  int conn_size = 0;
+  vtkIdType ncells    = 0;
+  vtkIdType conn_size = 0;
   for ( i = 0; i < nshapes; i ++ )
   {
-    int ns     = shapes[i]->GetTotalNumberOfShapes();
+    vtkIdType ns = shapes[i]->GetTotalNumberOfShapes();
     ncells    += ns;
-    conn_size += ( shapes[i]->GetShapeSize() + 1 ) * ns;
+    conn_size += static_cast<vtkIdType>( shapes[i]->GetShapeSize() + 1 ) * ns;
   }
 
   outCD->CopyAllocate( inCD, ncells );
@@ -1506,7 +1506,7 @@ void vtkTableBasedClipperVolumeFromVolume::
   vtkIdType * cl = cellLocations->GetPointer( 0 );
 
   vtkIdType ids[1024]; // 8 (for hex) should be max, but...
-  int current_index = 0;
+  vtkIdType current_index = 0;
   for ( i = 0; i < nshapes; i ++ )
   {
     const int * list;
@@ -1743,6 +1743,7 @@ int vtkTableBasedClipDataSet::RequestData( vtkInformation * vtkNotUsed( request 
   cpyInput.TakeReference( theInput->NewInstance() );
   cpyInput->CopyStructure( theInput  );
   cpyInput->GetCellData()->PassData( theInput->GetCellData() );
+  cpyInput->GetFieldData()->PassData( theInput->GetFieldData() );
   cpyInput->GetPointData()
           ->InterpolateAllocate( theInput->GetPointData(), 0, 0, 1 );
 
@@ -1884,10 +1885,12 @@ int vtkTableBasedClipDataSet::RequestData( vtkInformation * vtkNotUsed( request 
   }
 
   outputUG->Squeeze();
+  outputUG->GetFieldData()->PassData(cpyInput->GetFieldData());
 
   if (clippedOutputUG)
   {
     clippedOutputUG->Squeeze();
+    clippedOutputUG->GetFieldData()->PassData(cpyInput->GetFieldData());
   }
 
   if ( pScalars )

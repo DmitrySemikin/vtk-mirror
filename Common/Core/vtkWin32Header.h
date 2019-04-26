@@ -86,7 +86,7 @@ Do_not_include_vtkWin32Header_directly_vtkSystemIncludes_includes_it;
 # endif
   // Enable workaround for windows header name mangling.
   // See VTK/Utilities/Upgrading/README.WindowsMangling.txt for details.
-#if !defined(__VTK_WRAP__)
+#if !defined(__VTK_WRAP__) && !defined(__WRAP_GCCXML__)
 # define VTK_WORKAROUND_WINDOWS_MANGLE
 #endif
 
@@ -120,19 +120,6 @@ Do_not_include_vtkWin32Header_directly_vtkSystemIncludes_includes_it;
 #  pragma warning ( disable : 4706 ) /* assignment in conditional expression */
 #  pragma warning ( disable : 4710 ) /* function not inlined */
 #  pragma warning ( disable : 4786 ) /* identifier truncated in debug info */
-# endif
-#endif
-
-#if defined(__BORLANDC__) && (__BORLANDC__ < 0x660)
-  // Disable Borland compiler warning messages that often occur in valid code.
-# if !defined(VTK_DISPLAY_WIN32_WARNINGS)
-#  pragma warn -8004 /* assigned a value that is never used */
-#  pragma warn -8008 /* condition is always false */
-#  pragma warn -8026 /* funcs w/class-by-value args not expanded inline */
-#  pragma warn -8027 /* functions w/ do/for/while not expanded inline */
-#  pragma warn -8060 /* possibly incorrect assignment */
-#  pragma warn -8066 /* unreachable code */
-#  pragma warn -8072 /* suspicious pointer arithmetic */
 # endif
 #endif
 

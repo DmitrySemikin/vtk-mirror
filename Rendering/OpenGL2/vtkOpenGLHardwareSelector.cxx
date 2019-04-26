@@ -77,11 +77,11 @@ void vtkOpenGLHardwareSelector::PreCapturePass(int pass)
 
 #ifdef GL_MULTISAMPLE
   this->OriginalMultisample = ostate->GetEnumState(GL_MULTISAMPLE);
-  ostate->glDisable(GL_MULTISAMPLE);
+  ostate->vtkglDisable(GL_MULTISAMPLE);
 #endif
 
   this->OriginalBlending = ostate->GetEnumState(GL_BLEND);
-  ostate->glDisable(GL_BLEND);
+  ostate->vtkglDisable(GL_BLEND);
 }
 
 //----------------------------------------------------------------------------
@@ -113,11 +113,11 @@ void vtkOpenGLHardwareSelector::BeginSelection()
     // Disable multisample, and blending before writing the zbuffer
 #ifdef GL_MULTISAMPLE
     vtkOpenGLState::ScopedglEnableDisable msaver(ostate, GL_MULTISAMPLE);
-    ostate->glDisable(GL_MULTISAMPLE);
+    ostate->vtkglDisable(GL_MULTISAMPLE);
 #endif
 
     vtkOpenGLState::ScopedglEnableDisable bsaver(ostate, GL_BLEND);
-    ostate->glDisable(GL_BLEND);
+    ostate->vtkglDisable(GL_BLEND);
 
     rwin->Render();
     this->Renderer->PreserveDepthBufferOn();
@@ -254,41 +254,6 @@ void vtkOpenGLHardwareSelector::RenderCompositeIndex(unsigned int index)
     float color[3];
     vtkHardwareSelector::Convert(static_cast<int>(0xffffff & index), color);
     this->SetPropColorValue(color);
-  }
-}
-
-//----------------------------------------------------------------------------
-// TODO: make inline
-void vtkOpenGLHardwareSelector::RenderAttributeId(vtkIdType attribid)
-{
-  if (attribid < 0)
-  {
-    vtkErrorMacro("Invalid id: " << attribid);
-    return;
-  }
-
-  this->MaxAttributeId = (attribid > this->MaxAttributeId)? attribid :
-    this->MaxAttributeId;
-
-  if (this->CurrentPass < ID_LOW24 || this->CurrentPass > ID_HIGH16)
-  {
-    return;
-  }
-
-  // 0 is reserved.
-  attribid += ID_OFFSET;
-
-  for (int cc=0; cc < 3; cc++)
-  {
-    int words24 = (0xffffff & attribid);
-    attribid = attribid >> 24;
-    if ((this->CurrentPass - ID_LOW24) == cc)
-    {
-      float color[3];
-      vtkHardwareSelector::Convert(words24, color);
-      this->SetPropColorValue(color);
-      break;
-    }
   }
 }
 

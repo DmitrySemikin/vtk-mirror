@@ -57,7 +57,7 @@ MPI_Comm* vtkMPICommunicatorOpaqueComm::GetHandle()
 
 //-----------------------------------------------------------------------------
 // This MPI error handler basically does the same thing as the default error
-// handler, but also provides a convenient place to attache a debugger
+// handler, but also provides a convenient place to attach a debugger
 // breakpoint.
 extern "C" void vtkMPICommunicatorMPIErrorHandler(MPI_Comm *comm,
                                                   int *errorcode, ...)
@@ -123,7 +123,7 @@ inline MPI_Datatype vtkMPICommunicatorGetMPIType(int vtkType)
     case VTK_ID_TYPE:           return MPI_LONG_LONG;
 #else
     case VTK_ID_TYPE:
-      vtkGenericWarningMacro("This systems MPI doesn't seem to support 64 bit ids and you have 64 bit IDs turned on. Please contact VTK mailing list.");
+      vtkGenericWarningMacro("This systems MPI doesn't seem to support 64 bit ids and you have 64 bit IDs turned on. Please seek assistance on the VTK Discourse (https://discourse.vtk.org/).");
       return MPI_LONG;
 #endif
 #else //VTK_USE_64BIT_IDS
@@ -183,7 +183,7 @@ inline int vtkMPICommunicatorCheckSize(vtkIdType length)
   if (length > VTK_INT_MAX)
   {
     vtkGenericWarningMacro(<< "This operation not yet supported for more than "
-                           << VTK_INT_MAX << " bytes");
+                           << VTK_INT_MAX << " objects");
     return 0;
   }
   else
@@ -864,7 +864,7 @@ int vtkMPICommunicator::ReceiveVoidArray(void *data, vtkIdType maxlength, int ty
     if (words_received < maxReceive)
     {
       // words_received in this packet is exactly equal to maxReceive, then it
-      // means that the sender is sending atleast one more packet for this
+      // means that the sender is sending at least one more packet for this
       // message. Otherwise, we have received all the packets for this message
       // and we no longer need to iterate.
       return 1;

@@ -35,15 +35,13 @@
 #include "vtkUnsignedCharArray.h"
 
 #include "vtk_diy2.h"   // must include this before any diy header
-VTKDIY2_PRE_INCLUDE
-#include VTK_DIY2_HEADER(diy/assigner.hpp)
-#include VTK_DIY2_HEADER(diy/link.hpp)
-#include VTK_DIY2_HEADER(diy/master.hpp)
-#include VTK_DIY2_HEADER(diy/mpi.hpp)
-#include VTK_DIY2_HEADER(diy/reduce.hpp)
-#include VTK_DIY2_HEADER(diy/partners/swap.hpp)
-#include VTK_DIY2_HEADER(diy/decomposition.hpp)
-VTKDIY2_POST_INCLUDE
+#include VTK_DIY2(diy/assigner.hpp)
+#include VTK_DIY2(diy/link.hpp)
+#include VTK_DIY2(diy/master.hpp)
+#include VTK_DIY2(diy/mpi.hpp)
+#include VTK_DIY2(diy/reduce.hpp)
+#include VTK_DIY2(diy/partners/swap.hpp)
+#include VTK_DIY2(diy/decomposition.hpp)
 
 #include <algorithm>
 
@@ -374,7 +372,7 @@ inline void GetGlobalFieldMetaData(diy::mpi::communicator &comm,
   int source;
   diy::mpi::all_reduce(comm, rank, source, diy::mpi::minimum<int>());
 
-  if (source < comm.size()) // atleast one process has field meta data
+  if (source < comm.size()) // at least one process has field meta data
   {
     diy::MemoryBuffer bb;
     if (comm.rank() == source)

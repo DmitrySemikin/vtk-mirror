@@ -15,7 +15,8 @@
 
 #include "vtkBoundingBox.h"
 #include "vtkCompositeDataDisplayAttributes.h"
-#include "vtkCompositeDataIterator.h"
+#include "vtkDataObjectTree.h"
+#include "vtkDataObjectTreeRange.h"
 #include "vtkDataSet.h"
 #include "vtkMath.h"
 #include "vtkMultiBlockDataSet.h"
@@ -274,22 +275,14 @@ void vtkCompositeDataDisplayAttributes::ComputeVisibleBoundsInternal(
   bool blockVisible = (cda && cda->HasBlockVisibility(dobj)) ?
     cda->GetBlockVisibility(dobj) : parentVisible;
 
-  vtkMultiBlockDataSet *mbds = vtkMultiBlockDataSet::SafeDownCast(dobj);
-  vtkMultiPieceDataSet *mpds = vtkMultiPieceDataSet::SafeDownCast(dobj);
-  if (mbds || mpds)
+  vtkDataObjectTree *dObjTree = vtkDataObjectTree::SafeDownCast(dobj);
+  if (dObjTree)
   {
-    const unsigned int numChildren = mbds ? mbds->GetNumberOfBlocks() :
-      mpds->GetNumberOfPieces();
-    for (unsigned int cc = 0 ; cc < numChildren; cc++)
+    using Opts = vtk::DataObjectTreeOptions;
+    for (vtkDataObject *child : vtk::Range(dObjTree, Opts::SkipEmptyNodes))
     {
-      vtkDataObject* child = mbds ? mbds->GetBlock(cc) : mpds->GetPiece(cc);
-      if (child == nullptr)
-      {
-        // Speeds things up when dealing with nullptr blocks (which is common with AMRs).
-        continue;
-      }
       vtkCompositeDataDisplayAttributes::ComputeVisibleBoundsInternal(
-        cda, child, bbox, blockVisible);
+            cda, child, bbox, blockVisible);
     }
   }
   else if (dobj && blockVisible == true)
@@ -314,29 +307,32 @@ vtkDataObject* vtkCompositeDataDisplayAttributes::DataObjectFromIndex(
   }
   current_flat_index++;
 
-  auto multiBlock = vtkMultiBlockDataSet::SafeDownCast(parent_obj);
-  auto multiPiece = vtkMultiPieceDataSet::SafeDownCast(parent_obj);
-  if (multiBlock || multiPiece)
+  // for leaf types quick continue, otherwise it recurses which
+  // calls two more SafeDownCast which are expensive
+  int dotype = parent_obj->GetDataObjectType();
+  if (dotype < VTK_COMPOSITE_DATA_SET) // see vtkType.h
   {
-    const unsigned int numChildren = multiBlock ?
-      multiBlock->GetNumberOfBlocks() : multiPiece->GetNumberOfPieces();
+    return nullptr;
+  }
 
-    for (unsigned int cc = 0; cc < numChildren; cc++)
+  vtkDataObjectTree *dObjTree = vtkDataObjectTree::SafeDownCast(parent_obj);
+  if (dObjTree)
+  {
+    using Opts = vtk::DataObjectTreeOptions;
+    for (vtkDataObject *child : vtk::Range(dObjTree, Opts::None))
     {
-      vtkDataObject* child = multiBlock ? multiBlock->GetBlock(cc) :
-        multiPiece->GetPiece(cc);
-
-      if (!child)
+      if (child)
       {
-        current_flat_index++;
-        continue;
+        const auto data = vtkCompositeDataDisplayAttributes::DataObjectFromIndex(
+              flat_index, child, current_flat_index);
+        if (data)
+        {
+          return data;
+        }
       }
-
-      const auto data = vtkCompositeDataDisplayAttributes::DataObjectFromIndex(
-        flat_index, child, current_flat_index);
-      if (data)
+      else
       {
-        return data;
+        ++current_flat_index;
       }
     }
   }

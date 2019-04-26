@@ -111,7 +111,7 @@ public:
   void ReleaseGraphicsResources(vtkWindow *) override;
   int RenderOpaqueGeometry(vtkViewport *viewport) override;
   int RenderTranslucentPolygonalGeometry(vtkViewport *viewport) override;
-  int HasTranslucentPolygonalGeometry() override;
+  vtkTypeBool HasTranslucentPolygonalGeometry() override;
   double *GetBounds() override;
   //@}
 
@@ -156,7 +156,7 @@ public:
 
   //@{
   /**
-   * Toogle the visibility of the handle on and off
+   * Toggle the visibility of the handle on and off
    */
   vtkSetMacro( HandleVisibility, vtkTypeBool );
   vtkGetMacro( HandleVisibility, vtkTypeBool );

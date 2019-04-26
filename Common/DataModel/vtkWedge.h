@@ -65,24 +65,33 @@ public:
   int GetNumberOfFaces() override {return 5;}
   vtkCell *GetEdge(int edgeId) override;
   vtkCell *GetFace(int faceId) override;
-  int CellBoundary(int subId, double pcoords[3], vtkIdList *pts) override;
+  int CellBoundary(int subId, const double pcoords[3], vtkIdList *pts) override;
   void Contour(double value, vtkDataArray *cellScalars,
                vtkIncrementalPointLocator *locator, vtkCellArray *verts,
                vtkCellArray *lines, vtkCellArray *polys,
                vtkPointData *inPd, vtkPointData *outPd,
                vtkCellData *inCd, vtkIdType cellId, vtkCellData *outCd) override;
-  int EvaluatePosition(double x[3], double* closestPoint,
+  int EvaluatePosition(const double x[3], double closestPoint[3],
                        int& subId, double pcoords[3],
-                       double& dist2, double *weights) override;
-  void EvaluateLocation(int& subId, double pcoords[3], double x[3],
+                       double& dist2, double weights[]) override;
+  void EvaluateLocation(int& subId, const double pcoords[3], double x[3],
                         double *weights) override;
-  int IntersectWithLine(double p1[3], double p2[3], double tol, double& t,
+  int IntersectWithLine(const double p1[3], const double p2[3], double tol, double& t,
                         double x[3], double pcoords[3], int& subId) override;
   int Triangulate(int index, vtkIdList *ptIds, vtkPoints *pts) override;
-  void Derivatives(int subId, double pcoords[3], double *values,
+  void Derivatives(int subId, const double pcoords[3], const double *values,
                    int dim, double *derivs) override;
   double *GetParametricCoords() override;
   //@}
+
+  /**
+   * Return the case table for table-based isocontouring (aka marching cubes
+   * style implementations). A linear 3D cell with N vertices will have 2**N
+   * cases. The returned case array lists three edges in order to produce one
+   * output triangle which may be repeated to generate multiple triangles. The
+   * list of cases terminates with a -1 entry.
+   */
+  static int* GetTriangleCases(int caseId);
 
   /**
    * Return the center of the wedge in parametric coordinates.
@@ -92,25 +101,25 @@ public:
   /**
    * @deprecated Replaced by vtkWedge::InterpolateFunctions as of VTK 5.2
    */
-  static void InterpolationFunctions(double pcoords[3], double weights[6]);
+  static void InterpolationFunctions(const double pcoords[3], double weights[6]);
   /**
    * @deprecated Replaced by vtkWedge::InterpolateDerivs as of VTK 5.2
    */
-  static void InterpolationDerivs(double pcoords[3], double derivs[18]);
+  static void InterpolationDerivs(const double pcoords[3], double derivs[18]);
   //@{
   /**
    * Compute the interpolation functions/derivatives
    * (aka shape functions/derivatives)
    */
-  void InterpolateFunctions(double pcoords[3], double weights[6]) override
+  void InterpolateFunctions(const double pcoords[3], double weights[6]) override
   {
     vtkWedge::InterpolationFunctions(pcoords,weights);
   }
-  void InterpolateDerivs(double pcoords[3], double derivs[18]) override
+  void InterpolateDerivs(const double pcoords[3], double derivs[18]) override
   {
     vtkWedge::InterpolationDerivs(pcoords,derivs);
   }
-  int JacobianInverse(double pcoords[3], double **inverse, double derivs[18]);
+  int JacobianInverse(const double pcoords[3], double **inverse, double derivs[18]);
   //@}
 
   //@{
@@ -143,6 +152,3 @@ inline int vtkWedge::GetParametricCenter(double pcoords[3])
 }
 
 #endif
-
-
-

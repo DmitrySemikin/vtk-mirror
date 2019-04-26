@@ -84,14 +84,14 @@ static char *cur_string = &ret_string[0];
 
 int ex_check_file_type(const char *path, int *type)
 {
-/* Based on (stolen from?) NC_check_file_type from netcdf sources.
+  /* Based on (stolen from?) NC_check_file_type from netcdf sources.
 
-Type is set to:
-1 if this is a netcdf classic file,
-2 if this is a netcdf 64-bit offset file,
-4 pnetcdf cdf5 file.
-5 if this is an hdf5 file
-*/
+  Type is set to:
+  1 if this is a netcdf classic file,
+  2 if this is a netcdf 64-bit offset file,
+  4 pnetcdf cdf5 file.
+  5 if this is an hdf5 file
+  */
 
 #define MAGIC_NUMBER_LEN 4
 
@@ -203,7 +203,7 @@ int ex_put_names_internal(int exoid, int varid, size_t num_entity, char **names,
   int_names = calloc(num_entity * name_length, 1);
 
   for (i = 0; i < num_entity; i++) {
-    if (*names[i] != '\0') {
+    if (names != NULL && *names != NULL && *names[i] != '\0') {
       found_name = 1;
       strncpy(&int_names[idx], names[i], name_length - 1);
       int_names[idx + name_length - 1] = '\0';
@@ -224,13 +224,15 @@ int ex_put_names_internal(int exoid, int varid, size_t num_entity, char **names,
     idx += name_length;
   }
 
+  if ((status = nc_put_var_text(exoid, varid, int_names)) != NC_NOERR) {
+    free(int_names);
+    snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to store %s names in file id %d",
+             ex_name_of_object(obj_type), exoid);
+    ex_err(__func__, errmsg, status);
+    EX_FUNC_LEAVE(EX_FATAL);
+  }
+
   if (found_name) {
-    if ((status = nc_put_var_text(exoid, varid, int_names)) != NC_NOERR) {
-      snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to store %s names in file id %d",
-               ex_name_of_object(obj_type), exoid);
-      ex_err(__func__, errmsg, status);
-      EX_FUNC_LEAVE(EX_FATAL);
-    }
 
     /* Update the maximum_name_length attribute on the file. */
     ex_update_max_name_length(exoid, max_name_len - 1);
@@ -253,7 +255,7 @@ int ex_put_name_internal(int exoid, int varid, size_t index, const char *name,
   /* inquire previously defined dimensions  */
   name_length = ex_inquire_int(exoid, EX_INQ_DB_MAX_ALLOWED_NAME_LENGTH) + 1;
 
-  if (*name != '\0') {
+  if (name != NULL && *name != '\0') {
     int too_long = 0;
     start[0]     = index;
     start[1]     = 0;
@@ -490,7 +492,7 @@ char *ex_dim_num_entries_in_object(ex_entity_type obj_type, int idx)
   case EX_FACE_SET: return DIM_NUM_FACE_FS(idx);
   case EX_SIDE_SET: return DIM_NUM_SIDE_SS(idx);
   case EX_ELEM_SET: return DIM_NUM_ELE_ELS(idx);
-  default: return 0;
+  default: return NULL;
   }
 }
 
@@ -505,7 +507,7 @@ char *ex_name_var_of_object(ex_entity_type obj_type, int i, int j)
   case EX_FACE_SET: return VAR_FS_VAR(i, j);
   case EX_SIDE_SET: return VAR_SS_VAR(i, j);
   case EX_ELEM_SET: return VAR_ELS_VAR(i, j);
-  default: return 0;
+  default: return NULL;
   }
 }
 
@@ -516,7 +518,7 @@ char *ex_name_of_map(ex_entity_type map_type, int map_index)
   case EX_EDGE_MAP: return VAR_EDGE_MAP(map_index);
   case EX_FACE_MAP: return VAR_FACE_MAP(map_index);
   case EX_ELEM_MAP: return VAR_ELEM_MAP(map_index);
-  default: return 0;
+  default: return NULL;
   }
 }
 
@@ -544,11 +546,12 @@ int ex_id_lkup(int exoid, ex_entity_type id_type, ex_entity_id num)
   char *   id_dim;
   char *   stat_table;
   int      varid, dimid;
-  size_t   dim_len, i;
+  size_t   dim_len, i, j;
   int64_t *id_vals   = NULL;
   int *    stat_vals = NULL;
 
-  static int        filled = EX_FALSE;
+  static int        filled     = EX_FALSE;
+  static int        sequential = EX_FALSE;
   struct obj_stats *tmp_stats;
   int               status;
   char              errmsg[MAX_ERR_LENGTH];
@@ -637,7 +640,7 @@ int ex_id_lkup(int exoid, ex_entity_type id_type, ex_entity_id num)
 
   if ((tmp_stats->id_vals == NULL) || (!(tmp_stats->valid_ids))) {
 
-    /* first time thru or id arrays haven't been completely filled yet */
+    /* first time through or id arrays haven't been completely filled yet */
 
     /* get size of id array */
 
@@ -706,31 +709,42 @@ int ex_id_lkup(int exoid, ex_entity_type id_type, ex_entity_id num)
     }
 
     /* check if values in stored arrays are filled with non-zeroes */
-    filled = EX_TRUE;
+    filled     = EX_TRUE;
+    sequential = EX_TRUE;
     for (i = 0; i < dim_len; i++) {
+      if (id_vals[i] != i + 1) {
+        sequential = EX_FALSE;
+      }
       if (id_vals[i] == EX_INVALID_ID || id_vals[i] == NC_FILL_INT) {
-        filled = EX_FALSE;
+        filled     = EX_FALSE;
+        sequential = EX_FALSE;
         break; /* id array hasn't been completely filled with valid ids yet */
       }
     }
 
     if (filled) {
-      tmp_stats->valid_ids = EX_TRUE;
-      tmp_stats->num       = dim_len;
-      tmp_stats->id_vals   = id_vals;
+      tmp_stats->valid_ids  = EX_TRUE;
+      tmp_stats->sequential = sequential;
+      tmp_stats->num        = dim_len;
+      tmp_stats->id_vals    = id_vals;
     }
   }
   else {
-    id_vals = tmp_stats->id_vals;
-    dim_len = tmp_stats->num;
+    id_vals    = tmp_stats->id_vals;
+    dim_len    = tmp_stats->num;
+    sequential = tmp_stats->sequential;
   }
 
-  /* Do a linear search through the id array to find the array value
-     corresponding to the passed index number */
-
-  for (i = 0; i < dim_len; i++) {
-    if (id_vals[i] == num) {
-      break; /* found the id requested */
+  if (sequential && num < dim_len) {
+    i = num - 1;
+  }
+  else {
+    /* Do a linear search through the id array to find the array value
+       corresponding to the passed index number */
+    for (i = 0; i < dim_len; i++) {
+      if (id_vals[i] == num) {
+        break; /* found the id requested */
+      }
     }
   }
   if (i >= dim_len) /* failed to find id number */
@@ -745,24 +759,22 @@ int ex_id_lkup(int exoid, ex_entity_type id_type, ex_entity_id num)
   }
 
   /* Now check status array to see if object is null */
+  if ((tmp_stats->stat_vals == NULL) || (!(tmp_stats->valid_stat))) {
 
-  /* get variable id of status array */
-  if (nc_inq_varid(exoid, stat_table, &varid) == NC_NOERR) {
-    /* if status array exists, use it, otherwise assume object exists
-       to be backward compatible */
+    /* allocate space for new status array */
+    if (!(stat_vals = malloc(dim_len * sizeof(int)))) {
+      free(id_vals);
+      snprintf(errmsg, MAX_ERR_LENGTH,
+               "ERROR: failed to allocate memory for %s array for file id %d", id_table, exoid);
+      ex_err(__func__, errmsg, EX_MEMFAIL);
+      return (EX_FATAL);
+    }
 
-    if ((tmp_stats->stat_vals == NULL) || (!(tmp_stats->valid_stat))) {
-      /* first time thru or status arrays haven't been filled yet */
-
-      /* allocate space for new status array */
-
-      if (!(stat_vals = malloc(dim_len * sizeof(int)))) {
-        free(id_vals);
-        snprintf(errmsg, MAX_ERR_LENGTH,
-                 "ERROR: failed to allocate memory for %s array for file id %d", id_table, exoid);
-        ex_err(__func__, errmsg, EX_MEMFAIL);
-        return (EX_FATAL);
-      }
+    /* first time through or status arrays haven't been filled yet */
+    if (nc_inq_varid(exoid, stat_table, &varid) == NC_NOERR) {
+      /* get variable id of status array */
+      /* if status array exists, use it, otherwise assume object exists
+         to be backward compatible */
 
       if ((status = nc_get_var_int(exoid, varid, stat_vals)) != NC_NOERR) {
         free(id_vals);
@@ -772,27 +784,32 @@ int ex_id_lkup(int exoid, ex_entity_type id_type, ex_entity_id num)
         ex_err(__func__, errmsg, status);
         return (EX_FATAL);
       }
-
-      if (tmp_stats->valid_ids) {
-        /* status array is valid only if ids are valid */
-        tmp_stats->valid_stat = EX_TRUE;
-        tmp_stats->stat_vals  = stat_vals;
-      }
     }
     else {
-      stat_vals = tmp_stats->stat_vals;
+      for (j = 0; j < dim_len; j++) {
+        stat_vals[j] = 1;
+      }
     }
 
-    if (stat_vals[i] == 0) /* is this object null? */ {
-      ex_err(__func__, "", EX_NULLENTITY);
-      if (!(tmp_stats->valid_stat)) {
-        free(stat_vals);
-      }
-      if (!(tmp_stats->valid_ids)) {
-        free(id_vals);
-      }
-      return (-((int)i + 1)); /* return index into id array (1-based) */
+    if (tmp_stats->valid_ids) {
+      /* status array is valid only if ids are valid */
+      tmp_stats->valid_stat = EX_TRUE;
+      tmp_stats->stat_vals  = stat_vals;
     }
+  }
+  else {
+    stat_vals = tmp_stats->stat_vals;
+  }
+
+  if (stat_vals[i] == 0) /* is this object null? */ {
+    ex_err(__func__, "", EX_NULLENTITY);
+    if (!(tmp_stats->valid_stat)) {
+      free(stat_vals);
+    }
+    if (!(tmp_stats->valid_ids)) {
+      free(id_vals);
+    }
+    return (-((int)i + 1)); /* return index into id array (1-based) */
   }
   if (!(tmp_stats->valid_ids)) {
     free(id_vals);
@@ -1128,23 +1145,23 @@ static void ex_swap64(int64_t v[], int64_t i, int64_t j)
   v[j] = temp;
 }
 
-  /*!
-   * The following 'indexed qsort' routine is modified from Sedgewicks
-   * algorithm It selects the pivot based on the median of the left,
-   * right, and center values to try to avoid degenerate cases ocurring
-   * when a single value is chosen.  It performs a quicksort on
-   * intervals down to the EX_QSORT_CUTOFF size and then performs a final
-   * insertion sort on the almost sorted final array.  Based on data in
-   * Sedgewick, the EX_QSORT_CUTOFF value should be between 5 and 20.
-   *
-   * See Sedgewick for further details
-   * Define DEBUG_QSORT at the top of this file and recompile to compile
-   * in code that verifies that the array is sorted.
-   *
-   * NOTE: The 'int' implementation below assumes that *both* the items
-   *       being sorted and the *number* of items being sorted are both
-   *       representable as 'int'.
-   */
+/*!
+ * The following 'indexed qsort' routine is modified from Sedgewicks
+ * algorithm It selects the pivot based on the median of the left,
+ * right, and center values to try to avoid degenerate cases ocurring
+ * when a single value is chosen.  It performs a quicksort on
+ * intervals down to the EX_QSORT_CUTOFF size and then performs a final
+ * insertion sort on the almost sorted final array.  Based on data in
+ * Sedgewick, the EX_QSORT_CUTOFF value should be between 5 and 20.
+ *
+ * See Sedgewick for further details
+ * Define DEBUG_QSORT at the top of this file and recompile to compile
+ * in code that verifies that the array is sorted.
+ *
+ * NOTE: The 'int' implementation below assumes that *both* the items
+ *       being sorted and the *number* of items being sorted are both
+ *       representable as 'int'.
+ */
 
 #define EX_QSORT_CUTOFF 12
 
@@ -1374,7 +1391,8 @@ int ex_large_model(int exoid)
 
   /* See if the ATT_FILESIZE attribute is defined in the file */
   int file_size = 0;
-  if (nc_get_att_int(exoid, NC_GLOBAL, ATT_FILESIZE, &file_size) != NC_NOERR) {
+  int rootid    = exoid & EX_FILE_ID_MASK;
+  if (nc_get_att_int(rootid, NC_GLOBAL, ATT_FILESIZE, &file_size) != NC_NOERR) {
     /* Variable not found; default is 0 */
     file_size = 0;
   }
@@ -1393,27 +1411,30 @@ int ex_get_dimension(int exoid, const char *DIMENSION, const char *label, size_t
   if ((status = nc_inq_dimid(exoid, DIMENSION, dimid)) != NC_NOERR) {
     if (routine != NULL) {
       if (status == NC_EBADDIM) {
-        snprintf(errmsg, MAX_ERR_LENGTH, "Warning: no %s defined in file id %d", label, exoid);
-        ex_err(__func__, errmsg, status);
-      }
-      else {
-        snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to locate number of %s in file id %d",
+        snprintf(errmsg, MAX_ERR_LENGTH, "Warning: no dimension defining '%s' found in file id %d",
                  label, exoid);
         ex_err(__func__, errmsg, status);
       }
+      else {
+        snprintf(errmsg, MAX_ERR_LENGTH,
+                 "ERROR: failed to locate dimension defining number of '%s' in file id %d", label,
+                 exoid);
+        ex_err(__func__, errmsg, status);
+      }
     }
-    return (status);
+    return status;
   }
 
   if ((status = nc_inq_dimlen(exoid, *dimid, count)) != NC_NOERR) {
     if (routine != NULL) {
-      snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to get number of %s in file id %d", label,
-               exoid);
+      snprintf(errmsg, MAX_ERR_LENGTH,
+               "ERROR: failed to get length of dimension defining number of '%s' in file id %d",
+               label, exoid);
       ex_err(__func__, errmsg, status);
-      return -1;
     }
+    return status;
   }
-  return (status);
+  return status;
 }
 
 /* Deprecated. do not use */
@@ -1440,7 +1461,7 @@ void ex_compress_variable(int exoid, int varid, int type)
       nc_def_var_deflate(exoid, varid, shuffle, compress, deflate_level);
     }
 #if defined(PARALLEL_AWARE_EXODUS)
-    if (type != 3 && file->is_parallel && file->is_mpiio) {
+    if (type != 3 && file->is_parallel && file->is_hdf5) {
       nc_var_par_access(exoid, varid, NC_COLLECTIVE);
     }
 #endif

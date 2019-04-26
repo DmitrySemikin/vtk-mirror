@@ -19,7 +19,7 @@
  * periodic array
  *
  *
- * Map an array into a periodic array. Data from the original array aare
+ * Map an array into a periodic array. Data from the original array are
  * rotated (on the fly) by the specified angle along the specified axis
  * around the specified point. Lookup is not implemented.
  * Creating the array is virtually free, accessing a tuple require some
@@ -148,12 +148,12 @@ public:
   /**
    * Read only container, not supported.
    */
-  int Allocate(vtkIdType sz, vtkIdType ext) override;
+  vtkTypeBool Allocate(vtkIdType sz, vtkIdType ext) override;
 
   /**
    * Read only container, not supported.
    */
-  int Resize(vtkIdType numTuples) override;
+  vtkTypeBool Resize(vtkIdType numTuples) override;
 
   /**
    * Read only container, not supported.

@@ -36,7 +36,6 @@ vtkWidgetRepresentation::vtkWidgetRepresentation()
 
   this->PlaceFactor = 0.5;
   this->Placed = 0;
-  this->HandleSize = 0.05;
   this->ValidPick = 0;
   this->HandleSize = 0.01;
 
@@ -337,7 +336,7 @@ void vtkWidgetRepresentation::UpdatePropPose(
 
   newTransform->Translate(pos1[0], pos1[1], pos1[2]);
 
-  // now try to get the composit of translate, rotate, and scale
+  // now try to get the composite of translate, rotate, and scale
   newTransform->Translate(-(orig[0]), -(orig[1]), -(orig[2]));
   newTransform->PreMultiply();
   newTransform->Translate(orig[0], orig[1], orig[2]);

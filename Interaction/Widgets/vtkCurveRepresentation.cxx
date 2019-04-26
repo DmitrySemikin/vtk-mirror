@@ -108,6 +108,7 @@ vtkCurveRepresentation::vtkCurveRepresentation()
 
   this->CurrentHandle = nullptr;
   this->CurrentHandleIndex = -1;
+  this->FirstSelected = true;
 
   this->Transform = vtkTransform::New();
 
@@ -568,7 +569,7 @@ void vtkCurveRepresentation::SetPlaneSource(vtkPlaneSource* plane)
 }
 
 //----------------------------------------------------------------------------
-void vtkCurveRepresentation::Initialize(void)
+void vtkCurveRepresentation::Initialize()
 {
   int i;
   for ( i = 0; i < this->NumberOfHandles; ++i )
@@ -618,39 +619,6 @@ void vtkCurveRepresentation::CalculateCentroid()
   this->Centroid[0] /= this->NumberOfHandles;
   this->Centroid[1] /= this->NumberOfHandles;
   this->Centroid[2] /= this->NumberOfHandles;
-}
-
-//----------------------------------------------------------------------------
-void vtkCurveRepresentation::InsertHandleOnLine(double* pos)
-{
-  if (this->NumberOfHandles < 2) { return; }
-
-  vtkIdType id = this->LinePicker->GetCellId();
-  if (id == -1){ return; }
-
-  vtkIdType subid = this->LinePicker->GetSubId();
-
-  vtkPoints* newpoints = vtkPoints::New(VTK_DOUBLE);
-  newpoints->SetNumberOfPoints(this->NumberOfHandles+1);
-
-  int istart = subid;
-  int istop = istart + 1;
-  int count = 0;
-  int i;
-  for ( i = 0; i <= istart; ++i )
-  {
-    newpoints->SetPoint(count++,this->HandleGeometry[i]->GetCenter());
-  }
-
-  newpoints->SetPoint(count++,pos);
-
-  for ( i = istop; i < this->NumberOfHandles; ++i )
-  {
-    newpoints->SetPoint(count++,this->HandleGeometry[i]->GetCenter());
-  }
-
-  this->InitializeHandles(newpoints);
-  newpoints->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -768,7 +736,7 @@ int vtkCurveRepresentation::RenderOverlay(vtkViewport* win)
 }
 
 //----------------------------------------------------------------------------
-int vtkCurveRepresentation::HasTranslucentPolygonalGeometry()
+vtkTypeBool vtkCurveRepresentation::HasTranslucentPolygonalGeometry()
 {
   this->BuildRepresentation();
   int count = 0;
@@ -796,14 +764,17 @@ int vtkCurveRepresentation::ComputeInteractionState(int X, int Y,
 
   vtkAssemblyPath* path = this->GetAssemblyPath(X, Y, 0., this->HandlePicker);
 
+  // always get pick position
+  this->HandlePicker->GetPickPosition(this->LastPickPosition);
+
   if ( path != nullptr )
   {
     this->ValidPick = 1;
     this->InteractionState = vtkCurveRepresentation::OnHandle;
     this->CurrentHandleIndex =
       this->HighlightHandle(path->GetFirstNode()->GetViewProp());
-    this->HandlePicker->GetPickPosition(this->LastPickPosition);
     handlePicked = 1;
+    this->FirstSelected = (this->CurrentHandleIndex == 0);
   }
   else
   {
@@ -908,10 +879,43 @@ void vtkCurveRepresentation::WidgetInteraction(double e[2])
 }
 
 //----------------------------------------------------------------------------
+void vtkCurveRepresentation::PushHandle(double* pos)
+{
+  vtkPoints* newpoints = vtkPoints::New(VTK_DOUBLE);
+  newpoints->SetNumberOfPoints(this->NumberOfHandles + 1);
+
+  if (this->FirstSelected)
+  {
+    // pushing front
+    newpoints->SetPoint(0, pos);
+    for (int i = 0; i < this->NumberOfHandles; ++i)
+    {
+      newpoints->SetPoint(i+1, this->HandleGeometry[i]->GetCenter());
+    }
+  }
+  else
+  {
+    // pushing back
+    newpoints->SetPoint(this->NumberOfHandles, pos);
+    for (int i = 0; i < this->NumberOfHandles; ++i)
+    {
+      newpoints->SetPoint(i, this->HandleGeometry[i]->GetCenter());
+    }
+  }
+
+  this->InitializeHandles(newpoints);
+  newpoints->Delete();
+}
+
+//----------------------------------------------------------------------------
 void vtkCurveRepresentation::EndWidgetInteraction(double[2])
 {
   switch (this->InteractionState)
   {
+  case vtkCurveRepresentation::Pushing:
+    this->PushHandle(this->LastPickPosition);
+    break;
+
   case vtkCurveRepresentation::Inserting:
     this->InsertHandleOnLine(this->LastPickPosition);
     break;

@@ -34,6 +34,8 @@ class vtkMultiBlockDataSet;
 class vtkMultiPieceDataSet;
 class vtkNonOverlappingAMR;
 class vtkOverlappingAMR;
+class vtkPartitionedDataSet;
+class vtkPartitionedDataSetCollection;
 
 class VTKIOLEGACY_EXPORT vtkCompositeDataReader : public vtkDataReader
 {
@@ -51,26 +53,17 @@ public:
   void SetOutput(vtkCompositeDataSet *output);
   //@}
 
+  /**
+   * Actual reading happens here
+   */
+  int ReadMeshSimple(const std::string& fname,
+                     vtkDataObject* output) override;
+
 protected:
   vtkCompositeDataReader();
   ~vtkCompositeDataReader() override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) override;
-
-  // Override ProcessRequest to handle request data object event
-  int ProcessRequest(vtkInformation *, vtkInformationVector **,
-                             vtkInformationVector *) override;
-
-  // Since the Outputs[0] has the same UpdateExtent format
-  // as the generic DataObject we can copy the UpdateExtent
-  // as a default behavior.
-  int RequestUpdateExtent(vtkInformation *, vtkInformationVector **,
-                                  vtkInformationVector *) override;
-
-  // Create output (a directed or undirected graph).
-  virtual int RequestDataObject(vtkInformation *, vtkInformationVector **,
-                                vtkInformationVector *);
+  vtkDataObject* CreateOutput(vtkDataObject* currentOutput) override;
 
   int FillOutputPortInformation(int, vtkInformation*) override;
 
@@ -83,6 +76,8 @@ protected:
   bool ReadCompositeData(vtkMultiBlockDataSet*);
   bool ReadCompositeData(vtkHierarchicalBoxDataSet*);
   bool ReadCompositeData(vtkOverlappingAMR*);
+  bool ReadCompositeData(vtkPartitionedDataSet*);
+  bool ReadCompositeData(vtkPartitionedDataSetCollection*);
   bool ReadCompositeData(vtkNonOverlappingAMR*);
   vtkDataObject* ReadChild();
 

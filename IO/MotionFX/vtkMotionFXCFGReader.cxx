@@ -33,11 +33,14 @@
 #include "vtkTransform.h"
 #include "vtkVector.h"
 #include "vtkVectorOperators.h"
+
+#include <vtksys/RegularExpression.hxx>
 #include <vtksys/SystemTools.hxx>
 
-// grammar
-#include "vtkMotionFXCFGGrammar.h"
+// Set to 1 to generate debugging trace if grammar match fails.
+#include "vtkMotionFXCFGGrammar.h" // grammar
 
+#include <cctype>
 #include <fstream>
 #include <map>
 #include <string>
@@ -431,18 +434,12 @@ struct RotateMotion : public Motion
 
     if (theta != vtkVector3d(0.0))
     {
-      // theta is in radians.
-      // convert to degress
-      theta[0] = vtkMath::DegreesFromRadians(theta[0]);
-      theta[1] = vtkMath::DegreesFromRadians(theta[1]);
-      theta[2] = vtkMath::DegreesFromRadians(theta[2]);
-
+      // remember, theta is in radians.
       vtkNew<vtkTransform> transform;
       transform->Identity();
       transform->Translate(this->rot_cntr.GetData());
-      transform->RotateX(theta[0]);
-      transform->RotateY(theta[1]);
-      transform->RotateZ(theta[2]);
+      transform->RotateWXYZ(
+        vtkMath::DegreesFromRadians(theta.Norm()), theta[0], theta[1], theta[2]);
       transform->Translate(-this->rot_cntr[0], -this->rot_cntr[1], -this->rot_cntr[2]);
 
       ApplyTransform worker(transform);
@@ -612,63 +609,6 @@ struct PositionFileMotion : public Motion
       , angular_velocities(0.0)
     {
     }
-
-    tuple_type interpolate(double t, const tuple_type& other) const
-    {
-      tuple_type result;
-      result.center_of_mass = (1 - t) * this->center_of_mass + t * other.center_of_mass;
-      result.direction_cosines = (1 - t) * this->direction_cosines + t * other.direction_cosines;
-      result.rotation = (1 - t) * this->rotation + t * other.rotation;
-      result.angular_velocities = (1 - t) * this->angular_velocities + t * other.angular_velocities;
-      return result;
-    }
-
-    vtkSmartPointer<vtkTransform> compute_transform(
-      double time, const vtkVector3d& initial_centerOfMass, bool isOrientation) const
-    {
-      auto transform = vtkSmartPointer<vtkTransform>::New();
-      transform->PostMultiply(); // default is PreMultiply.
-
-      if (isOrientation == false)
-      {
-        // theta = omega * t
-        vtkVector3d theta = this->angular_velocities * time;
-
-        // convert to degress.
-        theta[0] = vtkMath::DegreesFromRadians(theta[0]);
-        theta[1] = vtkMath::DegreesFromRadians(theta[1]);
-        theta[2] = vtkMath::DegreesFromRadians(theta[2]);
-
-        // change origin to initial_centerOfMass.
-        transform->Translate((initial_centerOfMass * -1.0).GetData());
-
-        // rotate about the center-of-mass
-        transform->RotateY(theta[1]);
-        transform->RotateX(theta[0]);
-        transform->RotateZ(theta[2]);
-
-        // reset origin
-        transform->Translate(initial_centerOfMass.GetData());
-      }
-      else
-      {
-        // change origin to initial_centerOfMass.
-        transform->Translate((initial_centerOfMass * -1.0).GetData());
-
-        // rotate about axis defined the direction cosines by the angle
-        // specified.
-        transform->RotateWXYZ(
-          vtkMath::DegreesFromRadians(this->rotation), this->direction_cosines.GetData());
-
-        // reset origin.
-        transform->Translate(initial_centerOfMass.GetData());
-      }
-
-      // translate to the new center.
-      transform->Translate(this->center_of_mass.GetData());
-
-      return transform;
-    }
   };
 
   mutable std::map<double, tuple_type> positions; // (derived).
@@ -676,6 +616,9 @@ struct PositionFileMotion : public Motion
   template <typename MapType>
   PositionFileMotion(const MapType& params)
     : Motion(params)
+    , positionFile()
+    , isOrientation(false)
+    , initial_centerOfMass{ VTK_DOUBLE_MAX }
     , positions()
   {
     std::string motion_type;
@@ -683,7 +626,7 @@ struct PositionFileMotion : public Motion
     assert(motion_type == "POSITION_FILE");
 
     set(this->positionFile, "positionFile", params);
-    set(this->initial_centerOfMass, "initial_centerOfMass", params);
+    set(this->initial_centerOfMass, "initial_centerOfMass", params, this->initial_centerOfMass);
 
     std::string s_isOrientation;
     set(s_isOrientation, "isOrientation", params, std::string("false"));
@@ -704,9 +647,11 @@ struct PositionFileMotion : public Motion
 
   bool Move(vtkPoints* pts, double time) const override
   {
-    if ((time < this->tstart_prescribe) || (this->positions.size() == 0))
+    if ((time < this->tstart_prescribe) || (this->positions.size() < 2))
     {
       // nothing to do, this motion hasn't been activated yet.
+      // if there's less than 2 position entries, the interpolation logic fails
+      // and hence we don't handle it.
       return false;
     }
 
@@ -726,34 +671,79 @@ struct PositionFileMotion : public Motion
     // position file.
     assert(iter != this->positions.end());
 
-    auto iter_next = iter;
-    if (iter->first > time)
+    vtkNew<vtkTransform> transform;
+    transform->PostMultiply();
+    // center to the initial_centerOfMass.
+    if (this->initial_centerOfMass != vtkVector3d{ VTK_DOUBLE_MAX })
     {
-      --iter;
-    }
-    assert(iter != this->positions.end());
-
-    auto tuple = iter->second;
-    if (iter->first < time)
-    {
-      // we need to interpolate.
-      assert(iter_next != this->positions.end() && iter != this->positions.end());
-      assert(iter != iter_next);
-
-      double t = (time - iter->first) / (iter_next->first - iter->first);
-
-      tuple = iter->second.interpolate(t, iter_next->second);
+      transform->Translate((initial_centerOfMass * -1.0).GetData());
     }
 
-    auto transform = tuple.compute_transform(time, this->initial_centerOfMass, this->isOrientation);
-    if (transform)
+    vtkVector3d cumulativeS(0.0); //, cumulativeTheta(0.0);
+    if (this->isOrientation == false)
     {
-      ApplyTransform worker(transform);
-      // transform points.
-      using PointTypes = vtkTypeList_Create_2(float, double);
-      vtkArrayDispatch::DispatchByValueType<PointTypes>::Execute(pts->GetData(), worker);
-      pts->GetData()->Modified();
+      for (auto citer = this->positions.begin(); citer != iter; ++citer)
+      {
+        assert(time >= citer->first);
+
+        auto next = std::next(citer);
+        assert(next != this->positions.end());
+
+        const double interval = (next->first - citer->first);
+        const double dt = std::min(time - citer->first, interval);
+
+        const double t = dt / interval; // normalized dt
+        const vtkVector3d s = t * (next->second.center_of_mass - citer->second.center_of_mass);
+
+        // theta = (w0 + w1)*dt / 2
+        const vtkVector3d theta =
+          (citer->second.angular_velocities + next->second.angular_velocities) * dt * 0.5;
+        transform->RotateWXYZ(
+          vtkMath::DegreesFromRadians(theta.Norm()), theta[0], theta[1], theta[2]);
+
+        cumulativeS = cumulativeS + s;
+        // cumulativeTheta = cumulativeTheta + theta;
+      }
     }
+    else
+    {
+      if (iter->first < time)
+      {
+        auto next = std::next(iter);
+        assert(next != this->positions.end());
+
+        const double interval = (next->first - iter->first);
+        const double dt = std::min(time - iter->first, interval);
+        const double t = dt / interval; // normalized dt
+
+        const double rotation = (1.0 - t) * iter->second.rotation + t * next->second.rotation;
+        const vtkVector3d cosines =
+          (1.0 - t) * iter->second.direction_cosines + t * next->second.direction_cosines;
+        transform->RotateWXYZ(vtkMath::DegreesFromRadians(rotation), cosines.GetData());
+
+        const vtkVector3d disp =
+          (1.0 - t) * iter->second.center_of_mass + t * next->second.center_of_mass;
+        transform->Translate(disp.GetData());
+      }
+      else // iter->first == time
+      {
+        transform->RotateWXYZ(vtkMath::DegreesFromRadians(iter->second.rotation),
+          iter->second.direction_cosines.GetData());
+        transform->Translate(iter->second.center_of_mass.GetData());
+      }
+    }
+    // restore
+    if (this->initial_centerOfMass != vtkVector3d{ VTK_DOUBLE_MAX })
+    {
+      transform->Translate(initial_centerOfMass.GetData());
+    }
+    transform->Translate(cumulativeS.GetData());
+
+    ApplyTransform worker(transform);
+    // transform points.
+    using PointTypes = vtkTypeList_Create_2(float, double);
+    vtkArrayDispatch::DispatchByValueType<PointTypes>::Execute(pts->GetData(), worker);
+    pts->GetData()->Modified();
     return true;
   }
 };
@@ -908,23 +898,47 @@ private:
 template <typename Rule>
 struct action : nothing<Rule> {};
 
-template <>
-struct action<MotionFX::Common::Number>
+template<>
+struct action<MotionFX::CFG::Value>
 {
-  template <typename Input>
-  static void apply(const Input& in, ActiveState& state)
-  {
-    state.ActiveValue.DoubleValue.push_back(std::atof(in.string().c_str()));
-  }
-};
 
-template <>
-struct action<MotionFX::CFG::StringValue>
-{
   template <typename Input>
   static void apply(const Input& in, ActiveState& state)
   {
-    state.ActiveValue.StringValue = in.string();
+    auto content = in.string();
+    // the value can have trailing spaces; remove them.
+    while (content.size() > 0 && std::isspace(content.back()))
+    {
+      content.pop_back();
+    }
+    vtksys::RegularExpression tupleRe("^\"([^\"]+)\"$");
+    vtksys::RegularExpression numberRe(
+      "^[ \t]*[-+]?(([0-9]+.?)|([0-9]*.))[0-9]*([eE][-+]?[0-9]+)?[ \t]*$");
+    if (tupleRe.find(content))
+    {
+      state.ActiveValue.DoubleValue.clear();
+      const auto tuple = tupleRe.match(1);
+      auto values = vtksys::SystemTools::SplitString(tuple, ' ');
+      for (const auto& val : values)
+      {
+        if (numberRe.find(val))
+        {
+          state.ActiveValue.DoubleValue.push_back(std::atof(numberRe.match(0).c_str()));
+        }
+        else
+        {
+          vtkGenericWarningMacro("Expecting number, got '" << val << "'");
+        }
+      }
+    }
+    else if (numberRe.find(content))
+    {
+      state.ActiveValue.DoubleValue.push_back(std::atof(numberRe.match(0).c_str()));
+    }
+    else
+    {
+      state.ActiveValue.StringValue = content;
+    }
   }
 };
 
@@ -1041,9 +1055,16 @@ public:
     tao::pegtl::parse<MotionFX::CFG::Grammar, Actions::CFG::action>(in, state);
     if (this->Motions.size() == 0)
     {
-      //      tao::pegtl::read_input<> in2(filename);
-      //      tao::pegtl::parse<MotionFX::cfg::grammar, tao::pegtl::nothing,
-      //      tao::pegtl::tracer>(in2);
+      vtkGenericWarningMacro(
+        "No valid 'motions' were parsed from the CFG file. "
+        "This indicates a potential mismatch in the grammar rules and the file contents. "
+        "A highly verbose log for advanced debugging can be generated by defining the environment "
+        "variable `MOTIONFX_DEBUG_GRAMMAR` to debug grammar related issues.");
+      if (getenv("MOTIONFX_DEBUG_GRAMMAR") != nullptr)
+      {
+        tao::pegtl::read_input<> in2(filename);
+        tao::pegtl::parse<MotionFX::CFG::Grammar, tao::pegtl::nothing, tao::pegtl::tracer>(in2);
+      }
       return false;
     }
 
@@ -1072,6 +1093,12 @@ public:
       vtkGenericWarningMacro(
         "Failed to open '" << iter->first << "'. Skipping motions associated with it.");
       iter = this->Motions.erase(iter);
+    }
+
+    if (this->Motions.size() == 0)
+    {
+      vtkGenericWarningMacro("All parsed `motion`s were skipped!");
+      return false;
     }
 
     // now let's process and extra initializations needed by the active motions.

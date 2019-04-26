@@ -154,34 +154,20 @@ void vtkCutter::StructuredPointsCutter(vtkDataSet *dataSetInput,
     contourData->GetPointData()->AddArray(cutScalars);
   }
 
-  int i,j,k;
   double scalar;
   double x[3];
-  int *ext = input->GetExtent();
-  double *origin = input->GetOrigin();
-  double *spacing = input->GetSpacing();
-  int count = 0;
-  for (k = ext[4]; k <= ext[5]; ++k)
+  for (vtkIdType i = 0; i < numPts; i++)
   {
-    x[2] = origin[2] + spacing[2]*k;
-    for (j = ext[2]; j <= ext[3]; ++j)
-    {
-      x[1] = origin[1] + spacing[1]*j;
-      for (i = ext[0]; i <= ext[1]; i++)
-      {
-        x[0] = origin[0] + spacing[0]*i;
-        scalar = this->CutFunction->FunctionValue(x);
-        cutScalars->SetComponent(count, 0, scalar);
-        count++;
-      }
-    }
+    input->GetPoint(i, x);
+    scalar = this->CutFunction->FunctionValue(x);
+    cutScalars->SetComponent(i, 0, scalar);
   }
 
   this->SynchronizedTemplates3D->SetInputData(contourData);
   this->SynchronizedTemplates3D->
     SetInputArrayToProcess(0,0,0,vtkDataObject::FIELD_ASSOCIATION_POINTS,"cutScalars");
   this->SynchronizedTemplates3D->SetNumberOfContours(numContours);
-  for (i = 0; i < numContours; i++)
+  for (int i = 0; i < numContours; i++)
   {
     this->SynchronizedTemplates3D->SetValue(i, this->GetValue(i));
   }
@@ -564,7 +550,7 @@ void vtkCutter::DataSetCutter(vtkDataSet *input, vtkPolyData *output)
     // loop over all cells.
     //
     // This is going to have a problem if the input has 2D and 3D cells.
-    // I am fixing a bug where cell data is scrambled becauses with
+    // I am fixing a bug where cell data is scrambled because with
     // vtkPolyData output, verts and lines have lower cell ids than triangles.
     for (iter=0; iter < numContours && !abortExecute; iter++)
     {

@@ -93,7 +93,9 @@ public:
   }
 
 private:
-  MessageStream(const MessageStream&) {}
+  MessageStream(const MessageStream&) = delete;
+  void operator=(const MessageStream&) = delete;
+
   char* Data;
   char* Head;
   int Size;
@@ -592,7 +594,6 @@ void vtkPLagrangianParticleTracker::GenerateParticles(
         array->SetNumberOfComponents(nComponents);
         stream >> nameLen;
         std::vector<char> name(nameLen + 1, 0);
-        name[nameLen] = '\0';
         for (int l = 0; l < nameLen; l++)
         {
           stream >> name[l];
@@ -601,13 +602,15 @@ void vtkPLagrangianParticleTracker::GenerateParticles(
         for (int idComp = 0; idComp < nComponents; idComp++)
         {
           stream >> compNameLen;
-          std::vector<char> compName(compNameLen + 1, 0);
-          name[compNameLen] = '\0';
-          for (int compLength = 0; compLength < compNameLen; compLength++)
+          if (compNameLen > 0)
           {
-            stream >> compName[compLength];
+            std::vector<char> compName(compNameLen + 1, 0);
+            for (int compLength = 0; compLength < compNameLen; compLength++)
+            {
+              stream >> compName[compLength];
+            }
+            array->SetComponentName(idComp, &compName[0]);
           }
-          array->SetComponentName(idComp, &compName[0]);
         }
         seedData->AddArray(array);
         array->Delete();
@@ -718,7 +721,6 @@ void vtkPLagrangianParticleTracker::GenerateParticles(
           const char * localName = array->GetName();
           stream >> nameLen;
           std::vector<char> name(nameLen + 1, 0);
-          name[nameLen] = '\0';
           for (int l = 0; l < nameLen; l++)
           {
             stream >> name[l];
@@ -733,7 +735,6 @@ void vtkPLagrangianParticleTracker::GenerateParticles(
             stream >> compNameLen;
             const char * localCompName = array->GetComponentName(idComp);
             std::vector<char> compName(compNameLen + 1, 0);
-            name[compNameLen] = '\0';
             for (int compLength = 0; compLength < compNameLen; compLength++)
             {
               stream >> compName[compLength];
@@ -1020,8 +1021,9 @@ bool vtkPLagrangianParticleTracker::CheckParticlePathsRenderingThreshold(
     if (this->UseParticlePathsRenderingThreshold)
     {
       // Reduce the totalNumberOfPoints to check if we need to display the particle paths.
-      vtkIdType totalNPoints = particlePathsOutput->GetNumberOfPoints();
-      this->Controller->AllReduce(&totalNPoints, &totalNPoints, 1, vtkCommunicator::SUM_OP);
+      vtkIdType localNPoints = particlePathsOutput->GetNumberOfPoints();
+      vtkIdType totalNPoints;
+      this->Controller->AllReduce(&localNPoints, &totalNPoints, 1, vtkCommunicator::SUM_OP);
       return totalNPoints > this->ParticlePathsRenderingPointsThreshold;
     }
     else

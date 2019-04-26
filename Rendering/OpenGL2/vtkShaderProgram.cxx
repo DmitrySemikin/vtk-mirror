@@ -307,6 +307,7 @@ bool vtkShaderProgram::DetachShader(const vtkShader *shader)
         return true;
       }
 #endif
+    case vtkShader::Unknown:
     default:
       return false;
   }
@@ -358,7 +359,7 @@ bool vtkShaderProgram::Link()
   // clear out the list of uniforms used
   this->ClearMaps();
 
-#if GL_ES_VERSION_3_0 != 1
+#ifndef GL_ES_VERSION_3_0
   // bind the outputs if specified
   if (this->NumberOfOutputs)
   {
@@ -892,7 +893,7 @@ bool vtkShaderProgram::SetAttributeArrayInternal(
   return true;
 }
 
-inline int vtkShaderProgram::FindAttributeArray(const char *cname)
+int vtkShaderProgram::FindAttributeArray(const char *cname)
 {
   if (cname == nullptr || !this->Linked)
   {
@@ -916,7 +917,7 @@ inline int vtkShaderProgram::FindAttributeArray(const char *cname)
   return loc;
 }
 
-inline int vtkShaderProgram::FindUniform(const char *cname)
+int vtkShaderProgram::FindUniform(const char *cname)
 {
   if (cname == nullptr || !this->Linked)
   {

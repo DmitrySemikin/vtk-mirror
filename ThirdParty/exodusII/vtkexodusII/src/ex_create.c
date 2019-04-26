@@ -129,7 +129,7 @@ declared with
 \param io_ws            The word size in bytes (4 or 8) of the floating point
                         data as they are to be stored in the exodus file.
 
-\param run_version (internally generated) used to verify compatability of libary
+\param run_version (internally generated) used to verify compatibility of library
 and include files.
 
 The following code segment creates an exodus file called \file{test.exo}:
@@ -154,11 +154,15 @@ exoid = ex_create ("test.exo"       \comment{filename path}
 
 static int warning_output = 0;
 
+/* NOTE: Do *not* call `ex_create_int()` directly.  The public API
+ *       function name is `ex_create()` which is a wrapper that calls
+ *       `ex_create_int` with an additional argument to make sure
+ *       library and include file are consistent
+ */
 int ex_create_int(const char *path, int cmode, int *comp_ws, int *io_ws, int run_version)
 {
   int   exoid;
   int   status;
-  int   dimid;
   int   old_fill;
   int   lio_ws;
   int   filesiz = 1;
@@ -374,6 +378,7 @@ int ex_create_int(const char *path, int cmode, int *comp_ws, int *io_ws, int run
 #if NC_HAS_DISKLESS
   if (my_mode & EX_DISKLESS) {
     nc_mode |= NC_DISKLESS;
+    nc_mode |= NC_WRITE;
   }
 #endif
 
@@ -485,33 +490,6 @@ int ex_create_int(const char *path, int cmode, int *comp_ws, int *io_ws, int run
       ex_err(__func__, errmsg, status);
       EX_FUNC_LEAVE(EX_FATAL);
     }
-  }
-
-  /* define some dimensions and variables */
-
-  /* create string length dimension */
-  if ((status = nc_def_dim(exoid, DIM_STR, (MAX_STR_LENGTH + 1), &dimid)) != NC_NOERR) {
-    snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to define string length in file id %d", exoid);
-    ex_err(__func__, errmsg, status);
-    EX_FUNC_LEAVE(EX_FATAL);
-  }
-
-  /* The name string length dimension is delayed until the ex_put_init function
-   */
-
-  /* create line length dimension */
-  if ((status = nc_def_dim(exoid, DIM_LIN, (MAX_LINE_LENGTH + 1), &dimid)) != NC_NOERR) {
-    snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to define line length in file id %d", exoid);
-    ex_err(__func__, errmsg, status);
-    EX_FUNC_LEAVE(EX_FATAL);
-  }
-
-  /* create number "4" dimension; must be of type long */
-  if ((status = nc_def_dim(exoid, DIM_N4, 4L, &dimid)) != NC_NOERR) {
-    snprintf(errmsg, MAX_ERR_LENGTH, "ERROR: failed to define number \"4\" dimension in file id %d",
-             exoid);
-    ex_err(__func__, errmsg, status);
-    EX_FUNC_LEAVE(EX_FATAL);
   }
 
   {

@@ -54,12 +54,12 @@
 #define vtkXMLDataHeaderPrivate_DoNotInclude
 #include "vtkXMLDataHeaderPrivate.h"
 #undef vtkXMLDataHeaderPrivate_DoNotInclude
+#include "vtkInformationQuadratureSchemeDefinitionVectorKey.h"
+#include "vtkInformationStringKey.h"
+#include "vtkNumberToString.h"
+#include "vtkQuadratureSchemeDefinition.h"
 #include "vtkXMLDataElement.h"
 #include "vtkXMLReaderVersion.h"
-#include "vtkInformationQuadratureSchemeDefinitionVectorKey.h"
-#include "vtkQuadratureSchemeDefinition.h"
-#include "vtkInformationStringKey.h"
-
 #include <memory>
 
 #include <cassert>
@@ -74,7 +74,6 @@
 
 #include <cctype> // for isalnum
 #include <locale> // C++ locale
-
 
 //*****************************************************************************
 // Friend class to enable access for template functions to the protected
@@ -863,7 +862,6 @@ int vtkXMLWriter::Write()
   return 1;
 }
 
-
 //----------------------------------------------------------------------------
 int vtkXMLWriter::OpenStream()
 {
@@ -1084,7 +1082,6 @@ void vtkXMLWriter::WriteFileAttributes()
      << "."
      << this->GetDataSetMinorVersion()
      << "\"";
-
 
   // Write the byte order for the file.
   if (this->ByteOrder == vtkXMLWriter::BigEndian)
@@ -1360,13 +1357,8 @@ int vtkXMLWriter::WriteBinaryData(vtkAbstractArray* a)
     }
 
     // No data compression.  The header is just the length of the data.
-#if defined(VTK_HAS_STD_UNIQUE_PTR)
     std::unique_ptr<vtkXMLDataHeader>
       uh(vtkXMLDataHeader::New(this->HeaderType, 1));
-#else
-    std::auto_ptr<vtkXMLDataHeader>
-      uh(vtkXMLDataHeader::New(this->HeaderType, 1));
-#endif
     if (!uh->Set(0, dataSize))
     {
       vtkErrorMacro("Array \"" << a->GetName() <<
@@ -1857,13 +1849,14 @@ template <class T>
 int vtkXMLWriterWriteVectorAttribute(ostream& os, const char* name,
                                      int length, T* data)
 {
+  vtkNumberToString convert;
   os << " " << name << "=\"";
   if (length)
   {
-    os << data[0];
+    os << convert(data[0]);
     for (int i = 1; i < length; ++i)
     {
-      os << " " << data[i];
+      os << " " << convert(data[i]);
     }
   }
   os << "\"";
@@ -2169,7 +2162,8 @@ bool vtkXMLWriter::WriteInformation(vtkInformation *info, vtkIndent indent)
 template <class T>
 inline ostream& vtkXMLWriteAsciiValue(ostream& os, const T& value)
 {
-  os << value;
+  vtkNumberToString convert;
+  os << convert(value);
   return os;
 }
 
@@ -2343,6 +2337,10 @@ void vtkXMLWriter::WriteArrayHeader(vtkAbstractArray* a,  vtkIndent indent,
     os << indent << "<Array";
   }
   this->WriteWordTypeAttribute("type", a->GetDataType());
+  if (a->GetDataType() == VTK_ID_TYPE)
+  {
+    this->WriteScalarAttribute("IdType", 1);
+  }
   if (alternateName)
   {
     this->WriteStringAttribute("Name", alternateName);
@@ -2638,7 +2636,6 @@ void vtkXMLWriter::WriteCellDataInline(vtkCellData* cd, vtkIndent indent)
   this->DestroyStringArray(cd->GetNumberOfArrays(), names);
 }
 
-
 //----------------------------------------------------------------------------
 void vtkXMLWriter::WriteFieldDataAppended(vtkFieldData* fd,
                                           vtkIndent indent,
@@ -2674,8 +2671,6 @@ void vtkXMLWriter::WriteFieldDataAppended(vtkFieldData* fd,
   this->DestroyStringArray(fd->GetNumberOfArrays(), names);
 }
 
-
-
 //----------------------------------------------------------------------------
 void vtkXMLWriter::WriteFieldDataAppendedData(vtkFieldData* fd, int timestep,
                                               OffsetsManagerGroup *fdManager)
@@ -2708,7 +2703,6 @@ void vtkXMLWriter::WriteFieldDataAppendedData(vtkFieldData* fd, int timestep,
     }
   }
 }
-
 
 //----------------------------------------------------------------------------
 void vtkXMLWriter::WritePointDataAppended(vtkPointData* pd, vtkIndent indent,
@@ -2768,7 +2762,7 @@ void vtkXMLWriter::WritePointDataAppendedData(vtkPointData* pd, int timestep,
     // Only write pd if MTime has changed
     vtkMTimeType &pdMTime = pdManager->GetElement(i).GetLastMTime();
     vtkAbstractArray* a = pd->GetAbstractArray(i);
-    if ( pdMTime != mtime )
+    if ( pdMTime != mtime || timestep == 0 )
     {
       pdMTime = mtime;
       this->WriteArrayAppendedData(a,
@@ -3262,6 +3256,10 @@ void vtkXMLWriter::WritePArray(vtkAbstractArray* a, vtkIndent indent,
     os << indent << "<PArray";
   }
   this->WriteWordTypeAttribute("type", a->GetDataType());
+  if (a->GetDataType() == VTK_ID_TYPE)
+  {
+    this->WriteScalarAttribute("IdType", 1);
+  }
   if (alternateName)
   {
     this->WriteStringAttribute("Name", alternateName);

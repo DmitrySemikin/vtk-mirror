@@ -41,35 +41,48 @@
 namespace vtkm {
 namespace cont {
 
-class VTKACCELERATORSVTKM_EXPORT vtkmCellSetSingleType : public CellSet
+class vtkmCellSetSingleType : public CellSet
 {
   typedef tovtkm::vtkCellArrayContainerTag ConnectivityStorageTag;
 
 public:
   vtkmCellSetSingleType()
-    : CellSet((std::string())),
-      NumberOfCells(0),
-      NumberOfPoints(0),
-      CellTypeAsId(CellShapeTagEmpty::Id),
-      Connectivity(),
-      ReverseConnectivityBuilt(false),
-      RConn(),
-      RNumIndices(),
-      RIndexOffsets()
+    : CellSet((std::string()))
+    , NumberOfCells(0)
+    , NumberOfPoints(0)
+    , CellTypeAsId(CellShapeTagEmpty::Id)
+    , Connectivity()
+    , ReverseConnectivityBuilt(false)
+    , RConn()
+    , RNumIndices()
+    , RIndexOffsets()
   {
   }
 
   template <typename CellShapeTag>
   vtkmCellSetSingleType(CellShapeTag, const std::string& name)
-    : CellSet(name),
-      NumberOfCells(0),
-      NumberOfPoints(0),
-      CellTypeAsId(CellShapeTag::Id),
-      Connectivity(),
-      ReverseConnectivityBuilt(false),
-      RConn(),
-      RNumIndices(),
-      RIndexOffsets()
+    : CellSet(name)
+    , NumberOfCells(0)
+    , NumberOfPoints(0)
+    , CellTypeAsId(CellShapeTag::Id)
+    , Connectivity()
+    , ReverseConnectivityBuilt(false)
+    , RConn()
+    , RNumIndices()
+    , RIndexOffsets()
+  {
+  }
+
+  vtkmCellSetSingleType(const vtkmCellSetSingleType& src)
+    : CellSet(src)
+    , NumberOfCells(src.NumberOfCells)
+    , NumberOfPoints(src.NumberOfPoints)
+    , CellTypeAsId(src.CellTypeAsId)
+    , Connectivity(src.Connectivity)
+    , ReverseConnectivityBuilt(src.ReverseConnectivityBuilt)
+    , RConn(src.RConn)
+    , RNumIndices(src.RNumIndices)
+    , RIndexOffsets(src.RIndexOffsets)
   {
   }
 
@@ -87,19 +100,19 @@ public:
     return *this;
   }
 
-  vtkm::Id GetNumberOfCells() const
+  vtkm::Id GetNumberOfCells() const override
   {
     return this->NumberOfCells;
   }
 
-  vtkm::Id GetNumberOfPoints() const
+  vtkm::Id GetNumberOfPoints() const override
   {
     return this->NumberOfPoints;
   }
 
-  virtual vtkm::Id GetNumberOfFaces() const { return -1; }
+  vtkm::Id GetNumberOfFaces() const override{ return -1; }
 
-  virtual vtkm::Id GetNumberOfEdges() const { return -1; }
+  vtkm::Id GetNumberOfEdges() const override{ return -1; }
 
   vtkm::Id GetSchedulingRange(vtkm::TopologyElementTagCell) const
   {
@@ -109,6 +122,43 @@ public:
   vtkm::Id GetSchedulingRange(vtkm::TopologyElementTagPoint) const
   {
     return this->GetNumberOfPoints();
+  }
+
+  vtkm::IdComponent GetNumberOfPointsInCell(vtkm::Id) const override
+  {
+    return this->DetermineNumberOfPoints();
+  }
+
+  vtkm::UInt8 GetCellShape(vtkm::Id) const override
+  {
+    return static_cast<vtkm::UInt8>(this->CellTypeAsId);
+  }
+
+  void GetCellPointIds(vtkm::Id id, vtkm::Id *ptids) const override
+  {
+    vtkm::Id count = this->DetermineNumberOfPoints();
+    vtkm::Id start = (id * (count + 1)) + 1;
+    auto portal = this->Connectivity.GetPortalConstControl();
+    for (vtkm::Id i = 0; i < count; ++i)
+    {
+      ptids[i] = portal.Get(i + start);
+    }
+  }
+
+  std::shared_ptr<CellSet> NewInstance() const override
+  {
+    return std::make_shared<vtkmCellSetSingleType>();
+  }
+
+  void DeepCopy(const CellSet* src) override
+  {
+    const auto* other = dynamic_cast<const vtkmCellSetSingleType*>(src);
+    if (!other)
+    {
+      throw vtkm::cont::ErrorBadType("Incorrect type passed to CellSetExplicit::DeepCopy");
+    }
+
+    this->Fill(other->NumberOfPoints, other->Connectivity);
   }
 
   // This is the way you can fill the memory from another system without copying
@@ -152,7 +202,15 @@ public:
     return this->Connectivity;
   }
 
-  virtual void PrintSummary(std::ostream& out) const;
+  void PrintSummary(std::ostream& out) const override;
+
+  void ReleaseResourcesExecution() override
+  {
+    this->Connectivity.ReleaseResourcesExecution();
+    this->RConn.ReleaseResourcesExecution();
+    this->RNumIndices.ReleaseResourcesExecution();
+    this->RIndexOffsets.ReleaseResourcesExecution();
+  }
 
 private:
   template <typename CellShapeTag>
@@ -197,6 +255,18 @@ extern template VTKACCELERATORSVTKM_TEMPLATE_EXPORT
 extern template VTKACCELERATORSVTKM_TEMPLATE_EXPORT
   vtkm::exec::ConnectivityVTKSingleType<vtkm::cont::DeviceAdapterTagTBB>
     vtkmCellSetSingleType::PrepareForInput(vtkm::cont::DeviceAdapterTagTBB,
+      vtkm::TopologyElementTagPoint, vtkm::TopologyElementTagCell) const;
+
+extern template VTKACCELERATORSVTKM_TEMPLATE_EXPORT
+  vtkm::exec::ReverseConnectivityVTK<vtkm::cont::DeviceAdapterTagTBB>
+    vtkmCellSetSingleType::PrepareForInput(vtkm::cont::DeviceAdapterTagTBB,
+      vtkm::TopologyElementTagCell, vtkm::TopologyElementTagPoint) const;
+#endif
+
+#ifdef VTKM_ENABLE_OPENMP
+extern template VTKACCELERATORSVTKM_TEMPLATE_EXPORT
+  vtkm::exec::ConnectivityVTKSingleType<vtkm::cont::DeviceAdapterTagOpenMP>
+    vtkmCellSetSingleType::PrepareForInput(vtkm::cont::DeviceAdapterTagOpenMP,
       vtkm::TopologyElementTagPoint, vtkm::TopologyElementTagCell) const;
 
 extern template VTKACCELERATORSVTKM_TEMPLATE_EXPORT

@@ -22,7 +22,7 @@
 #include <vtk_pegtl.h>
 
 // for debugging
-// #include <vtkpegtl/include/tao/pegtl/contrib/tracer.hpp>
+#include <vtkpegtl/include/tao/pegtl/contrib/tracer.hpp>
 
 namespace MotionFX
 {
@@ -59,7 +59,7 @@ struct Row
       Delimiter, Number, Delimiter, Number, Delimiter, Number, star<space>> {};
 
 struct Grammar : star<Row> {};
-} // namepsace LegacyPositionFile
+} // namespace LegacyPositionFile
 
 //-----------------------------------------------------------------------------
 // rules for parsing a position file in orientations formation.
@@ -86,24 +86,25 @@ using namespace Common;
 // Rule that matches a Comment. Consume everything on the line following a ';'
 struct Comment : seq<string<';'>, until<eolf>> {};
 
-// rule for "<num> <num>...."
-struct Tuple : seq<one<'"'>, plus<pad<Number, space>>, one<'"'> > {};
-
 struct WS_Required : sor<Comment, eol, plus<space>> {};
 struct WS : star<WS_Required> {};
 
-struct FileName : sor<list<list<identifier, one<'.'> >, one<'/'>>> {};
-struct StringValue : sor<FileName, identifier> {};
-struct DoubleValue : sor<Number, Tuple> {};
-struct Value : sor<StringValue, DoubleValue> {};
+struct Value : plus<not_one<';', '}', '\r', '\n'>> {};
 
 struct ParameterName : identifier {};
 struct Statement : seq<ParameterName, WS_Required, Value> {};
+struct StatementOther : seq<ParameterName, WS_Required, plus<not_one<'}','{',';'>>> {};
 
 struct Motion : seq<TAO_PEGTL_STRING("motion"), WS, one<'{'>, WS, list<Statement, WS>, WS, one<'}'>> {};
 struct Motions : seq<TAO_PEGTL_STRING("motions"), WS, one<'{'>, WS, list<Motion, WS>, WS, one<'}'>> {};
 
-struct Lines : sor<Comment, space, Motions> {};
+struct OtherNonNested : seq<identifier, WS, one<'{'>, WS, list<StatementOther, WS>, WS, one<'}'>> {};
+
+struct OtherNested : seq<identifier, WS, one<'{'>, WS,
+                      list<sor<OtherNonNested, StatementOther>, WS>,
+                      WS, one<'}'>> {};
+
+struct Lines : sor<Comment, space, Motions, OtherNonNested, OtherNested> {};
 
 struct Grammar : star<Lines> {};
 

@@ -80,6 +80,8 @@
 
 class vtkAbstractElectronicData;
 class vtkDataArray;
+class vtkInformation;
+class vtkInformationVector;
 class vtkMatrix3x3;
 class vtkPlane;
 class vtkPoints;
@@ -105,23 +107,25 @@ public:
    */
   vtkAtom AppendAtom()
   {
-    return this->AppendAtom(0, vtkVector3f(0, 0, 0));
+    return this->AppendAtom(0, 0., 0., 0.);
   }
 
+  //@{
   /**
    * Add new atom with the specified atomic number and position. Return a
    * vtkAtom that refers to the new atom.
    */
-  vtkAtom AppendAtom(unsigned short atomicNumber, const vtkVector3f &pos);
-
-  /**
-   * Convenience methods to append a new atom with the specified atomic number
-   * and position.
-   */
-  vtkAtom AppendAtom(unsigned short atomicNumber, double x, double y, double z)
+  vtkAtom AppendAtom(unsigned short atomicNumber, double x, double y, double z);
+  vtkAtom AppendAtom(unsigned short atomicNumber, const vtkVector3f& pos)
   {
-    return this->AppendAtom(atomicNumber, vtkVector3f(x, y, z));
+    return this->AppendAtom(atomicNumber, pos[0], pos[1], pos[2]);
   }
+
+  vtkAtom AppendAtom(unsigned short atomicNumber, double pos[3])
+  {
+    return this->AppendAtom(atomicNumber, pos[0], pos[1], pos[2]);
+  }
+  //@}
 
   /**
    * Return a vtkAtom that refers to the atom with the specified id.
@@ -175,6 +179,10 @@ public:
    */
   void SetAtomPosition(vtkIdType atomId, const vtkVector3f &pos);
   void SetAtomPosition(vtkIdType atomId, double x, double y, double z);
+  void SetAtomPosition(vtkIdType atomId, double pos[3])
+  {
+    this->SetAtomPosition(atomId, pos[0], pos[1], pos[2]);
+  }
   //@}
 
   //@{
@@ -183,6 +191,7 @@ public:
    */
   vtkVector3f GetAtomPosition(vtkIdType atomId);
   void GetAtomPosition(vtkIdType atomId, float pos[3]);
+  void GetAtomPosition(vtkIdType atomId, double pos[3]);
   //@}
 
   //@{
@@ -210,6 +219,7 @@ public:
    */
   vtkPoints * GetAtomicPositionArray();
   vtkUnsignedShortArray * GetAtomicNumberArray();
+  vtkUnsignedShortArray * GetBondOrdersArray();
   //@}
 
   //@{
@@ -371,29 +381,79 @@ public:
    * Parameters atomPositions and atomicNumberArray should have the same size.
    */
   int Initialize(vtkPoints* atomPositions,
-    vtkUnsignedShortArray* atomicNumberArray,
-    vtkDataSetAttributes* atomData = nullptr);
-
-  /**
-   * Overloads Initialize method to allow vtkDataArray instead of vtkUnsignedShortArray.
-   */
-  int Initialize(vtkPoints* atomPositions,
     vtkDataArray* atomicNumberArray,
-    vtkDataSetAttributes* atomData = nullptr);
+    vtkDataSetAttributes* atomData);
 
   /**
-   * Overloads Initialize method. Look for an atomic number array in atomData.
-   * If none found, take the first array.
+   * Overloads Initialize method.
    */
   int Initialize(vtkPoints* atomPositions,
-    vtkDataSetAttributes* atomData);
+    vtkDataSetAttributes* atomData)
+  {
+    return this->Initialize(atomPositions, nullptr, atomData);
+  }
 
   /**
    * Use input molecule points, atomic number and atomic data to initialize the new molecule.
    */
   int Initialize(vtkMolecule* molecule);
 
-  static const char* GetAtomicNumberArrayName() {return "Atomic Numbers";}
+  //@{
+  /**
+   * Retrieve a molecule from an information vector.
+   */
+  static vtkMolecule* GetData(vtkInformation *info);
+  static vtkMolecule* GetData(vtkInformationVector *v, int i=0);
+  //@}
+
+  /**
+   * Return the VertexData of the underlying graph
+   */
+  vtkDataSetAttributes* GetAtomData()
+  {
+    return this->GetVertexData();
+  }
+
+  /**
+   * Return the EdgeData of the underlying graph
+   */
+  vtkDataSetAttributes* GetBondData()
+  {
+    return this->GetEdgeData();
+  }
+
+  /**
+   * Return the edge id from the underlying graph.
+   */
+  vtkIdType GetBondId(vtkIdType a, vtkIdType b)
+  {
+    return this->GetEdgeId(a, b);
+  }
+
+  //@{
+  /**
+   * Get/Set the atomic number array name.
+   */
+  vtkSetStringMacro(AtomicNumberArrayName);
+  vtkGetStringMacro(AtomicNumberArrayName);
+  //@}
+
+  //@{
+  /**
+   * Get/Set the bond orders array name.
+   */
+  vtkSetStringMacro(BondOrdersArrayName);
+  vtkGetStringMacro(BondOrdersArrayName);
+  //@}
+
+  /**
+   * Return the actual size of the data in kibibytes (1024 bytes). This number
+   * is valid only after the pipeline has updated. The memory size
+   * returned is guaranteed to be greater than or equal to the
+   * memory required to represent the data (e.g., extra space in
+   * arrays, etc. are not included in the return value).
+   */
+  unsigned long GetActualMemorySize() override;
 
  protected:
   vtkMolecule();
@@ -431,6 +491,10 @@ public:
 
   vtkUnsignedCharArray* AtomGhostArray;
   vtkUnsignedCharArray* BondGhostArray;
+
+  char* AtomicNumberArrayName;
+  char* BondOrdersArrayName;
+
 private:
   vtkMolecule(const vtkMolecule&) = delete;
   void operator=(const vtkMolecule&) = delete;

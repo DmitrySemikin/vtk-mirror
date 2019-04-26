@@ -198,7 +198,7 @@ private:
   // is accessible through GetTables() method
   vtkStringArray *myTables;
 
-  // Storing the currect record list from any one
+  // Storing the correct record list from any one
   // of the tables in the database, this array is
   // accessible through GetRecord(const char *table)
   vtkStringArray *currentRecord;
@@ -212,4 +212,4 @@ private:
 
 #endif // (QT_EDITION & QT_MODULE_SQL)
 #endif // vtkQtSQLDatabase_h
-
+// VTK-HeaderTest-Exclude: vtkQtSQLDatabase.h

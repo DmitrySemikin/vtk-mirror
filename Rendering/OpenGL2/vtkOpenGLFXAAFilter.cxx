@@ -225,8 +225,19 @@ void vtkOpenGLFXAAFilter::Prepare()
   this->BlendState = ostate->GetEnumState(GL_BLEND);
   this->DepthTestState = ostate->GetEnumState(GL_DEPTH_TEST);
 
-  ostate->glDisable(GL_BLEND);
-  ostate->glDisable(GL_DEPTH_TEST);
+#ifdef __APPLE__
+  // Restore viewport to its original size. This is necessary only on
+  // MacOS when HiDPI is supported. Enabling HiDPI has the side effect that
+  // Cocoa will start overriding any glViewport calls in application code.
+  // For reference, see QCocoaWindow::initialize().
+  int origin[2];
+  int usize, vsize;
+  this->Renderer->GetTiledSizeAndOrigin(&usize, &vsize, origin, origin+1);
+  ostate->vtkglViewport(origin[0], origin[1], usize, vsize);
+#endif
+
+  ostate->vtkglDisable(GL_BLEND);
+  ostate->vtkglDisable(GL_DEPTH_TEST);
 
   vtkOpenGLCheckErrorMacro("Error after saving GL state.");
 }
@@ -255,17 +266,29 @@ void vtkOpenGLFXAAFilter::CreateGLObjects()
 {
   assert(!this->Input);
   this->Input = vtkTextureObject::New();
-  this->Input->SetContext(static_cast<vtkOpenGLRenderWindow*>(
-                            this->Renderer->GetRenderWindow()));
+  vtkOpenGLRenderWindow* renWin =
+    static_cast<vtkOpenGLRenderWindow*>(this->Renderer->GetRenderWindow());
+  this->Input->SetContext(renWin);
   this->Input->SetFormat(GL_RGB);
 
-  // ES doesn't support GL_RGB8, and OpenGL 3 doesn't support GL_RGB.
-  // What a world.
-#if defined(GL_ES_VERSION_3_0)
-  this->Input->SetInternalFormat(GL_RGB);
+  // we need to get the format of current color buffer in order to allocate the right format
+  // for the texture used in FXAA
+  int internalFormat = renWin->GetColorBufferInternalFormat(0);
+
+  if (internalFormat != 0)
+  {
+    this->Input->SetInternalFormat(static_cast<unsigned int>(internalFormat));
+  }
+  else // the query failed, fallback to classic texture
+  {
+    // ES doesn't support GL_RGB8, and OpenGL 3 doesn't support GL_RGB.
+    // What a world.
+#ifdef GL_ES_VERSION_3_0
+    this->Input->SetInternalFormat(GL_RGB);
 #else // OpenGL ES
-  this->Input->SetInternalFormat(GL_RGB8);
+    this->Input->SetInternalFormat(GL_RGB8);
 #endif // OpenGL ES
+  }
 
   // Required for FXAA, since we interpolate texels for blending.
   this->Input->SetMinificationFilter(vtkTextureObject::Linear);
@@ -379,11 +402,11 @@ void vtkOpenGLFXAAFilter::Finalize()
   vtkOpenGLState *ostate = this->Renderer->GetState();
   if (this->BlendState)
   {
-    ostate->glEnable(GL_BLEND);
+    ostate->vtkglEnable(GL_BLEND);
   }
   if (this->DepthTestState)
   {
-    ostate->glEnable(GL_DEPTH_TEST);
+    ostate->vtkglEnable(GL_DEPTH_TEST);
   }
 
   vtkOpenGLCheckErrorMacro("Error after restoring GL state.");

@@ -207,7 +207,8 @@ void vtkPolyDataMapper2D::ColorByArrayComponent(int arrayNum, int component)
 }
 
 //----------------------------------------------------------------------------
-void vtkPolyDataMapper2D::ColorByArrayComponent(char* arrayName, int component)
+void vtkPolyDataMapper2D::ColorByArrayComponent(const char* arrayName,
+                                                int component)
 {
   if (strcmp(this->ArrayName, arrayName) == 0 &&
       component == this->ArrayComponent &&
@@ -296,7 +297,7 @@ void vtkPolyDataMapper2D::CreateDefaultLookupTable()
 
 //----------------------------------------------------------------------------
 // Return the method of coloring scalar data.
-const char *vtkPolyDataMapper2D::GetColorModeAsString(void)
+const char *vtkPolyDataMapper2D::GetColorModeAsString()
 {
   return (this->ColorMode == VTK_COLOR_MODE_MAP_SCALARS) ? "MapScalars" : "Default";
 }
