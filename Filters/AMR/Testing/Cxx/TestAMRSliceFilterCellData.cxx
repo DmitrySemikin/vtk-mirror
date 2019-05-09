@@ -22,9 +22,9 @@
 #include <vtkCompositePolyDataMapper2.h>
 #include <vtkDataObjectTreeIterator.h>
 #include <vtkDataSetSurfaceFilter.h>
+#include <vtkGeometryFilter.h>
 #include <vtkImageToAMR.h>
 #include <vtkLookupTable.h>
-#include <vtkNamedColors.h>
 #include <vtkNew.h>
 #include <vtkOverlappingAMR.h>
 #include <vtkPointDataToCellData.h>
@@ -59,8 +59,6 @@ int TestAMRSliceFilterCellData(int argc, char *argv[])
     surface->Update();
 
     // color map
-    vtkNew<vtkNamedColors> colors;
-
     vtkNew<vtkColorTransferFunction> colormap;
     colormap->SetColorSpaceToDiverging();
     colormap->AddRGBPoint(0.0, 1.0, 0.0, 0.0);
