@@ -94,7 +94,7 @@ void vtkMappedUnstructuredGrid<Implementation, CellIterator>
     this->Impl->GetFaceStream(cellId, ids);
     cell->SetFaces(ids->GetPointer(0));
   }
-  
+
   if (cell->RequiresInitialization())
   {
     cell->Initialize();
