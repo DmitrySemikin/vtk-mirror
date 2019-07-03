@@ -87,6 +87,14 @@ void vtkMappedUnstructuredGrid<Implementation, CellIterator>
   this->Impl->GetCellPoints(cellId, cell->PointIds);
   this->Points->GetPoints(cell->PointIds, cell->Points);
 
+  // Explicit face representation
+  if ( cell->RequiresExplicitFaceRepresentation() )
+  {
+    vtkNew<vtkIdList> ids;
+    this->Impl->GetFaceStream(cellId, ids);
+    cell->SetFaces(ids->GetPointer(0));
+  }
+  
   if (cell->RequiresInitialization())
   {
     cell->Initialize();
