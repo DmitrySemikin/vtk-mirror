@@ -195,7 +195,7 @@ void vtkQuaternionInterpolator::InterpolateQuaternion(double t, vtkQuaterniond& 
 
   else if (t >= this->QuaternionList->back().Time)
   {
-    TimedQuaternion& Q = this->QuaternionList->front();
+    TimedQuaternion& Q = this->QuaternionList->back();
     q = Q.Q;
     return;
   }
@@ -277,7 +277,7 @@ void vtkQuaternionInterpolator::InterpolateQuaternion(double t, vtkQuaterniond& 
     qc = q1.Slerp(T, iter2->Q.Normalized());
     qd = ai.Slerp(T, bi);
     q = qc.Slerp(2.0 * T * (1.0 - T), qd);
-    q.NormalizeWithAngleInDegrees();
+    q.Normalize();
   }
 }
 
