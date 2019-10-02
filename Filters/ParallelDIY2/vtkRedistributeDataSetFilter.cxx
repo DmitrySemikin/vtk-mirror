@@ -95,6 +95,7 @@ std::vector<std::vector<int> > GenerateCellRegions(
   dataset->GetCellBounds(0, bds);
 
   const auto numCells = dataset->GetNumberOfCells();
+  int maxCellSize = dataset->GetMaxCellSize();
   if (duplicate_boundary_cells)
   {
     // vtkKdNode helps us do fast cell/cut intersections. So convert each cut to a
@@ -110,11 +111,12 @@ std::vector<std::vector<int> > GenerateCellRegions(
       kdnode->SetBounds(cut_bounds);
       kdnodes.push_back(std::move(kdnode));
     }
+
     vtkSMPThreadLocalObject<vtkGenericCell> gcellLO;
     vtkSMPTools::For(0, numCells,
-      [dataset, ghostCells, &kdnodes, &gcellLO, &cellRegions](vtkIdType first, vtkIdType last) {
+      [dataset, ghostCells, &kdnodes, &gcellLO, &cellRegions, maxCellSize](vtkIdType first, vtkIdType last) {
         auto gcell = gcellLO.Local();
-        std::vector<double> weights(dataset->GetMaxCellSize());
+        std::vector<double> weights(maxCellSize);
         for (vtkIdType cellId = first; cellId < last; ++cellId)
         {
           if (ghostCells != nullptr &&
@@ -143,9 +145,9 @@ std::vector<std::vector<int> > GenerateCellRegions(
     // simply assign to region contain the cell center.
     vtkSMPThreadLocalObject<vtkGenericCell> gcellLO;
     vtkSMPTools::For(0, numCells,
-      [dataset, ghostCells, &cuts, &gcellLO, &cellRegions](vtkIdType first, vtkIdType last) {
+      [dataset, ghostCells, &cuts, &gcellLO, &cellRegions, maxCellSize](vtkIdType first, vtkIdType last) {
         auto gcell = gcellLO.Local();
-        std::vector<double> weights(dataset->GetMaxCellSize());
+        std::vector<double> weights(maxCellSize);
         for (vtkIdType cellId = first; cellId < last; ++cellId)
         {
           if (ghostCells != nullptr &&
