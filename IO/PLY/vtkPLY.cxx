@@ -2197,91 +2197,6 @@ void vtkPLY::write_ascii_item(
 
 
 /******************************************************************************
-Write out an item to a file as ascii characters.
-
-Entry:
-  os   - output stream
-  item - pointer to item to write
-  type - data type that "item" points to
-
-Exit:
-  returns a double-precision float that contains the value of the written item
-******************************************************************************/
-
-double vtkPLY::old_write_ascii_item(std::ostream *os, char *item, int type)
-{
-  switch (type) {
-    case PLY_CHAR:
-    case PLY_INT8:
-    {
-      vtkTypeInt8 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_UCHAR:
-    case PLY_UINT8:
-    {
-      vtkTypeUInt8 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_SHORT:
-    case PLY_INT16:
-    {
-      vtkTypeInt16 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_USHORT:
-    case PLY_UINT16:
-    {
-      vtkTypeUInt16 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_INT:
-    case PLY_INT32:
-    {
-      vtkTypeInt32 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_UINT:
-    case PLY_UINT32:
-    {
-      vtkTypeUInt32 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return static_cast<double>(value);
-    }
-    case PLY_FLOAT:
-    case PLY_FLOAT32:
-    {
-      vtkTypeFloat32 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return value;
-    }
-    case PLY_DOUBLE:
-    case PLY_FLOAT64:
-    {
-      vtkTypeFloat64 value;
-      memcpy(&value, item, sizeof(value));
-      *os << value << " ";
-      return value;
-    }
-  }
-  fprintf (stderr, "old_write_ascii_item: bad type = %d\n", type);
-  return 0.0;
-}
-
-
-/******************************************************************************
 Get the value of an item that is in memory, and place the result
 into an integer, an unsigned integer and a double.
 
@@ -2369,7 +2284,7 @@ void vtkPLY::get_stored_item(
     {
       vtkTypeFloat32 value;
       memcpy(&value, ptr, sizeof(value));
-      *uint_val = static_cast<unsigned int>(value);
+      *uint_val = value > 0 ? static_cast<unsigned int>(value) : 0;
       *int_val = static_cast<int>(value);
       *double_val = static_cast<double>(value);
       break;
@@ -2612,12 +2527,8 @@ void vtkPLY::get_ascii_item(
   switch (type) {
     case PLY_CHAR:
     case PLY_INT8:
-    case PLY_UCHAR:
-    case PLY_UINT8:
     case PLY_SHORT:
     case PLY_INT16:
-    case PLY_USHORT:
-    case PLY_UINT16:
     case PLY_INT:
     case PLY_INT32:
       *int_val = atoi (word);
@@ -2625,6 +2536,10 @@ void vtkPLY::get_ascii_item(
       *double_val = *int_val;
       break;
 
+    case PLY_UCHAR:
+    case PLY_UINT8:
+    case PLY_USHORT:
+    case PLY_UINT16:
     case PLY_UINT:
     case PLY_UINT32:
       *uint_val = strtoul (word, nullptr, 10);
@@ -2638,7 +2553,7 @@ void vtkPLY::get_ascii_item(
     case PLY_FLOAT64:
       *double_val = atof (word);
       *int_val = (int) *double_val;
-      *uint_val = (unsigned int) *double_val;
+      *uint_val = *double_val > 0 ? (unsigned int) *double_val : 0;
       break;
 
     default:
