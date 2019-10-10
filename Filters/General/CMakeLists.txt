@@ -12,6 +12,7 @@ set(classes
   vtkBrownianPoints
   vtkCellCenters
   vtkCellDerivatives
+  vtkCellTextureToPointTexture
   vtkCellTreeLocator
   vtkCellValidator
   vtkClipClosedSurface
@@ -116,5 +117,9 @@ set(classes
   vtkWarpVector
   vtkYoungsMaterialInterface)
 
+set(private_classes
+  vtkCellTextureToPointTextureInternal)
+
 vtk_module_add_module(VTK::FiltersGeneral
-  CLASSES ${classes})
+  CLASSES ${classes}
+  PRIVATE_CLASSES ${private_classes})

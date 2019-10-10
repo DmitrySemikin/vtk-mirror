@@ -28,6 +28,7 @@ TEST_DEPENDS
   VTK::IOGeometry
   VTK::IOImage
   VTK::IOLegacy
+  VTK::IOPLY
   VTK::IOXML
   VTK::ImagingCore
   VTK::ImagingMath

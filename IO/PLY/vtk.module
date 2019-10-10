@@ -12,6 +12,7 @@ DEPENDS
 PRIVATE_DEPENDS
   VTK::CommonDataModel
   VTK::CommonMisc
+  VTK::FiltersGeneral
   VTK::vtksys
 TEST_DEPENDS
   VTK::FiltersSources

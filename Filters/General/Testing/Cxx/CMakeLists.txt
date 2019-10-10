@@ -48,6 +48,7 @@ vtk_add_test_cxx(vtkFiltersGeneralCxxTests tests
 vtk_add_test_cxx(vtkFiltersGeneralCxxTests data_tests
   BoxClipPointData.cxx
   BoxClipOrientedPointData.cxx
+  TestCellTextureToPointTexture.cxx
   TestDataSetGradient.cxx
   TestDataSetGradientPrecompute.cxx
   TestGradientAndVorticity.cxx,NO_VALID

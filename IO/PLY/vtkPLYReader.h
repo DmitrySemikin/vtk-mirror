@@ -27,7 +27,7 @@
  * to the output data.
  * If the "face" element has the property "texcoord" a new TCoords
  * point array is created and points are duplicated if they have 2 or
- * more different texture coordinates. Points are duplicated only if
+ * more different texture coordinates for a point. Points are duplicated only if
  * DuplicatePointsForFaceTexture is true (default).
  * This creates a polygonal data that can be textured without
  * artifacts. If unique points are required use a vtkCleanPolyData
@@ -90,13 +90,23 @@ public:
 
   /**
    * If true (default) and the "face" element has the property "texcoord" duplicate
-   * face points if they have 2 or more different texture coordinates.
+   * face points if they have 2 or more different texture coordinates for a point.
    * Otherwise, each texture coordinate for a face point overwrites previously set
    * texture coordinates for that point.
    */
   vtkGetMacro(DuplicatePointsForFaceTexture, bool);
   vtkSetMacro(DuplicatePointsForFaceTexture, bool);
+  vtkBooleanMacro(DuplicatePointsForFaceTexture, bool);
 
+  /**
+   * Reads the face texture as it is stored in the file if true
+   * (and DuplicatePointsForFaceTexture is false), otherwise does
+   * nothing (default). If the face texture is read, point texture is not
+   * created anymore.
+   */
+  vtkGetMacro(ReadFaceTextureOnly, bool);
+  vtkSetMacro(ReadFaceTextureOnly, bool);
+  vtkBooleanMacro(ReadFaceTextureOnly, bool);
 
 protected:
   vtkPLYReader();
@@ -117,6 +127,7 @@ private:
 
   float FaceTextureTolerance;
   bool DuplicatePointsForFaceTexture;
+  bool ReadFaceTextureOnly;
 };
 
 #endif
