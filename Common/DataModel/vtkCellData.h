@@ -40,6 +40,7 @@ public:
 protected:
   vtkCellData() {} //make sure constructor and destructor are protected
   ~vtkCellData() override {}
+  int CheckNumberOfComponents(vtkAbstractArray* da, int attributeType) override;
 
 private:
   vtkCellData(const vtkCellData&) = delete;
@@ -47,6 +48,3 @@ private:
 };
 
 #endif
-
-
-

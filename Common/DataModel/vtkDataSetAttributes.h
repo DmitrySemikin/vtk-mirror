@@ -637,8 +637,10 @@ protected:
   static const char AttributeNames[NUM_ATTRIBUTES][12];
   static const char LongAttributeNames[NUM_ATTRIBUTES][35];
 
+protected:
+  virtual int CheckNumberOfComponents(vtkAbstractArray* da, int attributeType);
+
 private:
-  static int CheckNumberOfComponents(vtkAbstractArray* da, int attributeType);
 
   vtkFieldData::BasicIterator  ComputeRequiredArrays(vtkDataSetAttributes* pd, int ctype);
 
