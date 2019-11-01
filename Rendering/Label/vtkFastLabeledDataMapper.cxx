@@ -25,6 +25,7 @@
 #include "vtkInformation.h"
 #include "vtkObjectFactory.h"
 #include "vtkOpenGLRenderWindow.h"
+#include "vtkOpenGLResourceFreeCallback.h"
 #include "vtkPNGWriter.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
@@ -1525,11 +1526,17 @@ void vtkFastLabeledDataMapper::RenderPiece(vtkRenderer* ren, vtkActor* actor)
   vtkAlgorithmOutput* savedreference = this->GetInputConnection(0, 0);
 
   // Check to see whether we have to rebuild everything
+  vtkOpenGLRenderWindow* openGLRenderWindow =
+    dynamic_cast<vtkOpenGLRenderWindow*>(ren->GetRenderWindow());
   if (this->GetMTime() > this->BuildTime || inputDO->GetMTime() > this->BuildTime ||
-    this->Implementation->DPI != ren->GetRenderWindow()->GetDPI())
+    this->Implementation->DPI != ren->GetRenderWindow()->GetDPI() ||
+    !this->ResourceCallback->IsWindowRegistered(openGLRenderWindow))
   {
-    this->Implementation->glyphsTO->SetContext(
-      static_cast<vtkOpenGLRenderWindow*>(ren->GetRenderWindow()));
+    // Reset the texture context
+    this->Implementation->glyphsTO->SetContext(openGLRenderWindow);
+    // Reset the render window context (which might have changed from on- to off-screen rendering,
+    // for example)
+    this->ResourceCallback->RegisterGraphicsResources(openGLRenderWindow);
     this->Implementation->DPI = ren->GetRenderWindow()->GetDPI();
     this->BuildLabels();
   }

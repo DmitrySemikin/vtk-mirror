@@ -24,22 +24,26 @@ class vtkWindow;
 
 class vtkGenericOpenGLResourceFreeCallback
 {
-  public:
-    vtkGenericOpenGLResourceFreeCallback() {
-        this->VTKWindow = nullptr; this->Releasing = false; }
-    virtual ~vtkGenericOpenGLResourceFreeCallback() { }
+public:
+  vtkGenericOpenGLResourceFreeCallback()
+  {
+    this->VTKWindow = nullptr;
+    this->Releasing = false;
+  }
+  virtual ~vtkGenericOpenGLResourceFreeCallback() = default;
 
-    // Called when the event is invoked
-    virtual void Release() = 0;
+  // Called when the event is invoked
+  virtual void Release() = 0;
 
-    virtual void RegisterGraphicsResources(vtkOpenGLRenderWindow *rw) =  0;
+  virtual void RegisterGraphicsResources(vtkOpenGLRenderWindow* rw) = 0;
 
-    bool IsReleasing() {
-      return this->Releasing; }
+  bool IsWindowRegistered(vtkOpenGLRenderWindow* rw) { return (rw == VTKWindow); }
 
-  protected:
-    vtkOpenGLRenderWindow *VTKWindow;
-    bool Releasing;
+  bool IsReleasing() { return this->Releasing; }
+
+protected:
+  vtkOpenGLRenderWindow* VTKWindow;
+  bool Releasing;
 };
 
 // Description:
@@ -48,15 +52,16 @@ template <class T>
 class vtkOpenGLResourceFreeCallback : public vtkGenericOpenGLResourceFreeCallback
 {
 public:
-  vtkOpenGLResourceFreeCallback(T* handler, void (T::*method)(vtkWindow *))
+  vtkOpenGLResourceFreeCallback(T* handler, void (T::*method)(vtkWindow*))
   {
     this->Handler = handler;
     this->Method = method;
   }
 
-  ~vtkOpenGLResourceFreeCallback() override { }
+  ~vtkOpenGLResourceFreeCallback() override = default;
 
-  void RegisterGraphicsResources(vtkOpenGLRenderWindow *rw) override {
+  void RegisterGraphicsResources(vtkOpenGLRenderWindow* rw) override
+  {
     if (this->VTKWindow == rw)
     {
       return;
@@ -86,9 +91,10 @@ public:
       this->Releasing = false;
     }
   }
+
 protected:
   T* Handler;
-  void (T::*Method)(vtkWindow *);
+  void (T::*Method)(vtkWindow*);
 };
 
 #endif
