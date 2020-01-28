@@ -16,35 +16,47 @@
  * @class   vtkHyperTreeGridEntry
  * @brief   Entries are cache data for cursors
  *
- * Entries are relevant for cursor/supercursor developers. Filters
+ * Hyper Tree Grid Entries are a mechanism used on Hyper Tree Grid
+ * to avoid inheritance overhead.
+ * Entries are relevant for cursor/supercursor developers. Filter
  * developers should have a look at cursors/supercursors documentation.
  * (cf. vtkHyperTreeGridNonOrientedCursor). When writing a new cursor or
  * supercursor the choice of the entry is very important: it will drive
  * the performance and memory cost. This is even more important for
  * supercursors which have several neighbors: 6x for VonNeuman and 26x for
- * Moore.
+ * Moore in 3D with a branch factor of 2.
  *
  * Several types of Entries exist:
- * 1. vtkHyperTreeGridEntry
- * This cache only memorizes the current cell index in one HyperTree.
- * Using the index, this entry provides several services such as:
- * is the cell coarse or leaf, get or set global index (to access
- * field value, cf. vtkHyperTree), descend into selected child,
- * subdivise the cell. Equivalent services are available for all entries.
  *
- * 2. vtkHyperTreeGridGeometryEntry
- * This cache adds the origin coordinates of the cell atop
- * vtkHyperTreeGridEntry. Getter is provided, as well as services related
- * to the bounding box and cell center.
+ * - vtkHyperTreeGridEntry
+ *   
+ *   This cache only memorizes the current cell index in one HyperTree.
+ *   Using the index, this entry provides several services:
+ *   + Determine if the current cell is a leaf
+ *   + Get or set global index which can be used to interact
+ *     with scalar array
+ *   + Descend into selected child
+ *   + Subdivise the current cell (it needs to be a leaf for it to work)
  *
- * 3. vtkHyperTreeGridLevelEntry
- * This cache adds the following information with their getters atop
- * vtkHyperTreeGridEntry: pointer to the HyperTree, level of the current
- * cell.
+ *  The same services exist for all entries.
  *
- * 4. vtkHyperTreeGridGeometryLevelEntry
- * This cache is a combination of vtkHyperTreeGridLevelEntry and
- * vtkHyperTreeGridLevelEntry: it provides all combined services.
+ * - vtkHyperTreeGridGeometryEntry
+ *
+ *   This entry caches the origin coordinates of the current cell
+ *   atop vtkHyperTreeGridEntry services. A getter is provided,
+ *   as well as services related
+ *   to the bounding box and cell center.
+ *
+ * - vtkHyperTreeGridLevelEntry
+ *
+ *   This entry offers the same services as vtkHyperTreeGridEntry, adding:
+ *   - A pointer to the vtkHyperTreeGrid owning the current cell.
+ *   - Access to the depth (or level) of the current cell.
+ *
+ * - vtkHyperTreeGridGeometryLevelEntry
+ *
+ *   This cache is the concatanation of vtkHyperTreeGridGeometryEntry
+ *   and vtkHyperTreeGridLevelEntry.
  *
  * @sa
  * vtkHyperTreeGridEntry
@@ -79,20 +91,18 @@ public:
    */
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  // @deprecated Replaced by PrintSelf as of VTK 9.0
+  VTK_LEGACY(void Dump(ostream& os));
+
   /**
-   * Dump information
+   * Defautl constructor
    */
-  void Dump(ostream& os);
+  vtkHyperTreeGridEntry();
 
   /**
    * Constructor
    */
-  vtkHyperTreeGridEntry() { this->Index = 0; }
-
-  /**
-   * Constructor
-   */
-  vtkHyperTreeGridEntry(vtkIdType index) { this->Index = index; }
+  vtkHyperTreeGridEntry(vtkIdType index);
 
   /**
    * Destructor
@@ -123,7 +133,8 @@ public:
    * Return the global index for the current cell (cf. vtkHyperTree).
    * \pre not_tree: tree
    */
-  vtkIdType GetGlobalNodeIndex(const vtkHyperTree* tree) const;
+  VTK_LEGACY(vtkIdType GetGlobalNodeIndex(const vtkHyperTree* tree) const);
+  vtkIdType GetGlobalNodeIndex(vtkHyperTree* tree) const;
 
   /**
    * Set the global index for the root cell of the HyperTree.

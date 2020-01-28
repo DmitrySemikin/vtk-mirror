@@ -67,7 +67,8 @@
 // #include "vtkPointData.h" // vtkPointData
 
 #include <cassert> // std::assert
-#include <map>     // std::map
+#include <limits>  // For vtkHyperTreeGrid::InvalidIndex
+#include <map>     // For iterators
 #include <memory>  // std::shared_ptr
 
 class vtkBitArray;
@@ -109,7 +110,7 @@ public:
    * Invalid index that is returned for undefined nodes, for example for nodes that are out of
    * bounds (they can exist with the super cursors).
    */
-  static constexpr vtkIdType InvalidIndex = ~0;
+  static constexpr vtkIdType InvalidIndex = std::numeric_limits<vtkIdType>::min();
 
   /**
    * Set/Get mode squeeze

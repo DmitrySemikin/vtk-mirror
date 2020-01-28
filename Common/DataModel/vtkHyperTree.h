@@ -16,13 +16,21 @@
  * @class   vtkHyperTree
  * @brief   A data object structured as a tree.
  *
- * An hypertree grid is a dataobject containing a rectilinear grid of
+ * A hyper tree is the generalization of binary trees / quadtrees / octrees
+ * to more branching factors. The former cited trees have all a branch factor
+ * \f$f = 2\f$. Given c the number of children, and d the dimension of the hyper tree,
+ * we have \f$c = f^d\f$.
+ *
+ * In the current implementation, the only available branching factors
+ * are \f$f = 2\f$ and \f$f = 3\f$, in 1D, 2D and 3D.
+ *
+ * A hypertree grid is a dataobject containing a rectilinear grid of
  * elements that can be either null or a hypertree.
  * An hypertree is a dataobject describing a decomposition tree.
  * A VERTICE is an element of this tree.
  * A NODE, also called COARSE cell, is a specific vertice which is
- * refined and than has either exactly f^d children, where f in {2,3}
- * is the branching factor, the same value for all trees in this
+ * refined and that has either exactly f^d children, where f in {2,3}
+ * is the branching factor, or the same value for all trees in this
  * hypertree grid, and d in {1,2,3} is the spatial dimension. It is
  * called coarse because there are smaller child cells.
  * A LEAF, also called FINE cell, is a vertice without children, not

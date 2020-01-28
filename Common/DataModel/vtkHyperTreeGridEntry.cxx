@@ -15,11 +15,20 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkHyperTreeGridEntry.h"
 
 #include "vtkBitArray.h"
-
 #include "vtkHyperTree.h"
 #include "vtkHyperTreeGrid.h"
 
 #include <cassert>
+
+//-----------------------------------------------------------------------------
+vtkHyperTreeGridEntry::vtkHyperTreeGridEntry() : Index(vtkHyperTreeGrid::InvalidIndex)
+{
+}
+
+//-----------------------------------------------------------------------------
+vtkHyperTreeGridEntry::vtkHyperTreeGridEntry(vtkIdType index) : Index(index)
+{
+}
 
 //-----------------------------------------------------------------------------
 void vtkHyperTreeGridEntry::PrintSelf(ostream& os, vtkIndent indent)
@@ -28,26 +37,39 @@ void vtkHyperTreeGridEntry::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Index:" << this->Index << endl;
 }
 
+#ifndef VTK_LEGACY_REMOVE
 //-----------------------------------------------------------------------------
 void vtkHyperTreeGridEntry::Dump(ostream& os)
 {
+  VTK_LEGACY_REPLACED_BODY(
+      vtkHyperTreeGridEntry::Dump, "VTK 9.0", vtkHyperTreeGridEntry::PrintSelf);
   os << "Index:" << this->Index << endl;
+}
+
+//-----------------------------------------------------------------------------
+vtkIdType vtkHyperTreeGridEntry::GetGlobalNodeIndex(const vtkHyperTree* tree) const
+{
+  VTK_LEGACY_REPLACED_BODY(
+      vtkHyperTreeGridEntry::GetGlobalNodeIndex(const vtkHyperTree*), "VTK 9.0",
+      vtkHyperTreeGridEntry::GetGlobalNodeIndex(vtkHyperTree* tree));
+  return this->GetGlobalNodeIndex(const_cast<vtkHyperTree*>(tree));
+}
+#endif
+
+//-----------------------------------------------------------------------------
+vtkIdType vtkHyperTreeGridEntry::GetGlobalNodeIndex(vtkHyperTree* tree) const
+{
+  assert("pre: not_tree" && tree);
+  return tree->GetGlobalIndexFromLocal(this->Index);
 }
 
 //-----------------------------------------------------------------------------
 vtkHyperTree* vtkHyperTreeGridEntry::Initialize(
   vtkHyperTreeGrid* grid, vtkIdType treeIndex, bool create)
 {
-  assert(grid != nullptr);
+  assert(grid);
   this->Index = 0;
   return grid->GetTree(treeIndex, create);
-}
-
-//-----------------------------------------------------------------------------
-vtkIdType vtkHyperTreeGridEntry::GetGlobalNodeIndex(const vtkHyperTree* tree) const
-{
-  assert("pre: not_tree" && tree);
-  return tree->GetGlobalIndexFromLocal(this->Index);
 }
 
 //-----------------------------------------------------------------------------
