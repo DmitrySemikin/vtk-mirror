@@ -27,6 +27,7 @@ namespace RTW
         virtual RTWModel NewModel() = 0;
         virtual RTWGeometry NewInstance(RTWModel modelToInstantiate, const rtw::affine3f &transform) = 0;
         virtual RTWFrameBuffer NewFrameBuffer(const rtw::vec2i &size, const RTWFrameBufferFormat format, const uint32_t frameBufferChannels) = 0;
+        virtual RTWPixelOp NewPixelOp(const char *type) = 0;
 
         virtual void Release(RTWObject) = 0;
 
@@ -56,6 +57,7 @@ namespace RTW
         virtual void FrameBufferClear(RTWFrameBuffer, const uint32_t frameBufferChannels) = 0;
         virtual const void* MapFrameBuffer(RTWFrameBuffer, const RTWFrameBufferChannel) = 0;
         virtual void UnmapFrameBuffer(const void *mapped, RTWFrameBuffer) = 0;
+        virtual void SetPixelOp(RTWFrameBuffer, RTWPixelOp) = 0;
 
         virtual void SetDepthNormalizationGL(RTWFrameBuffer frameBuffer, float clipMin, float clipMax) = 0;
         virtual int GetColorTextureGL(RTWFrameBuffer frameBuffer) = 0;

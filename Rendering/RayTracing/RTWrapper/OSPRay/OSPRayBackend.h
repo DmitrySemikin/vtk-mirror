@@ -160,6 +160,11 @@ namespace RTW
       return reinterpret_cast<RTWFrameBuffer>(ospNewFrameBuffer(osp::vec2i{ size.x, size.y }, convert(format), frameBufferChannels));
     }
 
+    RTWPixelOp NewPixelOp(const char *type) override
+    {
+      return reinterpret_cast<RTWPixelOp>(ospNewPixelOp(type));
+    }
+
     void Release(RTWObject object) override
     {
       ospRelease(reinterpret_cast<OSPObject>(object));
@@ -265,6 +270,11 @@ namespace RTW
     void UnmapFrameBuffer(const void *mapped, RTWFrameBuffer frameBuffer) override
     {
       ospUnmapFrameBuffer(mapped, reinterpret_cast<OSPFrameBuffer>(frameBuffer));
+    }
+
+    void SetPixelOp(RTWFrameBuffer frameBuffer, RTWPixelOp pixelOp) override
+    {
+      ospSetPixelOp(reinterpret_cast<OSPFrameBuffer>(frameBuffer), reinterpret_cast<OSPPixelOp>(pixelOp));
     }
 
     void SetDepthNormalizationGL(RTWFrameBuffer /*frameBuffer*/, float /*clipMin*/, float /*clipMax*/) override

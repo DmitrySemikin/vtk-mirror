@@ -86,6 +86,11 @@ namespace RTW
             return nullptr;
         }
 
+        RTWPixelOp NewPixelOp(const char *type) override
+        {
+            return nullptr;
+        }
+
         void AddVolume(RTWModel model, RTWVolume volume) override
         {
         }
@@ -93,6 +98,10 @@ namespace RTW
         RTWError SetRegion(RTWVolume volume, void *source, const rtw::vec3i &regionCoords, const rtw::vec3i &regionSize) override
         {
             return RTW_NO_ERROR;
+        }
+
+        void SetPixelOp(RTWFrameBuffer frameBuffer, RTWPixelOp pixelOp) override
+        {
         }
     };
 }

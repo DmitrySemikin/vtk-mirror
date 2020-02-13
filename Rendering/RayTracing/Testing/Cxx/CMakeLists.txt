@@ -50,6 +50,7 @@ if (VTK_ENABLE_OSPRAY)
     # Miscellaneous tests
     TestOSPRayCache.cxx
     TestOSPRayTiling.cxx
+    TestOSPRayToneMapper.cxx
   )
 endif()
 

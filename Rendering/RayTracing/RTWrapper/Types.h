@@ -88,6 +88,7 @@ namespace rtw
 }
 
 typedef struct RTWHandle
+*RTWPixelOp,
 *RTWFrameBuffer,
 *RTWRenderer,
 *RTWCamera,

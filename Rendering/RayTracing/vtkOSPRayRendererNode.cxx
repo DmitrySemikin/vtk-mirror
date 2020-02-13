@@ -193,6 +193,7 @@ vtkInformationKeyMacro(vtkOSPRayRendererNode, VIEW_TIME, Double);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, TIME_CACHE_SIZE, Integer);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, DENOISER_THRESHOLD, Integer);
 vtkInformationKeyMacro(vtkOSPRayRendererNode, ENABLE_DENOISER, Integer);
+vtkInformationKeyMacro(vtkOSPRayRendererNode, ENABLE_TONE_MAPPER, Integer);
 
 class vtkOSPRayRendererNodeInternals
 {
@@ -428,6 +429,7 @@ vtkOSPRayRendererNode::vtkOSPRayRendererNode()
   this->NumActors = 0;
   this->ComputeDepth = true;
   this->OFrameBuffer = nullptr;
+  this->OPixelOp = nullptr;
   this->ImageX = this->ImageY = -1;
   this->CompositeOnGL = false;
   this->Accumulate = true;
@@ -454,6 +456,7 @@ vtkOSPRayRendererNode::~vtkOSPRayRendererNode()
     ospRelease((OSPModel)this->OModel);
     ospRelease((OSPRenderer)this->ORenderer);
     ospRelease(this->OFrameBuffer);
+    ospRelease(this->OPixelOp);
   }
   this->AccumulateMatrix->Delete();
   delete this->Internal;
@@ -934,6 +937,32 @@ int vtkOSPRayRendererNode::GetEnableDenoiser(vtkRenderer* renderer)
 }
 
 //----------------------------------------------------------------------------
+void vtkOSPRayRendererNode::SetEnableToneMapper(int value, vtkRenderer* renderer)
+{
+  if (!renderer)
+  {
+    return;
+  }
+  vtkInformation* info = renderer->GetInformation();
+  info->Set(vtkOSPRayRendererNode::ENABLE_TONE_MAPPER(), value);
+}
+
+//----------------------------------------------------------------------------
+int vtkOSPRayRendererNode::GetEnableToneMapper(vtkRenderer* renderer)
+{
+  if (!renderer)
+  {
+    return 0;
+  }
+  vtkInformation* info = renderer->GetInformation();
+  if (info && info->Has(vtkOSPRayRendererNode::ENABLE_TONE_MAPPER()))
+  {
+    return (info->Get(vtkOSPRayRendererNode::ENABLE_TONE_MAPPER()));
+  }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 void vtkOSPRayRendererNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
@@ -1216,6 +1245,7 @@ void vtkOSPRayRendererNode::Render(bool prepass)
       this->ImageY = this->Size[1];
       const size_t size = this->ImageX * this->ImageY;
       ospRelease(this->OFrameBuffer);
+      ospRelease(this->OPixelOp);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wextra"
       this->OFrameBuffer = ospNewFrameBuffer(isize,
@@ -1236,6 +1266,12 @@ void vtkOSPRayRendererNode::Render(bool prepass)
       this->AlbedoBuffer.resize(size);
       this->DenoiserDirty = true;
       ospSet1f(this->OFrameBuffer, "gamma", 1.0f);
+      if (this->GetEnableToneMapper(ren) != 0)
+      {
+        this->OPixelOp = ospNewPixelOp("tonemapper");
+        ospCommit(this->OPixelOp);
+        ospSetPixelOp(this->OFrameBuffer, this->OPixelOp);
+      }
       ospCommit(this->OFrameBuffer);
       ospFrameBufferClear(this->OFrameBuffer,
         OSP_FB_COLOR | (this->ComputeDepth ? OSP_FB_DEPTH : 0) |

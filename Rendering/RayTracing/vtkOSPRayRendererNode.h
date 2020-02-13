@@ -325,6 +325,17 @@ public:
   static int GetEnableDenoiser(vtkRenderer* renderer);
   //@}
 
+  /**
+   * Enable tone mapping (if supported).
+   */
+  static vtkInformationIntegerKey* ENABLE_TONE_MAPPER();
+  /**
+   * Convenience method to set/get ENABLE_TONE_MAPPER on a vtkRenderer.
+   */
+  static void SetEnableToneMapper(int, vtkRenderer* renderer);
+  static int GetEnableToneMapper(vtkRenderer* renderer);
+  //@}
+
 protected:
   vtkOSPRayRendererNode();
   ~vtkOSPRayRendererNode();
@@ -344,6 +355,7 @@ protected:
   OSPModel OModel;
   OSPRenderer ORenderer;
   OSPFrameBuffer OFrameBuffer;
+  OSPPixelOp OPixelOp;
   OSPData OLightArray;
   int ImageX, ImageY;
   std::vector<OSPLight> Lights;

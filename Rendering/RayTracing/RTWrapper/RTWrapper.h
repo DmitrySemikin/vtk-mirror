@@ -23,6 +23,7 @@ std::set<RTWBackendType> rtwGetAvailableBackends();
 #define OSPMaterial RTWMaterial
 #define OSPGeometry RTWGeometry
 #define OSPFrameBuffer RTWFrameBuffer
+#define OSPPixelOp RTWPixelOp
 #define OSPVolume RTWVolume
 #define OSPTransferFunction RTWTransferFunction
 #define OSPDataType RTWDataType
@@ -96,10 +97,12 @@ std::set<RTWBackendType> rtwGetAvailableBackends();
 #define ospNewInstance backend->NewInstance
 #define ospNewFrameBuffer backend->NewFrameBuffer
 #define ospNewRenderer backend->NewRenderer
+#define ospNewPixelOp backend->NewPixelOp
 #define ospFrameBufferClear backend->FrameBufferClear
 #define ospRenderFrame backend->RenderFrame
 #define ospMapFrameBuffer backend->MapFrameBuffer
 #define ospUnmapFrameBuffer backend->UnmapFrameBuffer
+#define ospSetPixelOp backend->SetPixelOp
 
 #define ospAddGeometry backend->AddGeometry
 #define ospAddVolume backend->AddVolume
