@@ -401,11 +401,11 @@ protected:
   int WriteScalarAttribute(const char* name, vtkIdType data);
 #endif
 
-  int WriteVectorAttribute(const char* name, int length, int* data);
-  int WriteVectorAttribute(const char* name, int length, float* data);
-  int WriteVectorAttribute(const char* name, int length, double* data);
+  int WriteVectorAttribute(const char* name, int length, const int* data);
+  int WriteVectorAttribute(const char* name, int length, const float* data);
+  int WriteVectorAttribute(const char* name, int length, const double* data);
 #ifdef VTK_USE_64BIT_IDS
-  int WriteVectorAttribute(const char* name, int length, vtkIdType* data);
+  int WriteVectorAttribute(const char* name, int length, const vtkIdType* data);
 #endif
 
   int WriteDataModeAttribute(const char* name);

@@ -1884,7 +1884,7 @@ const char* vtkXMLWriter::GetWordTypeName(int dataType)
 
 //----------------------------------------------------------------------------
 template <class T>
-int vtkXMLWriterWriteVectorAttribute(ostream& os, const char* name, int length, T* data)
+int vtkXMLWriterWriteVectorAttribute(ostream& os, const char* name, int length, const T* data)
 {
   vtkNumberToString convert;
   os << " " << name << "=\"";
@@ -1927,7 +1927,7 @@ int vtkXMLWriter::WriteScalarAttribute(const char* name, vtkIdType data)
 #endif
 
 //----------------------------------------------------------------------------
-int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, int* data)
+int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, const int* data)
 {
   int res = vtkXMLWriterWriteVectorAttribute(*(this->Stream), name, length, data);
 
@@ -1940,7 +1940,7 @@ int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, int* data)
 }
 
 //----------------------------------------------------------------------------
-int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, float* data)
+int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, const float* data)
 {
   int res = vtkXMLWriterWriteVectorAttribute(*(this->Stream), name, length, data);
 
@@ -1953,7 +1953,7 @@ int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, float* data
 }
 
 //----------------------------------------------------------------------------
-int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, double* data)
+int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, const double* data)
 {
   int res = vtkXMLWriterWriteVectorAttribute(*(this->Stream), name, length, data);
 
@@ -1967,7 +1967,7 @@ int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, double* dat
 
 //----------------------------------------------------------------------------
 #ifdef VTK_USE_64BIT_IDS
-int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, vtkIdType* data)
+int vtkXMLWriter::WriteVectorAttribute(const char* name, int length, const vtkIdType* data)
 {
   int res = vtkXMLWriterWriteVectorAttribute(*(this->Stream), name, length, data);
 
