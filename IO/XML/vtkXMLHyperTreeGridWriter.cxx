@@ -246,7 +246,7 @@ void vtkXMLHyperTreeGridWriter::WritePrimaryElementAttributes(ostream& os, vtkIn
   this->WriteScalarAttribute("BranchFactor", (int)input->GetBranchFactor());
   this->WriteScalarAttribute("TransposedRootIndexing", (bool)input->GetTransposedRootIndexing());
   this->WriteVectorAttribute(
-    "Dimensions", 3, (int*)const_cast<unsigned int*>(input->GetDimensions()));
+    "Dimensions", 3, input->GetDimensions());
   if (input->GetHasInterface())
   {
     this->WriteStringAttribute("InterfaceNormalsName", input->GetInterfaceNormalsName());

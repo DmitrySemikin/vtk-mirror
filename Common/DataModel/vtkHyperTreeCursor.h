@@ -145,8 +145,8 @@ public:
 
 protected:
   // Constructor
-  vtkHyperTreeCursor();
-  ~vtkHyperTreeCursor() override;
+  vtkHyperTreeCursor() = default;
+  ~vtkHyperTreeCursor() override = default;
 
 private:
   vtkHyperTreeCursor(const vtkHyperTreeCursor&) = delete;

@@ -17,32 +17,38 @@
  * @brief   A dataset containing a grid of vtkHyperTree instances
  * arranged as a rectilinear grid.
  *
+ * vtkHyperTreeGrid is an implementation of the following paper:
+ * 
+ * Visualization and Analysis of Large-Scale, Tree-Based, Adaptive
+ * MeshRefinement Simulations with Arbitrary Rectilinear Geometry.
  *
- * An hypertree grid is a dataset containing a rectilinear grid of root nodes,
- * each of which can be refined as a vtkHyperTree grid. This organization of the
+ * Guénolé Harel, Jacques-Bernard Lekien, Philippe P. Pébaÿ
+ *
+ * A vtkHyperTreeGrid is a vtkDataObject containing a rectilinear grid of root nodes,
+ * each of which can be refined as a vtkHyperTree. Please refer to the vtkHyperTree
+ * documentation for deeper insight on hypertrees. This organization of the
  * root nodes allows for the definition of tree-based AMR grids that do not have
  * uniform geometry.
- * Some filters can be applied on this dataset: contour, outline, geometry.
+ * Usually, filters need a specific implementation for hyper tree grids.
+ * In VTK, they all start with the prefix vtkHyperTreeGrid in their name.
  *
- * JB A valider la suite
- * The order and number of points must match that specified by the dimensions
- * of the grid. The point order increases in i fastest (from 0<=i<dims[0]),
- * then j (0<=j<dims[1]), then k (0<=k<dims[2]) where dims[] are the
- * dimensions of the grid in the i-j-k topological directions. The number of
- * points is dims[0]*dims[1]*dims[2]. The same is true for the cells of the
- * grid. The order and number of cells must match that specified by the
- * dimensions of the grid. The cell order increases in i fastest (from
- * 0<=i<(dims[0]-1)), then j (0<=j<(dims[1]-1)), then k (0<=k<(dims[2]-1))
- * The number of cells is (dims[0]-1)*(dims[1]-1)*(dims[2]-1).
- * JB
- * Dimensions : number of points by direction of rectilinear grid
- * CellDims : number of cells by directions of rectilinear grid
- * (1 for each dimensions 1)
+ * The size of a vtkHyperTreeGrid is set by its dimensions. The dimensions that the user
+ * can set actually refer to the underlying vertices of the grid of hypertrees.
+ * One can infer the number of hypertrees per dimensiosn by considering the dual
+ * of the grid: there are one less hypertrees than points per dimension. One has
+ * a handle on the number of hypertrees with the method GetCellDims.
+ *
+ * By convention, if the hypertree grid is not 3D, each unused dimension has its
+ * cell dimensions as well as point dimensions set to one. The user should not
+ * worry about updating cell dimensions, they are automatically updated
+ * when one sets the point dimneions (by calling SetDimensions).
+ *
+ * The ordering of the hypertree grid is the following: x grows faster than y,
+ * which grows faster than z.
  *
  * @warning
  * It is not a spatial search object. If you are looking for this kind of
  * octree see vtkCellLocator instead.
- * Extent support is not finished yet.
  *
  * @sa
  * vtkHyperTree vtkRectilinearGrid
@@ -61,10 +67,8 @@
 
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkDataObject.h"
-
 #include "vtkNew.h"          // vtkSmartPointer
 #include "vtkSmartPointer.h" // vtkSmartPointer
-// #include "vtkPointData.h" // vtkPointData
 
 #include <cassert> // std::assert
 #include <limits>  // For vtkHyperTreeGrid::InvalidIndex
@@ -77,14 +81,14 @@ class vtkCellLinks;
 class vtkCollection;
 class vtkDataArray;
 class vtkHyperTree;
-class vtkHyperTreeGridOrientedCursor;
-class vtkHyperTreeGridOrientedGeometryCursor;
 class vtkHyperTreeGridNonOrientedCursor;
 class vtkHyperTreeGridNonOrientedGeometryCursor;
 class vtkHyperTreeGridNonOrientedVonNeumannSuperCursor;
 class vtkHyperTreeGridNonOrientedVonNeumannSuperCursorLight;
 class vtkHyperTreeGridNonOrientedMooreSuperCursor;
 class vtkHyperTreeGridNonOrientedMooreSuperCursorLight;
+class vtkHyperTreeGridOrientedCursor;
+class vtkHyperTreeGridOrientedGeometryCursor;
 class vtkDoubleArray;
 class vtkDataSetAttributes;
 class vtkIdTypeArray;
@@ -135,9 +139,9 @@ public:
   virtual void CopyStructure(vtkDataObject*);
 
   /**
-   * Copy the internal structure with no data associated.
+   * @deprecated Replaced by CopyStructure as of VTK 10.0
    */
-  virtual void CopyEmptyStructure(vtkDataObject*);
+  VTK_LEGACY(virtual void CopyEmptyStructure(vtkDataObject*));
 
   // --------------------------------------------------------------------------
   // RectilinearGrid common API
@@ -146,6 +150,9 @@ public:
   //@{
   /**
    * Set/Get sizes of this rectilinear grid dataset
+   *
+   * @warning The actual number of hypertrees in the hypertree grid relies
+   * on the dual grid (of cells) of this grid (of points) being set here.
    */
   void SetDimensions(const unsigned int dims[3]);
   void SetDimensions(const int dims[3]);
@@ -156,18 +163,18 @@ public:
   //@{
   /**
    * Get dimensions of this rectilinear grid dataset.
-   * The dimensions correspond to the number of points
+   * The dimensions correspond to the number of points, i.e. the dual grid dimension
+   * of the hypertree grid.
    */
-  const unsigned int* GetDimensions() const VTK_SIZEHINT(3);
-  // JB Dommage, car vtkGetVectorMacro(Dimensions,int,3); not const function
+  const int* GetDimensions() const VTK_SIZEHINT(3);
   void GetDimensions(int dim[3]) const;
-  void GetDimensions(unsigned int dim[3]) const;
+  VTK_LEGACY(void GetDimensions(unsigned int dim[3]) const);
   //@}
 
   //@{
   /**
-   * Different ways to set the extent of the data array.  The extent
-   * should be set before the "Scalars" are set or allocated.
+   * Different ways to set the extent of the data array. The extent
+   * should be set before the data fields are set or allocated.
    * The Extent is stored in the order (X, Y, Z).
    * Set/Get extent of this rectilinear grid dataset.
    */
@@ -178,78 +185,59 @@ public:
 
   //@{
   /**
-   * JB Get grid sizes of this structured cells dataset.
-   * Valeurs deduites a partir de Dimensions/Extent
-   * Les dimensions non exprimees auront pour valeur 1.
+   * Get hypertree grid dimensions, which is the dual grid of the grid
+   * set by vtkHyperTreeGrid::SetDimensions(int[3]).
+   * By convension, if the hypertree grid is of dimensions less than 3D, the
+   * corresponding CellDims have a dimension of one.
+   *
+   * @warning Do not confuse these values with the ones of vtkHyperTreeGrid::GetDimensions()
    */
-  const unsigned int* GetCellDims() const VTK_SIZEHINT(3);
+  const int* GetCellDims() const VTK_SIZEHINT(3);
   void GetCellDims(int cellDims[3]) const;
-  void GetCellDims(unsigned int cellDims[3]) const;
+  VTK_LEGACY(void GetCellDims(unsigned int cellDims[3]) const);
   //@}
 
-  // --------------------------------------------------------------------------
-
-  //@{
   /**
-   * JB Get the dimensionality of the grid deduite a partir
-   * de Dimensions/Extent.
+   * Get the dimensionality of the grid deduced when setting
+   * Dimensions or Extent. Given 0<i<=3, For each Dimensions[i]
+   * equal to 1, or for each Extent[2*i+1] - Extent[2*i] equal to 0,
+   * the hypertree grid dimension is reduced by one.
    */
   unsigned int GetDimension() const { return this->Dimension; }
-  //@}
 
-  //@{
   /**
-   * JB retourne l'indice de la dimension valide.
+   * @deprecated Use GetAxes instead.
    */
-  void Get1DAxis(unsigned int& axis) const
-  {
-    assert("pre: valid_dim" && this->GetDimension() == 1);
-    axis = this->Axis[0];
-  }
-  //@}
+  VTK_LEGACY(void Get1DAxis(unsigned int& axis) const);
 
-  //@{
   /**
-   * JB Retourne l'indice des deux dimensions valides.
+   * @deprecated Use GetAxes instead
    */
-  void Get2DAxes(unsigned int& axis1, unsigned int& axis2) const
-  {
-    assert("pre: valid_dim" && this->GetDimension() == 2);
-    axis1 = this->Axis[0];
-    axis2 = this->Axis[1];
-  }
-  //@}
-
-  //@{
-  /**
-   * JB Get the axis information (used for CopyStructure)
-   */
-  const unsigned int* GetAxes() const { return this->Axis; }
-  //@}
-
-  //@{
-  /**
-   * The number of children each node can have.
-   */
-  // vtkGetMacro(NumberOfChildren, unsigned int); not const
-  unsigned int GetNumberOfChildren() const { return this->NumberOfChildren; }
-  //@}
+  VTK_LEGACY(void Get2DAxes(unsigned int& axis1, unsigned int& axis2) const);
 
   /**
-   * Get the number or trees available along the 3 axis.
-   * For 2D or 1D the empty dimension will be equal to 1.
-   * The empty dimension being any axis that contain a
-   * single value for their point coordinate.
+   * Returns the array of axes used to span the hypertree grid.
+   * The returned pointer is an array of 2 unsigned integers in [0,2].
+   * These integers tell which dimension in (x,y,z) is used to span the hypertree grid.
    *
-   * SetDimensions() must be called in order to have a valid
-   * NumberOfTreesPerDimension[3].
+   * If the inner dimension is 1D, only GetAxes()[0] should be regarded.
+   * If the inner dimension is 2D, (GetAxes()[0], GetAxes()[1]) form a direct frame.
+   *
+   * @note GetDimension() gives a handle on the inner dimension of the hypertree grid.
    */
-  // JB ?? virtual void GetNumberOfTreesPerDimension(unsigned int dimsOut[3]);
+  const unsigned* GetAxes() const { return this->Axis; }
+
+  /**
+   * Returns the number of children each node can have.
+   * This number will vary depending of the inner dimension of the hypertree grid as well as the
+   * branch factor of its hypertrees.
+   */
+  unsigned int GetNumberOfChildren() const { return this->NumberOfChildren; }
 
   //@{
   /**
    * Specify whether indexing mode of grid root cells must be transposed to
-   * x-axis first, z-axis last, instead of the default z-axis first, k-axis last
+   * x-axis first, z-axis last, instead of the default z-axis first, x-axis last
    */
   vtkSetMacro(TransposedRootIndexing, bool);
   vtkGetMacro(TransposedRootIndexing, bool);
@@ -257,22 +245,19 @@ public:
   void SetIndexingModeToIJK() { this->SetTransposedRootIndexing(true); }
   //@}
 
-  //@{
   /**
    * Get the orientation of 1D or 2D grids:
    * . in 1D: 0, 1, 2 = aligned along X, Y, Z axis
    * . in 2D: 0, 1, 2 = normal to X, Y, Z axis
-   * NB: Not used in 3D
+   *
+   * @warning This method is irrelevant in 3D.
    */
   unsigned int GetOrientation() const { return this->Orientation; }
-  //@}
 
-  //@{
   /**
-   * Get the state of frozen
+   * Getter on the frozen state of the hypertree grid.
    */
   vtkGetMacro(FreezeState, bool);
-  //@}
 
   //@{
   /**
@@ -283,7 +268,7 @@ public:
   //@}
 
   /**
-   * Return the maximum number of trees in the level 0 grid.
+   * Return the maximum number of trees in the depth 0 grid.
    */
   vtkIdType GetMaxNumberOfTrees();
 
@@ -385,84 +370,87 @@ public:
   vtkGetMacro(DepthLimiter, unsigned int);
   //@}
 
+  //@{
   /**
-   * JB
+   * This method initializes a cursor. A cursor is a tool allowing to walk through a hypertree or
+   * a hypertree grid. There are different types of cursors:
+   *
+   * * An oriented cursor. This is the simplest and the lightest one. It allows to walk in deeper
+   * levels, while forgetting how to go back to the parents of the nodes.
+   * * An oriented geometry cursor. This cursor has the same properties as the oriented cursor plus
+   * added features. One can get the bounding box of the current node pointed by the cursor.
+   * * A non oriented cursor. This cursor allows to go back and forth in a hyper tree.
+   * * A non oriented geometry cursor. This cursors is a geometry cursor allowing to go back and
+   * forth in a hypertree.
+   * * Super cursors. Super cursors are cursors allowing to jump / search in the
+   * neighboring hypertrees. The computation is a lot heavier than regular cursors, and ghost
+   * trees should be computed beforehand in a multi processing environnement with
+   * vtkHyperTreeGridGhostCellsGenerator. A super cursor has all the properties of all regular cursors
+   * + A Von Neumann super cursor. A super cursor giving access to a one-ring neighborhood within
+   * a distance of Manhattan. It is basically a "+" shaped neighborhood.
+   * + A Moore super cursor. A super cursor giving access to a one-ring neighborhood withing distance
+   * computed w.r.t. the infinity norm. It is basically a hypercube shaped neighborhood.
+   * 
+   * @param cursor An allocated cursor where all the information will be held.
+   * @param index The index of the hypertree where this cursor will be created.
+   * @param create A boolean flag which should be set to true if and only if one is attempting to
+   * create a hypertree. This is done when constructing a hypertree grid, not when processing
+   * an already made one.
    */
   void InitializeOrientedCursor(
     vtkHyperTreeGridOrientedCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridOrientedCursor* NewOrientedCursor(vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeOrientedGeometryCursor(
     vtkHyperTreeGridOrientedGeometryCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridOrientedGeometryCursor* NewOrientedGeometryCursor(
-    vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedCursor(
     vtkHyperTreeGridNonOrientedCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridNonOrientedCursor* NewNonOrientedCursor(vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedGeometryCursor(
     vtkHyperTreeGridNonOrientedGeometryCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridNonOrientedGeometryCursor* NewNonOrientedGeometryCursor(
-    vtkIdType index, bool create = false);
-
-  /**
-   * JB Retourne un curseur geometrique pointant une des mailles comportant la position spatiale x
-   */
-  vtkHyperTreeGridNonOrientedGeometryCursor* FindNonOrientedGeometryCursor(double x[3]);
-
-private:
-  unsigned int RecurseDichotomic(
-    double value, vtkDoubleArray* coord, unsigned int ideb, unsigned int ifin) const;
-
-  unsigned int FindDichotomic(double value, vtkDataArray* coord) const;
-
-public:
-  virtual unsigned int FindDichotomicX(double value) const;
-  virtual unsigned int FindDichotomicY(double value) const;
-  virtual unsigned int FindDichotomicZ(double value) const;
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedVonNeumannSuperCursor(
     vtkHyperTreeGridNonOrientedVonNeumannSuperCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridNonOrientedVonNeumannSuperCursor* NewNonOrientedVonNeumannSuperCursor(
-    vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedVonNeumannSuperCursorLight(
     vtkHyperTreeGridNonOrientedVonNeumannSuperCursorLight* cursor, vtkIdType index,
     bool create = false);
-  vtkHyperTreeGridNonOrientedVonNeumannSuperCursorLight* NewNonOrientedVonNeumannSuperCursorLight(
-    vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedMooreSuperCursor(
     vtkHyperTreeGridNonOrientedMooreSuperCursor* cursor, vtkIdType index, bool create = false);
-  vtkHyperTreeGridNonOrientedMooreSuperCursor* NewNonOrientedMooreSuperCursor(
-    vtkIdType index, bool create = false);
-
-  /**
-   * JB
-   */
   void InitializeNonOrientedMooreSuperCursorLight(
     vtkHyperTreeGridNonOrientedMooreSuperCursorLight* cursor, vtkIdType index, bool create = false);
+  //@}
+
+  //@{
+  /**
+   * Methoes equivalent with the methods Initialize(Non)Oriented(Geometry)Cursor. Instead
+   * of taking an already allocated cursor as input, it returns a pointer on a newly
+   * allocated cursor.
+   */
+  vtkHyperTreeGridOrientedCursor* NewOrientedCursor(vtkIdType index, bool create = false);
+  vtkHyperTreeGridOrientedGeometryCursor* NewOrientedGeometryCursor(
+    vtkIdType index, bool create = false);
+  vtkHyperTreeGridNonOrientedCursor* NewNonOrientedCursor(vtkIdType index, bool create = false);
+  vtkHyperTreeGridNonOrientedGeometryCursor* NewNonOrientedGeometryCursor(
+    vtkIdType index, bool create = false);
+  vtkHyperTreeGridNonOrientedVonNeumannSuperCursor* NewNonOrientedVonNeumannSuperCursor(
+    vtkIdType index, bool create = false);
+  vtkHyperTreeGridNonOrientedVonNeumannSuperCursorLight* NewNonOrientedVonNeumannSuperCursorLight(
+    vtkIdType index, bool create = false);
+  vtkHyperTreeGridNonOrientedMooreSuperCursor* NewNonOrientedMooreSuperCursor(
+    vtkIdType index, bool create = false);
   vtkHyperTreeGridNonOrientedMooreSuperCursorLight* NewNonOrientedMooreSuperCursorLight(
     vtkIdType index, bool create = false);
+  //@}
+
+  /**
+   * @warning DO NOT USE THIS FUNCTION, work in progress. Does not work in 3D.
+   */
+  vtkHyperTreeGridNonOrientedGeometryCursor* FindNonOrientedGeometryCursor(double x[3]);
+
+  //@{
+  /**
+   * Work in progress, ignore this code.
+   */
+  virtual unsigned int FindDichotomicX(double value) const;
+  virtual unsigned int FindDichotomicY(double value) const;
+  virtual unsigned int FindDichotomicZ(double value) const;
+  //@}
 
   /**
    * Restore data object to initial state.
@@ -471,13 +459,13 @@ public:
 
   /**
    * Return tree located at given index of hyper tree grid
-   * NB: This will construct a new HyperTree if grid slot is empty.
+   * @note This will construct a new HyperTree if grid slot is empty.
    */
   virtual vtkHyperTree* GetTree(vtkIdType, bool create = false);
 
   /**
    * Assign given tree to given index of hyper tree grid
-   * NB: This will create a new slot in the grid if needed.
+   * @note This will create a new slot in the grid if needed.
    */
   void SetTree(vtkIdType, vtkHyperTree*);
 
@@ -523,89 +511,145 @@ public:
     vtkHyperTreeGridNonOrientedCursor* cursor, vtkDataArray* normale);
 
   /**
-   * Get or create pure material mask
+   * Get or create pure material mask.
    */
   vtkBitArray* GetPureMask();
 
   /**
    * Return hard-coded bitcode correspondng to child mask
-   * Dimension 1:
-   * Factor 2:
+   *
+   * * Dimension 1:
+   * + Factor 2:
+   *
    * 0: 100, 1: 001
-   * Factor 3:
+   * + Factor 3:
+   *
    * 0: 100, 1: 010, 2: 001
-   * Dimension 2:
-   * Factor 2:
+   * * Dimension 2:
+   * + Factor 2:
+   *
    * 0: 1101 0000 0, 1: 0110 0100 0
+   *
    * 2: 0001 0011 0, 3: 0000 0101 1
-   * Factor 3:
+   * + Factor 3:
    * 0: 1101 0000 0, 1: 0100 0000 0, 2: 0110 0100 0
+   *
    * 3: 0001 0000 0, 4: 0000 1000 0, 5: 0000 0100 0
+   *
    * 6: 0001 0011 0, 7: 0000 0001 0, 8: 0000 0101 1
-   * Dimension 3:
-   * Factor 2:
+   * * Dimension 3:
+   * + Factor 2:
+   *
    * 0: 1101 1000 0110 1000 0000 0000 000, 1: 0110 1100 0011 0010 0000 0000 000
+   *
    * 2: 0001 1011 0000 1001 1000 0000 000, 3: 0000 1101 1000 0010 1100 0000 000
+   *
    * 4: 0000 0000 0110 1000 0011 0110 000, 5: 0000 0000 0011 0010 0001 1011 000
+   *
    * 6: 0000 0000 0000 1001 1000 0110 110, 7: 0000 0000 0000 0010 1100 0011 011
-   * Factor 3:
+   * + Factor 3:
+   *
    * 0: 1101 1000 0110 1000 0000 0000 000
+   *
    * 1: 0100 1000 0010 0000 0000 0000 000
+   *
    * 2: 0110 1100 0011 0010 0000 0000 000
+   *
    * 3: 0001 1000 0000 1000 0000 0000 000
+   *
    * 4: 0000 1000 0000 0000 0000 0000 000
+   *
    * 5: 0000 1100 0000 0010 0000 0000 000
+   *
    * 6: 0001 1011 0000 1001 1000 0000 000
+   *
    * 7: 0000 1001 0000 0000 1000 0000 000
+   *
    * 8: 0000 1101 1000 0010 1100 0000 000
+   *
    * 9: 0000 0000 0110 1000 0000 0000 000
+   *
    * 10: 0000 0000 0010 0000 0000 0000 000
+   *
    * 11: 0000 0000 0011 0010 0000 0000 000
+   *
    * 12: 0000 0000 0000 1000 0000 0000 000
+   *
    * 13: 0000 0000 0000 0100 0000 0000 000
+   *
    * 14: 0000 0000 0000 0010 0000 0000 000
+   *
    * 15: 0000 0000 0000 1001 1000 0000 000
+   *
    * 16: 0000 0000 0000 0000 1000 0000 000
+   *
    * 17: 0000 0000 0000 0010 1100 0000 000
+   *
    * 18: 0000 0000 0110 1000 0011 0110 000
+  *
    * 19: 0000 0000 0010 0000 0001 0010 000
+   *
    * 20: 0000 0000 0011 0010 0001 1011 000
+   *
    * 21: 0000 0000 0000 1000 0000 0110 000
+   *
    * 22: 0000 0000 0000 0000 0000 0010 000
+   *
    * 23: 0000 0000 0000 0010 0000 0011 000
+   *
    * 24: 0000 0000 0000 1001 1000 0110 110
+   *
    * 25: 0000 0000 0000 0000 1000 0010 010
+   *
    * 26: 0000 0000 0000 0010 1100 0011 011
    */
   unsigned int GetChildMask(unsigned int);
 
   /**
    * Convert the Cartesian coordinates of a root in the grid  to its global index.
+   * 
+   * @param treeOffsetIdx Offset index pointing to the beginning of the hypertree located at (i,j,k)
    */
-  void GetIndexFromLevelZeroCoordinates(vtkIdType&, unsigned int, unsigned int, unsigned int) const;
+  void GetIndexFromLevelZeroCoordinates(vtkIdType& treeOffsetIdx, int i, int j, int k) const;
 
   /**
    * Return the root index of a root cell with given index displaced.
    * by a Cartesian vector in the grid.
-   * NB: No boundary checks are performed.
+   *
+   * @param treeOffsetIdx Offset index pointing to the beginning of the hypertree located at (i,j,k)
+   * @note No boundary checks are performed.
    */
-  vtkIdType GetShiftedLevelZeroIndex(vtkIdType, unsigned int, unsigned int, unsigned int) const;
+  vtkIdType GetShiftedLevelZeroIndex(vtkIdType treeOffsetIdx, int i,  int j, int k) const;
 
   /**
-   * Convert the global index of a root to its Cartesian coordinates in the grid.
+   * Inverse function of GetIndexFromZeroCoordinates
    */
   void GetLevelZeroCoordinatesFromIndex(
-    vtkIdType, unsigned int&, unsigned int&, unsigned int&) const;
+    vtkIdType treeOffsetIdx, int& i, int& j, int& k) const;
 
   /**
-   * Convert the global index of a root to its Spacial coordinates origin and size.
+   * Returns the size and origin of the hypertree located at (i,j,k), such that the bounding box
+   * of the corresponding hypertree is (origin[0], origin[0]+size[0], origin[1], origin[1]+size[1],
+   * origin[2], origin[2]+size[2]), where the ordering correspond of the one of vtkBox.
    */
-  virtual void GetLevelZeroOriginAndSizeFromIndex(vtkIdType, double*, double*);
+  virtual void GetLevelZeroOriginAndSizeFromCoordinates(int i, int j, int k, double* origin, double* size);
 
   /**
-   * JB Convert the global index of a root to its Spacial coordinates origin and size.
+   * Same method has GetLevelZeroOriginAndSizeFromCoordinates, where the coordinates (i,j,k) are replaced
+   * by the tree offset index.
    */
-  virtual void GetLevelZeroOriginFromIndex(vtkIdType, double*);
+  virtual void GetLevelZeroOriginAndSizeFromIndex(vtkIdType treeOffsetIdx, double* origin, double* size);
+
+  /**
+   * Same method as GetLevelZeroOriginAndSizeFromCoordinates, although no size is computed
+   */
+  virtual void GetLevelZeroOriginFromCoordinates(int i, int j, int k, double* origin);
+
+  /**
+   * Same method has GetLevelZeroOriginFromCoordinates, where the coordinates (i,j,k) are replaced
+   * by the tree offset index.
+   */
+  virtual void GetLevelZeroOriginFromIndex(vtkIdType treeOffsetIdx, double* origin);
 
   /**
    * JB Retourne la valeur maximale du global index.
@@ -766,12 +810,8 @@ protected:
   // --------------------------------
   // RectilinearGrid common fields
   // --------------------------------
-private:
-  unsigned int Dimensions[3]; // Just for GetDimensions
-  unsigned int CellDims[3];   // Just for GetCellDims
 protected:
   int DataDescription;
-  int Extent[6];
 
   bool WithCoordinates;
   vtkDataArray* XCoordinates;
@@ -787,6 +827,7 @@ protected:
   char* InterfaceNormalsName;
   char* InterfaceInterceptsName;
 
+
   std::map<vtkIdType, vtkSmartPointer<vtkHyperTree> > HyperTrees;
 
   vtkNew<vtkPointData> PointData; // Scalars, vectors, etc. associated w/ each point
@@ -796,6 +837,28 @@ protected:
 private:
   vtkHyperTreeGrid(const vtkHyperTreeGrid&) = delete;
   void operator=(const vtkHyperTreeGrid&) = delete;
+
+  //@{
+  /**
+   * Those methods are at the proof of concept for point search in the hyper tree grid.
+   * Still in "beta" version, thus private.
+   */
+  unsigned int RecurseDichotomic(
+    double value, vtkDoubleArray* coord, unsigned int ideb, unsigned int ifin) const;
+  unsigned int FindDichotomic(double value, vtkDataArray* coord) const;
+  //@}
+
+  //@{
+  /**
+   * Each cell maps to a hypertree. CellDims is the dimension of the dual grid of the one
+   * set using SetDimensions method. Dimensions is manipulated through SetDimensions.
+   * Those are private members because they work together and should not be messed with.
+   * The only way to change those attributes is through SetDimensions and SetExtent.
+   */
+  int CellDims[3];
+  int Dimensions[3];
+  int Extent[6];
+  //@}
 };
 
 #endif
