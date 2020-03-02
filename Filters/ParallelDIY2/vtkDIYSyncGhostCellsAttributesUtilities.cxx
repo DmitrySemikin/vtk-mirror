@@ -105,4 +105,6 @@ void vtkDIYSyncGhostCellsAttributesUtilities::Sync(vtkDataObject* input, vtkMult
 
   std::vector<std::vector<vtkIdType>>
   diy::mpi::communicator comm = vtkDIYUtilities::GetCommunicator(controller);
+
+  vtkNew<vtkIdTypeArray> gids = 
 }
