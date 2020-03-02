@@ -918,6 +918,19 @@ vtkUnsignedCharArray* vtkDataSet::GetGhostArray(int type)
 }
 
 //----------------------------------------------------------------------------
+bool vtkDataSet::HasAnyGhostElements(int type)
+{
+  switch (type)
+  {
+    case POINT:
+      return this->HasAnyGhostPoints();
+    case CELL:
+      return this->HasAnyGhostCells();
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------
 vtkFieldData* vtkDataSet::GetAttributesAsFieldData(int type)
 {
   switch (type)

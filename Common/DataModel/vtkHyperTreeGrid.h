@@ -222,6 +222,11 @@ public:
    */
   vtkUnsignedCharArray* GetGhostArray(int type) override;
 
+  /**
+   * Returns true if this data object has a ghost array, false otherwise.
+   */
+  bool HasAnyGhostElements(int type) override;
+
   //@{
   /**
    * JB Get the axis information (used for CopyStructure)
