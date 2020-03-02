@@ -651,6 +651,13 @@ vtkUnsignedCharArray* vtkDataObject::GetGhostArray(int vtkNotUsed(type))
   return nullptr;
 }
 
+
+//----------------------------------------------------------------------------
+bool vtkDataObject::HasAnyGhostElements(int vtkNotUsed(type))
+{
+  return false;
+}
+
 //----------------------------------------------------------------------------
 vtkFieldData* vtkDataObject::GetAttributesAsFieldData(int type)
 {
