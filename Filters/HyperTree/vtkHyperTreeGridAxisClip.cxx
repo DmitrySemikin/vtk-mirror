@@ -289,7 +289,7 @@ int vtkHyperTreeGridAxisClip::ProcessTrees(vtkHyperTreeGrid* input, vtkDataObjec
 
   // Set identical grid parameters
   output->Initialize();
-  output->CopyEmptyStructure(input);
+  output->CopyStructure(input);
 
   // Initialize output point data
   this->InData = input->GetPointData();

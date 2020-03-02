@@ -132,7 +132,7 @@ int vtkHyperTreeGridGhostCellsGenerator::ProcessTrees(
   }
   else
   {
-    output->CopyEmptyStructure(input);
+    output->CopyStructure(input);
   }
 
   // Link HyperTrees

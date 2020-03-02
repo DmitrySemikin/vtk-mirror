@@ -133,11 +133,6 @@ public:
    */
   virtual void CopyStructure(vtkDataObject*);
 
-  /**
-   * Copy the internal structure with no data associated.
-   */
-  virtual void CopyEmptyStructure(vtkDataObject*);
-
   // --------------------------------------------------------------------------
   // RectilinearGrid common API
   // --------------------------------------------------------------------------
@@ -218,6 +213,14 @@ public:
     axis2 = this->Axis[1];
   }
   //@}
+
+  /**
+   * Returns the ghost array of CELL (given by type).
+   * This method makes one be able to get ghosts without
+   * safe downcasting from vtkDataObject.
+   * If the type is not CELL, returns nullptr;
+   */
+  vtkUnsignedCharArray* GetGhostArray(int type) override;
 
   //@{
   /**
@@ -630,20 +633,15 @@ public:
   bool HasAnyGhostCells() const;
 
   /**
-   * Accessor on ghost cells
-   */
-  vtkUnsignedCharArray* GetGhostCells();
-
-  /**
    * Gets the array that defines the ghost type of each point.
    * We cache the pointer to the array to save a lookup involving string comparisons
    */
-  vtkUnsignedCharArray* GetTreeGhostArray();
+  vtkUnsignedCharArray* GetCellGhostArray();
 
   /**
    * Allocate ghost array for points.
    */
-  vtkUnsignedCharArray* AllocateTreeGhostArray();
+  vtkUnsignedCharArray* AllocateCellGhostArray();
 
   /**
    * An iterator object to iteratively access trees in the grid.
@@ -751,9 +749,10 @@ protected:
    * These arrays pointers are caches used to avoid a string comparison (when
    * getting ghost arrays using GetArray(name))
    */
-  vtkUnsignedCharArray* TreeGhostArray;
-  bool TreeGhostArrayCached;
+  vtkUnsignedCharArray* CellGhostArray;
+  bool CellGhostArrayCached;
   //@}
+
 private:
   unsigned int Orientation; // 0, 1, or 2
   unsigned int Axis[2];
