@@ -499,6 +499,17 @@ vtkUnsignedCharArray* vtkHyperTreeGrid::GetGhostArray(int type)
   return nullptr;
 }
 
+//----------------------------------------------------------------------------
+bool vtkHyperTreeGrid::HasAnyGhostElements(int type)
+{
+  switch (type)
+  {
+    case CELL:
+      return this->HasAnyGhostCells();
+  }
+  return false;
+}
+
 // ============================================================================
 // BEGIN - RectilinearGrid common API
 // ============================================================================

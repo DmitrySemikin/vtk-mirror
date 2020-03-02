@@ -311,6 +311,11 @@ public:
   virtual vtkUnsignedCharArray* GetGhostArray(int type);
 
   /**
+   * Returns true if this data object has a ghost array, false otherwise.
+   */
+  virtual bool HasAnyGhostElements(int type);
+
+  /**
    * Returns the attributes of the data object as a vtkFieldData.
    * This returns non-null values in all the same cases as GetAttributes,
    * in addition to the case of FIELD, which will return the field data
