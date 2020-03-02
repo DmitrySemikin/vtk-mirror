@@ -285,7 +285,7 @@ int vtkHyperTreeGridContour::ProcessTrees(vtkHyperTreeGrid* input, vtkDataObject
   this->InMask = input->HasMask() ? input->GetMask() : nullptr;
 
   // Retrive ghost cells
-  this->InGhostArray = input->GetGhostCells();
+  this->InGhostArray = input->GetCellGhostArray();
 
   // Estimate output size as a multiple of 1024
   vtkIdType numCells = input->GetNumberOfVertices();

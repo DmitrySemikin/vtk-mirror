@@ -396,6 +396,14 @@ public:
   //@}
 
   /**
+   * Returns the ghost array of POINT or CELL (given by type).
+   * This method makes one be able to get ghosts without
+   * safe downcasting from vtkDataObject.
+   * If the type is nor POINT nor CELL, returns nullptr.
+   */
+  vtkUnsignedCharArray* GetGhostArray(int type) override;
+
+  /**
    * Returns the attributes of the data object as a vtkFieldData.
    * This returns non-null values in all the same cases as GetAttributes,
    * in addition to the case of FIELD, which will return the field data

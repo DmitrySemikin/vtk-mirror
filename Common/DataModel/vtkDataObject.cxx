@@ -646,6 +646,12 @@ vtkDataSetAttributes* vtkDataObject::GetAttributes(int type)
 }
 
 //----------------------------------------------------------------------------
+vtkUnsignedCharArray* vtkDataObject::GetGhostArray(int vtkNotUsed(type))
+{
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------
 vtkFieldData* vtkDataObject::GetAttributesAsFieldData(int type)
 {
   switch (type)

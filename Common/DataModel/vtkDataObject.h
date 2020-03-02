@@ -50,6 +50,7 @@ class vtkInformationIntegerVectorKey;
 class vtkInformationStringKey;
 class vtkInformationVector;
 class vtkInformationInformationVectorKey;
+class vtkUnsignedCharArray;
 
 #define VTK_PIECES_EXTENT 0
 #define VTK_3D_EXTENT 1
@@ -285,8 +286,29 @@ public:
    * field data is stored as a vtkFieldData instance, not a
    * vtkDataSetAttributes instance. To retrieve field data, use
    * GetAttributesAsFieldData.
+   *
+   * @warning This method NEEDS to be
+   * overriden in subclasses to work as documented.
+   * If not, it returns nullptr for any type but FIELD.
    */
   virtual vtkDataSetAttributes* GetAttributes(int type);
+
+  /**
+   * Returns the ghost arrays of the data object of the specified
+   * atribute type. The type may be:
+   * <ul>
+   * <li>POINT    - Defined in vtkDataSet subclasses
+   * <li>CELL   - Defined in vtkDataSet subclasses.
+   * </ul>
+   * The other attribute types, will return nullptr since
+   * ghosts arrays are not defined for now outside of
+   * point or cell.
+   *
+   * @warning This method NEEDS to be
+   * overriden in subclasses to be active. If not,
+   * it will return a nullptr.
+   */
+  virtual vtkUnsignedCharArray* GetGhostArray(int type);
 
   /**
    * Returns the attributes of the data object as a vtkFieldData.

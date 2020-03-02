@@ -905,6 +905,19 @@ vtkDataSet* vtkDataSet::GetData(vtkInformationVector* v, int i)
 }
 
 //----------------------------------------------------------------------------
+vtkUnsignedCharArray* vtkDataSet::GetGhostArray(int type)
+{
+  switch (type)
+  {
+    case POINT:
+      return this->GetPointGhostArray();
+    case CELL:
+      return this->GetCellGhostArray();
+  }
+  return nullptr;
+}
+
+//----------------------------------------------------------------------------
 vtkFieldData* vtkDataSet::GetAttributesAsFieldData(int type)
 {
   switch (type)
