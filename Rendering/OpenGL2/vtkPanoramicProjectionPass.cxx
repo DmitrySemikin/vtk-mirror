@@ -284,6 +284,8 @@ void vtkPanoramicProjectionPass::RenderOnFace(const vtkRenderState* s, int faceI
   newCamera->SetViewUp(oldCamera->GetViewUp());
   newCamera->SetViewAngle(90.0);
   newCamera->OrthogonalizeViewUp();
+  newCamera->UseExplicitAspectRatioOn();
+  newCamera->SetExplicitAspectRatio(1.0);
 
   if (r->GetRenderWindow()->GetStereoRender())
   {
@@ -330,17 +332,9 @@ void vtkPanoramicProjectionPass::RenderOnFace(const vtkRenderState* s, int faceI
       break;
   }
 
-  double range[2];
-  oldCamera->GetClippingRange(range);
-  newCamera->SetClippingRange(range);
-  vtkNew<vtkPerspectiveTransform> perspectiveTransform;
+  newCamera->OrthogonalizeViewUp();
 
-  // the fov is 90 degree in each direction, the frustum can be simplified
-  // xmin and ymin are -near and xmax and ymax are +near
-  perspectiveTransform->Frustum(-range[0], range[0], -range[0], range[0], range[0], range[1]);
-
-  newCamera->UseExplicitProjectionTransformMatrixOn();
-  newCamera->SetExplicitProjectionTransformMatrix(perspectiveTransform->GetMatrix());
+  r->ResetCameraClippingRange();
 
   s2.SetFrameBuffer(this->FrameBufferObject);
 

@@ -30,6 +30,7 @@
 #include <set>
 
 class vtkDataObject;
+class vtkInternals;
 class vtkMultiProcessController;
 class vtkPartitionedDataSet;
 class vtkPoints;
@@ -63,10 +64,7 @@ protected:
   vtkDIYSyncGhostCellsAttributesUtilities();
   ~vtkDIYSyncGhostCellsAttributesUtilities() override;
 
-  /**
-   * List of ghost types to update.
-   */
-  std::set<int> GhostTypes;
+  vtkInternals* Internals;
 
 private:
   vtkDIYSyncGhostCellsAttributesUtilities(const vtkDIYSyncGhostCellsAttributesUtilities&) = delete;
