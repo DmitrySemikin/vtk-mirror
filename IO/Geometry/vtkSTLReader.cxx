@@ -100,7 +100,7 @@ int vtkSTLReader::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   // Initialize
-  FILE* fp = vtksys::SystemTools::Fopen(this->FileName, "r");
+  FILE* fp = vtksys::SystemTools::Fopen(this->FileName, "rb");
   if (fp == nullptr)
   {
     vtkErrorMacro(<< "File " << this->FileName << " not found");

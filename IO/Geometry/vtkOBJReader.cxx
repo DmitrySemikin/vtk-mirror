@@ -122,7 +122,7 @@ int vtkOBJReader::RequestData(vtkInformation* vtkNotUsed(request),
     return 0;
   }
 
-  FILE* in = vtksys::SystemTools::Fopen(this->FileName, "r");
+  FILE* in = vtksys::SystemTools::Fopen(this->FileName, "rb");
 
   if (in == nullptr)
   {

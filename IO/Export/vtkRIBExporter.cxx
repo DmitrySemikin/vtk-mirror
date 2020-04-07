@@ -103,7 +103,7 @@ void vtkRIBExporter::WriteData()
   char* ribFileName = new char[ribFileNameSize];
   snprintf(ribFileName, ribFileNameSize, "%s%s", this->FilePrefix, ".rib");
 
-  this->FilePtr = vtksys::SystemTools::Fopen(ribFileName, "w");
+  this->FilePtr = vtksys::SystemTools::Fopen(ribFileName, "wb");
   if (this->FilePtr == nullptr)
   {
     vtkErrorMacro(<< "Cannot open " << ribFileName);

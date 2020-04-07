@@ -102,7 +102,7 @@ void vtkOOGLExporter::WriteData()
   }
 
   // try opening the files
-  fp = vtksys::SystemTools::Fopen(this->FileName, "w");
+  fp = vtksys::SystemTools::Fopen(this->FileName, "wb");
   if (!fp)
   {
     vtkErrorMacro(<< "unable to open Geomview OOGL file " << this->FileName);

@@ -476,7 +476,7 @@ int vtkTesting::RegressionTest(vtkAlgorithm* imageSource, double thresh, ostream
   string bestImageFileName = this->ValidImageFileName;
 
   // check the valid image
-  FILE* rtFin = vtksys::SystemTools::Fopen(this->ValidImageFileName, "r");
+  FILE* rtFin = vtksys::SystemTools::Fopen(this->ValidImageFileName, "rb");
   if (rtFin)
   {
     fclose(rtFin);

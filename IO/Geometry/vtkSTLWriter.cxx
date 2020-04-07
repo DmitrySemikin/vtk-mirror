@@ -113,7 +113,7 @@ void vtkSTLWriter::WriteAsciiSTL(vtkPoints* pts, vtkCellArray* polys, vtkCellArr
   vtkIdType npts = 0;
   const vtkIdType* indx = nullptr;
 
-  if ((fp = vtksys::SystemTools::Fopen(this->FileName, "w")) == nullptr)
+  if ((fp = vtksys::SystemTools::Fopen(this->FileName, "wb")) == nullptr)
   {
     vtkErrorMacro(<< "Couldn't open file: " << this->FileName
                   << " Reason: " << vtksys::SystemTools::GetLastSystemError());

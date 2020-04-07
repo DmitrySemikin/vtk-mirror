@@ -118,7 +118,7 @@ int TestOBJExporter(int argc, char* argv[])
 size_t fileSize(const std::string& filename)
 {
   size_t size = 0;
-  FILE* f = vtksys::SystemTools::Fopen(filename, "r");
+  FILE* f = vtksys::SystemTools::Fopen(filename, "rb");
   if (f)
   {
     fseek(f, 0, SEEK_END);

@@ -71,7 +71,7 @@ void vtkPVWebGLExporter::WriteData()
   std::string baseFileName = this->FileName;
   baseFileName.erase(baseFileName.size() - 6, 6);
   std::string metadatFile = this->FileName;
-  FILE* fp = vtksys::SystemTools::Fopen(metadatFile, "w");
+  FILE* fp = vtksys::SystemTools::Fopen(metadatFile, "wb");
   if (!fp)
   {
     vtkErrorMacro(<< "unable to open JSON MetaData file " << metadatFile.c_str());

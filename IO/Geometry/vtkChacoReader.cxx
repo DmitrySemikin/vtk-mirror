@@ -827,7 +827,7 @@ int vtkChacoReader::OpenCurrentFile()
     char* buf = new char[len + 64];
     snprintf(buf, len + 64, "%s.coords", this->BaseName);
 
-    this->CurrentGeometryFP = vtksys::SystemTools::Fopen(buf, "r");
+    this->CurrentGeometryFP = vtksys::SystemTools::Fopen(buf, "rb");
 
     if (this->CurrentGeometryFP == nullptr)
     {
@@ -838,7 +838,7 @@ int vtkChacoReader::OpenCurrentFile()
     {
       snprintf(buf, len + 64, "%s.graph", this->BaseName);
 
-      this->CurrentGraphFP = vtksys::SystemTools::Fopen(buf, "r");
+      this->CurrentGraphFP = vtksys::SystemTools::Fopen(buf, "rb");
 
       if (this->CurrentGraphFP == nullptr)
       {

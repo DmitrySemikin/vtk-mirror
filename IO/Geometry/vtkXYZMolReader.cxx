@@ -179,7 +179,7 @@ int vtkXYZMolReader::CanReadFile(const char* name)
     return 0;
   }
 
-  FILE* fp = vtksys::SystemTools::Fopen(name, "r");
+  FILE* fp = vtksys::SystemTools::Fopen(name, "rb");
   if (!fp)
   {
     return 0;

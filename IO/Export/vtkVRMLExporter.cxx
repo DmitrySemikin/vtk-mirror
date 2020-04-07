@@ -103,7 +103,7 @@ void vtkVRMLExporter::WriteData()
   // try opening the files
   if (!this->FilePointer)
   {
-    fp = vtksys::SystemTools::Fopen(this->FileName, "w");
+    fp = vtksys::SystemTools::Fopen(this->FileName, "wb");
     if (!fp)
     {
       vtkErrorMacro(<< "unable to open VRML file " << this->FileName);
