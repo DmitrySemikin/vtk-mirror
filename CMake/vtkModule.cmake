@@ -3889,7 +3889,7 @@ function (_vtk_module_install target)
     LIBRARY
       DESTINATION "${_vtk_build_LIBRARY_DESTINATION}"
       COMPONENT   "${_vtk_install_targets_component}"
-      NAMELINK_COMPONENT "${_vtk_build_HEADERS_COMPONENT}"
+      NAMELINK_COMPONENT "${_vtk_install_headers_component}"
     RUNTIME
       DESTINATION "${_vtk_build_RUNTIME_DESTINATION}"
       COMPONENT   "${_vtk_install_targets_component}")
