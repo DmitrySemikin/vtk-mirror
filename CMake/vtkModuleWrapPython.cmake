@@ -492,6 +492,7 @@ extern PyObject* PyInit_${_vtk_python_library_name}();
   if (_vtk_python_TARGET_SPECIFIC_COMPONENTS)
     string(PREPEND _vtk_python_wrap_component "${name}-")
   endif ()
+  string(REPLACE "::" "_" _vtk_python_wrap_component "${_vtk_python_wrap_component}")
 
   install(
     TARGETS             "${name}"
@@ -736,6 +737,8 @@ function (vtk_module_wrap_python)
     string(PREPEND _vtk_python_headers_component "${_vtk_python_TARGET_NAME}-")
     string(PREPEND _vtk_python_component "${_vtk_python_TARGET_NAME}-")
   endif ()
+  string(REPLACE "::" "_" _vtk_python_headers_component "${_vtk_python_headers_component}")
+  string(REPLACE "::" "_" _vtk_python_component "${_vtk_python_component}")
 
   set(_vtk_python_all_modules)
   set(_vtk_python_all_wrapped_modules)

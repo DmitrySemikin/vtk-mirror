@@ -3108,6 +3108,7 @@ $<$<BOOL:${_vtk_hierarchy_genex_include_directories}>:\n-I\'$<JOIN:${_vtk_hierar
         endif ()
       endif ()
     endif ()
+    string(REPLACE "::" "_" _vtk_hierarchy_headers_component "${_vtk_hierarchy_headers_component}")
     set_property(TARGET "${_vtk_add_module_real_target}"
       PROPERTY
         "INTERFACE_vtk_module_hierarchy_install" "\${_vtk_module_import_prefix}/${_vtk_build_HIERARCHY_DESTINATION}/${_vtk_hierarchy_filename}")
@@ -3739,6 +3740,7 @@ function (vtk_module_install_headers)
       endif ()
     endif ()
   endif ()
+  string(REPLACE "::" "_" _vtk_install_headers_headers_component "${_vtk_install_headers_headers_component}")
   if (_vtk_install_headers_FILES)
     install(
       FILES       ${_vtk_install_headers_FILES}
@@ -3878,6 +3880,8 @@ function (_vtk_module_install target)
       endif ()
     endif ()
   endif ()
+  string(REPLACE "::" "_" _vtk_install_headers_component "${_vtk_install_headers_component}")
+  string(REPLACE "::" "_" _vtk_install_targets_component "${_vtk_install_targets_component}")
 
   install(
     TARGETS             "${target}"
@@ -4973,6 +4977,7 @@ function (vtk_module_third_party_internal)
     if (_vtk_build_TARGET_SPECIFIC_COMPONENTS)
       string(PREPEND _vtk_third_party_internal_license_component "${_vtk_build_module}-")
     endif ()
+    string(REPLACE "::" "_" _vtk_third_party_internal_license_component "${_vtk_third_party_internal_license_component}")
     install(
       FILES       ${_vtk_third_party_internal_LICENSE_FILES}
       DESTINATION "${_vtk_build_LICENSE_DESTINATION}/${_vtk_third_party_internal_library_name}/"
