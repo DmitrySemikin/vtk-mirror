@@ -1857,6 +1857,83 @@ function (_vtk_module_write_import_prefix file destination)
 endfunction ()
 
 #[==[
+@ingroup module-impl
+@brief Add install component dependencies to lists
+
+This function determines whether a dependent module is part of a kit or not,
+and adds its corresponding install components to a target component list and
+header component list.
+
+~~~
+_vtk_module_add_component_dependencies(
+  MODULE            <module>
+  TARGETS_LIST      <variable>
+  HEADERS_LIST      <variable>
+  TARGETS_COMPONENT <targets component>
+  HEADERS_COMPONENT <headers component>)
+#]==]
+function (_vtk_module_add_component_dependencies)
+  cmake_parse_arguments(PARSE_ARGV 0 _vtk_add_component_dependencies
+    ""
+    "MODULE;TARGETS_LIST;HEADERS_LIST;TARGETS_COMPONENT;HEADERS_COMPONENT"
+    "")
+
+  if (_vtk_add_component_dependencies_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR
+      "Unparsed arguments for _vtk_add_component_dependencies: "
+      "${_vtk_add_component_dependencies_UNPARSED_ARGUMENTS}.")
+  endif ()
+
+  get_property(_vtk_add_component_dependencies_module_kit GLOBAL
+    PROPERTY "_vtk_module_${_vtk_add_component_dependencies_MODULE}_kit")
+  get_property(_vtk_add_component_dependencies_module_depends GLOBAL
+    PROPERTY "_vtk_module_${_vtk_add_component_dependencies_MODULE}_depends")
+  get_property(_vtk_add_component_dependencies_module_private_depends GLOBAL
+    PROPERTY "_vtk_module_${_vtk_add_component_dependencies_MODULE}_private_depends")
+  get_property(_vtk_add_component_dependencies_module_optional_depends GLOBAL
+    PROPERTY "_vtk_module_${_vtk_add_component_dependencies_MODULE}_optional_depends")
+
+  foreach (_vtk_add_component_dependencies_module_depend IN LISTS
+           _vtk_add_component_dependencies_module_depends
+           _vtk_add_component_dependencies_module_private_depends
+           _vtk_add_component_dependencies_module_optional_depends)
+    if (NOT TARGET "${_vtk_add_component_dependencies_module_depend}")
+      continue ()
+    endif ()
+
+    get_property(_vtk_add_component_dependencies_module_depend_kit GLOBAL
+      PROPERTY "_vtk_module_${_vtk_add_component_dependencies_module_depend}_kit")
+    if (_vtk_build_BUILD_WITH_KITS AND _vtk_add_component_dependencies_module_depend_kit)
+      if (NOT _vtk_add_component_dependencies_module_depend_kit STREQUAL _vtk_add_component_dependencies_module_kit)
+        string(REPLACE "::" "_" _vtk_add_component_dependencies_module_depend_kit_escaped "${_vtk_add_component_dependencies_module_depend_kit}")
+        list(APPEND "${_vtk_add_component_dependencies_TARGETS_LIST}" "${_vtk_add_component_dependencies_module_depend_kit_escaped}-${_vtk_add_component_dependencies_TARGETS_COMPONENT}")
+      endif ()
+    else ()
+      string(REPLACE "::" "_" _vtk_add_component_dependencies_module_depend_escaped "${_vtk_add_component_dependencies_module_depend}")
+      list(APPEND "${_vtk_add_component_dependencies_TARGETS_LIST}" "${_vtk_add_component_dependencies_module_depend_escaped}-${_vtk_add_component_dependencies_TARGETS_COMPONENT}")
+    endif ()
+  endforeach ()
+
+  foreach (_vtk_add_component_dependencies_module_depend IN LISTS
+           _vtk_add_component_dependencies_module_depends)
+    get_property(_vtk_add_component_dependencies_module_depend_kit GLOBAL
+      PROPERTY "_vtk_module_${_vtk_add_component_dependencies_module_depend}_kit")
+    if (_vtk_build_BUILD_WITH_KITS AND _vtk_add_component_dependencies_module_depend_kit)
+      if (NOT _vtk_add_component_dependencies_module_depend_kit STREQUAL _vtk_add_component_dependencies_module_kit)
+        string(REPLACE "::" "_" _vtk_add_component_dependencies_module_depend_kit_escaped "${_vtk_add_component_dependencies_module_depend_kit}")
+        list(APPEND "${_vtk_add_component_dependencies_HEADERS_LIST}" "${_vtk_add_component_dependencies_module_depend_kit_escaped}-${_vtk_add_component_dependencies_HEADERS_COMPONENT}")
+      endif ()
+    else ()
+      string(REPLACE "::" "_" _vtk_add_component_dependencies_module_depend_escaped "${_vtk_add_component_dependencies_module_depend}")
+      list(APPEND "${_vtk_add_component_dependencies_HEADERS_LIST}" "${_vtk_add_component_dependencies_module_depend_escaped}-${_vtk_add_component_dependencies_HEADERS_COMPONENT}")
+    endif ()
+  endforeach ()
+
+  set("${_vtk_add_component_dependencies_TARGETS_LIST}" "${${_vtk_add_component_dependencies_TARGETS_LIST}}" PARENT_SCOPE)
+  set("${_vtk_add_component_dependencies_HEADERS_LIST}" "${${_vtk_add_component_dependencies_HEADERS_LIST}}" PARENT_SCOPE)
+endfunction ()
+
+#[==[
 @ingroup module-internal
 @brief Export properties on modules and targets
 
@@ -2055,6 +2132,7 @@ vtk_module_build(
   [INSTALL_EXPORT     <export>]
 
   [TARGET_SPECIFIC_COMPONENTS <ON|OFF>]
+  [CPACK_COMPONENTS <ON|OFF>]
 
   [TEST_DIRECTORY_NAME        <name>]
   [TEST_DATA_TARGET           <target>]
@@ -2101,6 +2179,8 @@ have reasonable defaults if not specified.
     for the libraries built.
   * `TARGET_SPECIFIC_COMPONENTS`: (Defaults to `OFF`) If `ON`, place artifacts
     into target-specific install components (`<TARGET>-<COMPONENT>`).
+  * `CPACK_COMPONENTS` (Defaults to `OFF`): If set, and
+    `TARGET_SPECIFIC_COMPONENTS` is set, create CPack components.
   * `TARGET_NAMESPACE`: `Defaults to `\<AUTO\>`) The namespace for installed
     targets. All targets must have the same namespace. If set to `\<AUTO\>`,
     the namespace will be detected automatically.
@@ -2175,7 +2255,7 @@ function (vtk_module_build)
 
   cmake_parse_arguments(PARSE_ARGV 0 _vtk_build
     ""
-    "BUILD_WITH_KITS;USE_EXTERNAL;TARGET_SPECIFIC_COMPONENTS;LIBRARY_NAME_SUFFIX;VERSION;SOVERSION;PACKAGE;ENABLE_WRAPPING;${_vtk_build_install_arguments};${_vtk_build_test_arguments}"
+    "BUILD_WITH_KITS;USE_EXTERNAL;TARGET_SPECIFIC_COMPONENTS;CPACK_COMPONENTS;LIBRARY_NAME_SUFFIX;VERSION;SOVERSION;PACKAGE;ENABLE_WRAPPING;${_vtk_build_install_arguments};${_vtk_build_test_arguments}"
     "MODULES;KITS")
 
   if (_vtk_build_UNPARSED_ARGUMENTS)
@@ -2190,6 +2270,10 @@ function (vtk_module_build)
 
   if (NOT DEFINED _vtk_build_TARGET_SPECIFIC_COMPONENTS)
     set(_vtk_build_TARGET_SPECIFIC_COMPONENTS OFF)
+  endif ()
+
+  if (NOT DEFINED _vtk_build_CPACK_COMPONENTS)
+    set(_vtk_build_CPACK_COMPONENTS OFF)
   endif ()
 
   if (NOT DEFINED _vtk_build_PACKAGE)
@@ -2313,6 +2397,9 @@ function (vtk_module_build)
     LICENSE_DESTINATION
     HIERARCHY_DESTINATION)
 
+  string(REPLACE "::" "_" _vtk_build_targets_component_escaped "${_vtk_build_TARGETS_COMPONENT}")
+  string(REPLACE "::" "_" _vtk_build_headers_component_escaped "${_vtk_build_HEADERS_COMPONENT}")
+
   foreach (_vtk_build_module IN LISTS _vtk_build_MODULES)
     get_property("_vtk_build_${_vtk_build_module}_depends" GLOBAL
       PROPERTY "_vtk_module_${_vtk_build_module}_depends")
@@ -2412,6 +2499,8 @@ function (vtk_module_build)
 
       set(_vtk_build_kit_modules_object_libraries)
       set(_vtk_build_kit_modules_private_depends)
+      set(_vtk_build_kit_targets_depends_components)
+      set(_vtk_build_kit_headers_depends_components)
 
       get_property(_vtk_build_kit_modules GLOBAL
         PROPERTY  "_vtk_kit_${_vtk_build_kit}_kit_modules")
@@ -2442,7 +2531,22 @@ function (vtk_module_build)
               "$<LINK_ONLY:${_vtk_build_kit_module_private_depend}>")
           endif ()
         endforeach ()
+
+        _vtk_module_add_component_dependencies(
+          MODULE "${_vtk_build_kit_module}"
+          TARGETS_LIST _vtk_build_kit_targets_depends_components
+          HEADERS_LIST _vtk_build_kit_headers_depends_components
+          TARGETS_COMPONENT "${_vtk_build_targets_component_escaped}"
+          HEADERS_COMPONENT "${_vtk_build_headers_component_escaped}")
       endforeach ()
+
+      if (_vtk_build_TARGET_SPECIFIC_COMPONENTS AND _vtk_build_CPACK_COMPONENTS)
+        string(REPLACE "::" "_" _vtk_build_kit_escaped "${_vtk_build_kit}")
+        list(REMOVE_DUPLICATES _vtk_build_kit_targets_depends_components)
+        list(REMOVE_DUPLICATES _vtk_build_kit_headers_depends_components)
+        cpack_add_component("${_vtk_build_kit_escaped}-${_vtk_build_targets_component_escaped}" DEPENDS ${_vtk_build_kit_targets_depends_components})
+        cpack_add_component("${_vtk_build_kit_escaped}-${_vtk_build_headers_component_escaped}" DEPENDS "${_vtk_build_headers_component_escaped}" "${_vtk_build_kit_escaped}-${_vtk_build_targets_component_escaped}" ${_vtk_build_kit_headers_depends_components})
+      endif ()
 
       get_property(_vtk_build_kit_private_links GLOBAL
         PROPERTY "_vtk_kit_${_vtk_build_kit}_private_links")
@@ -2491,6 +2595,29 @@ function (vtk_module_build)
         "The `TARGET_NAMESPACE` (${_vtk_build_TARGET_NAMESPACE}) is not the "
         "same as the ${_vtk_build_module} module namespace "
         "(${_vtk_build_namespace}).")
+    endif ()
+
+    get_property(_vtk_build_module_kit GLOBAL
+      PROPERTY "_vtk_module_${_vtk_build_module}_kit")
+    if (_vtk_build_TARGET_SPECIFIC_COMPONENTS AND _vtk_build_CPACK_COMPONENTS AND (NOT _vtk_build_BUILD_WITH_KITS OR NOT _vtk_build_module_kit))
+      set(_vtk_build_module_targets_depends_components)
+      set(_vtk_build_module_headers_depends_components)
+      _vtk_module_add_component_dependencies(
+        MODULE "${_vtk_build_module}"
+        TARGETS_LIST _vtk_build_module_targets_depends_components
+        HEADERS_LIST _vtk_build_module_headers_depends_components
+        TARGETS_COMPONENT "${_vtk_build_targets_component_escaped}"
+        HEADERS_COMPONENT "${_vtk_build_headers_component_escaped}")
+
+      string(REPLACE "::" "_" _vtk_build_module_escaped "${_vtk_build_module}")
+      if (_vtk_build_module_targets_depends_components)
+        list(REMOVE_DUPLICATES _vtk_build_module_targets_depends_components)
+      endif ()
+      if (_vtk_build_module_headers_depends_components)
+        list(REMOVE_DUPLICATES _vtk_build_module_headers_depends_components)
+      endif ()
+      cpack_add_component("${_vtk_build_module_escaped}-${_vtk_build_targets_component_escaped}" DEPENDS ${_vtk_build_module_targets_depends_components})
+      cpack_add_component("${_vtk_build_module_escaped}-${_vtk_build_headers_component_escaped}" DEPENDS "${_vtk_build_headers_component_escaped}" "${_vtk_build_module_escaped}-${_vtk_build_targets_component_escaped}" ${_vtk_build_module_headers_depends_components})
     endif ()
 
     get_property(_vtk_build_is_third_party
@@ -2561,6 +2688,24 @@ function (vtk_module_build)
       SPLIT_INSTALL_PROPERTIES
         # Set the properties which differ between build and install trees.
         ${_vtk_build_split_properties})
+
+    set(_vtk_build_component_prefix)
+    if (_vtk_build_TARGET_SPECIFIC_COMPONENTS)
+      string(REPLACE "::" "_" _vtk_build_component_prefix "${_vtk_build_module}-")
+      if (_vtk_build_BUILD_WITH_KITS)
+        get_property(_vtk_build_module_kit GLOBAL
+          PROPERTY "_vtk_module_${_vtk_build_module}_kit")
+        if (_vtk_build_module_kit)
+          string(REPLACE "::" "_" _vtk_build_component_prefix "${_vtk_build_module_kit}-")
+        endif ()
+      endif ()
+    endif ()
+    _vtk_module_set_module_property("${_vtk_build_module}"
+      PROPERTY "targets_component"
+      VALUE "${_vtk_build_component_prefix}${_vtk_build_targets_component_escaped}")
+    _vtk_module_set_module_property("${_vtk_build_module}"
+      PROPERTY "headers_component"
+      VALUE "${_vtk_build_component_prefix}${_vtk_build_headers_component_escaped}")
   endforeach ()
 
   if (_vtk_build_BUILD_WITH_KITS)

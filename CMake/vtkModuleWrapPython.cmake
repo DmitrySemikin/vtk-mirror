@@ -236,6 +236,7 @@ The remaining information it uses is assumed to be provided by the
 function (_vtk_module_wrap_python_library name)
   set(_vtk_python_library_sources)
   set(_vtk_python_library_classes)
+  set(_vtk_python_component_dependencies)
   foreach (_vtk_python_module IN LISTS ARGN)
     _vtk_module_get_module_property("${_vtk_python_module}"
       PROPERTY  "exclude_wrap"
@@ -279,6 +280,11 @@ function (_vtk_module_wrap_python_library name)
           # Export the wrapping hints file.
           INTERFACE_vtk_module_python_package)
     endif ()
+
+    _vtk_module_get_module_property("${_vtk_python_module}"
+      PROPERTY "targets_component"
+      VARIABLE _vtk_python_module_targets_component)
+    list(APPEND _vtk_python_component_dependencies "${_vtk_python_module_targets_component}")
   endforeach ()
 
   # The foreach needs to be split so that dependencies are guaranteed to have
@@ -491,6 +497,18 @@ extern PyObject* PyInit_${_vtk_python_library_name}();
   set(_vtk_python_wrap_component "${_vtk_python_COMPONENT}")
   if (_vtk_python_TARGET_SPECIFIC_COMPONENTS)
     string(PREPEND _vtk_python_wrap_component "${name}-")
+    if (_vtk_python_CPACK_COMPONENTS)
+      _vtk_module_get_module_property("VTK::WrappingPythonCore"
+        PROPERTY "targets_component"
+        VARIABLE _vtk_python_wrapping_python_core_component)
+      _vtk_module_get_module_property("VTK::Python"
+        PROPERTY "targets_component"
+        VARIABLE _vtk_python_python_component)
+      cpack_add_component("${_vtk_python_wrap_component}" DEPENDS
+        "${_vtk_python_wrapping_python_core_component}"
+        "${_vtk_python_python_component}"
+        ${_vtk_python_component_dependencies})
+    endif ()
   endif ()
   string(REPLACE "::" "_" _vtk_python_wrap_component "${_vtk_python_wrap_component}")
 
@@ -528,7 +546,9 @@ vtk_module_wrap_python(
 
   [INSTALL_EXPORT <export>]
   [COMPONENT <component>]
-  [TARGET_SPECIFIC_COMPONENTS <ON|OFF>])
+  [TARGETS_COMPONENT <component>]
+  [TARGET_SPECIFIC_COMPONENTS <ON|OFF>]
+  [CPACK_COMPONENTS <ON|OFF>])
 ~~~
 
   * `MODULES`: (Required) The list of modules to wrap.
@@ -550,6 +570,8 @@ vtk_module_wrap_python(
     be installed.
   * `TARGET_SPECIFIC_COMPONENTS` (Defaults to `OFF`): If set, prepend the
     output target name to the install component (`<TARGET>-<COMPONENT>`).
+  * `CPACK_COMPONENTS` (Defaults to `OFF`): If set, and
+    `TARGET_SPECIFIC_COMPONENTS` is set, create CPack components.
   * `DEPENDS`: This is list of other Python modules targets i.e. targets
     generated from previous calls to `vtk_module_wrap_python` that this new
     target depends on. This is used when `BUILD_STATIC` is true to ensure that
@@ -575,11 +597,13 @@ vtk_module_wrap_python(
     libraries to the provided export set.
   * `COMPONENT`: Defaults to `python`. All install rules created by this
     function will use this installation component.
+  * `TARGETS_COMPONENT`: Defaults to `runtime`. Used only to determine the
+    dependencies for CPack components.
 #]==]
 function (vtk_module_wrap_python)
   cmake_parse_arguments(PARSE_ARGV 0 _vtk_python
     ""
-    "MODULE_DESTINATION;STATIC_MODULE_DESTINATION;LIBRARY_DESTINATION;PYTHON_PACKAGE;BUILD_STATIC;INSTALL_HEADERS;INSTALL_EXPORT;TARGET_SPECIFIC_COMPONENTS;TARGET;COMPONENT;WRAPPED_MODULES;CMAKE_DESTINATION;DEPENDS;SOABI"
+    "MODULE_DESTINATION;STATIC_MODULE_DESTINATION;LIBRARY_DESTINATION;PYTHON_PACKAGE;BUILD_STATIC;INSTALL_HEADERS;INSTALL_EXPORT;TARGET_SPECIFIC_COMPONENTS;CPACK_COMPONENTS;TARGET;COMPONENT;WRAPPED_MODULES;CMAKE_DESTINATION;DEPENDS;SOABI"
     "MODULES")
 
   if (_vtk_python_UNPARSED_ARGUMENTS)
@@ -613,6 +637,10 @@ function (vtk_module_wrap_python)
 
   if (NOT DEFINED _vtk_python_TARGET_SPECIFIC_COMPONENTS)
     set(_vtk_python_TARGET_SPECIFIC_COMPONENTS OFF)
+  endif ()
+
+  if (NOT DEFINED _vtk_python_CPACK_COMPONENTS)
+    set(_vtk_python_CPACK_COMPONENTS OFF)
   endif ()
 
   if (_vtk_python_SOABI)
@@ -660,6 +688,10 @@ function (vtk_module_wrap_python)
 
   if (NOT DEFINED _vtk_python_COMPONENT)
     set(_vtk_python_COMPONENT "python")
+  endif ()
+
+  if (NOT DEFINED _vtk_python_TARGETS_COMPONENT)
+    set(_vtk_python_TARGETS_COMPONENT "runtime")
   endif ()
 
   if (NOT _vtk_python_PYTHON_PACKAGE)

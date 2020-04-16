@@ -189,6 +189,7 @@ function (_vtk_module_wrap_java_library name)
   set(_vtk_java_library_sources)
   set(_vtk_java_library_java_sources)
   set(_vtk_java_library_link_depends)
+  set(_vtk_java_library_component_depends)
   foreach (_vtk_java_module IN LISTS ARGN)
     _vtk_module_get_module_property("${_vtk_java_module}"
       PROPERTY  "exclude_wrap"
@@ -205,6 +206,11 @@ function (_vtk_module_wrap_java_library name)
       ${_vtk_java_sources})
     list(APPEND _vtk_java_library_java_sources
       ${_vtk_java_java_sources})
+
+    _vtk_module_get_module_property("${_vtk_java_module}"
+      PROPERTY  "targets_component"
+      VARIABLE  _vtk_java_module_targets_component)
+    list(APPEND _vtk_java_library_component_depends "${_vtk_java_module_targets_component}")
 
     _vtk_module_get_module_property("${_vtk_java_module}"
       PROPERTY  "depends"
@@ -277,6 +283,13 @@ function (_vtk_module_wrap_java_library name)
       LIBRARY
         DESTINATION "${_vtk_java_JNILIB_DESTINATION}"
         COMPONENT   "${_vtk_java_jnilib_component}")
+
+    if (_vtk_java_TARGET_SPECIFIC_COMPONENTS AND _vtk_java_CPACK_COMPONENTS)
+      _vtk_module_get_module_property(VTK::Java
+        PROPERTY "targets_component"
+        VARIABLE _vtk_java_java_targets_component)
+      cpack_add_component("${_vtk_java_jnilib_component}" DEPENDS "${_vtk_java_java_targets_component}" ${_vtk_java_library_component_depends})
+    endif ()
   endif ()
 
   vtk_module_autoinit(
@@ -317,6 +330,8 @@ vtk_module_wrap_java(
     libraries.
   * `TARGET_SPECIFIC_COMPONENTS`: Defaults to `OFF`. If set, prepend the
     output target name to the install component (`<TARGET>-<COMPONENT>`).
+  * `CPACK_COMPONENTS`: Defaults to `OFF`. If set, and
+    `TARGET_SPECIFIC_COMPONENTS` is set, create CPack components.
 
 For each wrapped module, a `<module>Java` target will be created. These targets
 will have a `_vtk_module_java_files` property which is the list of generated
@@ -328,7 +343,7 @@ used.
 function (vtk_module_wrap_java)
   cmake_parse_arguments(PARSE_ARGV 0 _vtk_java
     ""
-    "JAVA_OUTPUT;WRAPPED_MODULES;LIBRARY_DESTINATION;JNILIB_DESTINATION;JNILIB_COMPONENT;TARGET_SPECIFIC_COMPONENTS"
+    "JAVA_OUTPUT;WRAPPED_MODULES;LIBRARY_DESTINATION;JNILIB_DESTINATION;JNILIB_COMPONENT;TARGET_SPECIFIC_COMPONENTS;CPACK_COMPONENTS"
     "MODULES")
 
   if (_vtk_java_UNPARSED_ARGUMENTS)
@@ -347,6 +362,10 @@ function (vtk_module_wrap_java)
 
   if (NOT _vtk_java_TARGET_SPECIFIC_COMPONENTS)
     set(_vtk_java_TARGET_SPECIFIC_COMPONENTS "OFF")
+  endif ()
+
+  if (NOT _vtk_java_CPACK_COMPONENTS)
+    set(_vtk_java_CPACK_COMPONENTS "OFF")
   endif ()
 
   # Set up rpaths

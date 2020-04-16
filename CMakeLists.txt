@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.12...3.16 FATAL_ERROR)
 
 project(VTK)
 
+include(CPack)
+
 set(vtk_cmake_dir "${VTK_SOURCE_DIR}/CMake")
 list(INSERT CMAKE_MODULE_PATH 0 "${vtk_cmake_dir}")
 
@@ -322,6 +324,7 @@ vtk_module_build(
   USE_EXTERNAL        "${VTK_USE_EXTERNAL}"
   ENABLE_WRAPPING     "${VTK_ENABLE_WRAPPING}"
   TARGET_SPECIFIC_COMPONENTS  "${VTK_TARGET_SPECIFIC_COMPONENTS}"
+  CPACK_COMPONENTS            ON
   TEST_INPUT_DATA_DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}/Testing"
   TEST_OUTPUT_DATA_DIRECTORY  "${CMAKE_CURRENT_BINARY_DIR}/ExternalData/Testing")
 include(vtkModuleJson)
@@ -357,6 +360,7 @@ if (VTK_WRAP_PYTHON)
     SOABI               "${vtk_soabi}"
     WRAPPED_MODULES vtk_python_wrapped_modules
     TARGET_SPECIFIC_COMPONENTS "${VTK_TARGET_SPECIFIC_COMPONENTS}"
+    CPACK_COMPONENTS    ON
     TARGET          VTK::vtkpythonmodules)
 
   add_subdirectory(Wrapping/Python)
