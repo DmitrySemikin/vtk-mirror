@@ -527,8 +527,8 @@ vtk_module_wrap_python(
   [SOABI <soabi>]
 
   [INSTALL_EXPORT <export>]
-  [COMPONENT <component>])
-  [TARGET_SPECIFIC_COMPONENTS <ON|OFF>]
+  [COMPONENT <component>]
+  [TARGET_SPECIFIC_COMPONENTS <ON|OFF>])
 ~~~
 
   * `MODULES`: (Required) The list of modules to wrap.
