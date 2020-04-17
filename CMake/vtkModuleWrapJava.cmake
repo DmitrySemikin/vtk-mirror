@@ -262,16 +262,21 @@ function (_vtk_module_wrap_java_library name)
       "_vtk_module_java_files" "${_vtk_java_library_java_sources}")
 
   if (_vtk_java_JNILIB_DESTINATION)
+    set(_vtk_java_jnilib_component "${_vtk_java_JNILIB_COMPONENT}")
+    if (_vtk_java_TARGET_SPECIFIC_COMPONENTS)
+      string(PREPEND _vtk_java_jnilib_component "${_vtk_java_target}-")
+    endif ()
+    string(REPLACE "::" "_" _vtk_java_jnilib_component "${_vtk_java_jnilib_component}")
     install(
       TARGETS "${_vtk_java_target}"
       # Windows
       RUNTIME
         DESTINATION "${_vtk_java_JNILIB_DESTINATION}"
-        COMPONENT   "${_vtk_java_JNILIB_COMPONENT}"
+        COMPONENT   "${_vtk_java_jnilib_component}"
       # Other platforms
       LIBRARY
         DESTINATION "${_vtk_java_JNILIB_DESTINATION}"
-        COMPONENT   "${_vtk_java_JNILIB_COMPONENT}")
+        COMPONENT   "${_vtk_java_jnilib_component}")
   endif ()
 
   vtk_module_autoinit(
@@ -310,6 +315,8 @@ vtk_module_wrap_java(
   * `JNILIB_DESTINATION`: Where to install JNI libraries.
   * `JNILIB_COMPONENT`: Defaults to `jni`. The install component to use for JNI
     libraries.
+  * `TARGET_SPECIFIC_COMPONENTS`: Defaults to `OFF`. If set, prepend the
+    output target name to the install component (`<TARGET>-<COMPONENT>`).
 
 For each wrapped module, a `<module>Java` target will be created. These targets
 will have a `_vtk_module_java_files` property which is the list of generated
@@ -321,7 +328,7 @@ used.
 function (vtk_module_wrap_java)
   cmake_parse_arguments(PARSE_ARGV 0 _vtk_java
     ""
-    "JAVA_OUTPUT;WRAPPED_MODULES;LIBRARY_DESTINATION;JNILIB_DESTINATION;JNILIB_COMPONENT"
+    "JAVA_OUTPUT;WRAPPED_MODULES;LIBRARY_DESTINATION;JNILIB_DESTINATION;JNILIB_COMPONENT;TARGET_SPECIFIC_COMPONENTS"
     "MODULES")
 
   if (_vtk_java_UNPARSED_ARGUMENTS)
@@ -336,6 +343,10 @@ function (vtk_module_wrap_java)
 
   if (NOT _vtk_java_JNILIB_COMPONENT)
     set(_vtk_java_JNILIB_COMPONENT "jni")
+  endif ()
+
+  if (NOT _vtk_java_TARGET_SPECIFIC_COMPONENTS)
+    set(_vtk_java_TARGET_SPECIFIC_COMPONENTS "OFF")
   endif ()
 
   # Set up rpaths

@@ -5,7 +5,8 @@ vtk_module_wrap_java(
   WRAPPED_MODULES vtk_java_wrapped_modules
   LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
   # Update vtkSettings.java.in if this changes.
-  JNILIB_DESTINATION  "${CMAKE_INSTALL_LIBDIR}/java/vtk-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+  JNILIB_DESTINATION  "${CMAKE_INSTALL_LIBDIR}/java/vtk-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}"
+  TARGET_SPECIFIC_COMPONENTS "${VTK_TARGET_SPECIFIC_COMPONENTS}")
 
 # TODO: Make FindJava.cmake use imported targets.
 find_package(Java REQUIRED COMPONENTS Development)
