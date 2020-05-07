@@ -426,9 +426,9 @@ bool vtkXdmfDomain::GetWholeExtent(XdmfGrid* xmfGrid, int extents[6])
   }
 
   // vtk Dims are i,j,k XDMF are k,j,i
-  extents[5] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[0] - 1);
+  extents[1] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[0] - 1);
   extents[3] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[1] - 1);
-  extents[1] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[2] - 1);
+  extents[5] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[2] - 1);
   return true;
 }
 
@@ -448,13 +448,13 @@ bool vtkXdmfDomain::GetOriginAndSpacing(XdmfGrid* xmfGrid, double origin[3], dou
     xmfGeometry->Update(); // read heavy-data for the geometry.
     XdmfFloat64* xmfOrigin = xmfGeometry->GetOrigin();
     XdmfFloat64* xmfSpacing = xmfGeometry->GetDxDyDz();
-    origin[0] = xmfOrigin[2];
+    origin[0] = xmfOrigin[0];
     origin[1] = xmfOrigin[1];
-    origin[2] = xmfOrigin[0];
+    origin[2] = xmfOrigin[2];
 
-    spacing[0] = xmfSpacing[2];
+    spacing[0] = xmfSpacing[0];
     spacing[1] = xmfSpacing[1];
-    spacing[2] = xmfSpacing[0];
+    spacing[2] = xmfSpacing[2];
     return true;
   }
   else if (xmfGeometry->GetGeometryType() == XDMF_GEOMETRY_ORIGIN_DXDY)
@@ -463,13 +463,13 @@ bool vtkXdmfDomain::GetOriginAndSpacing(XdmfGrid* xmfGrid, double origin[3], dou
     xmfGeometry->Update(); // read heavy-data for the geometry.
     XdmfFloat64* xmfOrigin = xmfGeometry->GetOrigin();
     XdmfFloat64* xmfSpacing = xmfGeometry->GetDxDyDz();
-    origin[0] = 0.0;
+    origin[0] = xmfOrigin[0];
     origin[1] = xmfOrigin[1];
-    origin[2] = xmfOrigin[0];
+    origin[2] = 0.0;
 
-    spacing[0] = 1.0;
+    spacing[0] = xmfSpacing[0];
     spacing[1] = xmfSpacing[1];
-    spacing[2] = xmfSpacing[0];
+    spacing[2] = 1.0;
     return true;
   }
   origin[0] = origin[1] = origin[2] = 0.0;
