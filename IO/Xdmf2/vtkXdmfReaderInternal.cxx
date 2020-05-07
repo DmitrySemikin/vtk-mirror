@@ -425,7 +425,6 @@ bool vtkXdmfDomain::GetWholeExtent(XdmfGrid* xmfGrid, int extents[6])
     dimensions[cc] = 1;
   }
 
-  // vtk Dims are i,j,k XDMF are k,j,i
   extents[1] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[0] - 1);
   extents[3] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[1] - 1);
   extents[5] = vtkMAX(static_cast<XdmfInt64>(0), dimensions[2] - 1);
