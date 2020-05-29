@@ -133,7 +133,7 @@ static const char* vtkparse_string_replace(
   StringCache* cache, const char* str1, int n, const char* name[], const char* val[])
 {
   const char* cp = str1;
-  char result_store[1024];
+  static char result_store[1024];
   size_t resultMaxLen = 1024;
   char *result, *tmp;
   int k;
