@@ -1385,6 +1385,12 @@ int vtkPolyData::IsEdge(vtkIdType p1, vtkIdType p2)
     return 0;
   }
 
+  // if point ids are the same
+  if (p1 == p2)
+  {
+    return 0;
+  }
+
   this->GetPointCells(p1, ncells, cells);
   for (i = 0; i < ncells; i++)
   {
@@ -1394,7 +1400,13 @@ int vtkPolyData::IsEdge(vtkIdType p1, vtkIdType p2)
       case VTK_EMPTY_CELL:
       case VTK_VERTEX:
       case VTK_POLY_VERTEX:
+        break;
       case VTK_LINE:
+        if (this->IsPointUsedByCell(p2, cells[i]))
+        {
+          return 1;
+        }
+        break;
       case VTK_POLY_LINE:
         break;
       case VTK_TRIANGLE:

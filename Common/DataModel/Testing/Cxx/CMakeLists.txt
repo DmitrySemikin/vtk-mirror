@@ -47,6 +47,7 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   TestPiecewiseFunctionLogScale.cxx
   TestPixelExtent.cxx
   TestPointLocators.cxx
+  TestPolyDataIsEdgeVTKLine.cxx
   TestPolyDataRemoveCell.cxx
   TestPolygon.cxx
   TestPolygonBoundedTriangulate.cxx
