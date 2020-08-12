@@ -19,8 +19,8 @@
 #include "vtkInformationVector.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
+#include "vtkPointSet.h"
 #include "vtkPoints.h"
-#include "vtkPolyData.h"
 #include "vtkRandomSequence.h"
 
 #include <cfloat>
@@ -65,14 +65,12 @@ int vtkPointSource::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // get the output
-  vtkPolyData* output = vtkPolyData::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPointSet* output = vtkPointSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   vtkIdType i;
   double theta, rho, cosphi, sinphi, radius;
   double x[3];
   vtkPoints* newPoints;
-  vtkCellArray* newVerts;
-
   newPoints = vtkPoints::New();
 
   // Set the desired precision for the points in the output.
@@ -86,10 +84,6 @@ int vtkPointSource::RequestData(vtkInformation* vtkNotUsed(request),
   }
 
   newPoints->Allocate(this->NumberOfPoints);
-  newVerts = vtkCellArray::New();
-  newVerts->AllocateEstimate(1, this->NumberOfPoints);
-
-  newVerts->InsertNextCell(this->NumberOfPoints);
 
   if (this->Distribution == VTK_POINT_SHELL)
   { // only produce points on the surface of the sphere
@@ -102,7 +96,7 @@ int vtkPointSource::RequestData(vtkInformation* vtkNotUsed(request),
       x[0] = this->Center[0] + radius * cos(theta);
       x[1] = this->Center[1] + radius * sin(theta);
       x[2] = this->Center[2] + this->Radius * cosphi;
-      newVerts->InsertCellPoint(newPoints->InsertNextPoint(x));
+      newPoints->InsertNextPoint(x);
     }
   }
   else
@@ -117,7 +111,7 @@ int vtkPointSource::RequestData(vtkInformation* vtkNotUsed(request),
       x[0] = this->Center[0] + radius * cos(theta);
       x[1] = this->Center[1] + radius * sin(theta);
       x[2] = this->Center[2] + rho * cosphi;
-      newVerts->InsertCellPoint(newPoints->InsertNextPoint(x));
+      newPoints->InsertNextPoint(x);
     }
   }
   //
@@ -125,9 +119,6 @@ int vtkPointSource::RequestData(vtkInformation* vtkNotUsed(request),
   //
   output->SetPoints(newPoints);
   newPoints->Delete();
-
-  output->SetVerts(newVerts);
-  newVerts->Delete();
 
   return 1;
 }

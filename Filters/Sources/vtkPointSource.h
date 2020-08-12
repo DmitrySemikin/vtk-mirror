@@ -20,26 +20,25 @@
  * of points within a specified radius about a specified center point.
  * By default location of the points is random within the sphere. It is
  * also possible to generate random points only on the surface of the
- * sphere. The output PolyData has the specified number of points and
- * 1 cell - a vtkPolyVertex containing all of the points.
+ * sphere. The output PointSet has the specified number of points.
  */
 
 #ifndef vtkPointSource_h
 #define vtkPointSource_h
 
 #include "vtkFiltersSourcesModule.h" // For export macro
-#include "vtkPolyDataAlgorithm.h"
+#include "vtkPointSetAlgorithm.h"
 
 #define VTK_POINT_UNIFORM 1
 #define VTK_POINT_SHELL 0
 
 class vtkRandomSequence;
 
-class VTKFILTERSSOURCES_EXPORT vtkPointSource : public vtkPolyDataAlgorithm
+class VTKFILTERSSOURCES_EXPORT vtkPointSource : public vtkPointSetAlgorithm
 {
 public:
   static vtkPointSource* New();
-  vtkTypeMacro(vtkPointSource, vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkPointSource, vtkPointSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{

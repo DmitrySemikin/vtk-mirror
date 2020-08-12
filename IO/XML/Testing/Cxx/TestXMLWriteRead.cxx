@@ -73,7 +73,7 @@ int TestConvertType(const std::string& type, const std::string& fileName)
   std::cout << "Write to " << fileName << std::endl;
 
   // write the polydata
-  vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  vtkSmartPointer<vtkXMLDataSetWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
   writer->SetInputData(source->GetOutput());
   writer->SetFileName(fileName.c_str());
   writer->SetDataModeToAscii();

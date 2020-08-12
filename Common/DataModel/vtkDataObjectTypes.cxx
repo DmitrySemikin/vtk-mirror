@@ -179,6 +179,10 @@ vtkDataObject* vtkDataObjectTypes::NewDataObject(const char* classname)
   {
     return vtkDataObject::New();
   }
+  else if (strcmp(classname, "vtkPointSet") == 0)
+  {
+    return vtkPointSet::New();
+  }
   else if (strcmp(classname, "vtkPolyData") == 0)
   {
     return vtkPolyData::New();

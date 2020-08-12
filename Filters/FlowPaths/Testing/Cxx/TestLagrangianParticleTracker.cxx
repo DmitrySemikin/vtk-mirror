@@ -30,6 +30,7 @@
 #include "vtkNew.h"
 #include "vtkPlaneSource.h"
 #include "vtkPointData.h"
+#include "vtkPointSet.h"
 #include "vtkPointSource.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRTAnalyticSource.h"
@@ -46,23 +47,23 @@ int TestLagrangianParticleTracker(int, char*[])
   seeds->SetNumberOfPoints(10);
   seeds->SetRadius(4);
   seeds->Update();
-  vtkPolyData* seedPD = seeds->GetOutput();
-  vtkPointData* seedData = seedPD->GetPointData();
+  vtkPointSet* seedPS = seeds->GetOutput();
+  vtkPointData* seedData = seedPS->GetPointData();
 
   // Create seed data
   vtkNew<vtkDoubleArray> partVel;
   partVel->SetNumberOfComponents(3);
-  partVel->SetNumberOfTuples(seedPD->GetNumberOfPoints());
+  partVel->SetNumberOfTuples(seedPS->GetNumberOfPoints());
   partVel->SetName("InitialVelocity");
 
   vtkNew<vtkDoubleArray> partDens;
   partDens->SetNumberOfComponents(1);
-  partDens->SetNumberOfTuples(seedPD->GetNumberOfPoints());
+  partDens->SetNumberOfTuples(seedPS->GetNumberOfPoints());
   partDens->SetName("ParticleDensity");
 
   vtkNew<vtkDoubleArray> partDiam;
   partDiam->SetNumberOfComponents(1);
-  partDiam->SetNumberOfTuples(seedPD->GetNumberOfPoints());
+  partDiam->SetNumberOfTuples(seedPS->GetNumberOfPoints());
   partDiam->SetName("ParticleDiameter");
 
   partVel->FillComponent(0, 2);
@@ -166,8 +167,8 @@ int TestLagrangianParticleTracker(int, char*[])
   ugFlow->AddInputData(waveletImg);
 
   vtkNew<vtkMultiBlockDataGroupFilter> groupSeed;
-  groupSeed->AddInputDataObject(seedPD);
-  groupSeed->AddInputDataObject(seedPD);
+  groupSeed->AddInputDataObject(seedPS);
+  groupSeed->AddInputDataObject(seedPS);
 
   // Create Integrator
   vtkNew<vtkRungeKutta2> integrator;
@@ -234,7 +235,7 @@ int TestLagrangianParticleTracker(int, char*[])
   tracker->SetMaximumIntegrationTime(10.0);
   tracker->Update();
   tracker->SetInputData(waveletImg);
-  tracker->SetSourceData(seedPD);
+  tracker->SetSourceData(seedPS);
   tracker->SetMaximumNumberOfSteps(300);
   tracker->SetMaximumIntegrationTime(-1.0);
   tracker->SetSurfaceConnection(groupSurface->GetOutputPort());
@@ -283,7 +284,7 @@ int TestLagrangianParticleTracker(int, char*[])
     return EXIT_FAILURE;
   }
   tracker->Print(cout);
-  if (tracker->GetSource() != seedPD)
+  if (tracker->GetSource() != seedPS)
   {
     std::cerr << "Incorrect Source" << std::endl;
     return EXIT_FAILURE;
