@@ -550,5 +550,5 @@ const vtkXMLCompositeDataReaderEntry vtkXMLCompositeDataReaderInternals::ReaderL
   { "vtp", "vtkXMLPolyDataReader" }, { "vtu", "vtkXMLUnstructuredGridReader" },
   { "vti", "vtkXMLImageDataReader" }, { "vtr", "vtkXMLRectilinearGridReader" },
   { "vts", "vtkXMLStructuredGridReader" }, { "vtt", "vtkXMLTableReader" },
-  { "htg", "vtkXMLHyperTreeGridReader" }, { nullptr, nullptr }
+  { "htg", "vtkXMLHyperTreeGridReader" }, { "vtps", "vtkXMLPointSetReader" }, { nullptr, nullptr }
 };

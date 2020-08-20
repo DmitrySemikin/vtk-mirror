@@ -26,9 +26,10 @@
 #define vtkmCoordinateSystemTransform_h
 
 #include "vtkAcceleratorsVTKmFiltersModule.h" // required for correct export
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
-class VTKACCELERATORSVTKMFILTERS_EXPORT vtkmCoordinateSystemTransform : public vtkPointSetAlgorithm
+class VTKACCELERATORSVTKMFILTERS_EXPORT vtkmCoordinateSystemTransform
+  : public vtkPassInputTypeAlgorithm
 {
   enum struct TransformTypes
   {
@@ -40,7 +41,7 @@ class VTKACCELERATORSVTKMFILTERS_EXPORT vtkmCoordinateSystemTransform : public v
   };
 
 public:
-  vtkTypeMacro(vtkmCoordinateSystemTransform, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkmCoordinateSystemTransform, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkmCoordinateSystemTransform* New();

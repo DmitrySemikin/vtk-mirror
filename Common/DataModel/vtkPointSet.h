@@ -212,6 +212,11 @@ public:
   void ComputeBounds() override;
 
   /**
+   * Return the type of data object.
+   */
+  int GetDataObjectType() override { return VTK_POINT_SET; }
+
+  /**
    * Reclaim any unused memory.
    */
   void Squeeze() override;

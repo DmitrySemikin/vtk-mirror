@@ -25,14 +25,14 @@
 #define vtkmPointTransform_h
 
 #include "vtkAcceleratorsVTKmFiltersModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkHomogeneousTransform;
 
-class VTKACCELERATORSVTKMFILTERS_EXPORT vtkmPointTransform : public vtkPointSetAlgorithm
+class VTKACCELERATORSVTKMFILTERS_EXPORT vtkmPointTransform : public vtkPassInputTypeAlgorithm
 {
 public:
-  vtkTypeMacro(vtkmPointTransform, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkmPointTransform, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkmPointTransform* New();

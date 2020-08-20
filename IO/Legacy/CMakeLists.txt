@@ -12,6 +12,8 @@ set(classes
   vtkGraphReader
   vtkGraphWriter
   vtkPixelExtentIO
+  vtkPointSetReader
+  vtkPointSetWriter
   vtkPolyDataReader
   vtkPolyDataWriter
   vtkRectilinearGridReader

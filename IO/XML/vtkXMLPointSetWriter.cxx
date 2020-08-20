@@ -69,7 +69,7 @@ const char* vtkXMLPointSetWriter::GetDataSetName()
 //------------------------------------------------------------------------------
 const char* vtkXMLPointSetWriter::GetDefaultFileExtension()
 {
-  return "vtp";
+  return "vtps";
 }
 
 //------------------------------------------------------------------------------
