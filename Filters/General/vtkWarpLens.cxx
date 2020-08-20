@@ -83,7 +83,7 @@ int vtkWarpLens::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* 
 }
 
 int vtkWarpLens::RequestDataObject(
-  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkImageData* inImage = vtkImageData::GetData(inputVector[0]);
   vtkRectilinearGrid* inRect = vtkRectilinearGrid::GetData(inputVector[0]);
@@ -98,13 +98,7 @@ int vtkWarpLens::RequestDataObject(
     }
     return 1;
   }
-  vtkPointSet* output = vtkPointSet::GetData(outputVector);
-  if (!output)
-  {
-    vtkNew<vtkPointSet> newOutput;
-    outputVector->GetInformationObject(0)->Set(vtkDataObject::DATA_OBJECT(), newOutput);
-  }
-  return 1;
+  return Superclass::RequestDataObject(request, inputVector, outputVector);
 }
 
 int vtkWarpLens::RequestData(vtkInformation* vtkNotUsed(request),

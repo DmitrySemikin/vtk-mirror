@@ -122,6 +122,7 @@ protected:
 
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   int FillInputPortInformation(int port, vtkInformation* info) override;
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   int TargetDistanceMethod;   //!< point-to-point if 0, point-to-cell if 1
   double RelativeDistance[2]; //!< relative distance between inputs

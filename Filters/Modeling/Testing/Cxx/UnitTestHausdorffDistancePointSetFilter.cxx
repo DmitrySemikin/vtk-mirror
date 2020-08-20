@@ -95,11 +95,11 @@ int UnitTestHausdorffDistancePointSetFilter(int, char*[])
       std::cout << "ERROR: IsA should be vtkHausdorffDistancePointSetFilter, but is "
                 << newHaus->GetClassName() << std::endl;
     }
-    if (!newHaus->IsTypeOf("vtkPointSetAlgorithm"))
+    if (!newHaus->IsTypeOf("vtkPassInputTypeAlgorithm"))
     {
       ++status;
       std::cout << "ERROR: " << newHaus->GetClassName()
-                << " is not a subclass of vtkPointSetAlgorithm" << std::endl;
+                << " is not a subclass of vtkPassInputTypeAlgorithm" << std::endl;
     }
     newHaus->Delete();
   }

@@ -63,14 +63,14 @@
 #define vtkDeformPointSet_h
 
 #include "vtkFiltersGeneralModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 #include "vtkSmartPointer.h" // For protected ivars
 
 class vtkDoubleArray;
 class vtkPolyData;
 
-class VTKFILTERSGENERAL_EXPORT vtkDeformPointSet : public vtkPointSetAlgorithm
+class VTKFILTERSGENERAL_EXPORT vtkDeformPointSet : public vtkPassInputTypeAlgorithm
 {
 public:
   //@{
@@ -78,7 +78,7 @@ public:
    * Standard methods for instantiable (i.e., concrete) class.
    */
   static vtkDeformPointSet* New();
-  vtkTypeMacro(vtkDeformPointSet, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkDeformPointSet, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
@@ -125,6 +125,9 @@ protected:
   vtkSmartPointer<vtkDoubleArray> Weights;
 
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
   vtkDeformPointSet(const vtkDeformPointSet&) = delete;

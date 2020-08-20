@@ -49,7 +49,7 @@ int vtkWarpTo::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* in
 }
 
 int vtkWarpTo::RequestDataObject(
-  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkImageData* inImage = vtkImageData::GetData(inputVector[0]);
   vtkRectilinearGrid* inRect = vtkRectilinearGrid::GetData(inputVector[0]);
@@ -64,13 +64,7 @@ int vtkWarpTo::RequestDataObject(
     }
     return 1;
   }
-  vtkPointSet* output = vtkPointSet::GetData(outputVector);
-  if (!output)
-  {
-    vtkNew<vtkPointSet> newOutput;
-    outputVector->GetInformationObject(0)->Set(vtkDataObject::DATA_OBJECT(), newOutput);
-  }
-  return 1;
+  return Superclass::RequestDataObject(request, inputVector, outputVector);
 }
 
 int vtkWarpTo::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector** inputVector,

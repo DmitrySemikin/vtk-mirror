@@ -16,7 +16,6 @@
 #include "vtkDataSetMapper.h"
 #include "vtkMath.h"
 #include "vtkNew.h"
-#include "vtkPointSource.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkProperty.h"
@@ -53,7 +52,7 @@ int TestStreamTracerSurface(int argc, char* argv[])
     points->InsertNextPoint(calcData->GetPoint(i * (nLine - 1) + nLine));
   }
 
-  vtkNew<vtkPolyData> pointsPolydata;
+  vtkNew<vtkPointSet> pointsPolydata;
   pointsPolydata->SetPoints(points);
 
   vtkNew<vtkStreamTracer> stream;

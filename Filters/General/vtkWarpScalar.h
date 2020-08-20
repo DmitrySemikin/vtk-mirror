@@ -39,15 +39,15 @@
 #define vtkWarpScalar_h
 
 #include "vtkFiltersGeneralModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkDataArray;
 
-class VTKFILTERSGENERAL_EXPORT vtkWarpScalar : public vtkPointSetAlgorithm
+class VTKFILTERSGENERAL_EXPORT vtkWarpScalar : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkWarpScalar* New();
-  vtkTypeMacro(vtkWarpScalar, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkWarpScalar, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{

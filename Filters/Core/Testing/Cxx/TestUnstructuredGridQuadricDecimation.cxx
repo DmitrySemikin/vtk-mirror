@@ -12,13 +12,12 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include <vtkCleanPolyData.h>
 #include <vtkDelaunay3D.h>
 #include <vtkDoubleArray.h>
 #include <vtkPointData.h>
+#include <vtkPointSet.h>
 #include <vtkPointSource.h>
 #include <vtkPoints.h>
-#include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkUnstructuredGridQuadricDecimation.h>
@@ -57,17 +56,12 @@ int TestUnstructuredGridQuadricDecimation(int, char*[])
   source->SetRadius(1.);
   source->SetDistributionToUniform();
   source->SetOutputPointsPrecision(vtkAlgorithm::DOUBLE_PRECISION);
-
-  // Clean the polydata. This will remove overlapping points that may be
-  // present in the input data.
-  vtkSmartPointer<vtkCleanPolyData> cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
-  cleaner->SetInputConnection(source->GetOutputPort());
-  cleaner->Update();
+  source->Update();
 
   // Create point data for use in decimation (the point data acts as a fourth
   // dimension in a Euclidean metric for determining the "nearness" of points).
-  vtkPolyData* pd = cleaner->GetOutput();
-  vtkPoints* points = pd->GetPoints();
+  vtkPointSet* ps = source->GetOutput();
+  vtkPoints* points = ps->GetPoints();
   vtkSmartPointer<vtkDoubleArray> radius = vtkSmartPointer<vtkDoubleArray>::New();
   radius->SetName("radius");
   radius->SetNumberOfComponents(1);
@@ -80,12 +74,12 @@ int TestUnstructuredGridQuadricDecimation(int, char*[])
     r = std::sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
     radius->SetTypedTuple(i, &r);
   }
-  pd->GetPointData()->SetScalars(radius);
+  ps->GetPointData()->SetScalars(radius);
 
   // Generate a tetrahedral mesh from the input points. By
   // default, the generated volume is the convex hull of the points.
   vtkSmartPointer<vtkDelaunay3D> delaunay3D = vtkSmartPointer<vtkDelaunay3D>::New();
-  delaunay3D->SetInputData(pd);
+  delaunay3D->SetInputData(ps);
   delaunay3D->Update();
 
   const vtkIdType numberOfOriginalTetras = delaunay3D->GetOutput()->GetNumberOfCells();

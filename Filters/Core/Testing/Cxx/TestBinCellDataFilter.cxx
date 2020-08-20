@@ -18,7 +18,6 @@
 #include <vtkCellData.h>
 #include <vtkCellIterator.h>
 #include <vtkCellLocator.h>
-#include <vtkCleanPolyData.h>
 #include <vtkDelaunay3D.h>
 #include <vtkDoubleArray.h>
 #include <vtkGenericCell.h>
@@ -26,9 +25,9 @@
 #include <vtkMersenneTwister.h>
 #include <vtkNew.h>
 #include <vtkPointData.h>
+#include <vtkPointSet.h>
 #include <vtkPointSource.h>
 #include <vtkPoints.h>
-#include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 
@@ -56,15 +55,10 @@ vtkSmartPointer<vtkUnstructuredGrid> ConstructDelaunay3DSphere(
     source->SetDistributionToShell();
   }
 
-  // Clean the polydata. This will remove overlapping points that may be
-  // present in the input data.
-  vtkSmartPointer<vtkCleanPolyData> cleaner = vtkSmartPointer<vtkCleanPolyData>::New();
-  cleaner->SetInputConnection(source->GetOutputPort());
-
   // Generate a tetrahedral mesh from the input points. By
   // default, the generated volume is the convex hull of the points.
   vtkSmartPointer<vtkDelaunay3D> delaunay3D = vtkSmartPointer<vtkDelaunay3D>::New();
-  delaunay3D->SetInputConnection(cleaner->GetOutputPort());
+  delaunay3D->SetInputConnection(source->GetOutputPort());
   delaunay3D->Update();
 
   // Create cell data for use in binning.

@@ -71,6 +71,15 @@ vtkHausdorffDistancePointSetFilter::vtkHausdorffDistancePointSetFilter()
 
 vtkHausdorffDistancePointSetFilter::~vtkHausdorffDistancePointSetFilter() = default;
 
+//------------------------------------------------------------------------------
+int vtkHausdorffDistancePointSetFilter::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
 int vtkHausdorffDistancePointSetFilter::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

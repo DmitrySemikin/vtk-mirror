@@ -24,7 +24,7 @@
 #include "vtkOutlineFilter.h"
 #include "vtkPLagrangianParticleTracker.h"
 #include "vtkPointData.h"
-#include "vtkPointSet"
+#include "vtkPointSet.h"
 #include "vtkPointSource.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRTAnalyticSource.h"

@@ -68,7 +68,7 @@ int TestVTKMWarpScalar(int argc, char* argv[])
   xyWarpScalar->SetNormal(1, 0, 0); // should be ignored
   xyWarpScalar->SetInputConnection(xySource->GetOutputPort());
   xyWarpScalar->Update();
-  vtkPointSet* points = xyWarpScalar->GetOutput();
+  vtkPointSet* points = vtkPointSet::SafeDownCast(xyWarpScalar->GetOutput());
   for (vtkIdType i = 0; i < points->GetNumberOfPoints(); i++)
   {
     assert(points->GetPoint(i)[2] == 3.0);

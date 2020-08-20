@@ -24,13 +24,13 @@
 #define vtkWarpTo_h
 
 #include "vtkFiltersGeneralModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
-class VTKFILTERSGENERAL_EXPORT vtkWarpTo : public vtkPointSetAlgorithm
+class VTKFILTERSGENERAL_EXPORT vtkWarpTo : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkWarpTo* New();
-  vtkTypeMacro(vtkWarpTo, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkWarpTo, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
