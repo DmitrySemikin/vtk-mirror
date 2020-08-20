@@ -132,8 +132,6 @@ vtkDataObject* vtkPointSetAlgorithm::GetInput()
 vtkTypeBool vtkPointSetAlgorithm::ProcessRequest(
   vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-  std::cout << "ProcessRequest " << std::endl;
-  std::cout << request << ", " << inputVector << ", " << outputVector << std::endl;
   // generate the data
   if (request->Has(vtkDemandDrivenPipeline::REQUEST_DATA()))
   {
@@ -153,44 +151,6 @@ vtkTypeBool vtkPointSetAlgorithm::ProcessRequest(
   }
   return this->Superclass::ProcessRequest(request, inputVector, outputVector);
 }
-/*
-//------------------------------------------------------------------------------
-int vtkPointSetAlgorithm::RequestDataObject(
-  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
-{
-  std::cout << "la " << std::endl;
-  std::cout << inputVector << std::endl;
-  std::cout << inputVector[0] << std::endl;
-  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
-  if (!inInfo)
-  {
-    return 0;
-  }
-  std::cout << "la " << std::endl;
-  vtkPointSet* input = vtkPointSet::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-  std::cout << "la " << std::endl;
-
-  if (input)
-  {
-  std::cout << "la " << std::endl;
-    // for each output
-    for (int i = 0; i < this->GetNumberOfOutputPorts(); ++i)
-    {
-  std::cout << "la " << std::endl;
-      vtkInformation* info = outputVector->GetInformationObject(i);
-      vtkPointSet* output = vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
-
-      if (!output || !output->IsA(input->GetClassName()))
-      {
-        output = input->NewInstance();
-        info->Set(vtkDataObject::DATA_OBJECT(), output);
-        output->Delete();
-      }
-    }
-    return 1;
-  }
-  return 0;
-}*/
 
 //------------------------------------------------------------------------------
 int vtkPointSetAlgorithm::FillOutputPortInformation(int vtkNotUsed(port), vtkInformation* info)
