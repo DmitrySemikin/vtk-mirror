@@ -402,7 +402,7 @@ int AppendDatasetsAndCheckMergedArrayLengths(vtkAppendDataSets* append)
 {
   append->MergePointsOn();
   append->Update();
-  vtkDataSet* output = append->GetOutput();
+  vtkDataSet* output = vtkDataSet::SafeDownCast(append->GetOutput());
 
   if (output->GetPointData()->GetNumberOfArrays() > 0 &&
     output->GetPointData()->GetArray(0)->GetNumberOfTuples() != output->GetNumberOfPoints())
@@ -444,7 +444,7 @@ int AppendDatasetsAndPrint(const std::vector<vtkDataSet*>& inputs, const char* e
   }
   append->SetOutputDataSetType(vtkDataObjectTypes::GetTypeIdFromClassName(expectedDataSetType));
   append->Update();
-  vtkDataSet* output = append->GetOutput();
+  vtkDataSet* output = vtkDataSet::SafeDownCast(append->GetOutput());
   if (!output->IsA(expectedDataSetType))
   {
     std::cerr << "Output dataset type is " << output->GetClassName() << " but is expected to be "
@@ -493,7 +493,7 @@ bool TestToleranceModes(vtkDataSet* dataset1, vtkDataSet* dataset2)
   append->AddInputData(dataset2);
   append->Update();
 
-  auto output = append->GetOutput();
+  auto output = vtkDataSet::SafeDownCast(append->GetOutput());
   for (vtkIdType i = 0; i < output->GetNumberOfPoints(); ++i)
   {
     double point[3];
@@ -514,7 +514,7 @@ bool TestToleranceModes(vtkDataSet* dataset1, vtkDataSet* dataset2)
   append->ToleranceIsAbsoluteOn();
   append->Update();
 
-  output = append->GetOutput();
+  output = vtkDataSet::SafeDownCast(append->GetOutput());
   for (vtkIdType i = 0; i < output->GetNumberOfPoints(); ++i)
   {
     double point[3];

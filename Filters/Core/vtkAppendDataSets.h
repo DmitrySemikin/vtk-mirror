@@ -43,16 +43,16 @@
 #define vtkAppendDataSets_h
 
 #include "vtkFiltersCoreModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkDataSet;
 class vtkDataSetCollection;
 
-class VTKFILTERSCORE_EXPORT vtkAppendDataSets : public vtkPointSetAlgorithm
+class VTKFILTERSCORE_EXPORT vtkAppendDataSets : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkAppendDataSets* New();
-  vtkTypeMacro(vtkAppendDataSets, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkAppendDataSets, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -127,7 +127,7 @@ protected:
   int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
     vtkInformationVector* outputVector) override;
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-  virtual int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   int FillInputPortInformation(int port, vtkInformation* info) override;
 
   // If true we will attempt to merge points. Must also not have
