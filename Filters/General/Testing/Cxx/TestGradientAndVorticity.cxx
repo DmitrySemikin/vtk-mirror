@@ -444,7 +444,7 @@ int TestGradientAndVorticity(int argc, char* argv[])
     -1 // mark as end
   };
   transformFilter->Update();
-  vtkDataSet* output = transformFilter->GetOutput();
+  vtkDataSet* output = vtkDataSet::SafeDownCast(transformFilter->GetOutput());
   double bounds[6];
   output->GetBounds(bounds);
   elevationFilter->SetLowPoint(bounds[0], 0, 0);
@@ -481,7 +481,7 @@ int TestGradientAndVorticity(int argc, char* argv[])
   cellTypeSource->SetCellType(twoDCells[0]);
   generalTransform->RotateZ(30);
   transformFilter->Update();
-  output = transformFilter->GetOutput();
+  output = vtkDataSet::SafeDownCast(transformFilter->GetOutput());
   output->GetBounds(bounds);
   elevationFilter->SetLowPoint(bounds[0], 0, 0);
   elevationFilter->SetHighPoint(bounds[1], 0, 0);
@@ -520,7 +520,7 @@ int TestGradientAndVorticity(int argc, char* argv[])
   generalTransform->RotateX(20);
   generalTransform->RotateY(40);
   transformFilter->Update();
-  output = transformFilter->GetOutput();
+  output = vtkDataSet::SafeDownCast(transformFilter->GetOutput());
   output->GetBounds(bounds);
   elevationFilter->SetLowPoint(bounds[0], 0, 0);
   elevationFilter->SetHighPoint(bounds[1], 0, 0);

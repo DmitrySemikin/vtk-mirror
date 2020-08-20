@@ -289,7 +289,7 @@ int TestLagrangianIntegrationModel(int, char*[])
   odeTransform->SetInputArrayToProcess(
     7, 1, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, "ParticleDensity");
   odeTransform->SetLocator(locator);
-  odeTransform->AddDataSet(transform->GetOutput());
+  odeTransform->AddDataSet(vtkDataSet::SafeDownCast(transform->GetOutput()));
   odeTransform->AddDataSet(wavelet->GetOutput());
 
   // Test domain inclusion
@@ -336,7 +336,7 @@ int TestLagrangianIntegrationModel(int, char*[])
 
   // Test clear
   odeTriangle->ClearDataSets();
-  odeTriangle->AddDataSet(transform->GetOutput());
+  odeTriangle->AddDataSet(vtkDataSet::SafeDownCast(transform->GetOutput()));
   x[0] = 0;
   if (odeTriangle->FunctionValues(x, f, &part) == 1)
   {

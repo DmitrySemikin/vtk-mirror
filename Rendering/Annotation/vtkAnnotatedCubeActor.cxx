@@ -496,42 +496,43 @@ void vtkAnnotatedCubeActor::UpdateProps()
   this->InternalTransform->SetMatrix(this->XPlusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   vtkPolyData* edges = this->AppendTextEdges->GetInput(0);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 
   this->XMinusFaceActor->ComputeMatrix();
   this->InternalTransformFilter->SetInputConnection(this->XMinusFaceVectorText->GetOutputPort());
   this->InternalTransform->SetMatrix(this->XMinusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   edges = this->AppendTextEdges->GetInput(1);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 
   this->YPlusFaceActor->ComputeMatrix();
   this->InternalTransformFilter->SetInputConnection(this->YPlusFaceVectorText->GetOutputPort());
   this->InternalTransform->SetMatrix(this->YPlusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   edges = this->AppendTextEdges->GetInput(2);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 
   this->YMinusFaceActor->ComputeMatrix();
   this->InternalTransformFilter->SetInputConnection(this->YMinusFaceVectorText->GetOutputPort());
   this->InternalTransform->SetMatrix(this->YMinusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   edges = this->AppendTextEdges->GetInput(3);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 
   this->ZPlusFaceActor->ComputeMatrix();
   this->InternalTransformFilter->SetInputConnection(this->ZPlusFaceVectorText->GetOutputPort());
   this->InternalTransform->SetMatrix(this->ZPlusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   edges = this->AppendTextEdges->GetInput(4);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 
   this->ZMinusFaceActor->ComputeMatrix();
   this->InternalTransformFilter->SetInputConnection(this->ZMinusFaceVectorText->GetOutputPort());
   this->InternalTransform->SetMatrix(this->ZMinusFaceActor->GetMatrix());
   this->InternalTransformFilter->Update();
   edges = this->AppendTextEdges->GetInput(5);
-  edges->CopyStructure(this->InternalTransformFilter->GetOutput());
+
+  edges->CopyStructure(vtkDataSet::SafeDownCast(this->InternalTransformFilter->GetOutput()));
 }
 
 //------------------------------------------------------------------------------

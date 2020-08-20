@@ -75,6 +75,7 @@ vtkCxxSetObjectMacro(vtkGlyph3DMapper, BlockAttributes, vtkCompositeDataDisplayA
 // initial sources are defined.
 vtkGlyph3DMapper::vtkGlyph3DMapper()
 {
+  std::cout << "CONSTRUCTING vtkGlyph3DMapper " << this << std::endl;
   this->SetNumberOfInputPorts(2);
 
   this->BlockAttributes = nullptr;
@@ -452,7 +453,7 @@ int vtkGlyph3DMapper::FillInputPortInformation(int port, vtkInformation* info)
     info->Set(vtkAlgorithm::INPUT_IS_REPEATABLE(), 1);
     info->Set(vtkAlgorithm::INPUT_IS_OPTIONAL(), 1);
     info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkDataObjectTree");
-    info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+    info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
     return 1;
   }
   return 0;

@@ -335,44 +335,46 @@ int vtkAppendFilter::RequestData(vtkInformation* vtkNotUsed(request),
     }
 
     // copy cell
-    vtkUnstructuredGrid* ug = vtkUnstructuredGrid::SafeDownCast(dataSet);
-    for (vtkIdType cellId = 0; cellId < dataSetNumCells && !abort; ++cellId)
+    if (vtkUnstructuredGrid* ug = vtkUnstructuredGrid::SafeDownCast(dataSet))
     {
-      newPtIds->Reset();
-      if (ug && dataSet->GetCellType(cellId) == VTK_POLYHEDRON)
+      for (vtkIdType cellId = 0; cellId < dataSetNumCells && !abort; ++cellId)
       {
-        vtkIdType nfaces;
-        const vtkIdType* facePtIds;
-        ug->GetFaceStream(cellId, nfaces, facePtIds);
-        for (vtkIdType id = 0; id < nfaces; ++id)
+        newPtIds->Reset();
+        if (ug && dataSet->GetCellType(cellId) == VTK_POLYHEDRON)
         {
-          vtkIdType nPoints = facePtIds[0];
-          newPtIds->InsertNextId(nPoints);
-          for (vtkIdType j = 1; j <= nPoints; ++j)
+          vtkIdType nfaces;
+          const vtkIdType* facePtIds;
+          ug->GetFaceStream(cellId, nfaces, facePtIds);
+          for (vtkIdType id = 0; id < nfaces; ++id)
           {
-            newPtIds->InsertNextId(globalIndices[facePtIds[j] + ptOffset]);
+            vtkIdType nPoints = facePtIds[0];
+            newPtIds->InsertNextId(nPoints);
+            for (vtkIdType j = 1; j <= nPoints; ++j)
+            {
+              newPtIds->InsertNextId(globalIndices[facePtIds[j] + ptOffset]);
+            }
+            facePtIds += nPoints + 1;
           }
-          facePtIds += nPoints + 1;
+          output->InsertNextCell(VTK_POLYHEDRON, nfaces, newPtIds->GetPointer(0));
         }
-        output->InsertNextCell(VTK_POLYHEDRON, nfaces, newPtIds->GetPointer(0));
-      }
-      else
-      {
-        dataSet->GetCellPoints(cellId, ptIds);
-        for (vtkIdType id = 0; id < ptIds->GetNumberOfIds(); ++id)
+        else
         {
-          newPtIds->InsertId(id, globalIndices[ptIds->GetId(id) + ptOffset]);
+          dataSet->GetCellPoints(cellId, ptIds);
+          for (vtkIdType id = 0; id < ptIds->GetNumberOfIds(); ++id)
+          {
+            newPtIds->InsertId(id, globalIndices[ptIds->GetId(id) + ptOffset]);
+          }
+          output->InsertNextCell(dataSet->GetCellType(cellId), newPtIds);
         }
-        output->InsertNextCell(dataSet->GetCellType(cellId), newPtIds);
-      }
 
-      // Update progress
-      count++;
-      if (!(count % twentieth))
-      {
-        decimal += 0.05;
-        this->UpdateProgress(decimal);
-        abort = this->GetAbortExecute();
+        // Update progress
+        count++;
+        if (!(count % twentieth))
+        {
+          decimal += 0.05;
+          this->UpdateProgress(decimal);
+          abort = this->GetAbortExecute();
+        }
       }
     }
     ptOffset += dataSetNumPts;

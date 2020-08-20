@@ -29,17 +29,17 @@
 #define vtkTransformCoordinateSystems_h
 
 #include "vtkCoordinate.h" //to get the defines in vtkCoordinate
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 #include "vtkRenderingCoreModule.h" // For export macro
 
-class VTKRENDERINGCORE_EXPORT vtkTransformCoordinateSystems : public vtkPointSetAlgorithm
+class VTKRENDERINGCORE_EXPORT vtkTransformCoordinateSystems : public vtkPassInputTypeAlgorithm
 {
 public:
   //@{
   /**
    * Standard methods for type information and printing.
    */
-  vtkTypeMacro(vtkTransformCoordinateSystems, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkTransformCoordinateSystems, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 
@@ -97,6 +97,9 @@ protected:
   ~vtkTransformCoordinateSystems() override;
 
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   int InputCoordinateSystem;
   int OutputCoordinateSystem;

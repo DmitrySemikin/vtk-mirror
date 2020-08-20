@@ -108,7 +108,8 @@ vtkSmartPointer<vtkPointSet> TransformPointSet(int dataType, int outputPointsPre
 
   transformFilter->Update();
 
-  vtkSmartPointer<vtkPointSet> outputPointSet = transformFilter->GetOutput();
+  vtkSmartPointer<vtkPointSet> outputPointSet =
+    vtkPointSet::SafeDownCast(transformFilter->GetOutput());
   vtkSmartPointer<vtkPoints> points = outputPointSet->GetPoints();
 
   return outputPointSet;

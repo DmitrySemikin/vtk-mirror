@@ -66,8 +66,6 @@ protected:
   vtkDistributedPointCloudFilter();
   ~vtkDistributedPointCloudFilter() override;
 
-  int FillOutputPortInformation(int port, vtkInformation* info) override;
-
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**

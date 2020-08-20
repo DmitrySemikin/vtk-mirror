@@ -53,13 +53,6 @@ vtkDistributedPointCloudFilter::~vtkDistributedPointCloudFilter()
 }
 
 //------------------------------------------------------------------------------
-int vtkDistributedPointCloudFilter::FillOutputPortInformation(int, vtkInformation* info)
-{
-  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPolyData");
-  return 1;
-}
-
-//------------------------------------------------------------------------------
 int vtkDistributedPointCloudFilter::RequestData(
   vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

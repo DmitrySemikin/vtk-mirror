@@ -738,8 +738,6 @@ void vtkExecutive::CopyDefaultInformation(vtkInformation* request, int direction
 int vtkExecutive::CallAlgorithm(vtkInformation* request, int direction,
   vtkInformationVector** inInfo, vtkInformationVector* outInfo)
 {
-  std::cout << "vtkExecutive::CallAlgorithm" << std::endl;
-  std::cout << "inInfo " << inInfo << std::endl;
   // Copy default information in the direction of information flow.
   this->CopyDefaultInformation(request, direction, inInfo, outInfo);
 

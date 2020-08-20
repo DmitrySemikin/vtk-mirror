@@ -774,7 +774,7 @@ public:
         transformFilter->SetInputConnection(append->GetOutputPort());
         // make sure all points have the same Z
         transformFilter->Update();
-        vtkPointSet* xyPoly = transformFilter->GetOutput();
+        vtkPointSet* xyPoly = vtkPointSet::SafeDownCast(transformFilter->GetOutput());
         vtkPoints* xyPoints = xyPoly->GetPoints();
         double p[3];
         xyPoints->GetPoint(0, p);

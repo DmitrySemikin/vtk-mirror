@@ -153,7 +153,7 @@ vtkTypeBool vtkExtractDataOverTime::ProcessRequest(
 //------------------------------------------------------------------------------
 int vtkExtractDataOverTime::AllocateOutputData(vtkPointSet* input, vtkPointSet* output)
 {
-  // by default vtkPointSetAlgorithm::RequestDataObject already
+  // by default vtkPassInputTypeAlgorithm::RequestDataObject already
   // created an output of the same type as the input
   if (!output)
   {

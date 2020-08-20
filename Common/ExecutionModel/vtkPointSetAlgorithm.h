@@ -56,6 +56,11 @@ public:
   //@}
 
   /**
+   * Get the output as vtkPointSet.
+   */
+  vtkPointSet* GetPointSetOutput();
+
+  /**
    * Get the output as vtkPolyData.
    */
   vtkPolyData* GetPolyDataOutput();

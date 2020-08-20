@@ -24,19 +24,20 @@
 #define vtkProjectSphereFilter_h
 
 #include "vtkFiltersGeometryModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkCell;
 class vtkCellArray;
 class vtkDataSetAttributes;
 class vtkIdList;
 class vtkIncrementalPointLocator;
+class vtkPointSet;
 class vtkUnstructuredGrid;
 
-class VTKFILTERSGEOMETRY_EXPORT vtkProjectSphereFilter : public vtkPointSetAlgorithm
+class VTKFILTERSGEOMETRY_EXPORT vtkProjectSphereFilter : public vtkPassInputTypeAlgorithm
 {
 public:
-  vtkTypeMacro(vtkProjectSphereFilter, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkProjectSphereFilter, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkProjectSphereFilter* New();

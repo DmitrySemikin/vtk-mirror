@@ -29,13 +29,15 @@
 #define vtkExtractDataOverTime_h
 
 #include "vtkFiltersExtractionModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
-class VTKFILTERSEXTRACTION_EXPORT vtkExtractDataOverTime : public vtkPointSetAlgorithm
+class vtkPointSet;
+
+class VTKFILTERSEXTRACTION_EXPORT vtkExtractDataOverTime : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkExtractDataOverTime* New();
-  vtkTypeMacro(vtkExtractDataOverTime, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkExtractDataOverTime, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -58,7 +60,7 @@ protected:
   ~vtkExtractDataOverTime() override = default;
 
   int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector);
+    vtkInformationVector* outputVector) override;
 
   vtkTypeBool ProcessRequest(
     vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;

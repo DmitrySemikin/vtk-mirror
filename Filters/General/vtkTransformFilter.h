@@ -39,15 +39,15 @@
 #define vtkTransformFilter_h
 
 #include "vtkFiltersGeneralModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkAbstractTransform;
 
-class VTKFILTERSGENERAL_EXPORT vtkTransformFilter : public vtkPointSetAlgorithm
+class VTKFILTERSGENERAL_EXPORT vtkTransformFilter : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkTransformFilter* New();
-  vtkTypeMacro(vtkTransformFilter, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkTransformFilter, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**

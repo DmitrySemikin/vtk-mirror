@@ -171,6 +171,7 @@ vtkStandardNewMacro(vtkOpenGLGlyph3DMapper);
 // initial sources are defined.
 vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapper()
 {
+  std::cout << "CONSTRUCTING vtkOpenGLGlyph3DMapper " << this << std::endl;
   this->GlyphValues = new vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperArray();
   this->ColorMapper = vtkOpenGLGlyph3DMappervtkColorMapper::New();
 }
@@ -234,6 +235,7 @@ void vtkOpenGLGlyph3DMapper::SetupColorMapper()
 // as each frame is rendered.
 void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor)
 {
+  std::cout << "vtkOpenGLGlyphMapper::Render" << std::endl;
   vtkOpenGLClearErrorMacro();
 
   this->SetupColorMapper();
@@ -246,6 +248,7 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor)
   }
 
   vtkDataObject* inputDO = this->GetInputDataObject(0, 0);
+  std::cout << "HERE inputDO " << inputDO->GetClassName() << std::endl;
 
   // Check input for consistency
   //
@@ -272,6 +275,7 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor)
 
   // Check that source configuration is sane:
   vtkDataObjectTree* sourceTableTree = this->GetSourceTableTree();
+  std::cout << "sourceTableTree " << sourceTableTree << std::endl;
   int numSourceDataSets = this->GetNumberOfInputConnections(1);
   if (this->UseSourceTableTree)
   {
@@ -324,6 +328,7 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor)
   vtkCompositeDataSet* cd = vtkCompositeDataSet::SafeDownCast(inputDO);
   if (ds)
   {
+    std::cout << "RENDERING " << ds->GetClassName() << std::endl;
     this->Render(ren, actor, ds);
   }
   else if (cd)
@@ -391,6 +396,8 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor)
 void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor, vtkDataSet* dataset)
 {
   vtkIdType numPts = dataset->GetNumberOfPoints();
+  std::cout << "numPts " << numPts << std::endl;
+  std::cout << "ds " << dataset->GetClassName() << std::endl;
   if (numPts < 1)
   {
     vtkDebugMacro(<< "No points to glyph!");
@@ -561,6 +568,9 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor, vtkDataSe
 
     vtkDataObject* dObj = entry->DataObject;
     vtkPolyData* pd = vtkPolyData::SafeDownCast(dObj);
+    std::cout << "dObj " << dObj << " pd " << pd << std::endl;
+    std::cout << "points " << pd->GetNumberOfPoints() << ", cell " << pd->GetNumberOfCells()
+              << std::endl;
     vtkCompositeDataSet* cds = pd ? nullptr : vtkCompositeDataSet::SafeDownCast(dObj);
 
     vtkCompositeDataIterator* cdsIter = nullptr;

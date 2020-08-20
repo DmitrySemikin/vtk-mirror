@@ -376,7 +376,6 @@ protected:
 
   // Pipeline support
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
   vtkPointSmoothingFilter(const vtkPointSmoothingFilter&) = delete;

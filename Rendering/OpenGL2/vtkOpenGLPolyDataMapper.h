@@ -44,6 +44,7 @@ class vtkOpenGLBufferObject;
 class vtkOpenGLVertexBufferObject;
 class vtkOpenGLVertexBufferObjectGroup;
 class vtkPoints;
+class vtkPolyData;
 class vtkTexture;
 class vtkTextureObject;
 class vtkTransform;

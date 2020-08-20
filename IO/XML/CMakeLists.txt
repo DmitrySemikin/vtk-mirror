@@ -33,6 +33,8 @@ set(classes
   vtkXMLPartitionedDataSetCollectionWriter
   vtkXMLPartitionedDataSetReader
   vtkXMLPartitionedDataSetWriter
+  vtkXMLPointSetReader
+  vtkXMLPointSetWriter
   vtkXMLPolyDataReader
   vtkXMLPolyDataWriter
   vtkXMLReader

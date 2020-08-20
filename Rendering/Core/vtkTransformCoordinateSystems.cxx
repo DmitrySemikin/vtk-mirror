@@ -53,6 +53,23 @@ void vtkTransformCoordinateSystems::SetViewport(vtkViewport* viewport)
 }
 
 //------------------------------------------------------------------------------
+int vtkTransformCoordinateSystems::FillOutputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  // now add our info
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
+//------------------------------------------------------------------------------
+int vtkTransformCoordinateSystems::FillInputPortInformation(
+  int vtkNotUsed(port), vtkInformation* info)
+{
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
+  return 1;
+}
+
+//------------------------------------------------------------------------------
 int vtkTransformCoordinateSystems::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

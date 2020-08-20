@@ -65,9 +65,10 @@
 #define vtkHausdorffDistancePointSetFilter_h
 
 #include "vtkFiltersModelingModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
-class VTKFILTERSMODELING_EXPORT vtkHausdorffDistancePointSetFilter : public vtkPointSetAlgorithm
+class VTKFILTERSMODELING_EXPORT vtkHausdorffDistancePointSetFilter
+  : public vtkPassInputTypeAlgorithm
 {
 public:
   //@{
@@ -75,7 +76,7 @@ public:
    * Standard methods for construction, type and printing.
    */
   static vtkHausdorffDistancePointSetFilter* New();
-  vtkTypeMacro(vtkHausdorffDistancePointSetFilter, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkHausdorffDistancePointSetFilter, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
   //@}
 

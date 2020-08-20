@@ -72,15 +72,15 @@
 #define vtkWeightedTransformFilter_h
 
 #include "vtkFiltersHybridModule.h" // For export macro
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 
 class vtkAbstractTransform;
 
-class VTKFILTERSHYBRID_EXPORT vtkWeightedTransformFilter : public vtkPointSetAlgorithm
+class VTKFILTERSHYBRID_EXPORT vtkWeightedTransformFilter : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkWeightedTransformFilter* New();
-  vtkTypeMacro(vtkWeightedTransformFilter, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkWeightedTransformFilter, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**

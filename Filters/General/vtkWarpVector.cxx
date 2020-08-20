@@ -75,10 +75,13 @@ int vtkWarpVector::RequestDataObject(
     }
     return 1;
   }
-  else
+  vtkPointSet* output = vtkPointSet::GetData(outputVector);
+  if (!output)
   {
-    return this->Superclass::RequestDataObject(request, inputVector, outputVector);
+    vtkNew<vtkPointSet> newOutput;
+    outputVector->GetInformationObject(0)->Set(vtkDataObject::DATA_OBJECT(), newOutput);
   }
+  return 1;
 }
 
 //------------------------------------------------------------------------------

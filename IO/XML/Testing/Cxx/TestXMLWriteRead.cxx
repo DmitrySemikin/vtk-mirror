@@ -12,12 +12,12 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkPointSource.h"
-#include "vtkXMLPolyDataReader.h"
-#include "vtkXMLPolyDataWriter.h"
-
+#include "vtkPointSet.h"
 #include "vtkPointSource.h"
 #include "vtkPoints.h"
+#include "vtkXMLDataSetWriter.h"
+#include "vtkXMLPointSetReader.h"
+#include "vtkXMLPointSetWriter.h"
 
 #include "vtkTestUtilities.h"
 #include <string>
@@ -73,14 +73,14 @@ int TestConvertType(const std::string& type, const std::string& fileName)
   std::cout << "Write to " << fileName << std::endl;
 
   // write the polydata
-  vtkSmartPointer<vtkXMLDataSetWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  vtkSmartPointer<vtkXMLPointSetWriter> writer = vtkSmartPointer<vtkXMLPointSetWriter>::New();
   writer->SetInputData(source->GetOutput());
   writer->SetFileName(fileName.c_str());
   writer->SetDataModeToAscii();
   writer->Write();
 
   // read back the polydata
-  vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+  vtkSmartPointer<vtkXMLPointSetReader> reader = vtkSmartPointer<vtkXMLPointSetReader>::New();
   reader->SetFileName(fileName.c_str());
   reader->Update();
 

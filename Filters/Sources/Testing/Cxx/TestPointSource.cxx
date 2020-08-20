@@ -14,6 +14,7 @@
 =========================================================================*/
 
 #include <vtkMinimalStandardRandomSequence.h>
+#include <vtkPointSet.h>
 #include <vtkPointSource.h>
 #include <vtkSmartPointer.h>
 
@@ -43,7 +44,7 @@ int TestPointSource(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
 
   pointSource->Update();
 
-  vtkSmartPointer<vtkPolyData> polyData = pointSource->GetOutput();
+  vtkSmartPointer<vtkPointSet> polyData = pointSource->GetOutput();
   vtkSmartPointer<vtkPoints> points = polyData->GetPoints();
 
   if (points->GetDataType() != VTK_FLOAT)

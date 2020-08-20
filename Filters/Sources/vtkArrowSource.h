@@ -95,6 +95,8 @@ protected:
   int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
+  int FillInputPortInformation(int port, vtkInformation* info) override;
+
   int TipResolution;
   double TipLength;
   double TipRadius;

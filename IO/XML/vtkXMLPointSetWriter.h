@@ -64,15 +64,7 @@ protected:
   void AllocatePositionArrays() override;
   void DeletePositionArrays() override;
 
-  void WriteInlinePieceAttributes() override;
-  void WriteInlinePiece(vtkIndent indent) override;
-
-  void WriteAppendedPieceAttributes(int index) override;
-  void WriteAppendedPiece(int index, vtkIndent indent) override;
-  void WriteAppendedPieceData(int index) override;
-
   vtkIdType GetNumberOfInputCells() override;
-  void CalculateSuperclassFraction(float* fractions);
 
   // Positions of attributes for each piece.
   unsigned long* NumberOfVertsPositions;

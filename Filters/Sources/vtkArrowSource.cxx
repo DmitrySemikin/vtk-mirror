@@ -39,11 +39,17 @@ vtkArrowSource::vtkArrowSource()
   this->SetNumberOfInputPorts(0);
 }
 
+int vtkArrowSource::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
+{
+  info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkPointSet");
+  return 1;
+}
+
 int vtkArrowSource::RequestInformation(
   vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   outputVector->GetInformationObject(0)->Set(CAN_HANDLE_PIECE_REQUEST(), 1);
-  return Superclass::RequestInformation(request, inputVector, outputVector);
+  return 1;
 }
 
 int vtkArrowSource::RequestData(vtkInformation* vtkNotUsed(request),
@@ -106,7 +112,9 @@ int vtkArrowSource::RequestData(vtkInformation* vtkNotUsed(request),
     }
     else
     {
+      std::cout << "bef " << std::endl;
       append->Update();
+      std::cout << "aft " << std::endl;
       output->ShallowCopy(append->GetOutput());
     }
   }

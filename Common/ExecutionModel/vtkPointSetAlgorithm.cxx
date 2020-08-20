@@ -47,6 +47,13 @@ vtkPointSet* vtkPointSetAlgorithm::GetOutput(int port)
 }
 
 //------------------------------------------------------------------------------
+// Get the output as vtkPointSetData.
+vtkPointSet* vtkPointSetAlgorithm::GetPointSetOutput()
+{
+  return vtkPointSet::SafeDownCast(this->GetOutput());
+}
+
+//------------------------------------------------------------------------------
 // Get the output as vtkPolyData.
 vtkPolyData* vtkPointSetAlgorithm::GetPolyDataOutput()
 {

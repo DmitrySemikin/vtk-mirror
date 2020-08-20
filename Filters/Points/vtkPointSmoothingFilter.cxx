@@ -1351,13 +1351,6 @@ int vtkPointSmoothingFilter::RequestData(vtkInformation* vtkNotUsed(request),
 }
 
 //------------------------------------------------------------------------------
-int vtkPointSmoothingFilter::FillInputPortInformation(int, vtkInformation* info)
-{
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
-  return 1;
-}
-
-//------------------------------------------------------------------------------
 void vtkPointSmoothingFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);

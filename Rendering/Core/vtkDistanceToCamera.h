@@ -32,16 +32,16 @@
 #ifndef vtkDistanceToCamera_h
 #define vtkDistanceToCamera_h
 
-#include "vtkPointSetAlgorithm.h"
+#include "vtkPassInputTypeAlgorithm.h"
 #include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkRenderer;
 
-class VTKRENDERINGCORE_EXPORT vtkDistanceToCamera : public vtkPointSetAlgorithm
+class VTKRENDERINGCORE_EXPORT vtkDistanceToCamera : public vtkPassInputTypeAlgorithm
 {
 public:
   static vtkDistanceToCamera* New();
-  vtkTypeMacro(vtkDistanceToCamera, vtkPointSetAlgorithm);
+  vtkTypeMacro(vtkDistanceToCamera, vtkPassInputTypeAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -89,6 +89,9 @@ protected:
   ~vtkDistanceToCamera() override;
 
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+
+  int FillOutputPortInformation(int port, vtkInformation* info) override;
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
   vtkRenderer* Renderer;
   double ScreenSize;
