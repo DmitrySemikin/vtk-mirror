@@ -353,9 +353,8 @@ int vtkExtractSelectedFrustum::RequestData(vtkInformation* vtkNotUsed(request),
     {
       pointInArray->SetValue(i, flag);
     }
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outputPD->AddArray(pointInArray);
-    outputPD->SetScalars(pointInArray);
 
     cellInArray->SetNumberOfComponents(1);
     cellInArray->SetNumberOfTuples(numCells);
@@ -363,9 +362,8 @@ int vtkExtractSelectedFrustum::RequestData(vtkInformation* vtkNotUsed(request),
     {
       cellInArray->SetValue(i, flag);
     }
-    cellInArray->SetName("vtkInsidedness");
+    cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outputCD->AddArray(cellInArray);
-    outputCD->SetScalars(cellInArray);
   }
   else
   {

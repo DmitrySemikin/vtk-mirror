@@ -238,14 +238,12 @@ int vtkExtractSelectedLocations::ExtractCells(
   if (passThrough)
   {
     output->ShallowCopy(input);
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkPointData* outPD = output->GetPointData();
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
-    cellInArray->SetName("vtkInsidedness");
+    cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkCellData* outCD = output->GetCellData();
     outCD->AddArray(cellInArray);
-    outCD->SetScalars(cellInArray);
   }
 
   // Reverse the "in" flag
@@ -403,16 +401,14 @@ int vtkExtractSelectedLocations::ExtractPoints(
   if (passThrough)
   {
     output->ShallowCopy(input);
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkPointData* outPD = output->GetPointData();
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
     if (containingCells)
     {
-      cellInArray->SetName("vtkInsidedness");
+      cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
       vtkCellData* outCD = output->GetCellData();
       outCD->AddArray(cellInArray);
-      outCD->SetScalars(cellInArray);
     }
   }
 

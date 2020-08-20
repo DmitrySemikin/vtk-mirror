@@ -24,8 +24,11 @@
 
 //------------------------------------------------------------------------------
 vtkExtractSelectionBase::vtkExtractSelectionBase()
+  : PreserveTopology(0)
+  , TopologyFilterInputArrayName(nullptr)
+  , TopologyFilterOutputArrayName(nullptr)
 {
-  this->PreserveTopology = 0;
+  this->SetTopologyFilterOutputArrayName("vtkInsidedness");
   this->SetNumberOfInputPorts(2);
 }
 
@@ -120,5 +123,9 @@ int vtkExtractSelectionBase::RequestDataObject(
 void vtkExtractSelectionBase::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "PreserveTopology: " << this->PreserveTopology << endl;
+  os << indent << "PreserveTopology: " << (this->PreserveTopology ? "On\n" : "Off\n");
+  os << indent << "TopologyFilterInputArrayName: " << this->GetTopologyFilterInputArrayName()
+     << endl;
+  os << indent << "TopologyFilterOutputArrayName: " << this->GetTopologyFilterOutputArrayName()
+     << endl;
 }

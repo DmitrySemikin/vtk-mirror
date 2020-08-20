@@ -18,6 +18,7 @@ set(classes
   vtkExtractRectilinearGrid
   vtkExtractSelectedArraysOverTime
   vtkExtractSelectedBlock
+  vtkExtractSelectedFastIds
   vtkExtractSelectedIds
   vtkExtractSelectedLocations
   vtkExtractSelectedPolyDataIds
@@ -36,6 +37,9 @@ set(classes
   vtkProbeSelectedLocations
   vtkSelector
   vtkValueSelector)
+  
+set(private_headers
+  vtkExtractSelectedIdUtils)
 
 vtk_module_add_module(VTK::FiltersExtraction
   CLASSES ${classes})

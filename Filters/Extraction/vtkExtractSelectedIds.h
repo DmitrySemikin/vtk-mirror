@@ -25,7 +25,7 @@
  * array named in the GLOBALIDS DataSetAttribute, and arbitrary array, or the
  * position (tuple id or number) within the cell or point array.
  * @sa
- * vtkSelection vtkExtractSelection
+ * vtkSelection vtkExtractSelection vtkExtractSelectedFastIds
  */
 
 #ifndef vtkExtractSelectedIds_h
@@ -54,7 +54,7 @@ protected:
   // Usual data generation method
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int ExtractCells(vtkSelectionNode* sel, vtkDataSet* input, vtkDataSet* output);
+  virtual int ExtractCells(vtkSelectionNode* sel, vtkDataSet* input, vtkDataSet* output);
   int ExtractPoints(vtkSelectionNode* sel, vtkDataSet* input, vtkDataSet* output);
 
 private:
