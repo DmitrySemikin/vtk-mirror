@@ -46,7 +46,7 @@ int vtkArrowSource::FillInputPortInformation(int vtkNotUsed(port), vtkInformatio
 }
 
 int vtkArrowSource::RequestInformation(
-  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+  vtkInformation*, vtkInformationVector**, vtkInformationVector* outputVector)
 {
   outputVector->GetInformationObject(0)->Set(CAN_HANDLE_PIECE_REQUEST(), 1);
   return 1;

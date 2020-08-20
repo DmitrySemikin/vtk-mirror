@@ -24,8 +24,8 @@
 #include "vtkOutlineFilter.h"
 #include "vtkPLagrangianParticleTracker.h"
 #include "vtkPointData.h"
+#include "vtkPointSet"
 #include "vtkPointSource.h"
-#include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRTAnalyticSource.h"
 #include "vtkRegressionTestImage.h"
@@ -70,7 +70,7 @@ void MainPLagrangianParticleTracker(vtkMultiProcessController* controller, void*
   seeds->SetNumberOfPoints(10);
   seeds->SetRadius(4);
   seeds->Update();
-  vtkPolyData* seedPD = seeds->GetOutput();
+  vtkPointSet* seedPD = seeds->GetOutput();
   vtkPointData* seedData = seedPD->GetPointData();
 
   vtkNew<vtkDoubleArray> partVel;

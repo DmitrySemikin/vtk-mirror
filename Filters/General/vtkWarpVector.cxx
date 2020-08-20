@@ -60,7 +60,7 @@ int vtkWarpVector::FillInputPortInformation(int vtkNotUsed(port), vtkInformation
 
 //------------------------------------------------------------------------------
 int vtkWarpVector::RequestDataObject(
-  vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
+  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkImageData* inImage = vtkImageData::GetData(inputVector[0]);
   vtkRectilinearGrid* inRect = vtkRectilinearGrid::GetData(inputVector[0]);
