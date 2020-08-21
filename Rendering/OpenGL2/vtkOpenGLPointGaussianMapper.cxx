@@ -231,7 +231,7 @@ bool vtkOpenGLPointGaussianMapperHelper::GetNeedToRebuildShaders(
   // light complexity changed
   if (cellBO.Program == nullptr || cellBO.ShaderSourceTime < this->GetMTime() ||
     cellBO.ShaderSourceTime < actor->GetMTime() ||
-    cellBO.ShaderSourceTime < this->CurrentInput->GetMTime() ||
+    cellBO.ShaderSourceTime < this->GetInputAsDataSet()->GetMTime() ||
     cellBO.ShaderSourceTime < this->SelectionStateChanged ||
     cellBO.ShaderSourceTime < renderPassMTime)
   {
@@ -376,7 +376,7 @@ void vtkOpenGLPointGaussianMapperHelperColors(vtkUnsignedCharArray* outColors, v
   unsigned char* vPtr = static_cast<unsigned char*>(outColors->GetVoidPointer(0));
 
   // iterate over cells or not
-  if (verts->GetNumberOfCells())
+  if (verts && verts->GetNumberOfCells())
   {
     const vtkIdType* indices(nullptr);
     vtkIdType npts(0);
@@ -436,7 +436,7 @@ void vtkOpenGLPointGaussianMapperHelperSizes(vtkFloatArray* scales, PointDataTyp
   float* it = static_cast<float*>(scales->GetVoidPointer(0));
 
   // iterate over cells or not
-  if (verts->GetNumberOfCells())
+  if (verts && verts->GetNumberOfCells())
   {
     const vtkIdType* indices(nullptr);
     vtkIdType npts(0);
@@ -478,7 +478,7 @@ bool vtkOpenGLPointGaussianMapperHelper::GetNeedToRebuildBufferObjects(
   vtkRenderer* vtkNotUsed(ren), vtkActor* act)
 {
   if (this->VBOBuildTime < this->GetMTime() || this->VBOBuildTime < act->GetMTime() ||
-    this->VBOBuildTime < this->CurrentInput->GetMTime() ||
+    this->VBOBuildTime < this->GetInputAsDataSet()->GetMTime() ||
     this->VBOBuildTime < this->Owner->GetMTime() ||
     (this->Owner->GetScalarOpacityFunction() &&
       this->VBOBuildTime < this->Owner->GetScalarOpacityFunction()->GetMTime()) ||
@@ -495,8 +495,10 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
   vtkRenderer* ren, vtkActor* vtkNotUsed(act))
 {
   vtkPolyData* poly = this->CurrentInput;
+  vtkPointSet* pointset =
+    !poly ? vtkPointSet::SafeDownCast(this->GetInputAsDataSet()) : vtkPointSet::SafeDownCast(poly);
 
-  if (poly == nullptr)
+  if (poly == nullptr && pointset == nullptr)
   {
     return;
   }
@@ -505,7 +507,7 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
   this->TriangleScale = this->Owner->GetTriangleScale();
 
   bool hasScaleArray = this->Owner->GetScaleArray() != nullptr &&
-    poly->GetPointData()->HasArray(this->Owner->GetScaleArray());
+    pointset->GetPointData()->HasArray(this->Owner->GetScaleArray());
 
   if (this->Owner->GetScaleFactor() == 0.0)
   {
@@ -519,7 +521,7 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
   // if we have an opacity array then get it and if we have
   // a ScalarOpacityFunction map the array through it
   bool hasOpacityArray = this->Owner->GetOpacityArray() != nullptr &&
-    poly->GetPointData()->HasArray(this->Owner->GetOpacityArray());
+    pointset->GetPointData()->HasArray(this->Owner->GetOpacityArray());
 
   // For vertex coloring, this sets this->Colors as side effect.
   // For texture map coloring, this sets ColorCoordinates
@@ -529,14 +531,14 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
   // then the scalars do not have to be regenerted.
   this->MapScalars(1.0);
 
-  int splatCount = poly->GetPoints()->GetNumberOfPoints();
-  if (poly->GetVerts()->GetNumberOfCells())
+  int splatCount = pointset->GetPoints()->GetNumberOfPoints();
+  if (poly && poly->GetVerts()->GetNumberOfCells())
   {
     splatCount = poly->GetVerts()->GetNumberOfConnectivityIds();
   }
 
   // need to build points?
-  if (poly->GetVerts()->GetNumberOfCells())
+  if (poly && poly->GetVerts()->GetNumberOfCells())
   {
     vtkFloatArray* pts = vtkFloatArray::New();
     pts->SetNumberOfComponents(3);
@@ -567,7 +569,7 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
   }
   else // just pass the points
   {
-    this->VBOs->CacheDataArray("vertexMC", poly->GetPoints()->GetData(), ren, VTK_FLOAT);
+    this->VBOs->CacheDataArray("vertexMC", pointset->GetPoints()->GetData(), ren, VTK_FLOAT);
   }
 
   if (!this->UsingPoints)
@@ -578,19 +580,19 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
 
     if (hasScaleArray)
     {
-      vtkDataArray* sizes = poly->GetPointData()->GetArray(this->Owner->GetScaleArray());
+      vtkDataArray* sizes = pointset->GetPointData()->GetArray(this->Owner->GetScaleArray());
       switch (sizes->GetDataType())
       {
         vtkTemplateMacro(vtkOpenGLPointGaussianMapperHelperSizes(offsets,
           static_cast<VTK_TT*>(sizes->GetVoidPointer(0)), sizes->GetNumberOfComponents(),
-          this->Owner->GetScaleArrayComponent(), poly->GetPoints()->GetNumberOfPoints(), this,
-          poly->GetVerts()));
+          this->Owner->GetScaleArrayComponent(), pointset->GetPoints()->GetNumberOfPoints(), this,
+          poly ? poly->GetVerts() : nullptr));
       }
     }
     else
     {
       vtkOpenGLPointGaussianMapperHelperSizes(offsets, static_cast<float*>(nullptr), 0, 0,
-        poly->GetPoints()->GetNumberOfPoints(), this, poly->GetVerts());
+        pointset->GetPoints()->GetNumberOfPoints(), this, poly ? poly->GetVerts() : nullptr);
     }
     this->VBOs->CacheDataArray("radiusMC", offsets, ren, VTK_FLOAT);
     offsets->Delete();
@@ -606,12 +608,12 @@ void vtkOpenGLPointGaussianMapperHelper::BuildBufferObjects(
     clrs->SetNumberOfComponents(4);
     clrs->SetNumberOfTuples(splatCount);
 
-    vtkOpenGLPointGaussianMapperHelperColors(clrs, poly->GetPoints()->GetNumberOfPoints(),
+    vtkOpenGLPointGaussianMapperHelperColors(clrs, pointset->GetPoints()->GetNumberOfPoints(),
       this->Colors ? (unsigned char*)this->Colors->GetVoidPointer(0) : (unsigned char*)nullptr,
       this->Colors ? this->Colors->GetNumberOfComponents() : 0,
-      hasOpacityArray ? poly->GetPointData()->GetArray(this->Owner->GetOpacityArray())
+      hasOpacityArray ? pointset->GetPointData()->GetArray(this->Owner->GetOpacityArray())
                       : (vtkDataArray*)nullptr,
-      this->Owner->GetOpacityArrayComponent(), this, poly->GetVerts());
+      this->Owner->GetOpacityArrayComponent(), this, poly ? poly->GetVerts() : nullptr);
     this->VBOs->CacheDataArray("scalarColor", clrs, ren, VTK_UNSIGNED_CHAR);
     clrs->Delete();
   }
@@ -811,28 +813,28 @@ void vtkOpenGLPointGaussianMapper::Render(vtkRenderer* ren, vtkActor* actor)
       {
         unsigned int flatIndex = iter->GetCurrentFlatIndex();
         vtkDataObject* dso = iter->GetCurrentDataObject();
-        vtkPolyData* pd = vtkPolyData::SafeDownCast(dso);
+        vtkPointSet* ps = vtkPointSet::SafeDownCast(dso);
 
-        if (!pd || !pd->GetPoints())
+        if (!ps || !ps->GetPoints())
         {
           continue;
         }
 
         vtkOpenGLPointGaussianMapperHelper* helper = this->CreateHelper();
         this->CopyMapperValuesToHelper(helper);
-        helper->SetInputData(pd);
+        helper->SetInputDataObject(ps);
         helper->FlatIndex = flatIndex;
         this->Helpers.push_back(helper);
       }
     }
     else
     {
-      vtkPolyData* pd = vtkPolyData::SafeDownCast(this->GetInputDataObject(0, 0));
-      if (pd && pd->GetPoints())
+      vtkPointSet* ps = vtkPointSet::SafeDownCast(this->GetInputDataObject(0, 0));
+      if (ps && ps->GetPoints())
       {
         vtkOpenGLPointGaussianMapperHelper* helper = this->CreateHelper();
         this->CopyMapperValuesToHelper(helper);
-        helper->SetInputData(pd);
+        helper->SetInputDataObject(ps);
         this->Helpers.push_back(helper);
       }
     }
@@ -994,7 +996,7 @@ void vtkOpenGLPointGaussianMapper::BuildOpacityTable()
 int vtkOpenGLPointGaussianMapper::FillInputPortInformation(
   int vtkNotUsed(port), vtkInformation* info)
 {
-  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPolyData");
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
   info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkCompositeDataSet");
   return 1;
 }

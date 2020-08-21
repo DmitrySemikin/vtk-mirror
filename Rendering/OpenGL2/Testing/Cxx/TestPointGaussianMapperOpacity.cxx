@@ -145,10 +145,12 @@ int TestPointGaussianMapperOpacity(int argc, char* argv[])
     renderer->GetActiveCamera()->Elevation(1);
     renderWindow->Render();
   }
+
   timer->StopTimer();
   double elapsed = timer->GetElapsedTime();
 
-  int numPts = mapper->GetInput()->GetPoints()->GetNumberOfPoints();
+  int numPts =
+    vtkPointSet::SafeDownCast(mapper->GetInputAsDataSet())->GetPoints()->GetNumberOfPoints();
   cerr << "interactive render time: " << elapsed / numRenders << endl;
   cerr << "number of points: " << numPts << endl;
   cerr << "points per second: " << numPts * (numRenders / elapsed) << endl;
@@ -160,6 +162,7 @@ int TestPointGaussianMapperOpacity(int argc, char* argv[])
   //  renderer->GetActiveCamera()->Print(cerr);
 
   renderer->GetActiveCamera()->Zoom(10.0);
+
   renderWindow->Render();
 
   int retVal = vtkRegressionTestImage(renderWindow);

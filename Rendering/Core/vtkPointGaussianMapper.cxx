@@ -13,6 +13,7 @@
 =========================================================================*/
 #include "vtkPointGaussianMapper.h"
 
+#include "vtkInformation.h"
 #include "vtkObjectFactory.h"
 #include "vtkPiecewiseFunction.h"
 
@@ -68,4 +69,11 @@ void vtkPointGaussianMapper::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "OpacityTableSize: " << this->OpacityTableSize << "\n";
   os << indent << "ScaleTableSize: " << this->ScaleTableSize << "\n";
   os << indent << "TriangleScale: " << this->TriangleScale << "\n";
+}
+
+//------------------------------------------------------------------------------
+int vtkPointGaussianMapper::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
+{
+  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkPointSet");
+  return 1;
 }

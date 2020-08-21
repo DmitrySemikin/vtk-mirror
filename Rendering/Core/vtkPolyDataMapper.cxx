@@ -19,6 +19,7 @@
 #include "vtkInformationVector.h"
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
+#include "vtkPointSet.h"
 #include "vtkPolyData.h"
 #include "vtkRenderWindow.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
@@ -135,7 +136,7 @@ double* vtkPolyDataMapper::GetBounds()
 //------------------------------------------------------------------------------
 void vtkPolyDataMapper::ComputeBounds()
 {
-  vtkPolyData* input = this->GetInput();
+  vtkDataSet* input = this->GetInputAsDataSet();
   if (input)
   {
     input->GetBounds(this->Bounds);

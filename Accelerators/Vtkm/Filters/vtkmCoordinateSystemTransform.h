@@ -52,8 +52,6 @@ public:
   void SetCartesianToSpherical();
   void SetSphericalToCartesian();
 
-  int FillInputPortInformation(int port, vtkInformation* info) override;
-
 protected:
   vtkmCoordinateSystemTransform();
   ~vtkmCoordinateSystemTransform() override;
@@ -61,6 +59,8 @@ protected:
   int RequestDataObject(vtkInformation* request, vtkInformationVector** inputVector,
     vtkInformationVector* outputVector) override;
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+
+  int FillInputPortInformation(int port, vtkInformation* info) override;
 
 private:
   vtkmCoordinateSystemTransform(const vtkmCoordinateSystemTransform&) = delete;

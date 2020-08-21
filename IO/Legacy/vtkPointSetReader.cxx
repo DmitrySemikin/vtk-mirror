@@ -55,7 +55,7 @@ int vtkPointSetReader::ReadMeshSimple(const std::string& fname, vtkDataObject* d
 {
   vtkIdType numPts = 0;
   char line[256];
-  vtkIdType npts, size = 0, ncells;
+  vtkIdType npts;
   vtkPointSet* output = vtkPointSet::SafeDownCast(doOutput);
 
   vtkDebugMacro(<< "Reading vtk point data...");

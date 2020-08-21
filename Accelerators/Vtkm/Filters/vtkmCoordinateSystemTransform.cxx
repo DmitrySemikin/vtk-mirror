@@ -98,7 +98,7 @@ int vtkmCoordinateSystemTransform::RequestDataObject(
     }
     return 1;
   }
-  return Superclass::RequestData(request, inputVector, outputVector);
+  return Superclass::RequestDataObject(request, inputVector, outputVector);
 }
 
 //------------------------------------------------------------------------------

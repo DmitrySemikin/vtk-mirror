@@ -29,6 +29,7 @@
 #include "vtkRenderingCoreModule.h" // For export macro
 //#include "vtkTexture.h" // used to include texture unit enum.
 
+class vtkPointSet;
 class vtkPolyData;
 class vtkRenderer;
 class vtkRenderWindow;

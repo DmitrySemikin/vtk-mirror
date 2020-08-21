@@ -419,7 +419,7 @@ int vtkRandomAttributeGenerator::RequestData(vtkDataSet* input, vtkDataSet* outp
 
   if (numCells < 1)
   {
-    vtkDebugMacro(<< "No input!");
+    vtkDebugMacro(<< "No cells in input!");
     return 1;
   }
 

@@ -29,6 +29,7 @@
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderingCoreModule.h" // For export macro
 
+class vtkInformation;
 class vtkPiecewiseFunction;
 
 class VTKRENDERINGCORE_EXPORT vtkPointGaussianMapper : public vtkPolyDataMapper
@@ -172,6 +173,8 @@ public:
 protected:
   vtkPointGaussianMapper();
   ~vtkPointGaussianMapper() override;
+
+  int FillInputPortInformation(int, vtkInformation*) override;
 
   char* ScaleArray;
   int ScaleArrayComponent;
