@@ -1633,6 +1633,9 @@ vtkPlaneCutter::vtkPlaneCutter()
   this->GeneratePolygons = true;
   this->BuildTree = true;
   this->BuildHierarchy = true;
+  this->FilterTopology = 0;
+  this->TopologyFilterArrayName = nullptr;
+  this->SetTopologyFilterArrayName("vtkInsidedness");
 }
 
 //------------------------------------------------------------------------------
@@ -1733,7 +1736,10 @@ int vtkPlaneCutter::RequestData(vtkInformation* vtkNotUsed(request),
     {
       if (this->SphereTrees.empty())
       {
-        this->SphereTrees.push_back(vtkSmartPointer<vtkSphereTree>::New());
+        vtkSmartPointer<vtkSphereTree> sphereTree = vtkSmartPointer<vtkSphereTree>::New();
+        sphereTree->SetFilterTopology(this->GetFilterTopology());
+        sphereTree->SetTopologyFilterArrayName(this->GetTopologyFilterArrayName());
+        this->SphereTrees.push_back(sphereTree);
       }
       tree = this->SphereTrees[0];
     }

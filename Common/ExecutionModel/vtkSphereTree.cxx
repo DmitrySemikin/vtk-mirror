@@ -29,6 +29,7 @@
 #include "vtkPointData.h"
 #include "vtkSMPThreadLocal.h"
 #include "vtkSMPTools.h"
+#include "vtkSignedCharArray.h"
 #include "vtkSphere.h"
 #include "vtkStructuredGrid.h"
 #include "vtkUnstructuredGrid.h"
@@ -345,8 +346,16 @@ struct DataSetSpheres
 // Compute bounds for each cell in an unstructured grid
 struct UnstructuredSpheres : public DataSetSpheres
 {
-  UnstructuredSpheres(vtkUnstructuredGrid* grid, double* s)
+protected:
+  vtkTypeBool FilterTopology;
+  char* TopologyFilterArrayName;
+
+public:
+  UnstructuredSpheres(
+    vtkUnstructuredGrid* grid, double* s, vtkTypeBool filterTopology, char* topologyFilterArrayName)
     : DataSetSpheres(grid, s)
+    , FilterTopology(filterTopology)
+    , TopologyFilterArrayName(topologyFilterArrayName)
   {
   }
 
@@ -369,8 +378,23 @@ struct UnstructuredSpheres : public DataSetSpheres
     double& ymax = this->YMax.Local();
     double& zmax = this->ZMax.Local();
 
+    // Check for a filtering array if cells need to be removed
+    vtkCellData* inputCD = this->DataSet->GetCellData();
+    vtkSignedCharArray* includedCells =
+      (inputCD && this->FilterTopology && this->TopologyFilterArrayName != nullptr)
+      ? vtkArrayDownCast<vtkSignedCharArray>(inputCD->GetArray(this->TopologyFilterArrayName))
+      : nullptr;
+    vtkIdType numIncludedCells = includedCells ? includedCells->GetNumberOfValues() : 0;
+
     for (; cellId < endCellId; ++cellId, sphere += 4)
     {
+      // Filter out cells if filtering is enabled
+      if (includedCells &&
+        (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+      {
+        continue;
+      }
+
       grid->GetCellPoints(cellId, numCellPts, cellIds);
       numCellPts = (numCellPts < 40 ? numCellPts : 40);
       p = cellPts;
@@ -400,7 +424,8 @@ struct UnstructuredSpheres : public DataSetSpheres
   void Reduce() { DataSetSpheres::Reduce(); }
 
   static void Execute(vtkIdType numCells, vtkUnstructuredGrid* grid, double* s,
-    bool vtkNotUsed(computeBoundsAndRadius), double& aveRadius, double sphereBounds[6])
+    bool vtkNotUsed(computeBoundsAndRadius), double& aveRadius, double sphereBounds[6],
+    vtkTypeBool filterTopology, char* topologyFilterArrayName)
   {
     if (grid->GetNumberOfCells() > 0 && numCells <= grid->GetNumberOfCells())
     {
@@ -408,7 +433,7 @@ struct UnstructuredSpheres : public DataSetSpheres
       vtkNew<vtkIdList> dummy;
       grid->GetCellPoints(0, dummy);
 
-      UnstructuredSpheres spheres(grid, s);
+      UnstructuredSpheres spheres(grid, s, filterTopology, topologyFilterArrayName);
       vtkSMPTools::For(0, numCells, spheres);
       aveRadius = spheres.AverageRadius;
       spheres.GetBounds(sphereBounds);
@@ -1008,6 +1033,9 @@ vtkSphereTree::vtkSphereTree()
   this->Tree = nullptr;
   this->Hierarchy = nullptr;
   this->BuildHierarchy = true;
+  this->FilterTopology = 0;
+  this->TopologyFilterArrayName = nullptr;
+  this->SetTopologyFilterArrayName("vtkInsidedness");
   this->SphereTreeType = VTK_SPHERE_TREE_HIERARCHY_NONE;
   this->AverageRadius = 0.0;
   this->SphereBounds[0] = this->SphereBounds[1] = this->SphereBounds[2] = 0.0;
@@ -1097,7 +1125,8 @@ void vtkSphereTree::BuildTreeSpheres(vtkDataSet* input)
   else if (input->GetDataObjectType() == VTK_UNSTRUCTURED_GRID)
   {
     UnstructuredSpheres::Execute(numCells, vtkUnstructuredGrid::SafeDownCast(input), this->TreePtr,
-      this->BuildHierarchy, this->AverageRadius, this->SphereBounds);
+      this->BuildHierarchy, this->AverageRadius, this->SphereBounds, this->FilterTopology,
+      this->GetTopologyFilterArrayName());
   }
 
   else // default algorithm
@@ -1305,11 +1334,28 @@ void vtkSphereTree::BuildUnstructuredHierarchy(vtkDataSet* input, double* tree)
   vtkIdType *numSpheres = h->NumSpheres, *offsets = h->Offsets;
   vtkIdType gridSize = h->GridSize;
 
+  // Check for a filtering array if cells need to be removed
+  vtkCellData* inputCD = input->GetCellData();
+  vtkSignedCharArray* includedCells =
+    (inputCD != nullptr && this->FilterTopology && this->GetTopologyFilterArrayName() != nullptr)
+    ? vtkArrayDownCast<vtkSignedCharArray>(inputCD->GetArray(this->GetTopologyFilterArrayName()))
+    : nullptr;
+  vtkIdType numIncludedCells = includedCells ? includedCells->GetNumberOfValues() : 0;
+  vtkIdType numDefinedCells = 0;
+
   // Okay loop over all cell spheres and assign them to the grid cells.
   vtkIdType cellId, i, j, k, ii, idx, sliceOffset = static_cast<vtkIdType>(dims[0]) * dims[1];
   double* sphere = tree;
   for (cellId = 0; cellId < numCells; ++cellId, sphere += 4)
   {
+    // Filter out cells if filtering is enabled
+    if (includedCells &&
+      (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+    {
+      continue;
+    }
+    numDefinedCells++;
+
     i = static_cast<int>(dims[0] * (sphere[0] - bds[0]) / (bds[1] - bds[0]));
     j = static_cast<int>(dims[1] * (sphere[1] - bds[2]) / (bds[3] - bds[2]));
     k = static_cast<int>(dims[2] * (sphere[2] - bds[4]) / (bds[5] - bds[4]));
@@ -1327,11 +1373,18 @@ void vtkSphereTree::BuildUnstructuredHierarchy(vtkDataSet* input, double* tree)
     offsets[idx] = offsets[idx - 1] + numSpheres[idx - 1];
     maxNumSpheres = (numSpheres[idx] > maxNumSpheres ? numSpheres[idx] : maxNumSpheres);
   }
-  offsets[gridSize] = numCells;
+  offsets[gridSize] = numDefinedCells;
 
   // Now associate cells with appropriate grid buckets.
   for (cellId = 0; cellId < numCells; ++cellId)
   {
+    // Filter out cells if filtering is enabled
+    if (includedCells &&
+      (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+    {
+      continue;
+    }
+
     idx = cellLoc[cellId];
     *(cellMap + offsets[idx] + numSpheres[idx] - 1) = cellId;
     numSpheres[idx]--; // counting down towards offset

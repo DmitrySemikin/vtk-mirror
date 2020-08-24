@@ -163,6 +163,25 @@ public:
   vtkBooleanMacro(BuildHierarchy, bool);
   //@}
 
+  //@{
+  /**
+   * Should unstructured grids also filter out cells as specified by
+   * a 'vtkInsidedness' array? Default value is false(0).
+   */
+  vtkSetMacro(FilterTopology, vtkTypeBool);
+  vtkGetMacro(FilterTopology, vtkTypeBool);
+  vtkBooleanMacro(FilterTopology, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * Name for a 'vtkInsidedness' array used in topology filtering.
+   * Default value is "vtkInsidedness".
+   */
+  vtkSetStringMacro(TopologyFilterArrayName);
+  vtkGetStringMacro(TopologyFilterArrayName);
+  //@}
+
   /**
    * See vtkAlgorithm for details.
    */
@@ -179,6 +198,9 @@ protected:
   bool GeneratePolygons;
   bool BuildTree;
   bool BuildHierarchy;
+
+  vtkTypeBool FilterTopology;
+  char* TopologyFilterArrayName;
 
   // Helpers
   std::vector<vtkSmartPointer<vtkSphereTree>> SphereTrees;
