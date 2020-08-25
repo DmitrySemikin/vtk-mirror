@@ -131,7 +131,7 @@ public:
   //@{
   /**
    * Indicate whether to generate polygons instead of triangles when cutting
-   * structured and rectilinear grid.
+   * structured, rectilinear, and unstructured grid.
    * No effect with other kinds of inputs, enabled by default.
    */
   vtkSetMacro(GeneratePolygons, bool);

@@ -177,6 +177,16 @@ public:
   vtkGetMacro(OutputPointsPrecision, int);
   //@}
 
+  //@{
+  /**
+   * If this is enabled (by default), the output will be triangles
+   * otherwise, the output will be the intersection polygons
+   */
+  vtkSetMacro(GenerateTriangles, vtkTypeBool);
+  vtkGetMacro(GenerateTriangles, vtkTypeBool);
+  vtkBooleanMacro(GenerateTriangles, vtkTypeBool);
+  //@}
+
 protected:
   vtkClipPolyData(vtkImplicitFunction* cf = nullptr);
   ~vtkClipPolyData() override;
@@ -190,6 +200,7 @@ protected:
   vtkTypeBool GenerateClipScalars;
   vtkTypeBool GenerateClippedOutput;
   int OutputPointsPrecision;
+  vtkTypeBool GenerateTriangles;
 
 private:
   vtkClipPolyData(const vtkClipPolyData&) = delete;

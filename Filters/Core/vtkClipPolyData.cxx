@@ -19,6 +19,7 @@
 #include "vtkExecutive.h"
 #include "vtkFloatArray.h"
 #include "vtkGenericCell.h"
+#include "vtkIdListCollection.h"
 #include "vtkImplicitFunction.h"
 #include "vtkIncrementalPointLocator.h"
 #include "vtkInformation.h"
@@ -28,6 +29,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
+#include "vtkPolygonBuilder.h"
 #include "vtkTriangle.h"
 
 #include <cmath>
@@ -47,6 +49,7 @@ vtkClipPolyData::vtkClipPolyData(vtkImplicitFunction* cf)
   this->GenerateClipScalars = 0;
   this->GenerateClippedOutput = 0;
   this->OutputPointsPrecision = DEFAULT_PRECISION;
+  this->GenerateTriangles = 1;
 
   this->SetNumberOfOutputPorts(2);
 
@@ -210,7 +213,7 @@ int vtkClipPolyData::RequestData(vtkInformation* vtkNotUsed(request),
   {
     this->CreateDefaultLocator();
   }
-  this->Locator->InitPointInsertion(newPoints, input->GetBounds());
+  this->Locator->InitPointInsertion(newPoints, input->GetBounds(), numPts);
 
   if (!this->GenerateClipScalars && !input->GetPointData()->GetScalars())
   {
@@ -222,6 +225,20 @@ int vtkClipPolyData::RequestData(vtkInformation* vtkNotUsed(request),
   }
   outPD->InterpolateAllocate(inPD, estimatedSize, estimatedSize / 2);
   outCD->CopyAllocate(inCD, estimatedSize, estimatedSize / 2);
+
+  // If merging output, setup merging data structures
+  vtkNew<vtkCellArray> clippedCells;
+  vtkNew<vtkCellData> clippedCellData;
+  vtkPolygonBuilder polyBuilder;
+  vtkNew<vtkIdListCollection> polyCollection;
+  if (!this->GenerateTriangles)
+  {
+    const vtkIdType numberOfEstimatedClippedCells = 10;
+    const vtkIdType arrayExtensionSize = numberOfEstimatedClippedCells / 2;
+
+    clippedCells->Allocate(numberOfEstimatedClippedCells, arrayExtensionSize);
+    clippedCellData->CopyAllocate(outCD, numberOfEstimatedClippedCells, arrayExtensionSize);
+  }
 
   // If generating second output, setup clipped output
   if (this->GenerateClippedOutput)
@@ -277,8 +294,79 @@ int vtkClipPolyData::RequestData(vtkInformation* vtkNotUsed(request),
 
     } // switch
 
-    cell->Clip(this->Value, cellScalars, this->Locator, connList, inPD, outPD, inCD, cellId, outCD,
-      this->InsideOut);
+    if (this->GenerateTriangles)
+    {
+      cell->Clip(this->Value, cellScalars, this->Locator, connList, inPD, outPD, inCD, cellId,
+        outCD, this->InsideOut);
+    }
+    else
+    {
+      // Merging triangles to polygons based on similar functionality in vtkCutter and
+      // vtkContourHelper.
+
+      cell->Clip(this->Value, cellScalars, this->Locator, clippedCells, inPD, outPD, inCD, cellId,
+        clippedCellData, this->InsideOut);
+      // Using outPD instead of clippedPointData in the Clip() parameters to support node-based
+      // properties.
+
+      vtkIdType numberOfClippedPolygons = clippedCells->GetNumberOfCells();
+      bool shouldMergeTriangles = !this->GenerateTriangles && numberOfClippedPolygons > 1;
+      if (shouldMergeTriangles)
+      {
+        polyBuilder.Reset();
+        clippedCells->InitTraversal();
+
+        vtkIdType cellSize;
+        const vtkIdType* cellVerts = nullptr;
+        while (clippedCells->GetNextCell(cellSize, cellVerts))
+        {
+          if (cellSize == 3)
+          {
+            polyBuilder.InsertTriangle(cellVerts);
+          }
+          else if (cellSize == 4)
+          {
+            // ASSUMPTION: The result of clipping the polydata is composed of either triangles
+            // (handled above) or quads. Adding two triangles for the quad (simple triangulation)
+            vtkIdType quadTriangle1PointIndices[3]{ cellVerts[0], cellVerts[1], cellVerts[2] };
+            polyBuilder.InsertTriangle(quadTriangle1PointIndices);
+            vtkIdType quadTriangle2PointIndices[3]{ cellVerts[2], cellVerts[3], cellVerts[0] };
+            polyBuilder.InsertTriangle(quadTriangle2PointIndices);
+          }
+          else
+          {
+            vtkDebugMacro(<< "Unsupported number of polygon cells: " << cellSize);
+          }
+        }
+
+        polyBuilder.GetPolygons(polyCollection);
+        int nPolys = polyCollection->GetNumberOfItems();
+        for (int polyId = 0; polyId < nPolys; ++polyId)
+        {
+          vtkIdList* poly = polyCollection->GetItem(polyId);
+          if (poly->GetNumberOfIds() != 0)
+          {
+            vtkIdType outCellId = connList->InsertNextCell(poly);
+            outCD->CopyData(inCD, cellId,
+              outCellId + newVerts->GetNumberOfCells() + newLines->GetNumberOfCells());
+          }
+          poly->Delete();
+        }
+        polyCollection->RemoveAllItems();
+      }
+      else if (numberOfClippedPolygons == 1)
+      {
+        vtkIdType cellSize;
+        const vtkIdType* cellVerts = nullptr;
+        clippedCells->GetCell(0, cellSize, cellVerts);
+        vtkIdType outCellId = connList->InsertNextCell(cellSize, cellVerts);
+        outCD->CopyData(
+          inCD, cellId, outCellId + newVerts->GetNumberOfCells() + newLines->GetNumberOfCells());
+      }
+
+      clippedCells->Reset();
+      clippedCellData->Reset();
+    }
 
     if (this->GenerateClippedOutput)
     {

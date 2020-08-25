@@ -19,6 +19,7 @@
 #include "vtkCellData.h"
 #include "vtkCompositeDataSet.h"
 #include "vtkCompositeDataSetRange.h"
+#include "vtkContourHelper.h"
 #include "vtkDataObjectTreeRange.h"
 #include "vtkDataSet.h"
 #include "vtkDoubleArray.h"
@@ -32,6 +33,7 @@
 #include "vtkInformationIntegerVectorKey.h"
 #include "vtkInformationVector.h"
 #include "vtkMath.h"
+#include "vtkMergePoints.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkMultiPieceDataSet.h"
 #include "vtkNew.h"
@@ -63,7 +65,7 @@ namespace // begin anonymous namespace
 struct vtkLocalDataType
 {
   vtkPolyData* Output;
-  vtkNonMergingPointLocator* Locator;
+  vtkPointLocator* Locator;
   vtkCellData* NewVertsData;
   vtkCellData* NewLinesData;
   vtkCellData* NewPolysData;
@@ -196,9 +198,11 @@ struct CuttingFunctor
   vtkIdType NumSelected;
   bool Interpolate;
   bool GeneratePolygons;
+  vtkTypeBool MergePoints;
 
   CuttingFunctor(vtkDataSet* input, vtkDataObject* output, vtkPlane* plane, vtkSphereTree* tree,
-    double* origin, double* normal, bool interpolate, bool generatePolygons = false)
+    double* origin, double* normal, bool interpolate, bool generatePolygons = false,
+    vtkTypeBool mergePoints = false)
     : Input(input)
     , InPoints(nullptr)
     , Output(output)
@@ -209,6 +213,7 @@ struct CuttingFunctor
     , Normal(normal)
     , Interpolate(interpolate)
     , GeneratePolygons(generatePolygons)
+    , MergePoints(mergePoints)
   {
   }
 
@@ -300,7 +305,14 @@ struct CuttingFunctor
     localData.Output = vtkPolyData::New();
     vtkPolyData* output = localData.Output;
 
-    localData.Locator = vtkNonMergingPointLocator::New();
+    if (this->GeneratePolygons && this->MergePoints)
+    {
+      localData.Locator = vtkMergePoints::New();
+    }
+    else
+    {
+      localData.Locator = vtkNonMergingPointLocator::New();
+    }
     vtkPointLocator* locator = localData.Locator;
 
     vtkIdType numCells = this->Input->GetNumberOfCells();
@@ -379,8 +391,10 @@ struct CuttingFunctor
 struct PointSetFunctor : public CuttingFunctor
 {
   PointSetFunctor(vtkDataSet* input, vtkDataObject* output, vtkPlane* plane, vtkSphereTree* tree,
-    double* origin, double* normal, bool interpolate)
-    : CuttingFunctor(input, output, plane, tree, origin, normal, interpolate)
+    double* origin, double* normal, bool interpolate, vtkTypeBool generatePolygons = false,
+    vtkTypeBool mergePoints = false)
+    : CuttingFunctor(
+        input, output, plane, tree, origin, normal, interpolate, generatePolygons, mergePoints)
   {
   }
 
@@ -454,8 +468,10 @@ struct UnstructuredGridFunctor : public PointSetFunctor
   vtkUnstructuredGrid* Grid;
 
   UnstructuredGridFunctor(vtkDataSet* input, vtkDataObject* output, vtkPlane* plane,
-    vtkSphereTree* tree, double* origin, double* normal, bool interpolate)
-    : PointSetFunctor(input, output, plane, tree, origin, normal, interpolate)
+    vtkSphereTree* tree, double* origin, double* normal, bool interpolate,
+    bool generatePolygons = false)
+    : PointSetFunctor(
+        input, output, plane, tree, origin, normal, interpolate, generatePolygons, generatePolygons)
   {
     this->Grid = vtkUnstructuredGrid::SafeDownCast(input);
     this->SetInPoints(this->Grid->GetPoints());
@@ -502,6 +518,14 @@ struct UnstructuredGridFunctor : public PointSetFunctor
     vtkPoints* cellPoints;
     const unsigned char* selected = this->Selected + cellId;
 
+    std::unique_ptr<vtkContourHelper> contourHelper;
+    if (this->GeneratePolygons)
+    {
+      const vtkIdType estimatedSize = inCD->GetNumberOfTuples();
+      contourHelper = std::make_unique<vtkContourHelper>(loc, newVerts, newLines, newPolys, inPD,
+        inCD, outPD, newPolysData, estimatedSize, !this->GeneratePolygons);
+    }
+
     // Loop over the cell, processing only the one that are needed
     for (; cellId < endCellId; ++cellId)
     {
@@ -531,29 +555,36 @@ struct UnstructuredGridFunctor : public PointSetFunctor
           *s++ = this->Plane->FunctionValue(cellPoints->GetPoint(i));
         }
 
-        tmpOutCD = nullptr;
-        if (this->Interpolate)
+        if (this->GeneratePolygons)
         {
-          // Select correct cell data
-          switch (cell->GetCellDimension())
-          {
-            case (0):
-              VTK_FALLTHROUGH;
-            case (1):
-              tmpOutCD = newVertsData;
-              break;
-            case (2):
-              tmpOutCD = newLinesData;
-              break;
-            case (3):
-              tmpOutCD = newPolysData;
-              break;
-            default:
-              break;
-          }
+          contourHelper->Contour(cell, 0.0, cellScalars, cellId);
         }
-        cell->Contour(
-          0.0, cellScalars, loc, newVerts, newLines, newPolys, inPD, outPD, inCD, cellId, tmpOutCD);
+        else
+        {
+          tmpOutCD = nullptr;
+          if (this->Interpolate)
+          {
+            // Select correct cell data
+            switch (cell->GetCellDimension())
+            {
+              case (0):
+                VTK_FALLTHROUGH;
+              case (1):
+                tmpOutCD = newVertsData;
+                break;
+              case (2):
+                tmpOutCD = newLinesData;
+                break;
+              case (3):
+                tmpOutCD = newPolysData;
+                break;
+              default:
+                break;
+            }
+          }
+          cell->Contour(0.0, cellScalars, loc, newVerts, newLines, newPolys, inPD, outPD, inCD,
+            cellId, tmpOutCD);
+        }
       }
     }
   }
@@ -569,10 +600,11 @@ struct UnstructuredGridFunctor : public PointSetFunctor
   }
 
   static void Execute(vtkDataSet* input, vtkDataObject* output, vtkPlane* plane,
-    vtkSphereTree* tree, double* origin, double* normal, bool interpolate)
+    vtkSphereTree* tree, double* origin, double* normal, bool interpolate, bool generatePolygons)
   {
     vtkIdType numCells = input->GetNumberOfCells();
-    UnstructuredGridFunctor functor(input, output, plane, tree, origin, normal, interpolate);
+    UnstructuredGridFunctor functor(
+      input, output, plane, tree, origin, normal, interpolate, generatePolygons);
     functor.BuildAccelerationStructure();
     vtkSMPTools::For(0, numCells, functor);
   }
@@ -1893,8 +1925,8 @@ int vtkPlaneCutter::ExecuteDataSet(
 
   else if (input->GetDataObjectType() == VTK_UNSTRUCTURED_GRID)
   {
-    UnstructuredGridFunctor::Execute(
-      input, output, plane, tree, planeOrigin, planeNormal, this->InterpolateAttributes);
+    UnstructuredGridFunctor::Execute(input, output, plane, tree, planeOrigin, planeNormal,
+      this->InterpolateAttributes, this->GeneratePolygons);
   }
 
   else
