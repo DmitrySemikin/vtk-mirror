@@ -46,6 +46,7 @@ set(classes
   vtkConvexPointSet
   vtkCubicLine
   vtkCylinder
+  vtkCylindricalGrid
   vtkDataAssembly
   vtkDataObject
   vtkDataObjectCollection
