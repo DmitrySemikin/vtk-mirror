@@ -20,7 +20,7 @@
 #define FTDRV_H_
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include FT_MODULE_H
 
 

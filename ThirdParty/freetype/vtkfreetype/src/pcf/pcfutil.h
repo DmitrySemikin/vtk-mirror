@@ -29,7 +29,7 @@ THE SOFTWARE.
 #define PCFUTIL_H_
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include FT_CONFIG_CONFIG_H
 
 

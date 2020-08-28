@@ -22,7 +22,7 @@
 #define __TTCPAL_H__
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include "ttload.h"
 
 

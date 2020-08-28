@@ -21,7 +21,7 @@
 #define WINFNT_H_
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include FT_WINFONTS_H
 #include FT_INTERNAL_DRIVER_H
 

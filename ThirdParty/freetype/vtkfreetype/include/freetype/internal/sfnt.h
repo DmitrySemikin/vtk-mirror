@@ -20,7 +20,7 @@
 #define SFNT_H_
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include FT_INTERNAL_DRIVER_H
 #include FT_INTERNAL_TRUETYPE_TYPES_H
 #include FT_INTERNAL_WOFF_TYPES_H
