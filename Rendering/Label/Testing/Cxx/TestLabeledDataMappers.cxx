@@ -41,7 +41,6 @@
 
 #include "vtkDataSetAttributes.h"
 #include "vtkDataSetMapper.h"
-#include "vtkExtractSelectionLegacy.h"
 #include "vtkHardwareSelector.h"
 #include "vtkIdTypeArray.h"
 #include "vtkInteractorStyleTrackballCamera.h"
@@ -67,13 +66,27 @@ public:
   static KeyPressInteractorStyle* New();
   vtkTypeMacro(KeyPressInteractorStyle, vtkInteractorStyleTrackballCamera);
 
+  virtual void WriteCommands()
+  {
+    cout << endl;
+    cout << "Controls:" << endl;
+    cout << " A - Select all points on screen" << endl;
+    cout << " C - Change Font" << endl;
+    cout << " M(m) - More (less) Data" << endl;
+    cout << " B(b) - Bigger (smaller) Transform" << endl;
+    cout << " G(g) - Bigger (smaller) Font Size" << endl;
+    cout << " P(p) - Toggle Perspective / Parallel Projection" << endl;
+    cout << " H(h) - Help" << endl;
+    cout << endl;
+  }
+
   virtual void OnKeyPress()
   {
     // Get the keypress
     std::string key = this->Interactor->GetKeySym();
 
     // "s" for "s"elect
-    if (key.compare("s") == 0)
+    if (key.compare("A") == 0 || key.compare("a") == 0)
     {
       vtkNew<vtkHardwareSelector> selector;
       selector->SetRenderer(
@@ -87,43 +100,45 @@ public:
       selector->SetArea(windowSize);
       selector->SetFieldAssociation(vtkDataObject::FIELD_ASSOCIATION_POINTS);
       vtkSelection* selection = selector->Select();
-      std::cout << "Selection has " << selection->GetNumberOfNodes() << " nodes." << std::endl;
-      // selection->PrintSelf(cout, vtkIndent(0));
-#if 0
-        for (unsigned int cnt = 0; cnt < selection->GetNumberOfNodes(); cnt++)
-        {
-          auto n = selection->GetNode(cnt);
-          vtkIdTypeArray *da = vtkIdTypeArray::SafeDownCast(n->GetSelectionData()->GetArray("SelectedIds"));
-          cout << da->GetClassName() << endl;
-          for (int tup = 0; tup < da->GetNumberOfTuples(); tup++)
-          {
-            cout << "  ID[" << tup << "]=" << da->GetValue(tup) << endl;
-          }
-        }
-#endif
-      ids->Update();
-      extractSelection->SetInputData(0, ids->GetOutput());
-      extractSelection->SetInputData(1, selection);
-      extractSelection->Update();
-      selection->Delete();
-      mapper->ScalarVisibilityOff();
-      mapper->SetInputConnection(extractSelection->GetOutputPort());
-
-      actor->SetMapper(mapper);
-      actor->GetProperty()->SetColor(1, 0, 0);
-      actor->GetProperty()->SetPointSize(40);
-      static bool hasset = false;
-      if (!hasset)
+      vtkIdType pointsFound = 0;
+      for (unsigned int cnt = 0; cnt < selection->GetNumberOfNodes(); cnt++)
       {
-        this->Renderer->AddActor(actor);
-        hasset = true;
+        auto n = selection->GetNode(cnt);
+        vtkIdTypeArray* da =
+          vtkIdTypeArray::SafeDownCast(n->GetSelectionData()->GetArray("SelectedIds"));
+        if (da)
+        {
+          pointsFound = std::max(pointsFound, da->GetNumberOfTuples());
+        }
       }
+      std::cout << "Selection has " << selection->GetNumberOfNodes() << " nodes with "
+                << pointsFound << " points." << std::endl;
+      // selection->PrintSelf(cout, vtkIndent(0));
+
+#define SHOW_SELECTED_IDS true
+#if SHOW_SELECTED_IDS
+      for (unsigned int cnt = 0; cnt < selection->GetNumberOfNodes(); cnt++)
+      {
+        auto n = selection->GetNode(cnt);
+        vtkIdTypeArray* da =
+          vtkIdTypeArray::SafeDownCast(n->GetSelectionData()->GetArray("SelectedIds"));
+        cout << da->GetClassName() << " " << da->GetName() << endl;
+        for (int tup = 0; tup < da->GetNumberOfTuples(); tup++)
+        {
+          cout << "  ID[" << tup << "]=" << da->GetValue(tup) << endl;
+        }
+      }
+#endif
     }
 
     static int cnt = -1;
     if (key.compare("c") == 0) // change font selection
     {
       cnt = (cnt - 1) % 7;
+      if (cnt < 0)
+      {
+        cnt += 7;
+      }
     }
     if (key.compare("C") == 0) // change font selection
     {
@@ -226,6 +241,7 @@ public:
       plane->GetResolution(res[0], res[1]);
       res[1] = res[1] * 2;
       plane->SetResolution(res[0], res[1]);
+      cout << "Resolution: " << res[0] << ", " << res[1] << endl;
       this->Renderer->GetRenderWindow()->Render();
     }
     // "m" for "l"ess data?
@@ -235,12 +251,15 @@ public:
       plane->GetResolution(res[0], res[1]);
       res[1] = res[1] / 2;
       plane->SetResolution(res[0], res[1]);
+      cout << "Resolution: " << res[0] << ", " << res[1] << endl;
       this->Renderer->GetRenderWindow()->Render();
     }
+
     // "B" for "B"igger transform
     if (key.compare("B") == 0)
     {
       scale[0] = scale[0] * 2;
+      cout << "Scale: " << scale[0] << endl;
       matrix->Scale(scale);
       this->Renderer->GetRenderWindow()->Render();
     }
@@ -248,15 +267,17 @@ public:
     if (key.compare("b") == 0)
     {
       scale[0] = scale[0] / 2;
+      cout << "Scale: " << scale[0] << endl;
       matrix->Scale(scale);
       this->Renderer->GetRenderWindow()->Render();
     }
+
     if (key.compare("G") == 0)
     {
       vtkTextProperty* p = ldm->GetLabelTextProperty(0);
       int fsize = p->GetFontSize();
       fsize += 2;
-      cerr << fsize << endl;
+      cout << "Font Size: " << fsize << endl;
       p->SetFontSize(fsize);
       tactor->SetTextProperty(p);
       ldm->SetLabelTextProperty(p, 0);
@@ -267,7 +288,7 @@ public:
       vtkTextProperty* p = ldm->GetLabelTextProperty(0);
       int fsize = p->GetFontSize();
       fsize -= 2;
-      cerr << fsize << endl;
+      cout << "Font Size: " << fsize << endl;
       p->SetFontSize(fsize);
       tactor->SetTextProperty(p);
       ldm->SetLabelTextProperty(p, 0);
@@ -280,6 +301,13 @@ public:
       vtkCamera* cam = this->Renderer->GetActiveCamera();
       cam->SetParallelProjection(!cam->GetParallelProjection());
       this->Renderer->GetRenderWindow()->Render();
+      cout << "Perspective Projection: " << (cam->GetParallelProjection() ? "On" : "Off") << endl;
+    }
+
+    // "H" or "h" to toggle Perspective and Projection.
+    if (key.compare("H") == 0 || key.compare("h") == 0)
+    {
+      this->WriteCommands();
     }
 
     // Forward events
@@ -289,7 +317,6 @@ public:
   vtkRenderer* Renderer;
   vtkNew<vtkActor> actor;
   vtkNew<vtkDataSetMapper> mapper;
-  vtkNew<vtkExtractSelectionLegacy> extractSelection;
   double scale[3] = { 1.0, 1.0, 1.0 };
 };
 vtkStandardNewMacro(KeyPressInteractorStyle);
@@ -312,7 +339,7 @@ void AddTextProperty(int idx, int font, int fontSize, int frameWidth, std::array
 
 } // end anon namespace
 
-int TestLabeledDataMappers(int, char* [])
+int TestLabeledDataMappers(int, char*[])
 {
   // Create some data to label
   plane->SetResolution(10, 10);
@@ -437,6 +464,8 @@ int TestLabeledDataMappers(int, char* [])
   renWin->Render();
   ldm->ReleaseGraphicsResources(renWin);
   renWin->Render();
+
+  style->WriteCommands();
 
   int retVal = 0; // vtkRegressionTestImage( renWin );
   // if ( retVal == vtkRegressionTester::DO_INTERACTOR)

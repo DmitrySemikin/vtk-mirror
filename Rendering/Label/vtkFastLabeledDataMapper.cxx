@@ -38,7 +38,7 @@
 #include "vtkTimerLog.h"
 #include "vtkUnicodeStringArray.h"
 #include "vtkWindow.h"
-#include "vtkXMLPolyDataWriter.h"
+//#include "vtkXMLPolyDataWriter.h"
 
 #include <array>
 
