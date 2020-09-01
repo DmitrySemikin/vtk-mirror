@@ -19,6 +19,7 @@ set (VolumeCxxTests
   TestGPURayCastCompositeMaskBlend.cxx
   TestGPURayCastCompositeToMIP.cxx
   TestGPURayCastCropping.cxx
+  TestGPURayCastCropping1.cxx
   TestGPURayCastDataTypesMIP.cxx
   TestGPURayCastDataTypesMinIP.cxx
   TestGPURayCastDependentComponentsLightParameters.cxx
@@ -34,16 +35,20 @@ set (VolumeCxxTests
   TestGPURayCastImageSampleXY.cxx
   TestGPURayCastIndependentComponentsLightParameters.cxx
   TestGPURayCastIndependentVectorMode.cxx
+  TestGPURayCastLabelMap.cxx
+  TestGPURayCastLabelMap1Label.cxx
   TestGPURayCastLargeColorTransferFunction.cxx
   TestGPURayCastMIPBinaryMask.cxx
   TestGPURayCastMIPToComposite.cxx
   TestGPURayCastMapperBenchmark.cxx
+  TestGPURayCastMapperRectilinearGrid.cxx
   TestGPURayCastMapperSampleDistance.cxx
   TestGPURayCastMultiVolumeAddRemove.cxx
   TestGPURayCastMultiVolumeCellData.cxx
   TestGPURayCastMultiVolumeOverlapping.cxx
   TestGPURayCastMultiVolumeTransfer2D.cxx
   TestGPURayCastNearestDataTypesMIP.cxx
+  TestGPURayCastOrientedVolume.cxx
   TestGPURayCastPerspectiveParallel.cxx
   TestGPURayCastPositionalLights.cxx
   TestGPURayCastReleaseResources.cxx
@@ -66,15 +71,20 @@ set (VolumeCxxTests
   TestGPURayCastVolumePolyData.cxx
   TestGPURayCastVolumeRotation.cxx
   TestGPURayCastVolumeScale.cxx
+  TestGPURayCastVolumeUniformGridBlanking.cxx
   TestGPURayCastVolumeUpdate.cxx
   TestGPUVolumeRayCastMapper.cxx
   TestMinIntensityRendering.cxx
   TestMultiBlockMapper.cxx
+  TestMultiBlockMapperRectilinearGrid.cxx
+  TestMultiBlockUnstructuredGridVolumeMapper.cxx
   TestProjectedTetrahedra.cxx
   TestProjectedTetrahedraOffscreen.cxx
   TestProjectedTetrahedraTransform.cxx
+  TestProjectedTetrahedraVectorComponent.cxx
   TestRemoveVolumeNonCurrentContext.cxx
   TestSmartVolumeMapper.cxx
+  TestSmartVolumeMapperVolumeUpdate.cxx
   TestSmartVolumeMapperWindowLevel.cxx
   )
 

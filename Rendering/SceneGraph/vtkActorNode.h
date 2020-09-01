@@ -19,7 +19,7 @@
  * State storage and graph traversal for vtkActor/Mapper and Property
  * Made a choice to merge actor, mapper and property together. If there
  * is a compelling reason to separate them we can.
-*/
+ */
 
 #ifndef vtkActorNode_h
 #define vtkActorNode_h
@@ -27,8 +27,7 @@
 #include "vtkRenderingSceneGraphModule.h" // For export macro
 #include "vtkViewNode.h"
 
-class VTKRENDERINGSCENEGRAPH_EXPORT vtkActorNode :
-  public vtkViewNode
+class VTKRENDERINGSCENEGRAPH_EXPORT vtkActorNode : public vtkViewNode
 {
 public:
   static vtkActorNode* New();
@@ -38,13 +37,13 @@ public:
   /**
    * Build containers for our child nodes.
    */
-  virtual void Build(bool prepass) override;
+  void Build(bool prepass) override;
 
 protected:
   vtkActorNode();
-  ~vtkActorNode();
+  ~vtkActorNode() override;
 
- private:
+private:
   vtkActorNode(const vtkActorNode&) = delete;
   void operator=(const vtkActorNode&) = delete;
 };

@@ -12,8 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkDummyCommunicator.h"
 #include "vtkDummyController.h"
+#include "vtkDummyCommunicator.h"
 #include "vtkObjectFactory.h"
 
 vtkStandardNewMacro(vtkDummyController);
@@ -21,7 +21,7 @@ vtkStandardNewMacro(vtkDummyController);
 vtkCxxSetObjectMacro(vtkDummyController, Communicator, vtkCommunicator);
 vtkCxxSetObjectMacro(vtkDummyController, RMICommunicator, vtkCommunicator);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDummyController::vtkDummyController()
 {
   this->Communicator = vtkDummyCommunicator::New();
@@ -36,13 +36,13 @@ vtkDummyController::~vtkDummyController()
 
 void vtkDummyController::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "Communicator: " << this->Communicator << endl;
   os << indent << "RMICommunicator: " << this->RMICommunicator << endl;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDummyController::SingleMethodExecute()
 {
   if (this->SingleMethod)
@@ -59,13 +59,13 @@ void vtkDummyController::SingleMethodExecute()
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDummyController::MultipleMethodExecute()
 {
   int i = this->GetLocalProcessId();
 
   vtkProcessFunctionType multipleMethod;
-  void *multipleData;
+  void* multipleData;
   this->GetMultipleMethod(i, multipleMethod, multipleData);
   if (multipleMethod)
   {

@@ -26,7 +26,7 @@
  * This assumes that the points
  * of the graph have already been filled (perhaps by vtkGraphLayout).
  * The vertex data is passed along to the point data.
-*/
+ */
 
 #ifndef vtkGraphToPoints_h
 #define vtkGraphToPoints_h
@@ -37,18 +37,18 @@
 class VTKFILTERSGENERAL_EXPORT vtkGraphToPoints : public vtkPolyDataAlgorithm
 {
 public:
-  static vtkGraphToPoints *New();
-  vtkTypeMacro(vtkGraphToPoints,vtkPolyDataAlgorithm);
+  static vtkGraphToPoints* New();
+  vtkTypeMacro(vtkGraphToPoints, vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkGraphToPoints();
-  ~vtkGraphToPoints() override {}
+  ~vtkGraphToPoints() override = default;
 
   /**
    * Convert the vtkGraph into vtkPolyData.
    */
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   /**
    * Set the input type of the algorithm to vtkGraph.

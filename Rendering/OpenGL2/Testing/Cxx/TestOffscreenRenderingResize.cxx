@@ -22,12 +22,13 @@
 #include "vtkSphereSource.h"
 #include "vtkTestUtilities.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Test one can create an resize offscreen render windows.
 int TestOffscreenRenderingResize(int argc, char* argv[])
 {
   vtkNew<vtkRenderWindow> window;
-  window->SetOffScreenRendering(1);
+  window->SetShowWindow(false);
+  window->SetUseOffScreenBuffers(true);
   window->SetSize(300, 300);
 
   vtkNew<vtkRenderWindowInteractor> iren;

@@ -12,16 +12,16 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include "vtkPolyDataItem.h"
 #include "vtkAbstractMapper.h"
 #include "vtkContext2D.h"
 #include "vtkFieldData.h"
 #include "vtkFloatArray.h"
 #include "vtkIntArray.h"
-#include "vtkPen.h"
 #include "vtkObjectFactory.h"
+#include "vtkPen.h"
 #include "vtkPolyData.h"
-#include "vtkPolyDataItem.h"
-
+#include "vtkUnsignedCharArray.h"
 
 vtkStandardNewMacro(vtkPolyDataItem);
 
@@ -33,8 +33,11 @@ class vtkPolyDataItem::DrawHintsHelper
 {
 
 public:
-
-  DrawHintsHelper () {};
+  DrawHintsHelper()
+  {
+    this->previousLineType = 0;
+    this->previousLineWidth = 0.0f;
+  }
 
   /**
    * Retrieve drawing hints as field data from the polydata and use the
@@ -64,7 +67,7 @@ public:
     {
       pen->SetWidth(lineWidthArray->GetValue(0));
     }
-  };
+  }
 
   /**
    * "Un-apply" hints by restoring saved drawing state
@@ -84,17 +87,17 @@ private:
   float previousLineWidth;
 };
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPolyDataItem::vtkPolyDataItem()
-: PolyData(nullptr)
-, MappedColors(nullptr)
-, ScalarMode(VTK_SCALAR_MODE_USE_POINT_DATA)
+  : PolyData(nullptr)
+  , MappedColors(nullptr)
+  , ScalarMode(VTK_SCALAR_MODE_USE_POINT_DATA)
 {
   this->Position[0] = this->Position[1] = 0;
   this->HintHelper = new vtkPolyDataItem::DrawHintsHelper();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPolyDataItem::~vtkPolyDataItem()
 {
   this->SetPolyData(nullptr);
@@ -102,7 +105,7 @@ vtkPolyDataItem::~vtkPolyDataItem()
   delete this->HintHelper;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkPolyDataItem::Paint(vtkContext2D* painter)
 {
   if (this->PolyData && this->MappedColors)
@@ -110,8 +113,8 @@ bool vtkPolyDataItem::Paint(vtkContext2D* painter)
     this->HintHelper->ApplyDrawHints(painter, this->PolyData);
 
     // Draw the PolyData in the bottom left corner of the item.
-    painter->DrawPolyData(this->Position[0], this->Position[1], this->PolyData,
-      this->MappedColors, this->ScalarMode);
+    painter->DrawPolyData(
+      this->Position[0], this->Position[1], this->PolyData, this->MappedColors, this->ScalarMode);
 
     this->HintHelper->RemoveDrawHints(painter);
   }
@@ -119,7 +122,7 @@ bool vtkPolyDataItem::Paint(vtkContext2D* painter)
   return true;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPolyDataItem::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os, indent);

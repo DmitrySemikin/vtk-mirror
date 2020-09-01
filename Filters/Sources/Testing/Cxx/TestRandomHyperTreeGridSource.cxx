@@ -21,9 +21,9 @@
 #include "vtkNew.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkTextActor.h"
 #include "vtkTextProperty.h"
 
@@ -32,24 +32,15 @@
 namespace
 {
 
-double colors[8][3] =
-{
-  { 1.0, 1.0, 1.0 },
-  { 0.0, 1.0, 1.0 },
-  { 1.0, 0.0, 1.0 },
-  { 1.0, 1.0, 0.0 },
-  { 1.0, 0.0, 0.0 },
-  { 0.0, 1.0, 0.0 },
-  { 0.0, 0.0, 1.0 },
-  { 0.7, 0.3, 0.3 }
-};
+double colors[8][3] = { { 1.0, 1.0, 1.0 }, { 0.0, 1.0, 1.0 }, { 1.0, 0.0, 1.0 }, { 1.0, 1.0, 0.0 },
+  { 1.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0 }, { 0.0, 0.0, 1.0 }, { 0.7, 0.3, 0.3 } };
 
-void ConstructScene(vtkRenderer *renderer, int numPieces)
+void ConstructScene(vtkRenderer* renderer, int numPieces)
 {
   for (int i = 0; i < numPieces; ++i)
   {
     vtkNew<vtkRandomHyperTreeGridSource> source;
-    source->SetGridSize(4, 4, 1);
+    source->SetDimensions(5, 5, 2); // GridCell 4, 4, 1
     source->SetSeed(3713971);
     source->SetSplitFraction(0.75);
 
@@ -82,7 +73,7 @@ void ConstructScene(vtkRenderer *renderer, int numPieces)
   renderer->AddActor(label);
 
   renderer->ResetCamera();
-  renderer->GetActiveCamera()->Zoom(1.25);
+  renderer->GetActiveCamera()->Zoom(1.3);
 }
 
 } // end anon namespace
@@ -91,7 +82,7 @@ int TestRandomHyperTreeGridSource(int, char*[])
 {
   vtkNew<vtkRenderWindow> renWin;
   renWin->SetMultiSamples(0);
-  renWin->SetSize(500,500);
+  renWin->SetSize(500, 500);
 
   {
     vtkNew<vtkRenderer> renderer;

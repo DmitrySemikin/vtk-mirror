@@ -26,7 +26,7 @@
 #include "vtkTreeMapToPolyData.h"
 
 vtkStandardNewMacro(vtkIcicleView);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkIcicleView::vtkIcicleView()
 {
   vtkSmartPointer<vtkStackedTreeLayoutStrategy> strategy =
@@ -38,16 +38,15 @@ vtkIcicleView::vtkIcicleView()
   strategy->SetReverse(true);
   strategy->SetShrinkPercentage(shrink);
   this->SetLayoutStrategy(strategy);
-  vtkSmartPointer<vtkTreeMapToPolyData> poly =
-    vtkSmartPointer<vtkTreeMapToPolyData>::New();
+  vtkSmartPointer<vtkTreeMapToPolyData> poly = vtkSmartPointer<vtkTreeMapToPolyData>::New();
   this->SetAreaToPolyData(poly);
   this->SetUseRectangularCoordinates(true);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkIcicleView::~vtkIcicleView() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkIcicleView::SetTopToBottom(bool reversed)
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -58,7 +57,7 @@ void vtkIcicleView::SetTopToBottom(bool reversed)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkIcicleView::GetTopToBottom()
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -70,7 +69,7 @@ bool vtkIcicleView::GetTopToBottom()
   return false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkIcicleView::SetRootWidth(double width)
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -82,7 +81,7 @@ void vtkIcicleView::SetRootWidth(double width)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 double vtkIcicleView::GetRootWidth()
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -94,7 +93,7 @@ double vtkIcicleView::GetRootWidth()
   return 0.0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkIcicleView::SetLayerThickness(double thickness)
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -105,7 +104,7 @@ void vtkIcicleView::SetLayerThickness(double thickness)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 double vtkIcicleView::GetLayerThickness()
 {
   vtkStackedTreeLayoutStrategy* st =
@@ -117,22 +116,20 @@ double vtkIcicleView::GetLayerThickness()
   return 0.0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkIcicleView::SetUseGradientColoring(bool value)
 {
-  vtkTreeMapToPolyData* tm =
-    vtkTreeMapToPolyData::SafeDownCast(this->GetAreaToPolyData());
+  vtkTreeMapToPolyData* tm = vtkTreeMapToPolyData::SafeDownCast(this->GetAreaToPolyData());
   if (tm)
   {
     tm->SetAddNormals(value);
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkIcicleView::GetUseGradientColoring()
 {
-  vtkTreeMapToPolyData* tm =
-    vtkTreeMapToPolyData::SafeDownCast(this->GetAreaToPolyData());
+  vtkTreeMapToPolyData* tm = vtkTreeMapToPolyData::SafeDownCast(this->GetAreaToPolyData());
   if (tm)
   {
     return tm->GetAddNormals();
@@ -140,9 +137,8 @@ bool vtkIcicleView::GetUseGradientColoring()
   return false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkIcicleView::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }
-

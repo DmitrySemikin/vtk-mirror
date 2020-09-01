@@ -1,31 +1,51 @@
+set(memkind_tests)
+if(VTK_USE_MEMKIND)
+  set(memkind_tests
+    TestMemkindData.cxx
+    )
+endif()
+
 vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   NO_DATA NO_VALID NO_OUTPUT
+  TestDataArrayDispatcher.cxx
+  TestDispatchers.cxx
+  ${memkind_tests}
   LagrangeHexahedron.cxx
+  BezierInterpolation.cxx
+  TestBezier.cxx
   TestAngularPeriodicDataArray.cxx
+  TestCellInflation.cxx
   TestColor.cxx
   TestVector.cxx
   TestVectorOperators.cxx
   TestAMRBox.cxx
   TestBiQuadraticQuad.cxx
+  TestCellArray.cxx
+  TestCellArrayTraversal.cxx
   TestCompositeDataSets.cxx
+  TestCompositeDataSetRange.cxx
   TestComputeBoundingSphere.cxx
-  TestDataArrayDispatcher.cxx
+  TestDataAssembly.cxx
   TestDataObject.cxx
-  TestDispatchers.cxx
+  TestDataObjectTreeRange.cxx
   TestFieldList.cxx
   TestGenericCell.cxx
   TestGraph.cxx
   TestGraph2.cxx
   TestGraphAttributes.cxx
   TestHigherOrderCell.cxx
+  TestHyperTreeGridBitmask.cxx
+  TestHyperTreeGridElderChildIndex.cxx
   TestImageDataFindCell.cxx
   TestImageDataInterpolation.cxx
+  TestImageDataOrientation.cxx
   TestImageIterator.cxx
   TestInterpolationDerivs.cxx
   TestInterpolationFunctions.cxx
   TestMappedGridDeepCopy.cxx
   TestPath.cxx
   TestPentagonalPrism.cxx
+  TestPiecewiseFunction.cxx
   TestPiecewiseFunctionLogScale.cxx
   TestPixelExtent.cxx
   TestPointLocators.cxx
@@ -37,17 +57,18 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   TestPolyhedron3.cxx
   TestPolyhedronCombinatorialContouring.cxx
   TestPolyhedronConvexity.cxx
+  TestPolyhedronConvexityMultipleCells.cxx
   TestQuadraticPolygon.cxx
   TestRect.cxx
   TestSelectionExpression.cxx
   TestSelectionSubtract.cxx
   TestSortFieldData.cxx
+  TestStaticCellLocator.cxx
   TestTable.cxx
   TestTreeBFSIterator.cxx
   TestTreeDFSIterator.cxx
   TestTriangle.cxx
   TimePointLocators.cxx
-  otherCellArray.cxx
   otherCellBoundaries.cxx
   otherCellPosition.cxx
   otherCellTypes.cxx
@@ -74,6 +95,7 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests tests
   UnitTestTriangleIntersection.cxx
   )
 vtk_add_test_cxx(vtkCommonDataModelCxxTests data_tests
+  TestImageDataOrientation2.cxx,NO_DATA
   TestLagrangeTriangle.cxx
   TestLagrangeTetra.cxx
   TestLagrangeWedge.cxx
@@ -87,25 +109,35 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests data_tests
   TestQuadraticPolygonFilters.cxx
   )
 # add to the list but don't define a test
-list(APPEND data_tests TestPolyhedron2.cxx TestPolyhedronContouring.cxx TestPolyhedronCutter.cxx)
+list(APPEND data_tests
+  TestPolyhedron2.cxx
+  TestPolyhedronContouring.cxx
+  TestPolyhedronCutter.cxx
+  TestStaticCellLocatorEdgeCases.cxx
+  )
 
 vtk_add_test_cxx(vtkCommonDataModelCxxTests output_tests
   TestKdTreeRepresentation.cxx,NO_DATA
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedron2
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedron2
   COMMAND vtkCommonDataModelCxxTests TestPolyhedron2
   -D DATA{../Data/polyhedron_mesh.vtu}
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedronContouring
-  COMMAND ${vtk-module}CxxTests TestPolyhedronContouring
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedronContouring
+  COMMAND vtkCommonDataModelCxxTests TestPolyhedronContouring
    DATA{../Data/cell_850113.vtu} DATA{../Data/cell_12851_26.vtu}
   )
-ExternalData_add_test(VTKData
-  NAME TestPolyhedronCutter
-  COMMAND ${vtk-module}CxxTests TestPolyhedronCutter
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestPolyhedronCutter
+  COMMAND vtkCommonDataModelCxxTests TestPolyhedronCutter
   DATA{../Data/onePolyhedron.vtu} DATA{../Data/sliceOfPolyhedron.vtu}
+  )
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::CommonDataModelCxxTests-TestStaticCellLocatorEdgeCases
+  COMMAND vtkCommonDataModelCxxTests TestStaticCellLocatorEdgeCases
+  DATA{../Data/test_surface.vtp}
   )
 
 set(all_tests

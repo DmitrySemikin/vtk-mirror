@@ -19,14 +19,14 @@ PURPOSE.  See the above copyright notice for more information.
  * vtkWin32OpenGL2RenderWindow is a concrete implementation of the abstract
  * class vtkRenderWindow. vtkWin32OpenGL2Renderer interfaces to the standard
  * OpenGL graphics library in the Windows/NT environment..
-*/
+ */
 
 #ifndef vtkWin32OpenGLRenderWindow_h
 #define vtkWin32OpenGLRenderWindow_h
 
-#include "vtkRenderingOpenGL2Module.h" // For export macro
-#include <stack> // for ivar
 #include "vtkOpenGLRenderWindow.h"
+#include "vtkRenderingOpenGL2Module.h" // For export macro
+#include <stack>                       // for ivar
 
 #include "vtkWindows.h" // For windows API
 
@@ -35,14 +35,9 @@ class vtkIdList;
 class VTKRENDERINGOPENGL2_EXPORT vtkWin32OpenGLRenderWindow : public vtkOpenGLRenderWindow
 {
 public:
-  static vtkWin32OpenGLRenderWindow *New();
-  vtkTypeMacro(vtkWin32OpenGLRenderWindow,vtkOpenGLRenderWindow);
+  static vtkWin32OpenGLRenderWindow* New();
+  vtkTypeMacro(vtkWin32OpenGLRenderWindow, vtkOpenGLRenderWindow);
   void PrintSelf(ostream& os, vtkIndent indent) override;
-
-  /**
-   * Begin the rendering process.
-   */
-  void Start(void) override;
 
   /**
    * End the rendering process and display the image.
@@ -80,68 +75,88 @@ public:
   void WindowRemap(void) override;
 
   /**
+   * Show or not Show the window
+   */
+  void SetShowWindow(bool val) override;
+
+  /**
    * Set the preferred window size to full screen.
    */
   virtual void PrefFullScreen(void);
 
   //@{
   /**
-   * Set the size of the window in pixels.
+   * Set the size (width and height) of the rendering window in
+   * screen coordinates (in pixels). This resizes the operating
+   * system's view/window and redraws it.
+   *
+   * If the size has changed, this method will fire
+   * vtkCommand::WindowResizeEvent.
    */
-  void SetSize(int,int) override;
-  void SetSize(int a[2]) override {vtkOpenGLRenderWindow::SetSize(a);};
+  void SetSize(int width, int height) override;
+  void SetSize(int a[2]) override { this->SetSize(a[0], a[1]); }
   //@}
 
   /**
-   * Get the current size of the window in pixels.
+   * Get the size (width and height) of the rendering window in
+   * screen coordinates (in pixels).
    */
-  int *GetSize() VTK_SIZEHINT(2) override;
+  int* GetSize() VTK_SIZEHINT(2) override;
 
   //@{
   /**
-   * Set the position of the window.
+   * Set the position (x and y) of the rendering window in
+   * screen coordinates (in pixels). This resizes the operating
+   * system's view/window and redraws it.
    */
-  void SetPosition(int,int) override;
-  void SetPosition(int a[2]) override {vtkOpenGLRenderWindow::SetPosition(a);}
+  void SetPosition(int x, int y) override;
+  void SetPosition(int a[2]) override { this->SetPosition(a[0], a[1]); }
   //@}
 
   /**
    * Get the current size of the screen in pixels.
+   * An HDTV for example would be 1920 x 1080 pixels.
    */
-  int *GetScreenSize() VTK_SIZEHINT(2) override;
+  int* GetScreenSize() VTK_SIZEHINT(2) override;
 
   /**
-   * Get the position in screen coordinates of the window.
+   * Get the position (x and y) of the rendering window in
+   * screen coordinates (in pixels).
    */
-  int *GetPosition() VTK_SIZEHINT(2) override;
+  int* GetPosition() VTK_SIZEHINT(2) override;
 
   /**
    * Set the name of the window. This appears at the top of the window
    * normally.
    */
-  void SetWindowName(const char *) override;
+  void SetWindowName(const char*) override;
+
+  /**
+   * Set the icon displayed in the title bar and the taskbar.
+   */
+  void SetIcon(vtkImageData* img) override;
 
   /**
    * Set this RenderWindow's window id to a pre-existing window.
    */
-  void SetWindowInfo(const char *) override;
+  void SetWindowInfo(const char*) override;
 
   /**
    * Sets the WindowInfo that will be used after a WindowRemap.
    */
-  void SetNextWindowInfo(const char *) override;
+  void SetNextWindowInfo(const char*) override;
 
   /**
    * Sets the HWND id of the window that WILL BE created.
    */
-  void SetParentInfo(const char *) override;
+  void SetParentInfo(const char*) override;
 
-  void *GetGenericDisplayId() override {return (void *)this->ContextId;}
-  void *GetGenericWindowId() override {return (void *)this->WindowId;}
-  void *GetGenericParentId() override {return (void *)this->ParentId;}
-  void *GetGenericContext() override {return (void *)this->DeviceContext;}
-  void *GetGenericDrawable() override {return (void *)this->WindowId;}
-  void SetDisplayId(void *) override;
+  void* GetGenericDisplayId() override { return (void*)this->ContextId; }
+  void* GetGenericWindowId() override { return (void*)this->WindowId; }
+  void* GetGenericParentId() override { return (void*)this->ParentId; }
+  void* GetGenericContext() override { return (void*)this->DeviceContext; }
+  void* GetGenericDrawable() override { return (void*)this->WindowId; }
+  void SetDisplayId(void*) override;
 
   /**
    * Get the window id.
@@ -153,7 +168,7 @@ public:
    * Set the window id to a pre-existing window.
    */
   void SetWindowId(HWND);
-  void SetWindowId(void *foo) override {this->SetWindowId((HWND)foo);}
+  void SetWindowId(void* foo) override { this->SetWindowId((HWND)foo); }
   //@}
 
   /**
@@ -165,18 +180,18 @@ public:
   /**
    * Does this platform support render window data sharing.
    */
-  bool GetPlatformSupportsRenderWindowSharing() override { return true; };
+  bool GetPlatformSupportsRenderWindowSharing() override { return true; }
 
   //@{
   /**
    * Set the window's parent id to a pre-existing window.
    */
   void SetParentId(HWND);
-  void SetParentId(void *foo) override {this->SetParentId((HWND)foo);}
+  void SetParentId(void* foo) override { this->SetParentId((HWND)foo); }
   //@}
 
-  void SetContextId(HGLRC);    // hsr
-  void SetDeviceContext(HDC);  // hsr
+  void SetContextId(HGLRC);   // hsr
+  void SetDeviceContext(HDC); // hsr
 
   /**
    * Set the window id of the new window once a WindowRemap is done.
@@ -188,7 +203,7 @@ public:
    * This is the generic prototype as required by the vtkRenderWindow
    * parent.
    */
-  void SetNextWindowId(void *arg) override;
+  void SetNextWindowId(void* arg) override;
 
   /**
    * Prescribe that the window be created in a stereo-capable mode. This
@@ -211,19 +226,19 @@ public:
   /**
    * Get report of capabilities for the render window
    */
-  const char *ReportCapabilities() override;
+  const char* ReportCapabilities() override;
 
   /**
    * Is this render window using hardware acceleration? 0-false, 1-true
    */
-  int IsDirect() override;
+  vtkTypeBool IsDirect() override;
 
   /**
    * Check to see if a mouse button has been pressed or mouse wheel activated.
    * All other events are ignored by this method.
    * This is a useful check to abort a long render.
    */
-  int GetEventPending() override;
+  vtkTypeBool GetEventPending() override;
 
   //@{
   /**
@@ -231,8 +246,7 @@ public:
    */
   virtual void SetupPalette(HDC hDC);
   virtual void SetupPixelFormatPaletteAndContext(
-    HDC hDC, DWORD dwFlags, int debug,
-    int bpp=16, int zbpp=16);
+    HDC hDC, DWORD dwFlags, int debug, int bpp = 16, int zbpp = 16);
   //@}
 
   /**
@@ -259,12 +273,6 @@ public:
 
   bool DetectDPI() override;
 
-  /**
-   * Override the default implementation so that we can actively switch between
-   * on and off screen rendering.
-   */
-  void SetOffScreenRendering(vtkTypeBool offscreen) override;
-
   //@{
   /**
    * Ability to push and pop this window's context
@@ -290,41 +298,35 @@ public:
 
 protected:
   vtkWin32OpenGLRenderWindow();
-  ~vtkWin32OpenGLRenderWindow();
+  ~vtkWin32OpenGLRenderWindow() override;
 
   HINSTANCE ApplicationInstance;
-  HPALETTE  Palette;
-  HPALETTE  OldPalette;
-  HGLRC     ContextId;
-  HDC       DeviceContext;
-  BOOL      MFChandledWindow;
-  HWND      WindowId;
-  HWND      ParentId;
-  HWND      NextWindowId;
-  int       OwnWindow;
-  int       ScreenSize[2];
+  HPALETTE Palette;
+  HPALETTE OldPalette;
+  HGLRC ContextId;
+  HDC DeviceContext;
+  BOOL MFChandledWindow;
+  HWND WindowId;
+  HWND ParentId;
+  HWND NextWindowId;
+  vtkTypeBool OwnWindow;
+  static const std::string DEFAULT_BASE_WINDOW_NAME;
 
   std::stack<HGLRC> ContextStack;
   std::stack<HDC> DCStack;
 
-  int CreatingOffScreenWindow; // to avoid recursion (and memory leaks...)
-
   // message handler
-  virtual LRESULT MessageProc(HWND hWnd, UINT message,
-                              WPARAM wParam, LPARAM lParam);
+  virtual LRESULT MessageProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-  static LRESULT APIENTRY WndProc(HWND hWnd, UINT message,
-                                  WPARAM wParam, LPARAM lParam);
-  int CursorHidden;
-  int ForceMakeCurrent;
+  static LRESULT APIENTRY WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+  vtkTypeBool CursorHidden;
+  vtkTypeBool ForceMakeCurrent;
 
   int WindowIdReferenceCount;
   void ResizeWhileOffscreen(int xsize, int ysize);
   void CreateAWindow() override;
   void DestroyWindow() override;
   void InitializeApplication();
-  void CleanUpOffScreenRendering(void);
-  void CreateOffScreenWindow(int width,int height);
   void CleanUpRenderers();
   void VTKRegisterClass();
 
@@ -332,6 +334,5 @@ private:
   vtkWin32OpenGLRenderWindow(const vtkWin32OpenGLRenderWindow&) = delete;
   void operator=(const vtkWin32OpenGLRenderWindow&) = delete;
 };
-
 
 #endif

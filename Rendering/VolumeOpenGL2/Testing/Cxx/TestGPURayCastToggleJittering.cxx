@@ -36,22 +36,19 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRegressionTestImage.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 #include <vtkSphereSource.h>
 #include <vtkStructuredPointsReader.h>
-#include <vtkTestingObjectFactory.h>
 #include <vtkTestUtilities.h>
 #include <vtkVolume.h>
 #include <vtkVolumeProperty.h>
 
-
-static const char* TestGPURayCastToggleJitteringLog =
-"# StreamVersion 1\n"
-"EnterEvent 298 27 0 0 0 0 0\n"
-"MouseWheelForwardEvent 200 142 0 0 0 0 0\n"
-"LeaveEvent 311 71 0 0 0 0 0\n";
+static const char* TestGPURayCastToggleJitteringLog = "# StreamVersion 1\n"
+                                                      "EnterEvent 298 27 0 0 0 0 0\n"
+                                                      "MouseWheelForwardEvent 200 142 0 0 0 0 0\n"
+                                                      "LeaveEvent 311 71 0 0 0 0 0\n";
 
 int TestGPURayCastToggleJittering(int argc, char* argv[])
 {
@@ -64,12 +61,12 @@ int TestGPURayCastToggleJittering(int argc, char* argv[])
 
   vtkNew<vtkRenderer> ren;
   renWin->AddRenderer(ren);
-  vtkOpenGLRenderer *oglRen = vtkOpenGLRenderer::SafeDownCast(ren);
+  vtkOpenGLRenderer* oglRen = vtkOpenGLRenderer::SafeDownCast(ren);
   assert(oglRen); // This test should only be enabled for OGL2 backend.
   // This will print details about why depth peeling is unsupported:
-  oglRen->SetDebug(1);
+  oglRen->SetDebug(true);
   bool supported = oglRen->IsDualDepthPeelingSupported();
-  oglRen->SetDebug(0);
+  oglRen->SetDebug(false);
   if (!supported)
   {
     std::cerr << "Skipping test; volume peeling not supported.\n";
@@ -78,8 +75,7 @@ int TestGPURayCastToggleJittering(int argc, char* argv[])
 
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  char* volumeFile = vtkTestUtilities::ExpandDataFileName(
-                       argc, argv, "Data/ironProt.vtk");
+  char* volumeFile = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/ironProt.vtk");
   vtkNew<vtkStructuredPointsReader> reader;
   reader->SetFileName(volumeFile);
   delete[] volumeFile;
@@ -178,7 +174,6 @@ int TestGPURayCastToggleJittering(int argc, char* argv[])
 
   iren->Initialize();
 
-  int rv = vtkTesting::InteractorEventLoop(argc, argv, iren,
-                                           TestGPURayCastToggleJitteringLog);
+  int rv = vtkTesting::InteractorEventLoop(argc, argv, iren, TestGPURayCastToggleJitteringLog);
   return rv;
 }

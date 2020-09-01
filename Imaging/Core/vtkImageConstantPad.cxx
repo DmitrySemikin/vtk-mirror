@@ -22,7 +22,7 @@
 
 vtkStandardNewMacro(vtkImageConstantPad);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Constructor sets default values
 vtkImageConstantPad::vtkImageConstantPad()
 {
@@ -31,13 +31,13 @@ vtkImageConstantPad::vtkImageConstantPad()
   this->Constants = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkImageConstantPad::~vtkImageConstantPad()
 {
   delete[] this->Constants;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkImageConstantPad::SetConstants(int numCon, double* Cons)
 {
   delete[] this->Constants;
@@ -49,7 +49,6 @@ void vtkImageConstantPad::SetConstants(int numCon, double* Cons)
   }
 }
 
-//----------------------------------------------------------------------------
 // This templated function executes the filter for any type of data.
 template <class T>
 void vtkImageConstantPadExecute(vtkImageConstantPad* self, vtkImageData* inData, T* inPtr,
@@ -187,7 +186,7 @@ void vtkImageConstantPadExecute(vtkImageConstantPad* self, vtkImageData* inData,
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // This method is passed a input and output data, and executes the filter
 // algorithm to fill the output from the input.
 // It just executes a switch statement to call the correct function for

@@ -26,8 +26,7 @@
 #include "vtkGeovisGDALModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
 
-class VTKGEOVISGDAL_EXPORT vtkRasterReprojectionFilter
-  : public vtkImageAlgorithm
+class VTKGEOVISGDAL_EXPORT vtkRasterReprojectionFilter : public vtkImageAlgorithm
 {
 public:
   static vtkRasterReprojectionFilter* New();
@@ -103,24 +102,22 @@ public:
 
 protected:
   vtkRasterReprojectionFilter();
-  ~vtkRasterReprojectionFilter();
+  ~vtkRasterReprojectionFilter() override;
 
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestUpdateExtent(vtkInformation* request,
-                          vtkInformationVector** inputVector,
-                          vtkInformationVector* outputVector) override;
+  int RequestUpdateExtent(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-  int RequestInformation(vtkInformation* request,
-                         vtkInformationVector** inputVector,
-                         vtkInformationVector* outputVector) override;
+  int RequestInformation(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   int FillInputPortInformation(int port, vtkInformation* info) override;
   int FillOutputPortInformation(int port, vtkInformation* info) override;
 
   char* InputProjection;
+  int FlipAxis[3];
   char* OutputProjection;
   int OutputDimensions[2];
   double NoDataValue;

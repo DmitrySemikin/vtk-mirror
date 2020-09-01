@@ -20,10 +20,12 @@ PURPOSE.  See the above copyright notice for more information.
 
 #include <cassert>
 
-//----------------------------------------------------------------------------
-vtkBond::vtkBond(vtkMolecule *parent, vtkIdType id,
-                 vtkIdType beginAtomId, vtkIdType endAtomId)
-  : Molecule(parent), Id(id), BeginAtomId(beginAtomId), EndAtomId(endAtomId)
+//------------------------------------------------------------------------------
+vtkBond::vtkBond(vtkMolecule* parent, vtkIdType id, vtkIdType beginAtomId, vtkIdType endAtomId)
+  : Molecule(parent)
+  , Id(id)
+  , BeginAtomId(beginAtomId)
+  , EndAtomId(endAtomId)
 {
   assert(parent != nullptr);
   assert(id < parent->GetNumberOfBonds());
@@ -31,18 +33,15 @@ vtkBond::vtkBond(vtkMolecule *parent, vtkIdType id,
   assert(endAtomId < parent->GetNumberOfAtoms());
 }
 
-//----------------------------------------------------------------------------
-void vtkBond::PrintSelf(ostream &os, vtkIndent indent)
+//------------------------------------------------------------------------------
+void vtkBond::PrintSelf(ostream& os, vtkIndent indent)
 {
-  os << indent << "Molecule: " << this->Molecule
-     << " Id: " << this->Id
-     << " Order: " << this->GetOrder()
-     << " Length: " << this->GetLength()
-     << " BeginAtomId: " << this->BeginAtomId
-     << " EndAtomId: " << this->EndAtomId << endl;
+  os << indent << "Molecule: " << this->Molecule << " Id: " << this->Id
+     << " Order: " << this->GetOrder() << " Length: " << this->GetLength()
+     << " BeginAtomId: " << this->BeginAtomId << " EndAtomId: " << this->EndAtomId << endl;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 double vtkBond::GetLength() const
 {
   // Reimplement here to avoid the potential cost of building the EdgeList
@@ -53,43 +52,43 @@ double vtkBond::GetLength() const
   return (pos2 - pos1).Norm();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkIdType vtkBond::GetBeginAtomId() const
 {
   return this->BeginAtomId;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkIdType vtkBond::GetEndAtomId() const
 {
   return this->EndAtomId;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAtom vtkBond::GetBeginAtom()
 {
   return this->Molecule->GetAtom(this->BeginAtomId);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAtom vtkBond::GetEndAtom()
 {
   return this->Molecule->GetAtom(this->EndAtomId);
 }
 
-//----------------------------------------------------------------------------
-const vtkAtom vtkBond::GetBeginAtom() const
+//------------------------------------------------------------------------------
+vtkAtom vtkBond::GetBeginAtom() const
 {
   return this->Molecule->GetAtom(this->BeginAtomId);
 }
 
-//----------------------------------------------------------------------------
-const vtkAtom vtkBond::GetEndAtom() const
+//------------------------------------------------------------------------------
+vtkAtom vtkBond::GetEndAtom() const
 {
   return this->Molecule->GetAtom(this->EndAtomId);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 unsigned short vtkBond::GetOrder()
 {
   return this->Molecule->GetBondOrder(this->Id);

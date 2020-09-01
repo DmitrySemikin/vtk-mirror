@@ -18,14 +18,14 @@
 
 vtkStandardNewMacro(vtkTransmitStructuredGridPiece);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkTransmitStructuredGridPiece::vtkTransmitStructuredGridPiece() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkTransmitStructuredGridPiece::~vtkTransmitStructuredGridPiece() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkTransmitStructuredGridPiece::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

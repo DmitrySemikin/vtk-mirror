@@ -21,48 +21,49 @@
  *
  * @sa
  * vtkParticleTracerBase has the details of the algorithms
-*/
+ */
 
 #ifndef vtkStreaklineFilter_h
 #define vtkStreaklineFilter_h
 
 #include "vtkFiltersFlowPathsModule.h" // For export macro
-#include "vtkSmartPointer.h" // For protected ivars.
 #include "vtkParticleTracerBase.h"
+#include "vtkSmartPointer.h" // For protected ivars.
 
 class VTKFILTERSFLOWPATHS_EXPORT StreaklineFilterInternal
 {
 public:
-  StreaklineFilterInternal():Filter(nullptr){}
+  StreaklineFilterInternal()
+    : Filter(nullptr)
+  {
+  }
   void Initialize(vtkParticleTracerBase* filter);
-  virtual ~StreaklineFilterInternal(){}
-  virtual int OutputParticles(vtkPolyData* poly);
+  virtual ~StreaklineFilterInternal() = default;
+  virtual int OutputParticles(vtkPolyData* particles);
   void Finalize();
   void Reset();
+
 private:
   vtkParticleTracerBase* Filter;
-
 };
 
-
-class VTKFILTERSFLOWPATHS_EXPORT vtkStreaklineFilter: public vtkParticleTracerBase
+class VTKFILTERSFLOWPATHS_EXPORT vtkStreaklineFilter : public vtkParticleTracerBase
 {
- public:
-  vtkTypeMacro(vtkStreaklineFilter,vtkParticleTracerBase)
+public:
+  vtkTypeMacro(vtkStreaklineFilter, vtkParticleTracerBase);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkStreaklineFilter *New();
+  static vtkStreaklineFilter* New();
 
- protected:
+protected:
   vtkStreaklineFilter();
-  ~vtkStreaklineFilter() override{}
+  ~vtkStreaklineFilter() override = default;
   vtkStreaklineFilter(const vtkStreaklineFilter&) = delete;
   void operator=(const vtkStreaklineFilter&) = delete;
-  int OutputParticles(vtkPolyData* poly) override;
+  int OutputParticles(vtkPolyData* particles) override;
   void Finalize() override;
 
   StreaklineFilterInternal It;
 };
-
 
 #endif

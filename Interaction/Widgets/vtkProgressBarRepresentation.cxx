@@ -47,7 +47,7 @@ vtkProgressBarRepresentation::vtkProgressBarRepresentation()
   // Set up the geometry
   double size[2];
   this->GetSize(size);
-  this->Position2Coordinate->SetValue(0.04*size[0], 0.04*size[1]);
+  this->Position2Coordinate->SetValue(0.04 * size[0], 0.04 * size[1]);
   this->ProportionalResizeOff();
   this->Moving = 1;
   this->SetShowBorder(vtkBorderRepresentation::BORDER_ACTIVE);
@@ -58,11 +58,9 @@ vtkProgressBarRepresentation::vtkProgressBarRepresentation()
   this->Points->SetNumberOfPoints(8);
   this->Points->SetPoint(0, 0.2, 0.2, 0.0);
   this->Points->SetPoint(1, 0.2, PROGRESS_BAR_HEIGHT, 0.0);
-  this->Points->SetPoint(2, PROGRESS_BAR_WIDTH,
-    PROGRESS_BAR_HEIGHT, 0.0);
+  this->Points->SetPoint(2, PROGRESS_BAR_WIDTH, PROGRESS_BAR_HEIGHT, 0.0);
   this->Points->SetPoint(3, PROGRESS_BAR_WIDTH, 0.2, 0.0);
-  double progressPoint = 0.2 +
-    (this->ProgressRate * (PROGRESS_BAR_WIDTH - 0.2));
+  double progressPoint = 0.2 + (this->ProgressRate * (PROGRESS_BAR_WIDTH - 0.2));
   this->Points->SetPoint(4, 0.2, 0.2, 0.0);
   this->Points->SetPoint(5, 0.2, PROGRESS_BAR_HEIGHT, 0.0);
   this->Points->SetPoint(6, progressPoint, PROGRESS_BAR_HEIGHT, 0.0);
@@ -70,12 +68,12 @@ vtkProgressBarRepresentation::vtkProgressBarRepresentation()
 
   // Frame
   vtkNew<vtkCellArray> lines;
-  vtkIdType linesIds[5] = {0, 1, 2, 3, 0};
+  vtkIdType linesIds[5] = { 0, 1, 2, 3, 0 };
   lines->InsertNextCell(5, linesIds);
 
   // Progress bar
   vtkNew<vtkCellArray> polys;
-  vtkIdType polysIds[4] = {4, 5, 6, 7};
+  vtkIdType polysIds[4] = { 4, 5, 6, 7 };
   polys->InsertNextCell(4, polysIds);
 
   vtkNew<vtkPolyData> polydata;
@@ -96,8 +94,7 @@ vtkProgressBarRepresentation::vtkProgressBarRepresentation()
   transformFilter->SetTransform(this->BWTransform);
   transformFilter->SetInputData(polydata);
   vtkNew<vtkPolyDataMapper2D> mapper;
-  mapper->SetInputConnection(
-    transformFilter->GetOutputPort());
+  mapper->SetInputConnection(transformFilter->GetOutputPort());
   this->Property = vtkProperty2D::New();
   this->Actor = vtkActor2D::New();
   this->Actor->SetMapper(mapper);
@@ -123,13 +120,12 @@ vtkProgressBarRepresentation::vtkProgressBarRepresentation()
   backgroundTransformFilter->SetTransform(this->BWTransform);
   backgroundTransformFilter->SetInputData(backgroundPolydata);
   vtkNew<vtkPolyDataMapper2D> backgroundMapper;
-  backgroundMapper->SetInputConnection(
-    backgroundTransformFilter->GetOutputPort());
+  backgroundMapper->SetInputConnection(backgroundTransformFilter->GetOutputPort());
   this->BackgroundActor = vtkActor2D::New();
   this->BackgroundActor->SetMapper(backgroundMapper);
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkProgressBarRepresentation::~vtkProgressBarRepresentation()
 {
   this->Points->Delete();
@@ -139,40 +135,39 @@ vtkProgressBarRepresentation::~vtkProgressBarRepresentation()
   this->BackgroundActor->Delete();
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkProgressBarRepresentation::BuildRepresentation()
 {
   // Reposition progress bar points
-  double progressPoint = 0.2 +
-    (this->ProgressRate * (PROGRESS_BAR_WIDTH - 0.2));
+  double progressPoint = 0.2 + (this->ProgressRate * (PROGRESS_BAR_WIDTH - 0.2));
   this->Points->SetPoint(6, progressPoint, PROGRESS_BAR_HEIGHT, 0.0);
   this->Points->SetPoint(7, progressPoint, 0.2, 0.0);
   this->Points->Modified();
 
   // Set color
-  double backgroundColor[3] = { this->BackgroundColor[0] * 255,
-    this->BackgroundColor[1] * 255, this->BackgroundColor[2] * 255};
-  double progressBarColor[3] = {this->ProgressBarColor[0] * 255,
-    this->ProgressBarColor[1] * 255, this->ProgressBarColor[2] * 255};
+  double backgroundColor[3] = { this->BackgroundColor[0] * 255, this->BackgroundColor[1] * 255,
+    this->BackgroundColor[2] * 255 };
+  double progressBarColor[3] = { this->ProgressBarColor[0] * 255, this->ProgressBarColor[1] * 255,
+    this->ProgressBarColor[2] * 255 };
   for (int i = 0; i < 4; i++)
   {
     this->ProgressBarData->SetTuple(i, backgroundColor);
-    this->ProgressBarData->SetTuple(i+4, progressBarColor);
+    this->ProgressBarData->SetTuple(i + 4, progressBarColor);
   }
 
   // Note that the transform is updated by the superclass
   this->Superclass::BuildRepresentation();
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkProgressBarRepresentation::GetSize(double size[2])
 {
   size[0] = PROGRESS_BAR_WIDTH + 0.2;
   size[1] = PROGRESS_BAR_HEIGHT + 0.2;
 }
 
-//-------------------------------------------------------------------------
-void vtkProgressBarRepresentation::GetActors2D(vtkPropCollection *pc)
+//------------------------------------------------------------------------------
+void vtkProgressBarRepresentation::GetActors2D(vtkPropCollection* pc)
 {
   if (this->DrawBackground)
   {
@@ -182,8 +177,8 @@ void vtkProgressBarRepresentation::GetActors2D(vtkPropCollection *pc)
   this->Superclass::GetActors2D(pc);
 }
 
-//-------------------------------------------------------------------------
-void vtkProgressBarRepresentation::ReleaseGraphicsResources(vtkWindow *w)
+//------------------------------------------------------------------------------
+void vtkProgressBarRepresentation::ReleaseGraphicsResources(vtkWindow* w)
 {
   if (this->DrawBackground)
   {
@@ -193,8 +188,8 @@ void vtkProgressBarRepresentation::ReleaseGraphicsResources(vtkWindow *w)
   this->Superclass::ReleaseGraphicsResources(w);
 }
 
-//-------------------------------------------------------------------------
-int vtkProgressBarRepresentation::RenderOverlay(vtkViewport *w)
+//------------------------------------------------------------------------------
+int vtkProgressBarRepresentation::RenderOverlay(vtkViewport* w)
 {
   int count = this->Superclass::RenderOverlay(w);
   if (this->DrawBackground)
@@ -205,8 +200,8 @@ int vtkProgressBarRepresentation::RenderOverlay(vtkViewport *w)
   return count;
 }
 
-//-------------------------------------------------------------------------
-int vtkProgressBarRepresentation::RenderOpaqueGeometry(vtkViewport *w)
+//------------------------------------------------------------------------------
+int vtkProgressBarRepresentation::RenderOpaqueGeometry(vtkViewport* w)
 {
   int count = this->Superclass::RenderOpaqueGeometry(w);
   if (this->DrawBackground)
@@ -217,9 +212,8 @@ int vtkProgressBarRepresentation::RenderOpaqueGeometry(vtkViewport *w)
   return count;
 }
 
-//-----------------------------------------------------------------------------
-int vtkProgressBarRepresentation::RenderTranslucentPolygonalGeometry(
-  vtkViewport *w)
+//------------------------------------------------------------------------------
+int vtkProgressBarRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport* w)
 {
   int count = this->Superclass::RenderTranslucentPolygonalGeometry(w);
   if (this->DrawBackground)
@@ -230,7 +224,7 @@ int vtkProgressBarRepresentation::RenderTranslucentPolygonalGeometry(
   return count;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkTypeBool vtkProgressBarRepresentation::HasTranslucentPolygonalGeometry()
 {
   int result = this->Superclass::HasTranslucentPolygonalGeometry();
@@ -242,7 +236,7 @@ vtkTypeBool vtkProgressBarRepresentation::HasTranslucentPolygonalGeometry()
   return result;
 }
 
-//-------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkProgressBarRepresentation::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
@@ -258,8 +252,8 @@ void vtkProgressBarRepresentation::PrintSelf(ostream& os, vtkIndent indent)
   }
   os << indent << "ProgressRate: " << this->ProgressRate << "\n";
   os << indent << "ProgressBarColor: " << this->ProgressBarColor[0] << " "
-    << this->ProgressBarColor[1] << " " <<this->ProgressBarColor[2] << "\n";
+     << this->ProgressBarColor[1] << " " << this->ProgressBarColor[2] << "\n";
   os << indent << "DrawBackground: " << this->DrawBackground << "\n";
-  os << indent << "BackgroundColor: " << this->BackgroundColor[0] << " "
-    << this->BackgroundColor[1] << " " <<this->BackgroundColor[2] << "\n";
+  os << indent << "BackgroundColor: " << this->BackgroundColor[0] << " " << this->BackgroundColor[1]
+     << " " << this->BackgroundColor[2] << "\n";
 }

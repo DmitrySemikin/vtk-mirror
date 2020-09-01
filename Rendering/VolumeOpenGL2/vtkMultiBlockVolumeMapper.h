@@ -35,25 +35,23 @@
 #ifndef vtkMultiBlockVolumeMapper_h
 #define vtkMultiBlockVolumeMapper_h
 
-#include <vector>                            // For DataBlocks
+#include <vector> // For DataBlocks
 
-#include "vtkTimeStamp.h"                    // For BlockLoadingTime
 #include "vtkRenderingVolumeOpenGL2Module.h" // For export macro
 #include "vtkVolumeMapper.h"
-
 
 class vtkDataObjectTree;
 class vtkDataSet;
 class vtkImageData;
 class vtkMultiBlockDataSet;
+class vtkRenderWindow;
 class vtkSmartVolumeMapper;
 
-class VTKRENDERINGVOLUMEOPENGL2_EXPORT vtkMultiBlockVolumeMapper :
-  public vtkVolumeMapper
+class VTKRENDERINGVOLUMEOPENGL2_EXPORT vtkMultiBlockVolumeMapper : public vtkVolumeMapper
 {
 public:
-  static vtkMultiBlockVolumeMapper *New();
-  vtkTypeMacro(vtkMultiBlockVolumeMapper,vtkVolumeMapper);
+  static vtkMultiBlockVolumeMapper* New();
+  vtkTypeMacro(vtkMultiBlockVolumeMapper, vtkVolumeMapper);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -112,14 +110,22 @@ public:
   /**
    * \sa vtkVolumeMapper::SetCroppingRegionPlanes
    */
-  void SetCroppingRegionPlanes(double arg1, double arg2, double arg3,
-    double arg4, double arg5, double arg6) override;
-  void SetCroppingRegionPlanes(double *planes) override;
+  void SetCroppingRegionPlanes(
+    double arg1, double arg2, double arg3, double arg4, double arg5, double arg6) override;
+  void SetCroppingRegionPlanes(const double* planes) override;
 
   /**
    * \sa vtkVolumeMapper::SetCroppingRegionFlags
    */
   void SetCroppingRegionFlags(int mode) override;
+  //@}
+
+  //@{
+  /**
+   * Forwarded to internal vtkSmartVolumeMappers used.
+   * @sa vtkSmartVolumeMapper::SetRequestedRenderMode.
+   */
+  void SetRequestedRenderMode(int);
   //@}
 
 protected:
@@ -134,6 +140,9 @@ protected:
    * \sa vtkAlgorithm::FillInputPortInformation
    */
   int FillInputPortInformation(int port, vtkInformation* info) override;
+
+  vtkRenderWindow* DebugWin;
+  vtkRenderer* DebugRen;
 
 private:
   /**
@@ -181,10 +190,11 @@ private:
   MapperVec Mappers;
   vtkSmartVolumeMapper* FallBackMapper;
 
-  vtkTimeStamp BlockLoadingTime;
-  vtkTimeStamp BoundsComputeTime;
+  vtkMTimeType BlockLoadingTime;
+  vtkMTimeType BoundsComputeTime;
 
   int VectorMode;
   int VectorComponent;
+  int RequestedRenderMode;
 };
 #endif

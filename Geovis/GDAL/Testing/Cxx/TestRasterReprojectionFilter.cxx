@@ -35,13 +35,23 @@ int TestRasterReprojectionFilter(int argc, char* argv[])
 {
   cout << "CTEST_FULL_OUTPUT (Avoid ctest truncation of output)" << endl;
 
-  char* fname =
-    vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/GIS/sa052483.tif");
+  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/GIS/sa052483.tif");
 
   // Load input file
   vtkNew<vtkGDALRasterReader> reader;
   reader->SetFileName(fname);
   delete[] fname;
+
+  // test that we read the NoData value correctly
+  reader->Update();
+  double nodata = reader->GetInvalidValue(0);
+  double expectedNodata = -32768;
+  if (nodata != expectedNodata)
+  {
+    std::cerr << "Error NoData value. Found: " << nodata << ". Expected: " << expectedNodata
+              << std::endl;
+    return 1;
+  }
 
   // Apply reprojection filter
   vtkNew<vtkRasterReprojectionFilter> filter;

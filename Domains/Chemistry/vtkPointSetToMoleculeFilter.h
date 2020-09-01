@@ -26,9 +26,10 @@
 #ifndef vtkPointSetToMoleculeFilter_h
 #define vtkPointSetToMoleculeFilter_h
 
+#include "vtkDomainsChemistryModule.h" // For export macro
 #include "vtkMoleculeAlgorithm.h"
 
-class VTK_EXPORT vtkPointSetToMoleculeFilter : public vtkMoleculeAlgorithm
+class VTKDOMAINSCHEMISTRY_EXPORT vtkPointSetToMoleculeFilter : public vtkMoleculeAlgorithm
 {
 public:
   static vtkPointSetToMoleculeFilter* New();
@@ -54,6 +55,7 @@ protected:
   int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   bool ConvertLinesIntoBonds;
+
 private:
   vtkPointSetToMoleculeFilter(const vtkPointSetToMoleculeFilter&) = delete;
   void operator=(const vtkPointSetToMoleculeFilter&) = delete;

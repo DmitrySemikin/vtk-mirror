@@ -14,7 +14,8 @@
 =========================================================================*/
 /**
  * @class   vtkImplicitPolyDataDistance
- *
+ * @brief   Implicit function that computes the distance from a point x to the nearest point p on an
+ * input vtkPolyData.
  *
  * Implicit function that computes the distance from a point x to the
  * nearest point p on an input vtkPolyData. The sign of the function
@@ -34,7 +35,7 @@
  * by Cory Quammen, Chris Weigle C., Russ Taylor
  * http://hdl.handle.net/10380/3262
  * http://www.midasjournal.org/browse/publication/797
-*/
+ */
 
 #ifndef vtkImplicitPolyDataDistance_h
 #define vtkImplicitPolyDataDistance_h
@@ -48,8 +49,8 @@ class vtkPolyData;
 class VTKFILTERSCORE_EXPORT vtkImplicitPolyDataDistance : public vtkImplicitFunction
 {
 public:
-  static vtkImplicitPolyDataDistance *New();
-  vtkTypeMacro(vtkImplicitPolyDataDistance,vtkImplicitFunction);
+  static vtkImplicitPolyDataDistance* New();
+  vtkTypeMacro(vtkImplicitPolyDataDistance, vtkImplicitFunction);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
@@ -69,9 +70,10 @@ public:
   void EvaluateGradient(double x[3], double g[3]) override;
 
   /**
-   * Evaluate plane equation of nearest triangle to point x[3] and provides closest point on an input vtkPolyData.
+   * Evaluate plane equation of nearest triangle to point x[3] and provides closest point on an
+   * input vtkPolyData.
    */
-  double EvaluateFunctionAndGetClosestPoint (double x[3], double closestPoint[3]);
+  double EvaluateFunctionAndGetClosestPoint(double x[3], double closestPoint[3]);
 
   /**
    * Set the input vtkPolyData used for the implicit function
@@ -79,7 +81,7 @@ public:
    * vtkTriangleFilter to remove vertices and lines, leaving only
    * triangular polygons for evaluation as implicit planes.
    */
-  void SetInput(vtkPolyData *input);
+  void SetInput(vtkPolyData* input);
 
   //@{
   /**
@@ -125,15 +127,15 @@ protected:
    */
   void CreateDefaultLocator(void);
 
-  double SharedEvaluate(double x[3], double g[3], double p[3]);
+  double SharedEvaluate(double x[3], double g[3], double closestPoint[3]);
 
   double NoGradient[3];
   double NoClosestPoint[3];
   double NoValue;
   double Tolerance;
 
-  vtkPolyData *Input;
-  vtkCellLocator *Locator;
+  vtkPolyData* Input;
+  vtkCellLocator* Locator;
 
 private:
   vtkImplicitPolyDataDistance(const vtkImplicitPolyDataDistance&) = delete;

@@ -24,7 +24,7 @@
  * for that group. If the number of sub-blocks is larger than the
  * number of processors, each processor will possibly have more than
  * 1 sub-block.
-*/
+ */
 
 #ifndef vtkXMLCompositeDataReader_h
 #define vtkXMLCompositeDataReader_h
@@ -35,13 +35,15 @@
 class vtkCompositeDataSet;
 class vtkInformationIntegerKey;
 class vtkInformationIntegerVectorKey;
-
 struct vtkXMLCompositeDataReaderInternals;
+
+#include <set>    // for std::set
+#include <string> // for std::string
 
 class VTKIOXML_EXPORT vtkXMLCompositeDataReader : public vtkXMLReader
 {
 public:
-  vtkTypeMacro(vtkXMLCompositeDataReader,vtkXMLReader);
+  vtkTypeMacro(vtkXMLCompositeDataReader, vtkXMLReader);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   enum
@@ -62,8 +64,8 @@ public:
    * @a i * @a N + @a X.
    * @{
    */
-  vtkSetClampMacro(PieceDistribution, int, Block, Interleave)
-  vtkGetMacro(PieceDistribution, int)
+  vtkSetClampMacro(PieceDistribution, int, Block, Interleave);
+  vtkGetMacro(PieceDistribution, int);
   /**@}*/
 
   //@{
@@ -99,30 +101,24 @@ protected:
   // specified as relative paths.
   std::string GetFilePath();
 
-  std::string GetFileNameFromXML(vtkXMLDataElement *xmlElem,
-                                 const std::string &filePath);
+  std::string GetFileNameFromXML(vtkXMLDataElement* xmlElem, const std::string& filePath);
 
   vtkXMLReader* GetReaderOfType(const char* type);
-  vtkXMLReader* GetReaderForFile(const std::string &filename);
+  vtkXMLReader* GetReaderForFile(const std::string& filename);
 
-  int RequestInformation(vtkInformation*,
-                                 vtkInformationVector**,
-                                 vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  void SyncDataArraySelections(vtkXMLReader *accum,
-                               vtkXMLDataElement *xmlElem,
-                               const std::string &filePath);
+  void SyncDataArraySelections(
+    vtkXMLReader* accum, vtkXMLDataElement* xmlElem, const std::string& filePath);
 
   // Adds a child data object to the composite parent. childXML is the XML for
   // the child data object need to obtain certain meta-data about the child.
-  void AddChild(vtkCompositeDataSet* parent,
-    vtkDataObject* child, vtkXMLDataElement* childXML);
+  void AddChild(vtkCompositeDataSet* parent, vtkDataObject* child, vtkXMLDataElement* childXML);
 
   // Read the XML element for the subtree of a the composite dataset.
   // dataSetIndex is used to rank the leaf nodes in an inorder traversal.
-  virtual void ReadComposite(vtkXMLDataElement* element,
-    vtkCompositeDataSet* composite, const char* filePath,
-    unsigned int &dataSetIndex)=0;
+  virtual void ReadComposite(vtkXMLDataElement* element, vtkCompositeDataSet* composite,
+    const char* filePath, unsigned int& dataSetIndex) = 0;
 
   // Read the vtkDataSet (a leaf) in the composite dataset.
   virtual vtkDataSet* ReadDataset(vtkXMLDataElement* xmlElem, const char* filePath);
@@ -130,21 +126,43 @@ protected:
   // Read the vtkDataObject (a leaf) in the composite dataset.
   virtual vtkDataObject* ReadDataObject(vtkXMLDataElement* xmlElem, const char* filePath);
 
-  // Counts "DataSet" elements in the subtree.
-  unsigned int CountLeaves(vtkXMLDataElement* elem);
-
   /**
    * Given the inorder index for a leaf node, this method tells if the current
    * process should read the dataset.
+   *
+   * For a dataset that is part of a vtkParititionedDataSet or a
+   * vtkMultiPieceDataset, valid `pieceIndex` and `numPieces` should be specified such that
+   * `pieceIndex < numPieces`. When provided, this method can use the
+   * `PieceDistribution` selection to distribute each vtkMultiPieceDataset and
+   * vtkParititionedDataSet across ranks.
+   *
    */
-  int ShouldReadDataSet(unsigned int datasetIndex);
+  int ShouldReadDataSet(
+    unsigned int datasetIndex, unsigned int pieceIndex = 0, unsigned int numPieces = 0);
 
-  bool DataSetIsValidForBlockStrategy(unsigned int datasetIndex);
-  bool DataSetIsValidForInterleaveStrategy(unsigned int datasetIndex);
-
+#ifndef __VTK_WRAP__
+  /**
+   * Convenience method to count all nested elements with the given tag name.
+   * In addition, one can specify a list of tags to skip traversing into.
+   */
+  static unsigned int CountNestedElements(vtkXMLDataElement* element, const std::string& tagName,
+    const std::set<std::string>& exclusions = std::set<std::string>());
+#endif
 private:
   vtkXMLCompositeDataReader(const vtkXMLCompositeDataReader&) = delete;
   void operator=(const vtkXMLCompositeDataReader&) = delete;
+
+  //@{
+  /**
+   * Given the number of datasets (@a numDatasets) and number of pieces (@a numPieces),
+   * return the piece number of a dataset at the chosen index (@a datasetIndex)
+   * based on the assignment strategy.
+   */
+  static int GetPieceAssignmentForBlockStrategy(
+    unsigned int datasetIndex, unsigned int numDatasets, int numPieces);
+  static int GetPieceAssignmentForInterleaveStrategy(
+    unsigned int datasetIndex, unsigned int numDatasets, int numPieces);
+  //@}
 
   int PieceDistribution;
 

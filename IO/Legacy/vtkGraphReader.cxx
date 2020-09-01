@@ -12,6 +12,10 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkGraphReader.h"
 
 #include "vtkByteSwap.h"
@@ -33,29 +37,28 @@ vtkStandardNewMacro(vtkGraphReader);
 #undef read
 #endif
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGraphReader::vtkGraphReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGraphReader::~vtkGraphReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGraph* vtkGraphReader::GetOutput()
 {
   return this->GetOutput(0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGraph* vtkGraphReader::GetOutput(int idx)
 {
   return vtkGraph::SafeDownCast(this->GetOutputDataObject(idx));
 }
 
-//----------------------------------------------------------------------------
-int vtkGraphReader::ReadMeshSimple(const std::string& fname,
-                                   vtkDataObject* doOutput)
+//------------------------------------------------------------------------------
+int vtkGraphReader::ReadMeshSimple(const std::string& fname, vtkDataObject* doOutput)
 {
-  vtkDebugMacro(<<"Reading vtk graph ...");
+  vtkDebugMacro(<< "Reading vtk graph ...");
   char line[256];
 
   GraphType graphType;
@@ -70,7 +73,7 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
   vtkSmartPointer<vtkMutableUndirectedGraph> undir_builder =
     vtkSmartPointer<vtkMutableUndirectedGraph>::New();
 
-  vtkGraph *builder = nullptr;
+  vtkGraph* builder = nullptr;
   switch (graphType)
   {
     case vtkGraphReader::DirectedGraph:
@@ -82,6 +85,7 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
       builder = undir_builder;
       break;
 
+    case vtkGraphReader::UnknownGraph:
     default:
       vtkErrorMacro("ReadGraphType gave invalid result.");
       this->CloseVTKFile();
@@ -93,16 +97,16 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
   vtkVector3d lattice_a;
   vtkVector3d lattice_b;
   vtkVector3d lattice_c;
-  vtkVector3d lattice_origin;
+  vtkVector3d lattice_origin(0, 0, 0);
 
-  while(true)
+  while (true)
   {
-    if(!this->ReadString(line))
+    if (!this->ReadString(line))
     {
       break;
     }
 
-    if(!strncmp(this->LowerCase(line), "field", 5))
+    if (!strncmp(this->LowerCase(line), "field", 5))
     {
       vtkFieldData* const field_data = this->ReadFieldData();
       switch (graphType)
@@ -116,6 +120,7 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
           undir_builder->SetFieldData(field_data);
           break;
 
+        case vtkGraphReader::UnknownGraph:
         default: // Can't happen, would return earlier.
           break;
       }
@@ -124,13 +129,13 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
       continue;
     }
 
-    if(!strncmp(this->LowerCase(line), "points", 6))
+    if (!strncmp(this->LowerCase(line), "points", 6))
     {
       vtkIdType point_count = 0;
-      if(!this->Read(&point_count))
+      if (!this->Read(&point_count))
       {
-        vtkErrorMacro(<<"Cannot read number of points!");
-        this->CloseVTKFile ();
+        vtkErrorMacro(<< "Cannot read number of points!");
+        this->CloseVTKFile();
         return 1;
       }
 
@@ -138,13 +143,13 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
       continue;
     }
 
-    if(!strncmp(this->LowerCase(line), "vertices", 8))
+    if (!strncmp(this->LowerCase(line), "vertices", 8))
     {
       vtkIdType vertex_count = 0;
-      if(!this->Read(&vertex_count))
+      if (!this->Read(&vertex_count))
       {
-        vtkErrorMacro(<<"Cannot read number of vertices!");
-        this->CloseVTKFile ();
+        vtkErrorMacro(<< "Cannot read number of vertices!");
+        this->CloseVTKFile();
         return 1;
       }
       for (vtkIdType v = 0; v < vertex_count; ++v)
@@ -160,6 +165,7 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
             undir_builder->AddVertex();
             break;
 
+          case vtkGraphReader::UnknownGraph:
           default: // Can't happen, would return earlier.
             break;
         }
@@ -167,22 +173,22 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
       continue;
     }
 
-    if(!strncmp(this->LowerCase(line), "edges", 5))
+    if (!strncmp(this->LowerCase(line), "edges", 5))
     {
       vtkIdType edge_count = 0;
-      if(!this->Read(&edge_count))
+      if (!this->Read(&edge_count))
       {
-        vtkErrorMacro(<<"Cannot read number of edges!");
-        this->CloseVTKFile ();
+        vtkErrorMacro(<< "Cannot read number of edges!");
+        this->CloseVTKFile();
         return 1;
       }
       vtkIdType source = 0;
       vtkIdType target = 0;
-      for(vtkIdType edge = 0; edge != edge_count; ++edge)
+      for (vtkIdType edge = 0; edge != edge_count; ++edge)
       {
-        if(!(this->Read(&source) && this->Read(&target)))
+        if (!(this->Read(&source) && this->Read(&target)))
         {
-          vtkErrorMacro(<<"Cannot read edge!");
+          vtkErrorMacro(<< "Cannot read edge!");
           this->CloseVTKFile();
           return 1;
         }
@@ -198,6 +204,7 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
             undir_builder->AddEdge(source, target);
             break;
 
+          case vtkGraphReader::UnknownGraph:
           default: // Can't happen, would return earlier.
             break;
         }
@@ -205,27 +212,26 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
       continue;
     }
 
-    if(!strncmp(this->LowerCase(line), "vertex_data", 10))
+    if (!strncmp(this->LowerCase(line), "vertex_data", 10))
     {
       vtkIdType vertex_count = 0;
-      if(!this->Read(&vertex_count))
+      if (!this->Read(&vertex_count))
       {
-        vtkErrorMacro(<<"Cannot read number of vertices!");
+        vtkErrorMacro(<< "Cannot read number of vertices!");
         this->CloseVTKFile();
         return 1;
       }
-
 
       this->ReadVertexData(builder, vertex_count);
       continue;
     }
 
-    if(!strncmp(this->LowerCase(line), "edge_data", 9))
+    if (!strncmp(this->LowerCase(line), "edge_data", 9))
     {
       vtkIdType edge_count = 0;
-      if(!this->Read(&edge_count))
+      if (!this->Read(&edge_count))
       {
-        vtkErrorMacro(<<"Cannot read number of edges!");
+        vtkErrorMacro(<< "Cannot read number of edges!");
         this->CloseVTKFile();
         return 1;
       }
@@ -293,25 +299,21 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
         default:
           break;
       }
-
     }
 
     vtkErrorMacro(<< "Unrecognized keyword: " << line);
   }
 
-  vtkDebugMacro(<< "Read "
-    << builder->GetNumberOfVertices()
-    << " vertices and "
-    << builder->GetNumberOfEdges()
-    << " edges.\n");
+  vtkDebugMacro(<< "Read " << builder->GetNumberOfVertices() << " vertices and "
+                << builder->GetNumberOfEdges() << " edges.\n");
 
-  this->CloseVTKFile ();
+  this->CloseVTKFile();
 
   // Copy builder into output.
   vtkGraph* output = vtkGraph::SafeDownCast(doOutput);
   bool valid = output->CheckedShallowCopy(builder);
 
-  vtkMolecule *mol = vtkMolecule::SafeDownCast(output);
+  vtkMolecule* mol = vtkMolecule::SafeDownCast(output);
   if (valid && hasLattice && mol)
   {
     mol->SetLattice(lattice_a, lattice_b, lattice_c);
@@ -320,50 +322,50 @@ int vtkGraphReader::ReadMeshSimple(const std::string& fname,
 
   if (!valid)
   {
-    vtkErrorMacro(<<"Invalid graph structure, returning empty graph.");
+    vtkErrorMacro(<< "Invalid graph structure, returning empty graph.");
   }
 
   return 1;
 }
 
-//----------------------------------------------------------------------------
-int vtkGraphReader::ReadGraphType(const char* fname, GraphType &type)
+//------------------------------------------------------------------------------
+int vtkGraphReader::ReadGraphType(const char* fname, GraphType& type)
 {
   type = UnknownGraph;
 
-  if(!this->OpenVTKFile(fname) || !this->ReadHeader())
+  if (!this->OpenVTKFile(fname) || !this->ReadHeader())
   {
     return 0;
   }
 
   // Read graph-specific stuff
   char line[256];
-  if(!this->ReadString(line))
+  if (!this->ReadString(line))
   {
-    vtkErrorMacro(<<"Data file ends prematurely!");
+    vtkErrorMacro(<< "Data file ends prematurely!");
     this->CloseVTKFile();
     return 0;
   }
 
-  if(strncmp(this->LowerCase(line),"dataset", (unsigned long)7))
+  if (strncmp(this->LowerCase(line), "dataset", 7) != 0)
   {
     vtkErrorMacro(<< "Unrecognized keyword: " << line);
     this->CloseVTKFile();
     return 0;
   }
 
-  if(!this->ReadString(line))
+  if (!this->ReadString(line))
   {
-    vtkErrorMacro(<<"Data file ends prematurely!");
-    this->CloseVTKFile ();
+    vtkErrorMacro(<< "Data file ends prematurely!");
+    this->CloseVTKFile();
     return 0;
   }
 
-  if(!strncmp(this->LowerCase(line),"directed_graph", 14))
+  if (!strncmp(this->LowerCase(line), "directed_graph", 14))
   {
     type = DirectedGraph;
   }
-  else if(!strncmp(this->LowerCase(line), "undirected_graph", 16))
+  else if (!strncmp(this->LowerCase(line), "undirected_graph", 16))
   {
     type = UndirectedGraph;
   }
@@ -380,14 +382,14 @@ int vtkGraphReader::ReadGraphType(const char* fname, GraphType &type)
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkGraphReader::FillOutputPortInformation(int, vtkInformation* info)
 {
   info->Set(vtkDataObject::DATA_TYPE_NAME(), "vtkGraph");
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataObject* vtkGraphReader::CreateOutput(vtkDataObject* currentOutput)
 {
   GraphType graphType;
@@ -421,14 +423,15 @@ vtkDataObject* vtkGraphReader::CreateOutput(vtkDataObject* currentOutput)
       }
       return vtkMolecule::New();
 
+    case vtkGraphReader::UnknownGraph:
     default:
       vtkErrorMacro("ReadGraphType returned invalid result.");
       return nullptr;
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkGraphReader::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

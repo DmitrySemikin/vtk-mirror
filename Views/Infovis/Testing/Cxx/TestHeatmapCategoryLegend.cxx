@@ -22,13 +22,13 @@
 #include "vtkContextScene.h"
 #include "vtkContextTransform.h"
 #include "vtkContextView.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 
 #include "vtkRegressionTestImage.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int TestHeatmapCategoryLegend(int argc, char* argv[])
 {
   vtkNew<vtkTable> table;

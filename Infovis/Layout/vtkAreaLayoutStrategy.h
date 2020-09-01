@@ -33,11 +33,10 @@
  * @par Thanks:
  * Thanks to Jason Shepherd from Sandia National Laboratories
  * for help developing this class.
-*/
+ */
 
 #ifndef vtkAreaLayoutStrategy_h
 #define vtkAreaLayoutStrategy_h
-
 
 #include "vtkInfovisLayoutModule.h" // For export macro
 #include "vtkObject.h"
@@ -48,7 +47,7 @@ class vtkDataArray;
 class VTKINFOVISLAYOUT_EXPORT vtkAreaLayoutStrategy : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkAreaLayoutStrategy,vtkObject);
+  vtkTypeMacro(vtkAreaLayoutStrategy, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
@@ -62,17 +61,16 @@ public:
    * The sizeArray may be nullptr, or may contain the desired
    * size of each vertex in the tree.
    */
-  virtual void Layout(vtkTree *inputTree, vtkDataArray *areaArray,
-      vtkDataArray* sizeArray) = 0;
+  virtual void Layout(vtkTree* inputTree, vtkDataArray* areaArray, vtkDataArray* sizeArray) = 0;
 
-  // Modify edgeLayoutTree to have point locations appropriate
+  // Modify edgeRoutingTree to have point locations appropriate
   // for routing edges on a graph overlaid on the tree.
   // Layout() is called before this method, so inputTree will contain the
   // layout locations.
   // If you do not override this method,
-  // the edgeLayoutTree vertex locations are the same as the input tree.
-  virtual void LayoutEdgePoints(vtkTree *inputTree, vtkDataArray *areaArray,
-      vtkDataArray* sizeArray, vtkTree *edgeLayoutTree);
+  // the edgeRoutingTree vertex locations are the same as the input tree.
+  virtual void LayoutEdgePoints(
+    vtkTree* inputTree, vtkDataArray* areaArray, vtkDataArray* sizeArray, vtkTree* edgeRoutingTree);
 
   /**
    * Returns the vertex id that contains pnt (or -1 if no one contains it)
@@ -97,4 +95,3 @@ private:
 };
 
 #endif
-

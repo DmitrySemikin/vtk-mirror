@@ -36,8 +36,8 @@
 #ifndef Q_VTK_INTERACTOR_ADAPTER_H
 #define Q_VTK_INTERACTOR_ADAPTER_H
 
-#include "vtkGUISupportQtModule.h" // For export macro
 #include "QVTKWin32Header.h"
+#include "vtkGUISupportQtModule.h" // For export macro
 #include <QtCore/QObject>
 
 class vtkRenderWindowInteractor;
@@ -53,7 +53,7 @@ class VTKGUISUPPORTQT_EXPORT QVTKInteractorAdapter : public QObject
 public:
   // Description:
   // Constructor: takes QObject parent
-  QVTKInteractorAdapter(QObject* parent);
+  QVTKInteractorAdapter(QObject* parent = nullptr);
 
   // Description:
   // Destructor

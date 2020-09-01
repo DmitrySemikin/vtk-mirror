@@ -25,19 +25,19 @@
 
 #include <vtksys/SystemTools.hxx>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLPDataWriter::vtkXMLPDataWriter() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLPDataWriter::~vtkXMLPDataWriter() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPDataWriter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPDataWriter::WritePData(vtkIndent indent)
 {
   vtkDataSet* input = this->GetInputAsDataSet();
@@ -50,7 +50,7 @@ void vtkXMLPDataWriter::WritePData(vtkIndent indent)
     this->DataMode = vtkXMLWriter::Binary;
   }
 
-  vtkFieldData *fieldData = input->GetFieldData();
+  vtkFieldData* fieldData = input->GetFieldData();
 
   vtkInformation* meta = input->GetInformation();
   bool hasTime = meta->Has(vtkDataObject::DATA_TIME_STEP()) ? true : false;
@@ -79,7 +79,7 @@ void vtkXMLPDataWriter::WritePData(vtkIndent indent)
   this->WritePCellData(input->GetCellData(), indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkXMLPDataWriter::WritePieceInternal()
 {
   int piece = this->GetCurrentPiece();
@@ -99,7 +99,7 @@ int vtkXMLPDataWriter::WritePieceInternal()
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkXMLPDataWriter::WritePiece(int index)
 {
   // Create the writer for the piece.  Its configuration should match
@@ -136,13 +136,14 @@ int vtkXMLPDataWriter::WritePiece(int index)
   return result;
 }
 
-//----------------------------------------------------------------------------
-void vtkXMLPDataWriter::WritePrimaryElementAttributes(std::ostream& vtkNotUsed(os), vtkIndent vtkNotUsed(indent))
+//------------------------------------------------------------------------------
+void vtkXMLPDataWriter::WritePrimaryElementAttributes(
+  std::ostream& vtkNotUsed(os), vtkIndent vtkNotUsed(indent))
 {
   this->WriteScalarAttribute("GhostLevel", this->GhostLevel);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPDataWriter::SetupPieceFileNameExtension()
 {
   this->Superclass::SetupPieceFileNameExtension();

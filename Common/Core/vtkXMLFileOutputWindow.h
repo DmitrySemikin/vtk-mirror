@@ -32,14 +32,13 @@
  *
  * The method DisplayTag outputs the text unprocessed. To use this
  * class, instantiate it and then call SetInstance(this).
-*/
+ */
 
 #ifndef vtkXMLFileOutputWindow_h
 #define vtkXMLFileOutputWindow_h
 
 #include "vtkCommonCoreModule.h" // For export macro
 #include "vtkFileOutputWindow.h"
-
 
 class VTKCOMMONCORE_EXPORT vtkXMLFileOutputWindow : public vtkFileOutputWindow
 {
@@ -67,8 +66,8 @@ public:
   virtual void DisplayTag(const char*);
 
 protected:
-  vtkXMLFileOutputWindow() {}
-  ~vtkXMLFileOutputWindow() override {}
+  vtkXMLFileOutputWindow() = default;
+  ~vtkXMLFileOutputWindow() override = default;
 
   void Initialize();
   virtual void DisplayXML(const char*, const char*);
@@ -77,8 +76,6 @@ private:
   vtkXMLFileOutputWindow(const vtkXMLFileOutputWindow&) = delete;
   void operator=(const vtkXMLFileOutputWindow&) = delete;
 };
-
-
 
 #endif
 // VTK-HeaderTest-Exclude: vtkXMLFileOutputWindow.h

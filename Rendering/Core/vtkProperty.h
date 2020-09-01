@@ -26,30 +26,31 @@
  *
  * @sa
  * vtkActor vtkPropertyDevice
-*/
+ */
 
 #ifndef vtkProperty_h
 #define vtkProperty_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkObject.h"
-#include <map> // used for ivar
+#include "vtkRenderingCoreModule.h" // For export macro
+#include <map>                      // used for ivar
+#include <string>                   // used for ivar
 
 // shading models
-#define VTK_FLAT    0
+#define VTK_FLAT 0
 #define VTK_GOURAUD 1
-#define VTK_PHONG   2
+#define VTK_PHONG 2
+#define VTK_PBR 3
 
 // representation models
-#define VTK_POINTS    0
+#define VTK_POINTS 0
 #define VTK_WIREFRAME 1
-#define VTK_SURFACE   2
+#define VTK_SURFACE 2
 
 class vtkActor;
 class vtkInformation;
 class vtkRenderer;
 class vtkShaderProgram;
-class vtkShaderDeviceAdapter2;
 class vtkTexture;
 class vtkWindow;
 class vtkXMLDataElement;
@@ -60,7 +61,7 @@ class vtkPropertyInternals;
 class VTKRENDERINGCORE_EXPORT vtkProperty : public vtkObject
 {
 public:
-  vtkTypeMacro(vtkProperty,vtkObject);
+  vtkTypeMacro(vtkProperty, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
@@ -69,12 +70,12 @@ public:
    * coefficient=0; specular coefficient=0; specular power=1; Gouraud shading;
    * and surface representation. Backface and frontface culling are off.
    */
-  static vtkProperty *New();
+  static vtkProperty* New();
 
   /**
    * Assign one property to another.
    */
-  void DeepCopy(vtkProperty *p);
+  void DeepCopy(vtkProperty* p);
 
   /**
    * This method causes the property to set up whatever is required for
@@ -83,7 +84,7 @@ public:
    * method includes the invoking actor as an argument which can
    * be used by property devices that require the actor.
    */
-  virtual void Render(vtkActor *, vtkRenderer *);
+  virtual void Render(vtkActor*, vtkRenderer*);
 
   /**
    * This method renders the property as a backface property. TwoSidedLighting
@@ -91,7 +92,7 @@ public:
    * colors and opacity are used for backface properties. Other properties
    * such as Representation, Culling are specified by the Property.
    */
-  virtual void BackfaceRender(vtkActor *, vtkRenderer *) {}
+  virtual void BackfaceRender(vtkActor*, vtkRenderer*) {}
 
   /**
    * This method is called after the actor has been rendered.
@@ -138,30 +139,25 @@ public:
   /**
    * Set the shading interpolation method for an object.
    */
-  vtkSetClampMacro(Interpolation, int, VTK_FLAT, VTK_PHONG);
-  vtkGetMacro(Interpolation,int);
-  void SetInterpolationToFlat()
-    { this->SetInterpolation(VTK_FLAT); }
-  void SetInterpolationToGouraud()
-    { this->SetInterpolation(VTK_GOURAUD); }
-  void SetInterpolationToPhong()
-    { this->SetInterpolation(VTK_PHONG); }
-  const char *GetInterpolationAsString();
+  vtkSetClampMacro(Interpolation, int, VTK_FLAT, VTK_PBR);
+  vtkGetMacro(Interpolation, int);
+  void SetInterpolationToFlat() { this->SetInterpolation(VTK_FLAT); }
+  void SetInterpolationToGouraud() { this->SetInterpolation(VTK_GOURAUD); }
+  void SetInterpolationToPhong() { this->SetInterpolation(VTK_PHONG); }
+  void SetInterpolationToPBR() { this->SetInterpolation(VTK_PBR); }
+  const char* GetInterpolationAsString();
   //@}
 
   //@{
   /**
    * Control the surface geometry representation for the object.
    */
-  vtkSetClampMacro(Representation,int, VTK_POINTS, VTK_SURFACE);
-  vtkGetMacro(Representation,int);
-  void SetRepresentationToPoints()
-    { this->SetRepresentation(VTK_POINTS); }
-  void SetRepresentationToWireframe()
-    { this->SetRepresentation(VTK_WIREFRAME); }
-  void SetRepresentationToSurface()
-    { this->SetRepresentation(VTK_SURFACE); }
-  const char *GetRepresentationAsString();
+  vtkSetClampMacro(Representation, int, VTK_POINTS, VTK_SURFACE);
+  vtkGetMacro(Representation, int);
+  void SetRepresentationToPoints() { this->SetRepresentation(VTK_POINTS); }
+  void SetRepresentationToWireframe() { this->SetRepresentation(VTK_WIREFRAME); }
+  void SetRepresentationToSurface() { this->SetRepresentation(VTK_SURFACE); }
+  const char* GetRepresentationAsString();
   //@}
 
   //@{
@@ -172,9 +168,97 @@ public:
    */
   virtual void SetColor(double r, double g, double b);
   virtual void SetColor(double a[3]);
-  double *GetColor() VTK_SIZEHINT(3);
+  double* GetColor() VTK_SIZEHINT(3);
   void GetColor(double rgb[3]);
-  void GetColor(double &r, double &g, double &b);
+  void GetColor(double& r, double& g, double& b);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the metallic coefficient.
+   * Usually this value is either 0 or 1 for real material but any value in between is valid.
+   * This parameter is only used by PBR Interpolation.
+   * Default value is 0.0
+   */
+  vtkSetClampMacro(Metallic, double, 0.0, 1.0);
+  vtkGetMacro(Metallic, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the roughness coefficient.
+   * This value have to be between 0 (glossy) and 1 (rough).
+   * A glossy material have reflections and a high specular part.
+   * This parameter is only used by PBR Interpolation.
+   * Default value is 0.5
+   */
+  vtkSetClampMacro(Roughness, double, 0.0, 1.0);
+  vtkGetMacro(Roughness, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the anisotropy coefficient.
+   * This value controls the anisotropy of the material (0.0 means isotropic)
+   * This parameter is only used by PBR Interpolation.
+   * Default value is 0.0
+   */
+  vtkSetClampMacro(Anisotropy, double, 0.0, 1.0);
+  vtkGetMacro(Anisotropy, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the anisotropy rotation coefficient.
+   * This value controls the rotation of the direction of the anisotropy.
+   * This parameter is only used by PBR Interpolation.
+   * Default value is 0.0
+   */
+  vtkSetClampMacro(AnisotropyRotation, double, 0.0, 1.0);
+  vtkGetMacro(AnisotropyRotation, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the normal scale coefficient.
+   * This value affects the strength of the normal deviation from the texture.
+   * Default value is 1.0
+   */
+  vtkSetMacro(NormalScale, double);
+  vtkGetMacro(NormalScale, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the occlusion strength coefficient.
+   * This value affects the strength of the occlusion if a material texture is present.
+   * This parameter is only used by PBR Interpolation.
+   * Default value is 1.0
+   */
+  vtkSetClampMacro(OcclusionStrength, double, 0.0, 1.0);
+  vtkGetMacro(OcclusionStrength, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the emissive factor.
+   * This value is multiplied with the emissive color when an emissive texture is present.
+   * This parameter is only used by PBR Interpolation.
+   * Default value is [1.0, 1.0, 1.0]
+   */
+  vtkSetVector3Macro(EmissiveFactor, double);
+  vtkGetVector3Macro(EmissiveFactor, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the edge tint (for metals only).
+   * Set the color at grazing angle (fresnel reflectance).
+   * This parameter is only used by PBR Interpolation.
+   * Default value is [1.0, 1.0, 1.0]
+   */
+  vtkSetVector3Macro(EdgeTint, double);
+  vtkGetVector3Macro(EdgeTint, double);
   //@}
 
   //@{
@@ -232,6 +316,7 @@ public:
   //@{
   /**
    * Set/Get the diffuse surface color.
+   * For PBR Interpolation, DiffuseColor is used as the base color
    */
   vtkSetVector3Macro(DiffuseColor, double);
   vtkGetVector3Macro(DiffuseColor, double);
@@ -281,6 +366,33 @@ public:
    */
   vtkSetVector3Macro(VertexColor, double);
   vtkGetVector3Macro(VertexColor, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the RGBA color of selection primitives (if a selection is active on the mapper).
+   * Default is red and opaque.
+   */
+  vtkSetVector4Macro(SelectionColor, double);
+  vtkGetVector4Macro(SelectionColor, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the selection line width.
+   * Default is 2.
+   */
+  vtkSetMacro(SelectionLineWidth, float);
+  vtkGetMacro(SelectionLineWidth, float);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the selection point size.
+   * Default is 2.
+   */
+  vtkSetMacro(SelectionPointSize, float);
+  vtkGetMacro(SelectionPointSize, float);
   //@}
 
   //@{
@@ -361,12 +473,6 @@ public:
   vtkBooleanMacro(Shading, vtkTypeBool);
   //@}
 
-  /**
-   * Get the vtkShaderDeviceAdapter2 if set, returns null otherwise.
-   */
-  virtual vtkShaderDeviceAdapter2* GetShaderDeviceAdapter2()
-    { return nullptr; }
-
   //@{
   /**
    * Provide values to initialize shader variables.
@@ -376,49 +482,46 @@ public:
    * - \p numVars - number of variables being set
    * - \p x - values
    */
-  virtual void AddShaderVariable(const char *name, int numVars, int *x);
-  virtual void AddShaderVariable(const char *name, int numVars, float *x);
-  virtual void AddShaderVariable(const char *name, int numVars, double *x);
+  virtual void AddShaderVariable(const char* name, int numVars, int* x);
+  virtual void AddShaderVariable(const char* name, int numVars, float* x);
+  virtual void AddShaderVariable(const char* name, int numVars, double* x);
   //@}
 
   //@{
   /**
    * Methods to provide to add shader variables from wrappers.
    */
-  void AddShaderVariable(const char* name, int v)
-    { this->AddShaderVariable(name, 1, &v); }
-  void AddShaderVariable(const char* name, float v)
-    { this->AddShaderVariable(name, 1, &v); }
-  void AddShaderVariable(const char* name, double v)
-    { this->AddShaderVariable(name, 1, &v); }
+  void AddShaderVariable(const char* name, int v) { this->AddShaderVariable(name, 1, &v); }
+  void AddShaderVariable(const char* name, float v) { this->AddShaderVariable(name, 1, &v); }
+  void AddShaderVariable(const char* name, double v) { this->AddShaderVariable(name, 1, &v); }
   void AddShaderVariable(const char* name, int v1, int v2)
   {
-    int v[2] = {v1, v2};
+    int v[2] = { v1, v2 };
     this->AddShaderVariable(name, 2, v);
   }
   void AddShaderVariable(const char* name, float v1, float v2)
   {
-    float v[2] = {v1, v2};
+    float v[2] = { v1, v2 };
     this->AddShaderVariable(name, 2, v);
   }
   void AddShaderVariable(const char* name, double v1, double v2)
   {
-    double v[2] = {v1, v2};
+    double v[2] = { v1, v2 };
     this->AddShaderVariable(name, 2, v);
   }
   void AddShaderVariable(const char* name, int v1, int v2, int v3)
   {
-    int v[3] = {v1, v2, v3};
+    int v[3] = { v1, v2, v3 };
     this->AddShaderVariable(name, 3, v);
   }
   void AddShaderVariable(const char* name, float v1, float v2, float v3)
   {
-    float v[3] = {v1, v2, v3};
+    float v[3] = { v1, v2, v3 };
     this->AddShaderVariable(name, 3, v);
   }
   void AddShaderVariable(const char* name, double v1, double v2, double v3)
   {
-    double v[3] = {v1, v2, v3};
+    double v[3] = { v1, v2, v3 };
     this->AddShaderVariable(name, 3, v);
   }
   //@}
@@ -431,22 +534,64 @@ public:
    * must be assigned unique names. Note that for texture blending the
    * textures will be rendering is alphabetical order and after any texture
    * defined in the actor.
+   * There exists 4 special textures with reserved names: "albedoTex", "materialTex", "normalTex",
+   * "emissiveTex" and "anisotropyTex". While these textures can be added with the regular
+   * SetTexture method, it is preferred to use the methods SetBaseColorTexture, SetORMTexture,
+   * SetNormalTexture, SetEmissiveTexture and SetAnisotropyTexture respectively.
    */
   void SetTexture(const char* name, vtkTexture* texture);
   vtkTexture* GetTexture(const char* name);
   //@}
 
-  //@{
   /**
-   * Set/Get the texture object to control rendering texture maps. This will
-   * be a vtkTexture object. A property does not need to have an associated
-   * texture map and multiple properties can share one texture. Textures
-   * must be assigned unique names.
+   * Set the base color texture. Also called albedo, this texture is only used while rendering
+   * with PBR interpolation. This is the color of the object.
+   * This texture must be in sRGB color space.
+   * @sa SetInterpolationToPBR vtkTexture::UseSRGBColorSpaceOn
    */
-  VTK_LEGACY(void SetTexture(int unit, vtkTexture* texture));
-  VTK_LEGACY(vtkTexture* GetTexture(int unit));
-  VTK_LEGACY(void RemoveTexture(int unit));
-  //@}
+  void SetBaseColorTexture(vtkTexture* texture) { this->SetTexture("albedoTex", texture); }
+
+  /**
+   * Set the ORM texture. This texture contains three RGB independent components corresponding to
+   * the Occlusion value, Roughness value and Metallic value respectively.
+   * Each texture value is scaled by the Occlusion strength, roughness coefficient and metallic
+   * coefficient.
+   * This texture must be in linear color space.
+   * This is only used by the PBR shading model.
+   * @sa SetInterpolationToPBR SetOcclusionStrength SetMetallic SetRoughness
+   */
+  void SetORMTexture(vtkTexture* texture) { this->SetTexture("materialTex", texture); }
+
+  /**
+   * Set the anisotropy texture. This texture contains two independent components corresponding to
+   * the anisotropy value and anisotropy rotation. The last component (blue channel) is discarded.
+   * The anisotropy value is scaled by the anisotropy coefficient of the material. The anisotropy
+   * rotation rotates the direction of the anisotropy (ie. the tangent) around the normal and is not
+   * scaled by the anisotropy rotation coefficient.
+   * This texture must be in linear color space.
+   * This is only used by the PBR shading model.
+   * @sa SetInterpolationToPBR SetAnisotropy
+   */
+  void SetAnisotropyTexture(vtkTexture* texture) { this->SetTexture("anisotropyTex", texture); }
+
+  /**
+   * Set the normal texture. This texture is required for normal mapping. It is valid for both PBR
+   * and Phong interpolation.
+   * The normal mapping is enabled if this texture is present and both normals and tangents are
+   * presents in the vtkPolyData.
+   * This texture must be in linear color space.
+   * @sa vtkPolyDataTangents SetNormalScale
+   */
+  void SetNormalTexture(vtkTexture* texture) { this->SetTexture("normalTex", texture); }
+
+  /**
+   * Set the emissive texture. When present, this RGB texture provides location and color to the
+   * shader where the vtkPolyData should emit light. Emited light is scaled by EmissiveFactor.
+   * This is only supported by PBR interpolation model.
+   * This texture must be in sRGB color space.
+   * @sa SetInterpolationToPBR SetEmissiveFactor vtkTexture::UseSRGBColorSpaceOn
+   */
+  void SetEmissiveTexture(vtkTexture* texture) { this->SetTexture("emissiveTex", texture); }
 
   /**
    * Remove a texture from the collection.
@@ -466,31 +611,14 @@ public:
   /**
    * Returns all the textures in this property and their names
    */
-  std::map<std::string, vtkTexture *> &GetAllTextures() {
-    return this->Textures; }
+  std::map<std::string, vtkTexture*>& GetAllTextures() { return this->Textures; }
 
   /**
    * Release any graphics resources that are being consumed by this
    * property. The parameter window could be used to determine which graphic
    * resources to release.
    */
-  virtual void ReleaseGraphicsResources(vtkWindow *win);
-
-
-#ifndef VTK_LEGACY_REMOVE
-  // deprecated. Textures should use names not units
-  enum VTKTextureUnit
-  {
-    VTK_TEXTURE_UNIT_0 = 0,
-    VTK_TEXTURE_UNIT_1,
-    VTK_TEXTURE_UNIT_2,
-    VTK_TEXTURE_UNIT_3,
-    VTK_TEXTURE_UNIT_4,
-    VTK_TEXTURE_UNIT_5,
-    VTK_TEXTURE_UNIT_6,
-    VTK_TEXTURE_UNIT_7
-  };
-#endif
+  virtual void ReleaseGraphicsResources(vtkWindow* win);
 
   //@{
   /**
@@ -507,10 +635,8 @@ protected:
   /**
    * Computes composite color. Used by GetColor().
    */
-  static void ComputeCompositeColor(double result[3],
-    double ambient, const double ambient_color[3],
-    double diffuse, const double diffuse_color[3],
-    double specular, const double specular_color[3]);
+  static void ComputeCompositeColor(double result[3], double ambient, const double ambient_color[3],
+    double diffuse, const double diffuse_color[3], double specular, const double specular_color[3]);
 
   double Color[3];
   double AmbientColor[3];
@@ -518,13 +644,24 @@ protected:
   double SpecularColor[3];
   double EdgeColor[3];
   double VertexColor[3];
+  double SelectionColor[4] = { 1.0, 0.0, 0.0, 1.0 };
   double Ambient;
   double Diffuse;
+  double Metallic;
+  double Roughness;
+  double Anisotropy;
+  double AnisotropyRotation;
+  double NormalScale;
+  double OcclusionStrength;
+  double EmissiveFactor[3];
   double Specular;
   double SpecularPower;
   double Opacity;
+  double EdgeTint[3];
   float PointSize;
   float LineWidth;
+  float SelectionPointSize = 2.f;
+  float SelectionLineWidth = 2.f;
   int LineStipplePattern;
   int LineStippleRepeatFactor;
   int Interpolation;
@@ -556,7 +693,7 @@ private:
 /**
  * Return the method of shading as a descriptive character string.
  */
-inline const char *vtkProperty::GetInterpolationAsString(void)
+inline const char* vtkProperty::GetInterpolationAsString(void)
 {
   if (this->Interpolation == VTK_FLAT)
   {
@@ -566,9 +703,13 @@ inline const char *vtkProperty::GetInterpolationAsString(void)
   {
     return "Gouraud";
   }
-  else
+  else if (this->Interpolation == VTK_PHONG)
   {
     return "Phong";
+  }
+  else // if (this->Interpolation == VTK_PBR)
+  {
+    return "Physically based rendering";
   }
 }
 //@}
@@ -577,7 +718,7 @@ inline const char *vtkProperty::GetInterpolationAsString(void)
 /**
  * Return the method of shading as a descriptive character string.
  */
-inline const char *vtkProperty::GetRepresentationAsString(void)
+inline const char* vtkProperty::GetRepresentationAsString(void)
 {
   if (this->Representation == VTK_POINTS)
   {

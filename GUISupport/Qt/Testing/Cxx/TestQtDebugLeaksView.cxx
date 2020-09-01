@@ -15,17 +15,18 @@
 // Tests vtkQtDebugLeaksModel and vtkQtDebugLeaksView.
 
 #include "vtkConeSource.h"
+#include "vtkDebug.h"
 #include "vtkDebugLeaks.h"
-#include "vtkSmartPointer.h"
 #include "vtkQtDebugLeaksModel.h"
 #include "vtkQtDebugLeaksView.h"
+#include "vtkSmartPointer.h"
 
 #include <QApplication>
 #include <QStandardItemModel>
 #include <QTableView>
 
-#define fail(msg) \
-  std::cout << msg << std::endl; \
+#define fail(msg)                                                                                  \
+  std::cout << msg << std::endl;                                                                   \
   return EXIT_FAILURE
 
 int TestQtDebugLeaksView(int argc, char* argv[])
@@ -58,10 +59,10 @@ int TestQtDebugLeaksView(int argc, char* argv[])
     fail("Expected number of vtkConeSource to be 0");
   }
 
-  // The rest of the test requires that VTK_DEBUG_LEAKS is enabled.
-  // The beginning of this test is still useful to ensure that the widget
-  // opens without crashing when debug leaks is disabled.
-  #ifdef VTK_DEBUG_LEAKS
+// The rest of the test requires that VTK_DEBUG_LEAKS is enabled.
+// The beginning of this test is still useful to ensure that the widget
+// opens without crashing when debug leaks is disabled.
+#ifdef VTK_DEBUG_LEAKS
 
   vtkSmartPointer<vtkConeSource> cone = vtkSmartPointer<vtkConeSource>::New();
   app.processEvents();
@@ -158,12 +159,12 @@ int TestQtDebugLeaksView(int argc, char* argv[])
     fail("Expected 0 rows in the debug leaks view");
   }
 
-  #endif
+#endif
 
-  //uncomment to keep the widget open for interaction
-  //view.show();
-  //view.setAttribute(Qt::WA_QuitOnClose, true);
-  //app.exec();
+  // uncomment to keep the widget open for interaction
+  // view.show();
+  // view.setAttribute(Qt::WA_QuitOnClose, true);
+  // app.exec();
 
   return EXIT_SUCCESS;
 }

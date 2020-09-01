@@ -20,26 +20,29 @@
  * point attribute data (e.g., scalars, vectors, normals, texture
  * coordinates, etc.) Most of the functionality is handled by
  * vtkDataSetAttributes
-*/
+ */
 
 #ifndef vtkPointData_h
 #define vtkPointData_h
 
 #include "vtkCommonDataModelModule.h" // For export macro
 #include "vtkDataSetAttributes.h"
+#include "vtkDeprecation.h" // for VTK_DEPRECATED_IN_9_0_0
 
 class VTKCOMMONDATAMODEL_EXPORT vtkPointData : public vtkDataSetAttributes
 {
 public:
-  static vtkPointData *New();
+  static vtkPointData* New();
+  static vtkPointData* ExtendedNew();
 
-  vtkTypeMacro(vtkPointData,vtkDataSetAttributes);
+  vtkTypeMacro(vtkPointData, vtkDataSetAttributes);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+  VTK_DEPRECATED_IN_9_1_0("Use vtkFieldData::NullData")
   void NullPoint(vtkIdType ptId);
 
 protected:
-  vtkPointData() {}
-  ~vtkPointData() override {}
+  vtkPointData() = default;
+  ~vtkPointData() override = default;
 
 private:
   vtkPointData(const vtkPointData&) = delete;
@@ -47,5 +50,3 @@ private:
 };
 
 #endif
-
-

@@ -1,12 +1,12 @@
 import sys
+import vtk.test.Testing
 
 try:
     import numpy
 except ImportError:
     print("Numpy (http://numpy.scipy.org) not found.")
     print("This test requires numpy!")
-    from vtk.test import Testing
-    Testing.skip()
+    vtk.test.Testing.skip()
 
 import vtk
 import vtk.numpy_interface.dataset_adapter as dsa
@@ -261,3 +261,14 @@ mb.SetBlock(0, sg)
 mb.SetBlock(1, vtk.vtkImageData())
 assert dsa.WrapDataObject(mb).Points.Arrays[0] is not na
 assert dsa.WrapDataObject(mb).Points.Arrays[1] is na
+
+# --------------------------------------
+# try appending scalars
+ssource = vtk.vtkSphereSource()
+ssource.Update()
+output = ssource.GetOutput()
+pdw = dsa.WrapDataObject(output)
+original_arrays = pdw.PointData.GetNumberOfArrays()
+pdw.PointData.append(12, "twelve")
+pdw.PointData.append(12.12, "twelve-point-twelve")
+assert pdw.PointData.GetNumberOfArrays() == (2 + original_arrays)

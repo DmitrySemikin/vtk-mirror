@@ -181,7 +181,7 @@ public:
       {
         H5Lget_name_by_idx(groupId, ".", H5_INDEX_NAME, H5_ITER_INC, idx, datasetName,
           DATASET_NAME_MAX_SIZE, H5P_DEFAULT);
-        datasetNames.push_back(datasetName);
+        datasetNames.emplace_back(datasetName);
       }
       H5Gclose(groupId);
 
@@ -227,10 +227,10 @@ public:
       count++;
       std::ostringstream groupName;
       groupName << "/STATE_" << std::setw(4) << std::setfill('0') << count;
-      H5Eset_auto(NULL, NULL);
-      status = H5Gget_objinfo(this->FileId, groupName.str().c_str(), 0, NULL);
+      H5Eset_auto(nullptr, nullptr);
+      status = H5Gget_objinfo(this->FileId, groupName.str().c_str(), false, nullptr);
     }
-    // H5Eset_auto(NULL, NULL);
+    // H5Eset_auto(nullptr, nullptr);
     this->NUMBER_OF_STATES = count ? count - 1 : 0;
     // ----------------------------------
 
@@ -259,8 +259,8 @@ public:
     if ((datasetId = H5Dopen(groupId, datasetName)) < 0)
     {
       H5Gclose(groupId);
-      vtkErrorWithObjectMacro(this->Owner, "DataSet " << datasetName << " in group " << groupName
-                                                      << " don't want to open.");
+      vtkErrorWithObjectMacro(this->Owner,
+        "DataSet " << datasetName << " in group " << groupName << " don't want to open.");
       return false;
     }
 
@@ -307,8 +307,8 @@ public:
     hid_t datasetId;
     if ((datasetId = H5Dopen(groupId, datasetName)) < 0)
     {
-      vtkErrorWithObjectMacro(this->Owner, "DataSet " << datasetName << " in group " << groupName
-                                                      << " don't want to open.");
+      vtkErrorWithObjectMacro(this->Owner,
+        "DataSet " << datasetName << " in group " << groupName << " don't want to open.");
       H5Gclose(groupId);
       return nullptr;
     }
@@ -400,7 +400,8 @@ public:
     }
     else
     {
-      vtkErrorWithObjectMacro(this->Owner, "Unknown HDF5 data type --- it is not FLOAT, "
+      vtkErrorWithObjectMacro(this->Owner,
+        "Unknown HDF5 data type --- it is not FLOAT, "
           << "DOUBLE, INT, UNSIGNED INT, SHORT, UNSIGNED SHORT, "
           << "UNSIGNED CHAR, LONG, or LONG LONG.");
     }
@@ -513,7 +514,7 @@ public:
     {
       H5Lget_name_by_idx(groupId, ".", H5_INDEX_NAME, H5_ITER_INC, idx, datasetName,
         DATASET_NAME_MAX_SIZE, H5P_DEFAULT);
-      datasetNames.push_back(datasetName);
+      datasetNames.emplace_back(datasetName);
     }
 
     // Start processing datasets
@@ -523,8 +524,8 @@ public:
       hid_t datasetId;
       if ((datasetId = H5Dopen(groupId, dsName.c_str())) < 0)
       {
-        vtkErrorWithObjectMacro(this->Owner, "DataSet " << dsName.c_str() << " in group "
-                                                        << groupName << " don't want to open.");
+        vtkErrorWithObjectMacro(this->Owner,
+          "DataSet " << dsName.c_str() << " in group " << groupName << " don't want to open.");
         continue;
       }
 
@@ -599,7 +600,7 @@ public:
 
       outputCellArray = this->CreatePinFieldArray(dataSource);
       outputCellArray->SetName(dataSource->GetName());
-      this->CoreCellData.push_back(outputCellArray);
+      this->CoreCellData.emplace_back(outputCellArray);
       outputCellArray->Delete();
       dataSource->Delete();
     }
@@ -660,7 +661,7 @@ public:
         }
       }
     }
-    this->CoreCellData.push_back(outputCellArray);
+    this->CoreCellData.emplace_back(outputCellArray);
     outputCellArray->Delete();
   }
 
@@ -733,7 +734,7 @@ public:
     {
       H5Lget_name_by_idx(groupId, ".", H5_INDEX_NAME, H5_ITER_INC, idx, datasetName,
         DATASET_NAME_MAX_SIZE, H5P_DEFAULT);
-      datasetNames.push_back(datasetName);
+      datasetNames.emplace_back(datasetName);
     }
     H5Gclose(groupId);
 
@@ -809,15 +810,15 @@ private:
   vtkSmartPointer<vtkDataArray> ZCoordinates;
   vtkSmartPointer<vtkDataArray> CoreMap;
 
-  std::vector<vtkSmartPointer<vtkDataArray> > CoreCellData;
+  std::vector<vtkSmartPointer<vtkDataArray>> CoreCellData;
 };
 //*****************************************************************************
 
 vtkStandardNewMacro(vtkVeraOutReader);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Constructor for vtkVeraOutReader
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkVeraOutReader::vtkVeraOutReader()
 {
   this->FileName = nullptr;
@@ -828,9 +829,9 @@ vtkVeraOutReader::vtkVeraOutReader()
   this->Internal = new Internals(this);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Destructor for vtkVeraOutReader
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkVeraOutReader::~vtkVeraOutReader()
 {
   this->SetFileName(nullptr);
@@ -838,9 +839,9 @@ vtkVeraOutReader::~vtkVeraOutReader()
   this->Internal = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Verify that the file exists, get dimension sizes and variables
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkVeraOutReader::RequestInformation(
   vtkInformation* reqInfo, vtkInformationVector** inVector, vtkInformationVector* outVector)
 {
@@ -880,9 +881,9 @@ int vtkVeraOutReader::RequestInformation(
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Default method: Data is read into a vtkUnstructuredGrid
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkVeraOutReader::RequestData(vtkInformation* vtkNotUsed(reqInfo),
   vtkInformationVector** vtkNotUsed(inVector), vtkInformationVector* outVector)
 {
@@ -928,36 +929,36 @@ int vtkVeraOutReader::RequestData(vtkInformation* vtkNotUsed(reqInfo),
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //  Print self.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkVeraOutReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
   os << indent << "FileName: " << (this->FileName ? this->FileName : "NULL") << "\n";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Cell Array Selection
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 vtkDataArraySelection* vtkVeraOutReader::GetCellDataArraySelection() const
 {
   return this->Internal->CellDataArraySelection;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Field Array Selection
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 vtkDataArraySelection* vtkVeraOutReader::GetFieldDataArraySelection() const
 {
   return this->Internal->FieldDataArraySelection;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // MTime
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 vtkMTimeType vtkVeraOutReader::GetMTime()
 {
@@ -965,8 +966,8 @@ vtkMTimeType vtkVeraOutReader::GetMTime()
   vtkMTimeType cellMTime = this->Internal->CellDataArraySelection->GetMTime();
   vtkMTimeType fieldMTime = this->Internal->FieldDataArraySelection->GetMTime();
 
-  mTime = ( cellMTime > mTime ? cellMTime : mTime );
-  mTime = ( fieldMTime > mTime ? fieldMTime : mTime );
+  mTime = (cellMTime > mTime ? cellMTime : mTime);
+  mTime = (fieldMTime > mTime ? fieldMTime : mTime);
 
   return mTime;
 }

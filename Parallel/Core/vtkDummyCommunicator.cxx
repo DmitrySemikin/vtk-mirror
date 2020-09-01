@@ -18,7 +18,7 @@
 
 vtkStandardNewMacro(vtkDummyCommunicator);
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDummyCommunicator::vtkDummyCommunicator()
 {
   this->MaximumNumberOfProcesses = 1;
@@ -26,7 +26,7 @@ vtkDummyCommunicator::vtkDummyCommunicator()
 
 vtkDummyCommunicator::~vtkDummyCommunicator() = default;
 
-void vtkDummyCommunicator::PrintSelf(ostream &os, vtkIndent indent)
+void vtkDummyCommunicator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }

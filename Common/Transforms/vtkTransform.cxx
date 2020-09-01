@@ -20,7 +20,7 @@
 
 vtkStandardNewMacro(vtkTransform);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkTransform::vtkTransform()
 {
   this->Input = nullptr;
@@ -33,14 +33,13 @@ vtkTransform::vtkTransform()
 
   // initialize the legacy 'Point' info
   this->Point[0] = this->Point[1] = this->Point[2] = this->Point[3] = 0.0;
-  this->DoublePoint[0] =
-    this->DoublePoint[1] = this->DoublePoint[2] = this->DoublePoint[3] = 0.0;
+  this->DoublePoint[0] = this->DoublePoint[1] = this->DoublePoint[2] = this->DoublePoint[3] = 0.0;
 
   // save the original matrix MTime as part of a hack to support legacy code
   this->MatrixUpdateMTime = this->Matrix->GetMTime();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkTransform::~vtkTransform()
 {
   this->SetInput(nullptr);
@@ -55,7 +54,7 @@ vtkTransform::~vtkTransform()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkTransform::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Update();
@@ -63,29 +62,28 @@ void vtkTransform::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
   os << indent << "Input: (" << this->Input << ")\n";
   os << indent << "InverseFlag: " << this->GetInverseFlag() << "\n";
-  os << indent << "NumberOfConcatenatedTransforms: " <<
-    this->GetNumberOfConcatenatedTransforms() << "\n";
+  os << indent << "NumberOfConcatenatedTransforms: " << this->GetNumberOfConcatenatedTransforms()
+     << "\n";
   if (this->GetNumberOfConcatenatedTransforms() != 0)
   {
     int n = this->GetNumberOfConcatenatedTransforms();
     for (int i = 0; i < n; i++)
     {
-      vtkLinearTransform *t = this->GetConcatenatedTransform(i);
-      os << indent << "    " << i << ": " << t->GetClassName() << " at " <<
-         t << "\n";
+      vtkLinearTransform* t = this->GetConcatenatedTransform(i);
+      os << indent << "    " << i << ": " << t->GetClassName() << " at " << t << "\n";
     }
   }
 
-  os << indent << "DoublePoint: " << "( " <<
-     this->DoublePoint[0] << ", " << this->DoublePoint[1] << ", " <<
-     this->DoublePoint[2] << ", " << this->DoublePoint[3] << ")\n";
+  os << indent << "DoublePoint: "
+     << "( " << this->DoublePoint[0] << ", " << this->DoublePoint[1] << ", " << this->DoublePoint[2]
+     << ", " << this->DoublePoint[3] << ")\n";
 
-  os << indent << "Point: " << "( " <<
-     this->Point[0] << ", " << this->Point[1] << ", " <<
-     this->Point[2] << ", " << this->Point[3] << ")\n";
+  os << indent << "Point: "
+     << "( " << this->Point[0] << ", " << this->Point[1] << ", " << this->Point[2] << ", "
+     << this->Point[3] << ")\n";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkTransform::Identity()
 {
   this->Concatenation->Identity();
@@ -99,7 +97,7 @@ void vtkTransform::Identity()
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkTransform::Inverse()
 {
   this->Concatenation->Inverse();
@@ -113,10 +111,10 @@ void vtkTransform::Inverse()
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
-void vtkTransform::InternalDeepCopy(vtkAbstractTransform *gtrans)
+//------------------------------------------------------------------------------
+void vtkTransform::InternalDeepCopy(vtkAbstractTransform* gtrans)
 {
-  vtkTransform *transform = static_cast<vtkTransform *>(gtrans);
+  vtkTransform* transform = static_cast<vtkTransform*>(gtrans);
 
   // copy the input
   this->SetInput(transform->Input);
@@ -154,7 +152,7 @@ void vtkTransform::InternalDeepCopy(vtkAbstractTransform *gtrans)
   this->MatrixUpdateMTime = this->Matrix->GetMTime();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkTransform::InternalUpdate()
 {
   int i;
@@ -165,15 +163,14 @@ void vtkTransform::InternalUpdate()
   int doTheLegacyHack = 0;
   if (this->Matrix->GetMTime() > this->MatrixUpdateMTime)
   {
-    vtkDebugMacro(<<"InternalUpdate: this->Matrix was modified by something other than 'this'");
+    vtkDebugMacro(<< "InternalUpdate: this->Matrix was modified by something other than 'this'");
 
     // check to see if we have any inputs or concatenated transforms
     int isPipelined = (this->Input != nullptr);
     for (i = 0; i < nTransforms && !isPipelined; i++)
     { // the vtkSimpleTransform is just a matrix placeholder,
-        // it is not a real transform
-      isPipelined =
-        !this->Concatenation->GetTransform(i)->IsA("vtkSimpleTransform");
+      // it is not a real transform
+      isPipelined = !this->Concatenation->GetTransform(i)->IsA("vtkSimpleTransform");
     }
     // do the legacy hack only if we have no input transforms
     doTheLegacyHack = !isPipelined;
@@ -203,31 +200,29 @@ void vtkTransform::InternalUpdate()
     }
   }
   else
-  {  // otherwise, we start with the identity transform as our base
+  { // otherwise, we start with the identity transform as our base
     this->Matrix->Identity();
   }
 
   // concatenate PreTransforms
-  for (i = nPreTransforms-1; i >= 0; i--)
+  for (i = nPreTransforms - 1; i >= 0; i--)
   {
-    vtkHomogeneousTransform *transform =
-      static_cast<vtkHomogeneousTransform *>(this->Concatenation->GetTransform(i));
-    vtkMatrix4x4::Multiply4x4(this->Matrix,transform->GetMatrix(),
-                              this->Matrix);
+    vtkHomogeneousTransform* transform =
+      static_cast<vtkHomogeneousTransform*>(this->Concatenation->GetTransform(i));
+    vtkMatrix4x4::Multiply4x4(this->Matrix, transform->GetMatrix(), this->Matrix);
   }
 
   // concatenate PostTransforms
   for (i = nPreTransforms; i < nTransforms; i++)
   {
-    vtkHomogeneousTransform *transform =
-      static_cast<vtkHomogeneousTransform *>(this->Concatenation->GetTransform(i));
-    vtkMatrix4x4::Multiply4x4(transform->GetMatrix(),this->Matrix,
-                              this->Matrix);
+    vtkHomogeneousTransform* transform =
+      static_cast<vtkHomogeneousTransform*>(this->Concatenation->GetTransform(i));
+    vtkMatrix4x4::Multiply4x4(transform->GetMatrix(), this->Matrix, this->Matrix);
   }
 
   if (doTheLegacyHack)
   { // the transform operations have been incorporated into the matrix,
-      // so delete them
+    // so delete them
     this->Concatenation->Identity();
   }
   else
@@ -236,8 +231,8 @@ void vtkTransform::InternalUpdate()
   }
 }
 
-//----------------------------------------------------------------------------
-void vtkTransform::Concatenate(vtkLinearTransform *transform)
+//------------------------------------------------------------------------------
+void vtkTransform::Concatenate(vtkLinearTransform* transform)
 {
   if (transform->CircuitCheck(this))
   {
@@ -248,8 +243,8 @@ void vtkTransform::Concatenate(vtkLinearTransform *transform)
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
-void vtkTransform::SetInput(vtkLinearTransform *input)
+//------------------------------------------------------------------------------
+void vtkTransform::SetInput(vtkLinearTransform* input)
 {
   if (this->Input == input)
   {
@@ -272,11 +267,11 @@ void vtkTransform::SetInput(vtkLinearTransform *input)
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
-int vtkTransform::CircuitCheck(vtkAbstractTransform *transform)
+//------------------------------------------------------------------------------
+int vtkTransform::CircuitCheck(vtkAbstractTransform* transform)
 {
   if (this->vtkLinearTransform::CircuitCheck(transform) ||
-      (this->Input && this->Input->CircuitCheck(transform)))
+    (this->Input && this->Input->CircuitCheck(transform)))
   {
     return 1;
   }
@@ -293,13 +288,13 @@ int vtkTransform::CircuitCheck(vtkAbstractTransform *transform)
   return 0;
 }
 
-//----------------------------------------------------------------------------
-vtkAbstractTransform *vtkTransform::MakeTransform()
+//------------------------------------------------------------------------------
+vtkAbstractTransform* vtkTransform::MakeTransform()
 {
   return vtkTransform::New();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkMTimeType vtkTransform::GetMTime()
 {
   vtkMTimeType mtime = this->vtkLinearTransform::GetMTime();
@@ -330,18 +325,17 @@ vtkMTimeType vtkTransform::GetMTime()
   return mtime;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Get the x, y, z orientation angles from the transformation matrix as an
 // array of three floating point values.
-void vtkTransform::GetOrientation(double orientation[3],
-                                  vtkMatrix4x4 *amatrix)
+void vtkTransform::GetOrientation(double orientation[3], vtkMatrix4x4* amatrix)
 {
 #define VTK_AXIS_EPSILON 0.001
 #define VTK_ORTHO_EPSILON 4e-16
   int i;
 
   // convenient access to matrix
-  double (*matrix)[4] = amatrix->Element;
+  double(*matrix)[4] = amatrix->Element;
   double ortho[3][3];
 
   for (i = 0; i < 3; i++)
@@ -358,12 +352,12 @@ void vtkTransform::GetOrientation(double orientation[3],
   }
 
   // Check whether matrix is orthogonal
-  double r1 = vtkMath::Dot(ortho[0],ortho[1]);
-  double r2 = vtkMath::Dot(ortho[0],ortho[2]);
-  double r3 = vtkMath::Dot(ortho[1],ortho[2]);
+  double r1 = vtkMath::Dot(ortho[0], ortho[1]);
+  double r2 = vtkMath::Dot(ortho[0], ortho[2]);
+  double r3 = vtkMath::Dot(ortho[1], ortho[2]);
 
   // Orthogonalize the matrix if it isn't already orthogonal
-  if ((r1*r1) + (r2*r2) + (r3*r3) > (VTK_ORTHO_EPSILON*VTK_ORTHO_EPSILON))
+  if ((r1 * r1) + (r2 * r2) + (r3 * r3) > (VTK_ORTHO_EPSILON * VTK_ORTHO_EPSILON))
   {
     vtkMath::Orthogonalize3x3(ortho, ortho);
   }
@@ -391,25 +385,25 @@ void vtkTransform::GetOrientation(double orientation[3],
   double y3 = ortho[1][1];
   double z3 = ortho[1][2];
 
-  double d1 = sqrt(x2*x2 + z2*z2);
+  double d1 = sqrt(x2 * x2 + z2 * z2);
 
   double cosTheta, sinTheta;
-  if (d1 < VTK_AXIS_EPSILON*maxScale)
+  if (d1 < VTK_AXIS_EPSILON * maxScale)
   {
     cosTheta = 1.0;
     sinTheta = 0.0;
   }
   else
   {
-    cosTheta = z2/d1;
-    sinTheta = x2/d1;
+    cosTheta = z2 / d1;
+    sinTheta = x2 / d1;
   }
 
   double theta = atan2(sinTheta, cosTheta);
-  orientation[1] = - vtkMath::DegreesFromRadians( theta );
+  orientation[1] = -vtkMath::DegreesFromRadians(theta);
 
   // now rotate about x axis
-  double d = sqrt(x2*x2 + y2*y2 + z2*z2);
+  double d = sqrt(x2 * x2 + y2 * y2 + z2 * z2);
 
   double sinPhi, cosPhi;
   if (d < VTK_AXIS_EPSILON * maxScale)
@@ -419,22 +413,22 @@ void vtkTransform::GetOrientation(double orientation[3],
   }
   else if (d1 < VTK_AXIS_EPSILON * maxScale)
   {
-    sinPhi = y2/d;
-    cosPhi = z2/d;
+    sinPhi = y2 / d;
+    cosPhi = z2 / d;
   }
   else
   {
-    sinPhi = y2/d;
-    cosPhi = (x2*x2 + z2*z2)/(d1*d);
+    sinPhi = y2 / d;
+    cosPhi = (x2 * x2 + z2 * z2) / (d1 * d);
   }
 
   double phi = atan2(sinPhi, cosPhi);
-  orientation[0] = vtkMath::DegreesFromRadians( phi );
+  orientation[0] = vtkMath::DegreesFromRadians(phi);
 
   // finally, rotate about z
-  double x3p = x3*cosTheta - z3*sinTheta;
-  double y3p = - sinPhi*sinTheta*x3 + cosPhi*y3 - sinPhi*cosTheta*z3;
-  double d2 = sqrt(x3p*x3p + y3p*y3p);
+  double x3p = x3 * cosTheta - z3 * sinTheta;
+  double y3p = -sinPhi * sinTheta * x3 + cosPhi * y3 - sinPhi * cosTheta * z3;
+  double d2 = sqrt(x3p * x3p + y3p * y3p);
 
   double cosAlpha, sinAlpha;
   if (d2 < VTK_AXIS_EPSILON * maxScale)
@@ -444,15 +438,15 @@ void vtkTransform::GetOrientation(double orientation[3],
   }
   else
   {
-    cosAlpha = y3p/d2;
-    sinAlpha = x3p/d2;
+    cosAlpha = y3p / d2;
+    sinAlpha = x3p / d2;
   }
 
   double alpha = atan2(sinAlpha, cosAlpha);
-  orientation[2] = vtkMath::DegreesFromRadians( alpha );
+  orientation[2] = vtkMath::DegreesFromRadians(alpha);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Get the x, y, z orientation angles from the transformation matrix as an
 // array of three floating point values.
 void vtkTransform::GetOrientation(double orientation[3])
@@ -461,7 +455,7 @@ void vtkTransform::GetOrientation(double orientation[3])
   this->GetOrientation(orientation, this->Matrix);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // vtkTransform::GetOrientationWXYZ
 void vtkTransform::GetOrientationWXYZ(double wxyz[4])
 {
@@ -469,7 +463,7 @@ void vtkTransform::GetOrientationWXYZ(double wxyz[4])
 
   this->Update();
   // convenient access to matrix
-  double (*matrix)[4] = this->Matrix->Element;
+  double(*matrix)[4] = this->Matrix->Element;
   double ortho[3][3];
 
   for (i = 0; i < 3; i++)
@@ -488,11 +482,11 @@ void vtkTransform::GetOrientationWXYZ(double wxyz[4])
   vtkMath::Matrix3x3ToQuaternion(ortho, wxyz);
 
   // calc the return value wxyz
- double mag = sqrt( wxyz[1] * wxyz[1] + wxyz[2] * wxyz[2] + wxyz[3] * wxyz[3] );
+  double mag = sqrt(wxyz[1] * wxyz[1] + wxyz[2] * wxyz[2] + wxyz[3] * wxyz[3]);
 
-  if ( mag != 0.0 )
+  if (mag != 0.0)
   {
-    wxyz[0] = 2.0 * vtkMath::DegreesFromRadians( atan2( mag, wxyz[0] ) );
+    wxyz[0] = 2.0 * vtkMath::DegreesFromRadians(atan2(mag, wxyz[0]));
     wxyz[1] /= mag;
     wxyz[2] /= mag;
     wxyz[3] /= mag;
@@ -506,8 +500,7 @@ void vtkTransform::GetOrientationWXYZ(double wxyz[4])
   }
 }
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Return the position from the current transformation matrix as an array
 // of three floating point numbers. This is simply returning the translation
 // component of the 4x4 matrix.
@@ -520,7 +513,7 @@ void vtkTransform::GetPosition(double position[3])
   position[2] = this->Matrix->Element[2][3];
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Return the x, y, z scale factors of the current transformation matrix as
 // an array of three float numbers.
 void vtkTransform::GetScale(double scale[3])
@@ -528,7 +521,7 @@ void vtkTransform::GetScale(double scale[3])
   this->Update();
 
   // convenient access to matrix
-  double (*matrix)[4] = this->Matrix->Element;
+  double(*matrix)[4] = this->Matrix->Element;
   double U[3][3], VT[3][3];
 
   for (int i = 0; i < 3; i++)
@@ -541,17 +534,16 @@ void vtkTransform::GetScale(double scale[3])
   vtkMath::SingularValueDecomposition3x3(U, U, scale, VT);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Return the inverse of the current transformation matrix.
-void vtkTransform::GetInverse(vtkMatrix4x4 *inverse)
+void vtkTransform::GetInverse(vtkMatrix4x4* inverse)
 {
-  vtkMatrix4x4::Invert(this->GetMatrix(),inverse);
+  vtkMatrix4x4::Invert(this->GetMatrix(), inverse);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Obtain the transpose of the current transformation matrix.
-void vtkTransform::GetTranspose(vtkMatrix4x4 *transpose)
+void vtkTransform::GetTranspose(vtkMatrix4x4* transpose)
 {
-  vtkMatrix4x4::Transpose(this->GetMatrix(),transpose);
+  vtkMatrix4x4::Transpose(this->GetMatrix(), transpose);
 }
-

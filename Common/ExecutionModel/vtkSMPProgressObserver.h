@@ -22,7 +22,7 @@
  * information, one has to listen to the local observer in the same
  * thread. Since the execution will be somewhat load balanced,
  * it may be enough to do this only on the main thread.
-*/
+ */
 
 #ifndef vtkSMPProgressObserver_h
 #define vtkSMPProgressObserver_h
@@ -34,24 +34,21 @@
 class VTKCOMMONEXECUTIONMODEL_EXPORT vtkSMPProgressObserver : public vtkProgressObserver
 {
 public:
-  static vtkSMPProgressObserver *New();
-  vtkTypeMacro(vtkSMPProgressObserver,vtkProgressObserver);
+  static vtkSMPProgressObserver* New();
+  vtkTypeMacro(vtkSMPProgressObserver, vtkProgressObserver);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Passes the progress event to a thread local ProgressObserver
    * instance.
    */
-  void UpdateProgress(double amount) override;
+  void UpdateProgress(double progress) override;
 
   /**
    * Returns the progress observer local to the thread it was
    * called from.
    */
-  vtkProgressObserver* GetLocalObserver()
-  {
-    return this->Observers.Local();
-  }
+  vtkProgressObserver* GetLocalObserver() { return this->Observers.Local(); }
 
 protected:
   vtkSMPProgressObserver();

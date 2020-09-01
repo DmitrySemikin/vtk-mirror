@@ -44,7 +44,7 @@ Before you begin, perform initial setup:
     "Subscribe to this project" on the right of VTK.
 
 [GitLab Access]: https://gitlab.kitware.com/users/sign_in
-[Fork VTK]: https://gitlab.kitware.com/vtk/vtk/forks/new
+[Fork VTK]: https://gitlab.kitware.com/vtk/vtk/-/forks/new
 [developer setup script]: /Utilities/SetupForDevelopment.sh
 
 Workflow
@@ -127,6 +127,7 @@ A reader should have a general idea of the feature or fix to be developed given 
     * To add data follow [these instructions](data.md).
     * If your change modifies third party code, see [its
       documentation](../../../ThirdParty/UPDATING.md).
+    * To deprecate APIs, follow [these instructions](deprecation.md).
 
 Guidelines for Commit logs
 --------------------------
@@ -196,7 +197,7 @@ left, and use the "**New Merge Request**" button in the upper right to
 reach the URL printed at the end of the [previous step](#share-a-topic).
 It should be of the form:
 
-    https://gitlab.kitware.com/<username>/vtk/merge_requests/new
+    https://gitlab.kitware.com/<username>/vtk/-/merge_requests/new
 
 Follow these steps:
 

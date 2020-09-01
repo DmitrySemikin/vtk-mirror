@@ -14,8 +14,8 @@
 =========================================================================*/
 #include "vtkXMLPartitionedDataSetReader.h"
 
-#include "vtkCompositeDataSet.h"
 #include "vtkCompositeDataPipeline.h"
+#include "vtkCompositeDataSet.h"
 #include "vtkDataSet.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -26,23 +26,19 @@
 
 vtkStandardNewMacro(vtkXMLPartitionedDataSetReader);
 
-//----------------------------------------------------------------------------
-vtkXMLPartitionedDataSetReader::vtkXMLPartitionedDataSetReader()
-{
-}
+//------------------------------------------------------------------------------
+vtkXMLPartitionedDataSetReader::vtkXMLPartitionedDataSetReader() = default;
 
-//----------------------------------------------------------------------------
-vtkXMLPartitionedDataSetReader::~vtkXMLPartitionedDataSetReader()
-{
-}
+//------------------------------------------------------------------------------
+vtkXMLPartitionedDataSetReader::~vtkXMLPartitionedDataSetReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPartitionedDataSetReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkXMLPartitionedDataSetReader::FillOutputPortInformation(
   int vtkNotUsed(port), vtkInformation* info)
 {
@@ -50,16 +46,15 @@ int vtkXMLPartitionedDataSetReader::FillOutputPortInformation(
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char* vtkXMLPartitionedDataSetReader::GetDataSetName()
 {
   return "vtkPartitionedDataSet";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPartitionedDataSetReader::ReadComposite(vtkXMLDataElement* element,
-  vtkCompositeDataSet* composite, const char* filePath,
-  unsigned int &dataSetIndex)
+  vtkCompositeDataSet* composite, const char* filePath, unsigned int& dataSetIndex)
 {
   vtkPartitionedDataSet* pds = vtkPartitionedDataSet::SafeDownCast(composite);
   if (!pds)
@@ -68,8 +63,10 @@ void vtkXMLPartitionedDataSetReader::ReadComposite(vtkXMLDataElement* element,
     return;
   }
 
+  const unsigned int numberOfParitions =
+    vtkXMLCompositeDataReader::CountNestedElements(element, "Dataset");
   unsigned int maxElems = element->GetNumberOfNestedElements();
-  for (unsigned int cc=0; cc < maxElems; ++cc)
+  for (unsigned int cc = 0; cc < maxElems; ++cc)
   {
     vtkXMLDataElement* childXML = element->GetNestedElement(cc);
     if (!childXML || !childXML->GetName())
@@ -84,7 +81,7 @@ void vtkXMLPartitionedDataSetReader::ReadComposite(vtkXMLDataElement* element,
     if (strcmp(tagName, "DataSet") == 0)
     {
       vtkSmartPointer<vtkDataObject> childDS;
-      if (this->ShouldReadDataSet(dataSetIndex))
+      if (this->ShouldReadDataSet(dataSetIndex, index, numberOfParitions))
       {
         // Read
         childDS.TakeReference(this->ReadDataObject(childXML, filePath));

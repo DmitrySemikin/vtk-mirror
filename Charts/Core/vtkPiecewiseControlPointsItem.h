@@ -23,7 +23,7 @@
  * vtkControlPointsItem
  * vtkPiecewiseFunctionItem
  * vtkCompositeTransferFunctionItem
-*/
+ */
 
 #ifndef vtkPiecewiseControlPointsItem_h
 #define vtkPiecewiseControlPointsItem_h
@@ -33,11 +33,11 @@
 
 class vtkPiecewiseFunction;
 
-class VTKCHARTSCORE_EXPORT vtkPiecewiseControlPointsItem: public vtkControlPointsItem
+class VTKCHARTSCORE_EXPORT vtkPiecewiseControlPointsItem : public vtkControlPointsItem
 {
 public:
   vtkTypeMacro(vtkPiecewiseControlPointsItem, vtkControlPointsItem);
-  void PrintSelf(ostream &os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a piecewise control points object
@@ -69,15 +69,6 @@ public:
    */
   vtkIdType RemovePoint(double* pos) override;
 
-  //@{
-  /**
-   * Controls whether or not control points are drawn (true) or clicked and
-   * moved (false).
-   * False by default.
-   */
-  vtkSetMacro(StrokeMode, bool);
-  //@}
-
 protected:
   vtkPiecewiseControlPointsItem();
   ~vtkPiecewiseControlPointsItem() override;
@@ -86,16 +77,16 @@ protected:
 
   vtkMTimeType GetControlPointsMTime() override;
 
-  vtkIdType GetNumberOfPoints()const override;
-  void GetControlPoint(vtkIdType index, double *point)const override;
-  void SetControlPoint(vtkIdType index, double *point) override;
+  vtkIdType GetNumberOfPoints() const override;
+  void GetControlPoint(vtkIdType index, double* point) const override;
+  void SetControlPoint(vtkIdType index, double* point) override;
   void EditPoint(float tX, float tY) override;
 
   vtkPiecewiseFunction* PiecewiseFunction;
 
 private:
-  vtkPiecewiseControlPointsItem(const vtkPiecewiseControlPointsItem &) = delete;
-  void operator=(const vtkPiecewiseControlPointsItem &) = delete;
+  vtkPiecewiseControlPointsItem(const vtkPiecewiseControlPointsItem&) = delete;
+  void operator=(const vtkPiecewiseControlPointsItem&) = delete;
 };
 
 #endif

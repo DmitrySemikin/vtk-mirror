@@ -26,7 +26,7 @@
  *
  * @sa
  * vtkTreeBFSIterator vtkTreeDFSIterator
-*/
+ */
 
 #ifndef vtkTreeIterator_h
 #define vtkTreeIterator_h
@@ -46,7 +46,7 @@ public:
   /**
    * Set/get the graph to iterate over.
    */
-  void SetTree(vtkTree* graph);
+  void SetTree(vtkTree* tree);
   vtkGetMacro(Tree, vtkTree*);
   //@}
 
@@ -87,8 +87,8 @@ protected:
   vtkIdType NextId;
 
 private:
-  vtkTreeIterator(const vtkTreeIterator &) = delete;
-  void operator=(const vtkTreeIterator &) = delete;
+  vtkTreeIterator(const vtkTreeIterator&) = delete;
+  void operator=(const vtkTreeIterator&) = delete;
 };
 
 #endif

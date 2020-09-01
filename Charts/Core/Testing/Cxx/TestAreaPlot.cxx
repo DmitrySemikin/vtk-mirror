@@ -13,6 +13,9 @@
 
 =========================================================================*/
 
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkAxis.h"
 #include "vtkBrush.h"
 #include "vtkCharArray.h"
@@ -21,16 +24,16 @@
 #include "vtkContextView.h"
 #include "vtkFloatArray.h"
 #include "vtkNew.h"
-#include "vtkPlotArea.h"
 #include "vtkPlot.h"
+#include "vtkPlotArea.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkSmartPointer.h"
 #include "vtkTable.h"
 
 #include <algorithm>
-//----------------------------------------------------------------------------
-int TestAreaPlot( int, char * [] )
+//------------------------------------------------------------------------------
+int TestAreaPlot(int, char*[])
 {
   // Set up a 2D scene, add an XY chart to it
   vtkNew<vtkContextView> view;
@@ -65,7 +68,7 @@ int TestAreaPlot( int, char * [] )
 
   // Test charting with a few more points...
   int numPoints = 69;
-  float inc = 7.5 / (numPoints-1);
+  float inc = 7.5 / (numPoints - 1);
   table->SetNumberOfRows(numPoints);
   for (int i = 0; i < numPoints; ++i)
   {

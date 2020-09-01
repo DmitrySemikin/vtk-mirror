@@ -19,22 +19,22 @@
 #include "vtkSocket.h"
 
 vtkStandardNewMacro(vtkSocketCollection);
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkSocketCollection::vtkSocketCollection()
 {
   this->SelectedSocket = nullptr;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkSocketCollection::~vtkSocketCollection() = default;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::AddItem(vtkSocket* soc)
 {
   this->Superclass::AddItem(soc);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkSocketCollection::SelectSockets(unsigned long msec /*=0*/)
 {
   // clear last selected socket.
@@ -54,8 +54,7 @@ int vtkSocketCollection::SelectSockets(unsigned long msec /*=0*/)
   vtkCollectionIterator* iter = this->NewIterator();
 
   int index = 0;
-  for (iter->InitTraversal(); !iter->IsDoneWithTraversal();
-    iter->GoToNextItem(), index++)
+  for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem(), index++)
   {
     vtkSocket* soc = vtkSocket::SafeDownCast(iter->GetCurrentObject());
     if (!soc->GetConnected())
@@ -72,12 +71,11 @@ int vtkSocketCollection::SelectSockets(unsigned long msec /*=0*/)
   if (no_of_sockets == 0)
   {
     vtkErrorMacro("No alive sockets!");
-    delete []sockets_to_select;
-    delete []socket_indices;
+    delete[] sockets_to_select;
+    delete[] socket_indices;
     return -1;
   }
-  int res = vtkSocket::SelectSockets(sockets_to_select, no_of_sockets,
-    msec, &index);
+  int res = vtkSocket::SelectSockets(sockets_to_select, no_of_sockets, msec, &index);
   int actual_index = -1;
   if (index != -1)
   {
@@ -85,20 +83,19 @@ int vtkSocketCollection::SelectSockets(unsigned long msec /*=0*/)
   }
 
   iter->Delete();
-  delete []sockets_to_select;
-  delete []socket_indices;
+  delete[] sockets_to_select;
+  delete[] socket_indices;
 
   if (res <= 0 || index == -1)
   {
     return res;
   }
 
-  this->SelectedSocket = vtkSocket::SafeDownCast(
-    this->GetItemAsObject(actual_index));
+  this->SelectedSocket = vtkSocket::SafeDownCast(this->GetItemAsObject(actual_index));
   return 1;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::RemoveItem(vtkObject* a)
 {
   if (this->SelectedSocket && this->SelectedSocket == a)
@@ -108,7 +105,7 @@ void vtkSocketCollection::RemoveItem(vtkObject* a)
   this->Superclass::RemoveItem(a);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::RemoveItem(int i)
 {
   if (this->SelectedSocket && this->GetItemAsObject(i) == this->SelectedSocket)
@@ -118,8 +115,7 @@ void vtkSocketCollection::RemoveItem(int i)
   this->Superclass::RemoveItem(i);
 }
 
-
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::ReplaceItem(int i, vtkObject* a)
 {
   if (this->SelectedSocket && this->GetItemAsObject(i) == this->SelectedSocket)
@@ -129,14 +125,14 @@ void vtkSocketCollection::ReplaceItem(int i, vtkObject* a)
   this->Superclass::ReplaceItem(i, a);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::RemoveAllItems()
 {
   this->SelectedSocket = nullptr;
   this->Superclass::RemoveAllItems();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSocketCollection::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);

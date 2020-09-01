@@ -16,7 +16,7 @@
  * @class   vtkImageImportExecutive
  *
  * vtkImageImportExecutive
-*/
+ */
 
 #ifndef vtkImageImportExecutive_h
 #define vtkImageImportExecutive_h
@@ -24,24 +24,21 @@
 #include "vtkIOImageModule.h" // For export macro
 #include "vtkStreamingDemandDrivenPipeline.h"
 
-class VTKIOIMAGE_EXPORT vtkImageImportExecutive :
-  public vtkStreamingDemandDrivenPipeline
+class VTKIOIMAGE_EXPORT vtkImageImportExecutive : public vtkStreamingDemandDrivenPipeline
 {
 public:
   static vtkImageImportExecutive* New();
-  vtkTypeMacro(vtkImageImportExecutive,
-                       vtkStreamingDemandDrivenPipeline);
+  vtkTypeMacro(vtkImageImportExecutive, vtkStreamingDemandDrivenPipeline);
 
   /**
    * Override to implement some requests with callbacks.
    */
-  int ProcessRequest(vtkInformation* request,
-                             vtkInformationVector** inInfo,
-                             vtkInformationVector* outInfo) override;
+  vtkTypeBool ProcessRequest(
+    vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo) override;
 
 protected:
-  vtkImageImportExecutive() {}
-  ~vtkImageImportExecutive() override {}
+  vtkImageImportExecutive() = default;
+  ~vtkImageImportExecutive() override = default;
 
 private:
   vtkImageImportExecutive(const vtkImageImportExecutive&) = delete;

@@ -14,13 +14,12 @@
 =========================================================================*/
 #include "vtkUnstructuredGridVolumeRayIntegrator.h"
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkUnstructuredGridVolumeRayIntegrator::vtkUnstructuredGridVolumeRayIntegrator() = default;
 
 vtkUnstructuredGridVolumeRayIntegrator::~vtkUnstructuredGridVolumeRayIntegrator() = default;
 
 void vtkUnstructuredGridVolumeRayIntegrator::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

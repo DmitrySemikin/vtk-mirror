@@ -23,7 +23,7 @@
  * vtkControlPointsItem
  * vtkColorTransferFunctionItem
  * vtkCompositeTransferFunctionItem
-*/
+ */
 
 #ifndef vtkColorTransferControlPointsItem_h
 #define vtkColorTransferControlPointsItem_h
@@ -33,11 +33,11 @@
 
 class vtkColorTransferFunction;
 
-class VTKCHARTSCORE_EXPORT vtkColorTransferControlPointsItem: public vtkControlPointsItem
+class VTKCHARTSCORE_EXPORT vtkColorTransferControlPointsItem : public vtkControlPointsItem
 {
 public:
   vtkTypeMacro(vtkColorTransferControlPointsItem, vtkControlPointsItem);
-  void PrintSelf(ostream &os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Creates a piecewise control points object
@@ -48,6 +48,7 @@ public:
    * Set the piecewise function to draw its points
    */
   void SetColorTransferFunction(vtkColorTransferFunction* function);
+
   //@{
   /**
    * Get the piecewise function
@@ -58,21 +59,21 @@ public:
   /**
    * Return the number of points in the color transfer function.
    */
-  vtkIdType GetNumberOfPoints()const override;
+  vtkIdType GetNumberOfPoints() const override;
 
   /**
    * Returns the x and y coordinates as well as the midpoint and sharpness
    * of the control point corresponding to the index.
    * Note: The y (point[1]) is always 0.5
    */
-  void GetControlPoint(vtkIdType index, double *point)const override;
+  void GetControlPoint(vtkIdType index, double* point) const override;
 
   /**
    * Sets the x and y coordinates as well as the midpoint and sharpness
    * of the control point corresponding to the index.
    * Changing the y has no effect, it will always be 0.5
    */
-  void SetControlPoint(vtkIdType index, double *point) override;
+  void SetControlPoint(vtkIdType index, double* point) override;
 
   /**
    * Add a point to the function. Returns the index of the point (0 based),
@@ -80,6 +81,8 @@ public:
    * Subclasses should reimplement this function to do the actual work.
    */
   vtkIdType AddPoint(double* newPos) override;
+
+  using Superclass::RemovePoint;
 
   /**
    * Remove a point of the function. Returns the index of the point (0 based),
@@ -99,7 +102,7 @@ public:
   //@}
 
 protected:
-  vtkColorTransferControlPointsItem();
+  vtkColorTransferControlPointsItem() = default;
   ~vtkColorTransferControlPointsItem() override;
 
   void emitEvent(unsigned long event, void* params) override;
@@ -115,12 +118,12 @@ protected:
    */
   void ComputeBounds(double* bounds) override;
 
-  vtkColorTransferFunction* ColorTransferFunction;
+  vtkColorTransferFunction* ColorTransferFunction = nullptr;
+  bool ColorFill = false;
 
-  bool ColorFill;
 private:
-  vtkColorTransferControlPointsItem(const vtkColorTransferControlPointsItem &) = delete;
-  void operator=(const vtkColorTransferControlPointsItem &) = delete;
+  vtkColorTransferControlPointsItem(const vtkColorTransferControlPointsItem&) = delete;
+  void operator=(const vtkColorTransferControlPointsItem&) = delete;
 };
 
 #endif

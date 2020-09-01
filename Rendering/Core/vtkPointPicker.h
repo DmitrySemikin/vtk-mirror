@@ -23,27 +23,32 @@
  * returns the id of the point projecting closest onto the ray (within the
  * specified tolerance).  Ties are broken (i.e., multiple points all
  * projecting within the tolerance along the pick ray) by choosing the point
- * closest to the ray.
+ * closest to the ray origin (i.e., closest to the eye).
  *
  *
  * @sa
- * vtkPicker vtkCellPicker.
-*/
+ * vtkPicker vtkCellPicker
+ */
 
 #ifndef vtkPointPicker_h
 #define vtkPointPicker_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkPicker.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
 class vtkDataSet;
 
 class VTKRENDERINGCORE_EXPORT vtkPointPicker : public vtkPicker
 {
 public:
-  static vtkPointPicker *New();
-  vtkTypeMacro(vtkPointPicker,vtkPicker);
+  //@{
+  /**
+   * Standard methods for instantiation, type information, and printing.
+   */
+  static vtkPointPicker* New();
+  vtkTypeMacro(vtkPointPicker, vtkPicker);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+  //@}
 
   //@{
   /**
@@ -64,28 +69,21 @@ public:
 
 protected:
   vtkPointPicker();
-  ~vtkPointPicker() override {}
+  ~vtkPointPicker() override = default;
 
-  vtkIdType PointId; //picked point
-  vtkTypeBool UseCells;  // Use cell points vs. points directly
+  vtkIdType PointId;    // picked point
+  vtkTypeBool UseCells; // Use cell points vs. points directly
 
   double IntersectWithLine(const double p1[3], const double p2[3], double tol,
-                          vtkAssemblyPath *path, vtkProp3D *p,
-                          vtkAbstractMapper3D *m) override;
+    vtkAssemblyPath* path, vtkProp3D* p, vtkAbstractMapper3D* m) override;
   void Initialize() override;
 
-  vtkIdType IntersectDataSetWithLine(const double p1[3], double ray[3],
-                                     double rayFactor, double tol,
-                                     vtkDataSet* dataSet,
-                                     double& tMin, double minXYZ[3]);
-  bool UpdateClosestPoint(double x[3], const double p1[3],
-                          double ray[3], double rayFactor, double tol,
-                          double& tMin, double& distMin);
+  vtkIdType IntersectDataSetWithLine(const double p1[3], double ray[3], double rayFactor,
+    double tol, vtkDataSet* dataSet, double& tMin, double minXYZ[3]);
+
 private:
   vtkPointPicker(const vtkPointPicker&) = delete;
   void operator=(const vtkPointPicker&) = delete;
 };
 
 #endif
-
-

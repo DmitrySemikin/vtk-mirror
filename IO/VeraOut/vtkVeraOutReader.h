@@ -18,7 +18,7 @@
 #define vtkVeraOutReader_h
 
 #include "vtkIOVeraOutModule.h" // For VTKIOVERAOUT_EXPORT macro
-#include <vector> // For STL vector
+#include <vector>               // For STL vector
 
 // vtkCommonExecutionModel
 #include "vtkRectilinearGridAlgorithm.h"
@@ -53,12 +53,11 @@ protected:
   vtkVeraOutReader();
   ~vtkVeraOutReader() override;
 
-  int RequestInformation(
-    vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
   // Trigger the real data access
   int RequestData(
-    vtkInformation*, vtkInformationVector**, vtkInformationVector* outputVector) override;
+    vtkInformation*, vtkInformationVector**, vtkInformationVector* outVector) override;
 
   char* FileName;
   int NumberOfTimeSteps;

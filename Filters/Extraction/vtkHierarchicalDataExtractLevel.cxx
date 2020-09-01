@@ -18,15 +18,14 @@ PURPOSE.  See the above copyright notice for more information.
 
 vtkStandardNewMacro(vtkHierarchicalDataExtractLevel);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkHierarchicalDataExtractLevel::vtkHierarchicalDataExtractLevel() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkHierarchicalDataExtractLevel::~vtkHierarchicalDataExtractLevel() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkHierarchicalDataExtractLevel::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
-
+  this->Superclass::PrintSelf(os, indent);
 }

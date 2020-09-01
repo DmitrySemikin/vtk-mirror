@@ -17,6 +17,8 @@
 #include "metaUtils.h"
 #include "metaEvent.h"
 
+#include <string>
+
 #ifdef _MSC_VER
 #pragma warning ( disable: 4251 )
 #endif
@@ -27,7 +29,7 @@ namespace METAIO_NAMESPACE {
 #endif
 
 class METAIO_EXPORT MetaObject
-  {
+{
   ////
   //
   // PROTECTED
@@ -35,17 +37,17 @@ class METAIO_EXPORT MetaObject
   ////
   protected:
 
-      typedef METAIO_STL::vector<MET_FieldRecordType *> FieldsContainerType;
+      typedef std::vector<MET_FieldRecordType *> FieldsContainerType;
 
-      METAIO_STREAM::ifstream * m_ReadStream;
-      METAIO_STREAM::ofstream * m_WriteStream;
+      std::ifstream * m_ReadStream;
+      std::ofstream * m_WriteStream;
 
       FieldsContainerType m_Fields;
       FieldsContainerType m_UserDefinedWriteFields;
       FieldsContainerType m_UserDefinedReadFields;
       FieldsContainerType m_AdditionalReadFields;
 
-      char  m_FileName[255];
+      std::string m_FileName;
 
       char  m_Comment[255];            // "Comment = "       ""
 
@@ -63,7 +65,7 @@ class METAIO_EXPORT MetaObject
 
       MET_DistanceUnitsEnumType m_DistanceUnits;   // "DistanceUnits = mm"
 
-      float m_ElementSpacing[10];   // "ElementSpacing = "   0,0,0
+      double m_ElementSpacing[10];   // "ElementSpacing = "   0,0,0
 
       float m_Color[4];             // "Color = "            1.0, 0.0, 0.0, 1.0
 
@@ -79,10 +81,11 @@ class METAIO_EXPORT MetaObject
 
       bool  m_BinaryDataByteOrderMSB;
 
-      METAIO_STL::streamoff m_CompressedDataSize;
+      std::streamoff m_CompressedDataSize;
       // Used internally to set if the dataSize should be written
       bool m_WriteCompressedDataSize;
       bool m_CompressedData;
+      int  m_CompressionLevel;
 
       virtual void M_Destroy(void);
 
@@ -123,13 +126,13 @@ class METAIO_EXPORT MetaObject
 
       virtual void  CopyInfo(const MetaObject * _object);
 
-      bool  Read(const char * _fileName=NULL);
+      bool  Read(const char * _fileName=nullptr);
 
-      bool  ReadStream(int _nDims, METAIO_STREAM::ifstream * _stream);
+      bool  ReadStream(int _nDims, std::ifstream * _stream);
 
-      bool  Write(const char * _fileName=NULL);
+      bool  Write(const char * _fileName=nullptr);
 
-      virtual bool  Append(const char *_headName=NULL);
+      virtual bool  Append(const char *_headName=nullptr);
 
       ////
       //
@@ -218,10 +221,11 @@ class METAIO_EXPORT MetaObject
       //    ElementSpacing(...)
       //       Optional Field
       //       Physical Spacing (in same units as position)
-      const float * ElementSpacing(void) const;
-      float ElementSpacing(int _i) const;
+      const double * ElementSpacing(void) const;
+      double ElementSpacing(int _i) const;
+      void  ElementSpacing(const double * _elementSpacing);
       void  ElementSpacing(const float * _elementSpacing);
-      void  ElementSpacing(int _i, float _value);
+      void  ElementSpacing(int _i, double _value);
 
       //    Name(...)
       //       Optional Field
@@ -267,6 +271,9 @@ class METAIO_EXPORT MetaObject
       void  CompressedData(bool _compressedData);
       bool  CompressedData(void) const;
 
+      // Compression level 0-9. 0 = no compression.
+      void CompressionLevel(int _compressionLevel);
+      int CompressionLevel() const;
 
       virtual void Clear(void);
 
@@ -297,7 +304,7 @@ class METAIO_EXPORT MetaObject
             return (*it);
             }
           }
-        return 0;
+        return nullptr;
       }
 
       // Add a user's field
@@ -313,7 +320,7 @@ class METAIO_EXPORT MetaObject
         MET_FieldRecordType* mFw =
           this->FindFieldRecord(m_UserDefinedWriteFields,
                                 _fieldName);
-        if(mFw == 0)
+        if(mFw == nullptr)
           {
           duplicate = false;
           mFw = new MET_FieldRecordType;
@@ -328,7 +335,7 @@ class METAIO_EXPORT MetaObject
         MET_FieldRecordType* mFr =
           this->FindFieldRecord(m_UserDefinedReadFields,
                                 _fieldName);
-        if(mFr == 0)
+        if(mFr == nullptr)
           {
           duplicate = false;
           mFr = new MET_FieldRecordType;
@@ -367,7 +374,7 @@ class METAIO_EXPORT MetaObject
         return m_DoublePrecision;
         }
 
-  };
+};
 
 #if (METAIO_USE_NAMESPACE)
 };

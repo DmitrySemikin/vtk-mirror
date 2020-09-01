@@ -18,13 +18,14 @@
  *
  * vtkThreadMessager is a class that provides support for messaging between
  * threads multithreaded using pthreads or Windows messaging.
-*/
+ */
 
 #ifndef vtkThreadMessager_h
 #define vtkThreadMessager_h
 
 #include "vtkCommonSystemModule.h" // For export macro
 #include "vtkObject.h"
+#include "vtkThreads.h" // for VTK_USE_PTHREADS and VTK_USE_WIN32_THREADS
 
 #if defined(VTK_USE_PTHREADS)
 #include <pthread.h> // Needed for pthread types
@@ -33,9 +34,9 @@
 class VTKCOMMONSYSTEM_EXPORT vtkThreadMessager : public vtkObject
 {
 public:
-  static vtkThreadMessager *New();
+  static vtkThreadMessager* New();
 
-  vtkTypeMacro(vtkThreadMessager,vtkObject);
+  vtkTypeMacro(vtkThreadMessager, vtkObject);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**

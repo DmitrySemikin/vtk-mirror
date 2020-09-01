@@ -26,7 +26,7 @@
  * with irregular spacing on the Z dimension.  Only the first and
  * second output ports have time dependent data.
  * Parallel version of vtkWindBladeReader.h
-*/
+ */
 
 #ifndef vtkPWindBladeReader_h
 #define vtkPWindBladeReader_h
@@ -39,33 +39,31 @@ class PWindBladeReaderInternal;
 class VTKIOMPIPARALLEL_EXPORT vtkPWindBladeReader : public vtkWindBladeReader
 {
 public:
-  static vtkPWindBladeReader *New();
+  static vtkPWindBladeReader* New();
   vtkTypeMacro(vtkPWindBladeReader, vtkWindBladeReader);
 
-  void PrintSelf(ostream &os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
   vtkPWindBladeReader();
-  ~vtkPWindBladeReader();
+  ~vtkPWindBladeReader() override;
 
-  virtual int RequestData(vtkInformation *, vtkInformationVector **,
-                          vtkInformationVector *) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  virtual void CalculatePressure(int pressure, int prespre,
-                                 int tempg, int density) override;
-  virtual void CalculateVorticity(int vort, int uvw, int density) override;
-  virtual void LoadVariableData(int var) override;
-  virtual bool ReadGlobalData() override;
-  virtual bool FindVariableOffsets() override;
-  virtual void CreateZTopography(float* zValues) override;
-  virtual void SetupBladeData() override;
-  virtual void LoadBladeData(int timeStep) override;
+  void CalculatePressure(int pressure, int prespre, int tempg, int density) override;
+  void CalculateVorticity(int vort, int uvw, int density) override;
+  void LoadVariableData(int var) override;
+  bool ReadGlobalData() override;
+  bool FindVariableOffsets() override;
+  void CreateZTopography(float* zValues) override;
+  void SetupBladeData() override;
+  void LoadBladeData(int timeStep) override;
 
 private:
-  PWindBladeReaderInternal * PInternal;
+  PWindBladeReaderInternal* PInternal;
 
-  vtkPWindBladeReader(const vtkPWindBladeReader &) = delete;
-  void operator=(const vtkPWindBladeReader &) = delete;
+  vtkPWindBladeReader(const vtkPWindBladeReader&) = delete;
+  void operator=(const vtkPWindBladeReader&) = delete;
 };
 
 #endif

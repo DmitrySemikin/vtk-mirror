@@ -21,17 +21,18 @@ VTK_AOS_DATA_ARRAY_TEMPLATE_INSTANTIATE(double);
 
 #include "vtkObjectFactory.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkStandardNewMacro(vtkDoubleArray);
+vtkStandardExtendedNewMacro(vtkDoubleArray);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDoubleArray::vtkDoubleArray() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDoubleArray::~vtkDoubleArray() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDoubleArray::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->RealSuperclass::PrintSelf(os,indent);
+  this->RealSuperclass::PrintSelf(os, indent);
 }

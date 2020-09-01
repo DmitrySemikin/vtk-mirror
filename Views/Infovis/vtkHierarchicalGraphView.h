@@ -36,20 +36,20 @@
  * @par Thanks:
  * Thanks to the turtle with jets for feet, without you this class wouldn't
  * have been possible.
-*/
+ */
 
 #ifndef vtkHierarchicalGraphView_h
 #define vtkHierarchicalGraphView_h
 
-#include "vtkViewsInfovisModule.h" // For export macro
 #include "vtkGraphLayoutView.h"
+#include "vtkViewsInfovisModule.h" // For export macro
 
 class vtkRenderedHierarchyRepresentation;
 
 class VTKVIEWSINFOVIS_EXPORT vtkHierarchicalGraphView : public vtkGraphLayoutView
 {
 public:
-  static vtkHierarchicalGraphView *New();
+  static vtkHierarchicalGraphView* New();
   vtkTypeMacro(vtkHierarchicalGraphView, vtkGraphLayoutView);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
@@ -114,7 +114,7 @@ public:
   /**
    * Whether the graph edges are visible (default off).
    */
-  virtual void SetGraphVisibility(bool b);
+  virtual void SetGraphVisibility(bool vis);
   virtual bool GetGraphVisibility();
   vtkBooleanMacro(GraphVisibility, bool);
   //@}

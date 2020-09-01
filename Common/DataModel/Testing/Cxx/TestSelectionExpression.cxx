@@ -81,7 +81,7 @@ void Validate(vtkSelection* expr, const char* exprstr, const MapType& arrays, co
   ValidateIternal(result, f);
 }
 
-int TestSelectionExpression(int, char* [])
+int TestSelectionExpression(int, char*[])
 {
   vtkNew<vtkSelection> expr;
   vtkNew<vtkSelectionNode> aItem;
@@ -100,7 +100,7 @@ int TestSelectionExpression(int, char* [])
   expr->SetNode("F", fItem);
   expr->SetNode("G", gItem);
 
-  std::map<std::string, vtkSmartPointer<vtkSignedCharArray> > arrays;
+  std::map<std::string, vtkSmartPointer<vtkSignedCharArray>> arrays;
   std::vector<vtkSignedCharArray*> arrays_ptrs(expr->GetNumberOfNodes(), nullptr);
   for (int cc = 0, max = expr->GetNumberOfNodes(); cc < max; ++cc)
   {

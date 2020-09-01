@@ -23,8 +23,11 @@
 #include "vtkUnsignedCharArray.h"
 #include "vtksys/SystemTools.hxx"
 
-extern "C" {
+extern "C"
+{
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/stereo3d.h>
 #include <libswscale/swscale.h>
 }
 
@@ -50,9 +53,10 @@ extern "C" {
 //
 // Then to build ffmpeg as follows
 //
-// ./configure --enable-asm --enable-x86asm --arch=amd64  --disable-avdevice --enable-swscale --disable-doc --disable-ffplay --disable-ffprobe --disable-ffmpeg --enable-shared --disable-static --disable-bzlib --disable-libopenjpeg --disable-iconv --disable-zlib --prefix=/c/ffmpeg --toolchain=msvc
-// make
-// make install
+// ./configure --enable-asm --enable-x86asm --arch=amd64  --disable-avdevice --enable-swscale
+// --disable-doc --disable-ffplay --disable-ffprobe --disable-ffmpeg --enable-shared
+// --disable-static --disable-bzlib --disable-libopenjpeg --disable-iconv --disable-zlib
+// --prefix=/c/ffmpeg --toolchain=msvc make make install
 //
 // add libs to vtk build, I just add them to the FFMPEG_LIBAVCODEC_LIBRARIES variable
 //
@@ -100,22 +104,22 @@ public:
     }
   }
 
-  AVFormatContext *FormatContext = nullptr;
-  AVCodecContext *VideoDecodeContext = nullptr;
-  AVCodecContext *AudioDecodeContext = nullptr;
-  AVStream *VideoStream = nullptr;
-  AVStream *AudioStream = nullptr;
+  AVFormatContext* FormatContext = nullptr;
+  AVCodecContext* VideoDecodeContext = nullptr;
+  AVCodecContext* AudioDecodeContext = nullptr;
+  AVStream* VideoStream = nullptr;
+  AVStream* AudioStream = nullptr;
   int VideoStreamIndex = -1;
   int AudioStreamIndex = -1;
-  AVFrame *Frame = nullptr;
-  AVFrame *AudioFrame = nullptr;
+  AVFrame* Frame = nullptr;
+  AVFrame* AudioFrame = nullptr;
   AVPacket Packet;
   struct SwsContext* RGBContext = nullptr;
 };
 
 vtkStandardNewMacro(vtkFFMPEGVideoSource);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkFFMPEGVideoSource::vtkFFMPEGVideoSource()
   : AudioCallback(nullptr)
   , AudioCallbackClientData(nullptr)
@@ -133,17 +137,19 @@ vtkFFMPEGVideoSource::vtkFFMPEGVideoSource()
   this->FrameBufferRowAlignment = 4;
 
   this->Internal = new vtkFFMPEGVideoSourceInternal;
+
+  this->Stereo3D = false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkFFMPEGVideoSource::~vtkFFMPEGVideoSource()
 {
   this->vtkFFMPEGVideoSource::ReleaseSystemResources();
-  delete [] this->FileName;
+  delete[] this->FileName;
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::Initialize()
 {
   if (this->Initialized)
@@ -167,7 +173,7 @@ void vtkFFMPEGVideoSource::Initialize()
   }
 
   // local var to keep the code shorter
-  AVFormatContext *fcontext = this->Internal->FormatContext;
+  AVFormatContext* fcontext = this->Internal->FormatContext;
 
   /* retrieve stream information */
   if (avformat_find_stream_info(fcontext, nullptr) < 0)
@@ -184,11 +190,9 @@ void vtkFFMPEGVideoSource::Initialize()
     return;
   }
 
-  this->Internal->VideoStream =
-    fcontext->streams[this->Internal->VideoStreamIndex];
+  this->Internal->VideoStream = fcontext->streams[this->Internal->VideoStreamIndex];
 
-  AVCodec *dec =
-    avcodec_find_decoder(this->Internal->VideoStream->codecpar->codec_id);
+  AVCodec* dec = avcodec_find_decoder(this->Internal->VideoStream->codecpar->codec_id);
   if (!dec)
   {
     vtkErrorMacro("Failed to find codec for video");
@@ -199,12 +203,29 @@ void vtkFFMPEGVideoSource::Initialize()
   this->Internal->VideoDecodeContext->thread_count = this->DecodingThreads;
   // this->Internal->VideoDecodeContext->thread_type = FF_THREAD_FRAME;
 
+  // examine the video stream side data for additional information
+  this->Stereo3D = false;
+  if (this->Internal->VideoStream->nb_side_data > 0)
+  {
+    for (int i = 0; i < this->Internal->VideoStream->nb_side_data; ++i)
+    {
+      AVPacketSideData sd = this->Internal->VideoStream->side_data[i];
+      if (sd.type == AV_PKT_DATA_STEREO3D)
+      {
+        AVStereo3D* stereo = reinterpret_cast<AVStereo3D*>(sd.data);
+        if (stereo->type == AV_STEREO3D_TOPBOTTOM)
+        {
+          this->Stereo3D = true;
+        }
+      }
+    }
+  }
+
   avcodec_parameters_to_context(
-    this->Internal->VideoDecodeContext,
-    this->Internal->VideoStream->codecpar);
+    this->Internal->VideoDecodeContext, this->Internal->VideoStream->codecpar);
   avcodec_open2(this->Internal->VideoDecodeContext, dec, nullptr);
 
-  AVDictionary *opts = nullptr;
+  AVDictionary* opts = nullptr;
   /* Init the decoders, with or without reference counting */
   av_dict_set(&opts, "refcounted_frames", "1", 0);
   if (avcodec_open2(this->Internal->VideoDecodeContext, dec, &opts) < 0)
@@ -213,22 +234,17 @@ void vtkFFMPEGVideoSource::Initialize()
     return;
   }
 
-  this->SetFrameRate(static_cast<double>(this->Internal->VideoStream->r_frame_rate.num)/
+  this->SetFrameRate(static_cast<double>(this->Internal->VideoStream->r_frame_rate.num) /
     this->Internal->VideoStream->r_frame_rate.den);
 
   this->SetFrameSize(
-    this->Internal->VideoDecodeContext->width,
-    this->Internal->VideoDecodeContext->height,
-    1);
+    this->Internal->VideoDecodeContext->width, this->Internal->VideoDecodeContext->height, 1);
 
   // create a something to RGB converter
-  this->Internal->RGBContext = sws_getContext(
-     this->Internal->VideoDecodeContext->width,
-     this->Internal->VideoDecodeContext->height,
-     this->Internal->VideoDecodeContext->pix_fmt,
-     this->Internal->VideoDecodeContext->width,
-     this->Internal->VideoDecodeContext->height,
-     AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+  this->Internal->RGBContext = sws_getContext(this->Internal->VideoDecodeContext->width,
+    this->Internal->VideoDecodeContext->height, this->Internal->VideoDecodeContext->pix_fmt,
+    this->Internal->VideoDecodeContext->width, this->Internal->VideoDecodeContext->height,
+    AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
   if (!this->Internal->RGBContext)
   {
     vtkErrorMacro("Failed to create RGB context");
@@ -240,11 +256,9 @@ void vtkFFMPEGVideoSource::Initialize()
   // do we have an audio stream?
   if (this->Internal->AudioStreamIndex >= 0)
   {
-    this->Internal->AudioStream =
-      fcontext->streams[this->Internal->AudioStreamIndex];
+    this->Internal->AudioStream = fcontext->streams[this->Internal->AudioStreamIndex];
 
-    AVCodec *adec =
-      avcodec_find_decoder(this->Internal->AudioStream->codecpar->codec_id);
+    AVCodec* adec = avcodec_find_decoder(this->Internal->AudioStream->codecpar->codec_id);
     if (!adec)
     {
       vtkErrorMacro("Failed to find codec for audio");
@@ -253,11 +267,10 @@ void vtkFFMPEGVideoSource::Initialize()
 
     this->Internal->AudioDecodeContext = avcodec_alloc_context3(adec);
     avcodec_parameters_to_context(
-      this->Internal->AudioDecodeContext,
-      this->Internal->AudioStream->codecpar);
+      this->Internal->AudioDecodeContext, this->Internal->AudioStream->codecpar);
     avcodec_open2(this->Internal->AudioDecodeContext, adec, nullptr);
 
-    AVDictionary *aopts = nullptr;
+    AVDictionary* aopts = nullptr;
     /* Init the decoders, with or without reference counting */
     av_dict_set(&aopts, "refcounted_frames", "1", 0);
     if (avcodec_open2(this->Internal->AudioDecodeContext, adec, &aopts) < 0)
@@ -283,7 +296,7 @@ void vtkFFMPEGVideoSource::Initialize()
     return;
   }
 
-  /* initialize packet, set data to NULL, let the demuxer fill it */
+  /* initialize packet, set data to nullptr, let the demuxer fill it */
   av_init_packet(&this->Internal->Packet);
   this->Internal->Packet.data = nullptr;
   this->Internal->Packet.size = 0;
@@ -295,18 +308,18 @@ void vtkFFMPEGVideoSource::Initialize()
   this->Initialized = 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Feed frames to the decoder
-void *vtkFFMPEGVideoSource::FeedThread(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::FeedThread(vtkMultiThreader::ThreadInfo* data)
 {
-  vtkFFMPEGVideoSource *self = static_cast<vtkFFMPEGVideoSource *>(data->UserData);
+  vtkFFMPEGVideoSource* self = static_cast<vtkFFMPEGVideoSource*>(data->UserData);
   return self->Feed(data);
 }
 
 //
 // based off of https://blogs.gentoo.org/lu_zero/2016/03/29/new-avcodec-api/
 //
-void *vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo* data)
 {
   bool done = false;
 
@@ -324,15 +337,12 @@ void *vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo *data)
     }
     retryPacket = false;
     // feed video
-    if (fret >= 0 &&
-        this->Internal->Packet.stream_index == this->Internal->VideoStreamIndex)
+    if (fret >= 0 && this->Internal->Packet.stream_index == this->Internal->VideoStreamIndex)
     {
       // lock the decoder
       this->FeedMutex->Lock();
 
-      int sret = avcodec_send_packet(
-        this->Internal->VideoDecodeContext,
-        &this->Internal->Packet);
+      int sret = avcodec_send_packet(this->Internal->VideoDecodeContext, &this->Internal->Packet);
       if (sret == 0) // good decode
       {
         this->FeedCondition->Signal();
@@ -355,15 +365,12 @@ void *vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo *data)
     }
 
     // feed audio
-    if (fret >= 0 &&
-        this->Internal->Packet.stream_index == this->Internal->AudioStreamIndex)
+    if (fret >= 0 && this->Internal->Packet.stream_index == this->Internal->AudioStreamIndex)
     {
       // lock the decoder
       this->FeedAudioMutex->Lock();
 
-      int sret = avcodec_send_packet(
-        this->Internal->AudioDecodeContext,
-        &this->Internal->Packet);
+      int sret = avcodec_send_packet(this->Internal->AudioDecodeContext, &this->Internal->Packet);
       if (sret == 0) // good decode
       {
         this->FeedAudioCondition->Signal();
@@ -394,15 +401,14 @@ void *vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo *data)
     // check to see if we are being told to quit every so often
     if (count == 10)
     {
-      data->ActiveFlagLock->Lock();
+      std::lock_guard<std::mutex>(*data->ActiveFlagLock);
       done = done || (*(data->ActiveFlag) == 0);
-      data->ActiveFlagLock->Unlock();
       count = 0;
     }
     count++;
   }
 
-  // flush remaning data
+  // flush remaining data
   this->FeedMutex->Lock();
   avcodec_send_packet(this->Internal->VideoDecodeContext, nullptr);
   this->FeedCondition->Signal();
@@ -420,7 +426,7 @@ void *vtkFFMPEGVideoSource::Feed(vtkMultiThreader::ThreadInfo *data)
   return nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Sleep until the specified absolute time has arrived.
 // You must pass a handle to the current thread.
 // If '0' is returned, then the thread was aborted before or during the wait.
@@ -449,7 +455,7 @@ static void vtkThreadSleep(double time)
     {
       if (i == 0 && count % 100 == 0)
       {
-        cerr << "dropped frames, now beind by " << remaining << " seconds\n";
+        cerr << "dropped frames, now behind by " << remaining << " seconds\n";
       }
       break;
     }
@@ -464,13 +470,13 @@ static void vtkThreadSleep(double time)
   }
 }
 
-void *vtkFFMPEGVideoSource::DrainThread(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::DrainThread(vtkMultiThreader::ThreadInfo* data)
 {
-  vtkFFMPEGVideoSource *self = static_cast<vtkFFMPEGVideoSource *>(data->UserData);
+  vtkFFMPEGVideoSource* self = static_cast<vtkFFMPEGVideoSource*>(data->UserData);
   return self->Drain(data);
 }
 
-void *vtkFFMPEGVideoSource::Drain(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::Drain(vtkMultiThreader::ThreadInfo* data)
 {
   bool done = false;
   unsigned short count = 0;
@@ -483,8 +489,7 @@ void *vtkFFMPEGVideoSource::Drain(vtkMultiThreader::ThreadInfo *data)
   {
     this->FeedMutex->Lock();
 
-    int ret = avcodec_receive_frame(this->Internal->VideoDecodeContext,
-              this->Internal->Frame);
+    int ret = avcodec_receive_frame(this->Internal->VideoDecodeContext, this->Internal->Frame);
     if (ret == 0)
     {
       this->FeedCondition->Signal();
@@ -511,17 +516,34 @@ void *vtkFFMPEGVideoSource::Drain(vtkMultiThreader::ThreadInfo *data)
 
     if (ret == 0)
     {
-      vtkThreadSleep(startTime + frame/rate);
-      this->InternalGrab();
+      vtkThreadSleep(startTime + frame / rate);
+      if (this->VideoCallback)
+      {
+        vtkFFMPEGVideoSourceVideoCallbackData cbd;
+        cbd.Height = this->Internal->Frame->height;
+        int p = 0;
+        while (this->Internal->Frame->data[p] != nullptr && p < 8)
+        {
+          cbd.LineSize[p] = this->Internal->Frame->linesize[p];
+          cbd.Data[p] = this->Internal->Frame->data[p];
+          ++p;
+        }
+        cbd.Caller = this;
+        cbd.ClientData = this->VideoCallbackClientData;
+        this->VideoCallback(cbd);
+      }
+      else
+      {
+        this->InternalGrab();
+      }
       frame++;
     }
 
     // check to see if we are being told to quit every so often
     if (count == 10)
     {
-      data->ActiveFlagLock->Lock();
+      std::lock_guard<std::mutex>(*data->ActiveFlagLock);
       done = done || (*(data->ActiveFlag) == 0);
-      data->ActiveFlagLock->Unlock();
       count = 0;
     }
     count++;
@@ -530,13 +552,13 @@ void *vtkFFMPEGVideoSource::Drain(vtkMultiThreader::ThreadInfo *data)
   return nullptr;
 }
 
-void *vtkFFMPEGVideoSource::DrainAudioThread(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::DrainAudioThread(vtkMultiThreader::ThreadInfo* data)
 {
-  vtkFFMPEGVideoSource *self = static_cast<vtkFFMPEGVideoSource *>(data->UserData);
+  vtkFFMPEGVideoSource* self = static_cast<vtkFFMPEGVideoSource*>(data->UserData);
   return self->DrainAudio(data);
 }
 
-void *vtkFFMPEGVideoSource::DrainAudio(vtkMultiThreader::ThreadInfo *data)
+void* vtkFFMPEGVideoSource::DrainAudio(vtkMultiThreader::ThreadInfo* data)
 {
   bool done = false;
   unsigned short count = 0;
@@ -547,8 +569,7 @@ void *vtkFFMPEGVideoSource::DrainAudio(vtkMultiThreader::ThreadInfo *data)
   {
     this->FeedAudioMutex->Lock();
 
-    int ret = avcodec_receive_frame(this->Internal->AudioDecodeContext,
-              this->Internal->AudioFrame);
+    int ret = avcodec_receive_frame(this->Internal->AudioDecodeContext, this->Internal->AudioFrame);
     if (ret == 0)
     {
       this->FeedAudioCondition->Signal();
@@ -641,9 +662,8 @@ void *vtkFFMPEGVideoSource::DrainAudio(vtkMultiThreader::ThreadInfo *data)
     // check to see if we are being told to quit every so often
     if (count == 10)
     {
-      data->ActiveFlagLock->Lock();
+      std::lock_guard<std::mutex>(*data->ActiveFlagLock);
       done = done || (*(data->ActiveFlag) == 0);
-      data->ActiveFlagLock->Unlock();
       count = 0;
     }
     count++;
@@ -656,14 +676,12 @@ void vtkFFMPEGVideoSource::ReadFrame()
 {
   // first try to grab a frame from data we already have
   bool gotFrame = false;
-  while (!gotFrame &&
-    (!this->EndOfFile || this->Internal->Packet.size > 0))
+  while (!gotFrame && (!this->EndOfFile || this->Internal->Packet.size > 0))
   {
     int ret = AVERROR(EAGAIN);
     if (this->Internal->Packet.size > 0)
     {
-      ret = avcodec_receive_frame(this->Internal->VideoDecodeContext,
-              this->Internal->Frame);
+      ret = avcodec_receive_frame(this->Internal->VideoDecodeContext, this->Internal->Frame);
       if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
       {
         vtkErrorMacro("codec did not receive video frame");
@@ -686,8 +704,7 @@ void vtkFFMPEGVideoSource::ReadFrame()
       // if the packet is empty read more data from the file
       av_packet_unref(&this->Internal->Packet);
       int fret = av_read_frame(this->Internal->FormatContext, &this->Internal->Packet);
-      if (fret >= 0 &&
-          this->Internal->Packet.stream_index == this->Internal->VideoStreamIndex)
+      if (fret >= 0 && this->Internal->Packet.stream_index == this->Internal->VideoStreamIndex)
       {
         int sret = avcodec_send_packet(this->Internal->VideoDecodeContext, &this->Internal->Packet);
         if (sret < 0 && sret != AVERROR(EAGAIN) && sret != AVERROR_EOF)
@@ -723,40 +740,36 @@ void vtkFFMPEGVideoSource::InternalGrab()
 
   this->FrameCount++;
 
-  unsigned char *ptr = (unsigned char *)
-    ((reinterpret_cast<vtkUnsignedCharArray*>(this->FrameBuffer[index])) \
-      ->GetPointer(0));
+  unsigned char* ptr =
+    (unsigned char*)((reinterpret_cast<vtkUnsignedCharArray*>(this->FrameBuffer[index]))
+                       ->GetPointer(0));
 
   // the DIB has rows which are multiples of 4 bytes
-  int outBytesPerRow = ((this->FrameBufferExtent[1]-
-                         this->FrameBufferExtent[0]+1)
-                        * this->FrameBufferBitsPerPixel + 7)/8;
+  int outBytesPerRow =
+    ((this->FrameBufferExtent[1] - this->FrameBufferExtent[0] + 1) * this->FrameBufferBitsPerPixel +
+      7) /
+    8;
   outBytesPerRow += outBytesPerRow % this->FrameBufferRowAlignment;
   outBytesPerRow += outBytesPerRow % 4;
-  int rows = this->FrameBufferExtent[3]-this->FrameBufferExtent[2]+1;
+  int rows = this->FrameBufferExtent[3] - this->FrameBufferExtent[2] + 1;
 
   // update frame time
-  this->FrameBufferTimeStamps[index] =
-    this->StartTimeStamp + this->FrameCount / this->FrameRate;
+  this->FrameBufferTimeStamps[index] = this->StartTimeStamp + this->FrameCount / this->FrameRate;
 
-  uint8_t * dst[4];
+  uint8_t* dst[4];
   int dstStride[4];
   // we flip y axis here
   dstStride[0] = -outBytesPerRow;
-  dst[0] = ptr + outBytesPerRow*(rows-1);
-  sws_scale(this->Internal->RGBContext,
-    this->Internal->Frame->data,
-    this->Internal->Frame->linesize,
-    0,
-    this->Internal->Frame->height,
-    dst, dstStride);
+  dst[0] = ptr + outBytesPerRow * (rows - 1);
+  sws_scale(this->Internal->RGBContext, this->Internal->Frame->data,
+    this->Internal->Frame->linesize, 0, this->Internal->Frame->height, dst, dstStride);
 
   this->FrameBufferMutex->Unlock();
 
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::ReleaseSystemResources()
 {
   if (this->Initialized)
@@ -767,7 +780,7 @@ void vtkFFMPEGVideoSource::ReleaseSystemResources()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::Grab()
 {
   if (this->Recording)
@@ -786,13 +799,13 @@ void vtkFFMPEGVideoSource::Grab()
   this->InternalGrab();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::Play()
 {
   this->vtkVideoSource::Play();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::Record()
 {
   if (this->Playing)
@@ -808,17 +821,14 @@ void vtkFFMPEGVideoSource::Record()
     this->Recording = 1;
     this->FrameCount = 0;
     this->Modified();
-    this->FeedThreadId =
-      this->PlayerThreader->SpawnThread((vtkThreadFunctionType)\
-                                &vtkFFMPEGVideoSource::FeedThread,this);
-    this->DrainThreadId =
-      this->PlayerThreader->SpawnThread((vtkThreadFunctionType)\
-                                &vtkFFMPEGVideoSource::DrainThread,this);
+    this->FeedThreadId = this->PlayerThreader->SpawnThread(
+      (vtkThreadFunctionType)&vtkFFMPEGVideoSource::FeedThread, this);
+    this->DrainThreadId = this->PlayerThreader->SpawnThread(
+      (vtkThreadFunctionType)&vtkFFMPEGVideoSource::DrainThread, this);
     if (this->Internal->AudioDecodeContext)
     {
-      this->DrainAudioThreadId =
-        this->PlayerThreader->SpawnThread((vtkThreadFunctionType)\
-                                  &vtkFFMPEGVideoSource::DrainAudioThread,this);
+      this->DrainAudioThreadId = this->PlayerThreader->SpawnThread(
+        (vtkThreadFunctionType)&vtkFFMPEGVideoSource::DrainAudioThread, this);
     }
     else
     {
@@ -827,7 +837,7 @@ void vtkFFMPEGVideoSource::Record()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::Stop()
 {
   if (this->Playing || this->Recording)
@@ -844,13 +854,11 @@ void vtkFFMPEGVideoSource::Stop()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // try for the specified frame size
 void vtkFFMPEGVideoSource::SetFrameSize(int x, int y, int z)
 {
-  if (x == this->FrameSize[0] &&
-      y == this->FrameSize[1] &&
-      z == this->FrameSize[2])
+  if (x == this->FrameSize[0] && y == this->FrameSize[1] && z == this->FrameSize[2])
   {
     return;
   }
@@ -874,7 +882,7 @@ void vtkFFMPEGVideoSource::SetFrameSize(int x, int y, int z)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::SetFrameRate(float rate)
 {
   if (rate == this->FrameRate)
@@ -886,7 +894,7 @@ void vtkFFMPEGVideoSource::SetFrameRate(float rate)
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkFFMPEGVideoSource::SetOutputFormat(int format)
 {
   if (format == this->OutputFormat)
@@ -917,10 +925,10 @@ void vtkFFMPEGVideoSource::SetOutputFormat(int format)
   }
   this->NumberOfScalarComponents = numComponents;
 
-  if (this->FrameBufferBitsPerPixel != numComponents*8)
+  if (this->FrameBufferBitsPerPixel != numComponents * 8)
   {
     this->FrameBufferMutex->Lock();
-    this->FrameBufferBitsPerPixel = numComponents*8;
+    this->FrameBufferBitsPerPixel = numComponents * 8;
     if (this->Initialized)
     {
       this->UpdateFrameBuffer();

@@ -14,12 +14,12 @@
 =========================================================================*/
 
 #include "vtkAnimationCue.h"
-#include "vtkObjectFactory.h"
 #include "vtkCommand.h"
+#include "vtkObjectFactory.h"
 
 vtkStandardNewMacro(vtkAnimationCue);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAnimationCue::vtkAnimationCue()
 {
   this->StartTime = this->EndTime = 0.0;
@@ -30,10 +30,10 @@ vtkAnimationCue::vtkAnimationCue()
   this->ClockTime = 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAnimationCue::~vtkAnimationCue() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::StartCueInternal()
 {
   vtkAnimationCue::AnimationCueInfo info;
@@ -45,7 +45,7 @@ void vtkAnimationCue::StartCueInternal()
   this->InvokeEvent(vtkCommand::StartAnimationCueEvent, &info);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::EndCueInternal()
 {
   vtkAnimationCue::AnimationCueInfo info;
@@ -57,16 +57,15 @@ void vtkAnimationCue::EndCueInternal()
   this->InvokeEvent(vtkCommand::EndAnimationCueEvent, &info);
 }
 
-//----------------------------------------------------------------------------
-void vtkAnimationCue::TickInternal(
-  double currenttime, double deltatime, double clocktime)
+//------------------------------------------------------------------------------
+void vtkAnimationCue::TickInternal(double currenttime, double deltatime, double clocktime)
 {
   vtkAnimationCue::AnimationCueInfo info;
   info.StartTime = this->StartTime;
   info.EndTime = this->EndTime;
   info.DeltaTime = deltatime;
   info.AnimationTime = currenttime;
-  info.ClockTime =clocktime;
+  info.ClockTime = clocktime;
 
   this->AnimationTime = currenttime;
   this->DeltaTime = deltatime;
@@ -79,13 +78,11 @@ void vtkAnimationCue::TickInternal(
   this->ClockTime = 0;
 }
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::Tick(double currenttime, double deltatime, double clocktime)
 {
   // Check to see if we have crossed the Cue start.
-  if (currenttime >= this->StartTime &&
-    this->CueState == vtkAnimationCue::UNINITIALIZED)
+  if (currenttime >= this->StartTime && this->CueState == vtkAnimationCue::UNINITIALIZED)
   {
     this->CueState = vtkAnimationCue::ACTIVE;
     this->StartCueInternal();
@@ -107,19 +104,19 @@ void vtkAnimationCue::Tick(double currenttime, double deltatime, double clocktim
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::SetTimeMode(int mode)
 {
   this->TimeMode = mode;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::Initialize()
 {
   this->CueState = vtkAnimationCue::UNINITIALIZED;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::Finalize()
 {
   if (this->CueState == vtkAnimationCue::ACTIVE)
@@ -129,7 +126,7 @@ void vtkAnimationCue::Finalize()
   this->CueState = vtkAnimationCue::INACTIVE;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAnimationCue::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);

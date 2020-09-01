@@ -14,36 +14,59 @@
 =========================================================================*/
 #include "vtkXMLPartitionedDataSetCollectionReader.h"
 
-#include "vtkCompositeDataSet.h"
+#include "vtkBase64Utilities.h"
 #include "vtkCompositeDataPipeline.h"
+#include "vtkCompositeDataSet.h"
+#include "vtkDataAssembly.h"
 #include "vtkDataSet.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
-#include "vtkPartitionedDataSetCollection.h"
-#include "vtkPartitionedDataSet.h"
 #include "vtkObjectFactory.h"
+#include "vtkPartitionedDataSet.h"
+#include "vtkPartitionedDataSetCollection.h"
 #include "vtkSmartPointer.h"
 #include "vtkXMLDataElement.h"
 
+namespace
+{
+vtkSmartPointer<vtkDataAssembly> ReadDataAssembly(
+  vtkXMLDataElement* elem, vtkXMLPartitionedDataSetCollectionReader* self)
+{
+  if (elem->GetAttribute("encoding") == nullptr ||
+    strcmp(elem->GetAttribute("encoding"), "base64") != 0 || elem->GetCharacterData() == nullptr)
+  {
+    vtkWarningWithObjectMacro(self, "Unsupported DataAssembly encoding. Ignoring.");
+    return nullptr;
+  }
+
+  vtkNew<vtkDataAssembly> assembly;
+  size_t len_encoded_data = strlen(elem->GetCharacterData());
+  char* decoded_buffer = new char[len_encoded_data];
+  auto decoded_buffer_len = vtkBase64Utilities::DecodeSafely(
+    reinterpret_cast<const unsigned char*>(elem->GetCharacterData()), len_encoded_data,
+    reinterpret_cast<unsigned char*>(decoded_buffer), len_encoded_data);
+  decoded_buffer[decoded_buffer_len] = '\0';
+  assembly->InitializeFromXML(decoded_buffer);
+  delete[] decoded_buffer;
+  return assembly;
+}
+}
+
 vtkStandardNewMacro(vtkXMLPartitionedDataSetCollectionReader);
 
-//----------------------------------------------------------------------------
-vtkXMLPartitionedDataSetCollectionReader::vtkXMLPartitionedDataSetCollectionReader()
-{
-}
+//------------------------------------------------------------------------------
+vtkXMLPartitionedDataSetCollectionReader::vtkXMLPartitionedDataSetCollectionReader() = default;
 
-//----------------------------------------------------------------------------
-vtkXMLPartitionedDataSetCollectionReader::~vtkXMLPartitionedDataSetCollectionReader()
-{
-}
+//------------------------------------------------------------------------------
+vtkXMLPartitionedDataSetCollectionReader::~vtkXMLPartitionedDataSetCollectionReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPartitionedDataSetCollectionReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkXMLPartitionedDataSetCollectionReader::FillOutputPortInformation(
   int vtkNotUsed(port), vtkInformation* info)
 {
@@ -51,16 +74,15 @@ int vtkXMLPartitionedDataSetCollectionReader::FillOutputPortInformation(
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char* vtkXMLPartitionedDataSetCollectionReader::GetDataSetName()
 {
   return "vtkPartitionedDataSetCollection";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPartitionedDataSetCollectionReader::ReadComposite(vtkXMLDataElement* element,
-  vtkCompositeDataSet* composite, const char* filePath,
-  unsigned int &dataSetIndex)
+  vtkCompositeDataSet* composite, const char* filePath, unsigned int& dataSetIndex)
 {
   vtkPartitionedDataSetCollection* col = vtkPartitionedDataSetCollection::SafeDownCast(composite);
   vtkPartitionedDataSet* ds = vtkPartitionedDataSet::SafeDownCast(composite);
@@ -70,8 +92,12 @@ void vtkXMLPartitionedDataSetCollectionReader::ReadComposite(vtkXMLDataElement* 
     return;
   }
 
+  // count partitions to guide partition allocation when reading in parallel.
+  const unsigned int numberOfParitions =
+    ds ? vtkXMLCompositeDataReader::CountNestedElements(element, "DataSet") : 0;
+
   unsigned int maxElems = element->GetNumberOfNestedElements();
-  for (unsigned int cc=0; cc < maxElems; ++cc)
+  for (unsigned int cc = 0; cc < maxElems; ++cc)
   {
     vtkXMLDataElement* childXML = element->GetNestedElement(cc);
     if (!childXML || !childXML->GetName())
@@ -98,7 +124,7 @@ void vtkXMLPartitionedDataSetCollectionReader::ReadComposite(vtkXMLDataElement* 
     if (strcmp(tagName, "DataSet") == 0)
     {
       vtkSmartPointer<vtkDataObject> childDS;
-      if (this->ShouldReadDataSet(dataSetIndex))
+      if (this->ShouldReadDataSet(dataSetIndex, index, numberOfParitions))
       {
         // Read
         childDS.TakeReference(this->ReadDataObject(childXML, filePath));
@@ -107,13 +133,17 @@ void vtkXMLPartitionedDataSetCollectionReader::ReadComposite(vtkXMLDataElement* 
       ds->SetPartition(index, childDS);
       dataSetIndex++;
     }
-    else if (col != nullptr
-             && strcmp(tagName, "Partitions") == 0)
+    else if (col != nullptr && strcmp(tagName, "Partitions") == 0)
     {
       vtkPartitionedDataSet* childDS = vtkPartitionedDataSet::New();
       this->ReadComposite(childXML, childDS, filePath, dataSetIndex);
       col->SetPartitionedDataSet(index, childDS);
       childDS->Delete();
+    }
+    else if (col != nullptr && strcmp(tagName, "DataAssembly") == 0)
+    {
+      auto assembly = ::ReadDataAssembly(childXML, this);
+      col->SetDataAssembly(assembly);
     }
     else
     {

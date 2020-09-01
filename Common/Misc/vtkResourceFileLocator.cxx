@@ -14,7 +14,9 @@
 =========================================================================*/
 #include "vtkResourceFileLocator.h"
 
+#include "vtkLogger.h"
 #include "vtkObjectFactory.h"
+
 #include <vtksys/SystemTools.hxx>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -23,11 +25,8 @@
 #define VTK_PATH_SEPARATOR "/"
 #endif
 
-#define VTK_FILE_LOCATOR_DEBUG_MESSAGE(x)                                                          \
-  if (this->PrintDebugInformation)                                                                 \
-  {                                                                                                \
-    cout << "# vtk: " x << endl;                                                                   \
-  }
+#define VTK_FILE_LOCATOR_DEBUG_MESSAGE(...)                                                        \
+  vtkVLogF(static_cast<vtkLogger::Verbosity>(this->LogVerbosity), __VA_ARGS__)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 // Implementation for Windows win32 code but not cygwin
@@ -37,28 +36,29 @@
 #endif
 
 vtkStandardNewMacro(vtkResourceFileLocator);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkResourceFileLocator::vtkResourceFileLocator()
-  : PrintDebugInformation(false)
+  : LogVerbosity(vtkLogger::VERBOSITY_TRACE)
 {
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkResourceFileLocator::~vtkResourceFileLocator() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 std::string vtkResourceFileLocator::Locate(
   const std::string& anchor, const std::string& landmark, const std::string& defaultDir)
 {
   return this->Locate(anchor, { std::string() }, landmark, defaultDir);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 std::string vtkResourceFileLocator::Locate(const std::string& anchor,
   const std::vector<std::string>& landmark_prefixes, const std::string& landmark,
   const std::string& defaultDir)
 {
-  VTK_FILE_LOCATOR_DEBUG_MESSAGE("looking for '" << landmark << "'");
+  vtkVLogScopeF(
+    static_cast<vtkLogger::Verbosity>(this->LogVerbosity), "looking for '%s'", landmark.c_str());
   std::vector<std::string> path_components;
   vtksys::SystemTools::SplitPath(anchor, path_components);
   while (!path_components.empty())
@@ -71,12 +71,12 @@ std::string vtkResourceFileLocator::Locate(const std::string& anchor,
       const std::string landmarktocheck = landmarkdir + VTK_PATH_SEPARATOR + landmark;
       if (vtksys::SystemTools::FileExists(landmarktocheck))
       {
-        VTK_FILE_LOCATOR_DEBUG_MESSAGE("trying file " << landmarktocheck << " -- success!");
+        VTK_FILE_LOCATOR_DEBUG_MESSAGE("trying file %s -- success!", landmarktocheck.c_str());
         return landmarkdir;
       }
       else
       {
-        VTK_FILE_LOCATOR_DEBUG_MESSAGE("trying file " << landmarktocheck << " -- failed!");
+        VTK_FILE_LOCATOR_DEBUG_MESSAGE("trying file %s -- failed!", landmarktocheck.c_str());
       }
     }
     path_components.pop_back();
@@ -84,7 +84,7 @@ std::string vtkResourceFileLocator::Locate(const std::string& anchor,
   return defaultDir;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 std::string vtkResourceFileLocator::GetLibraryPathForSymbolUnix(const char* symbolname)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -108,7 +108,7 @@ std::string vtkResourceFileLocator::GetLibraryPathForSymbolUnix(const char* symb
 #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 std::string vtkResourceFileLocator::GetLibraryPathForSymbolWin32(const void* fptr)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -127,9 +127,37 @@ std::string vtkResourceFileLocator::GetLibraryPathForSymbolWin32(const void* fpt
 #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkResourceFileLocator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "PrintDebugInformation: " << this->PrintDebugInformation << endl;
+  os << indent << "LogVerbosity: " << this->LogVerbosity << endl;
+}
+
+void vtkResourceFileLocator::SetPrintDebugInformation(bool val)
+{
+  VTK_LEGACY_REPLACED_BODY(vtkResourceFileLocator::SetPrintDebugInformation, "VTK 9.0",
+    vtkResourceFileLocator::SetLogVerbosity);
+  this->SetLogVerbosity(val ? vtkLogger::VERBOSITY_INFO : vtkLogger::VERBOSITY_TRACE);
+}
+
+bool vtkResourceFileLocator::GetPrintDebugInformation()
+{
+  VTK_LEGACY_REPLACED_BODY(vtkResourceFileLocator::GetPrintDebugInformation, "VTK 9.0",
+    vtkResourceFileLocator::GetLogVerbosity);
+  return (this->GetLogVerbosity() == vtkLogger::VERBOSITY_INFO);
+}
+
+void vtkResourceFileLocator::PrintDebugInformationOn()
+{
+  VTK_LEGACY_REPLACED_BODY(vtkResourceFileLocator::PrintDebugInformationOn, "VTK 9.0",
+    vtkResourceFileLocator::SetLogVerbosity);
+  this->SetLogVerbosity(vtkLogger::VERBOSITY_INFO);
+}
+
+void vtkResourceFileLocator::PrintDebugInformationOff()
+{
+  VTK_LEGACY_REPLACED_BODY(vtkResourceFileLocator::PrintDebugInformationOff, "VTK 9.0",
+    vtkResourceFileLocator::SetLogVerbosity);
+  this->SetLogVerbosity(vtkLogger::VERBOSITY_TRACE);
 }

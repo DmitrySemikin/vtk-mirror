@@ -4,6 +4,7 @@ vtk_add_test_cxx(vtkImagingCoreCxxTests tests
   ImageAccumulateLarge.cxx,NO_VALID,NO_DATA,NO_OUTPUT 32
   ImageAutoRange.cxx
   ImageBSplineCoefficients.cxx
+  ImageGenericInterpolateSlidingWindow3D.cxx
   ImageHistogram.cxx
   ImageHistogramStatistics.cxx,NO_VALID
   ImageInterpolateSlidingWindow2D.cxx
@@ -15,6 +16,7 @@ vtk_add_test_cxx(vtkImagingCoreCxxTests tests
   ImageWeightedSum.cxx,NO_VALID
   ImportExport.cxx,NO_VALID
   TestBSplineWarp.cxx
+  TestImageProbeFilter.cxx
   TestImageStencilDataMethods.cxx,NO_VALID
   TestImageStencilIterator.cxx,NO_VALID
   TestStencilWithLasso.cxx
@@ -27,23 +29,23 @@ list(APPEND tests
   )
 
 # The stencil test is special
-ExternalData_add_test(VTKData
-  NAME vtkImagingCoreCxx-AddStencilData
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::ImagingCoreCxx-AddStencilData
   COMMAND vtkImagingCoreCxxTests TestImageStencilData 1
-    -D ${VTK_TEST_DATA_DIR}
-    -T ${VTK_TEST_OUTPUT_DIR}
+    -D ${_vtk_build_TEST_OUTPUT_DATA_DIRECTORY}
+    -T ${_vtk_build_TEST_OUTPUT_DIRECTORY}
     -V DATA{../Data/Baseline/TestAddStencilData.png,:})
-ExternalData_add_test(VTKData
-  NAME vtkImagingCoreCxx-SubtractStencilData
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::ImagingCoreCxx-SubtractStencilData
   COMMAND vtkImagingCoreCxxTests TestImageStencilData 2
-    -D ${VTK_TEST_DATA_DIR}
-    -T ${VTK_TEST_OUTPUT_DIR}
+    -D ${_vtk_build_TEST_OUTPUT_DATA_DIRECTORY}
+    -T ${_vtk_build_TEST_OUTPUT_DIRECTORY}
     -V DATA{../Data/Baseline/TestSubtractStencilData.png,:})
-ExternalData_add_test(VTKData
-  NAME vtkImagingCoreCxx-ClipStencilData
+ExternalData_add_test(${_vtk_build_TEST_DATA_TARGET}
+  NAME VTK::ImagingCoreCxx-ClipStencilData
   COMMAND vtkImagingCoreCxxTests TestImageStencilData 3
-    -D ${VTK_TEST_DATA_DIR}
-    -T ${VTK_TEST_OUTPUT_DIR}
+    -D ${_vtk_build_TEST_OUTPUT_DATA_DIRECTORY}
+    -T ${_vtk_build_TEST_OUTPUT_DIRECTORY}
     -V DATA{../Data/Baseline/TestClipStencilData.png,:})
 
 vtk_test_cxx_executable(vtkImagingCoreCxxTests tests

@@ -17,15 +17,14 @@
 #include "vtkObjectFactory.h"
 
 vtkStandardNewMacro(vtkXMLHierarchicalDataReader);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLHierarchicalDataReader::vtkXMLHierarchicalDataReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLHierarchicalDataReader::~vtkXMLHierarchicalDataReader() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLHierarchicalDataReader::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
-

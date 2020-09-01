@@ -19,16 +19,18 @@
  * vtkCellDataToPointData is a filter that transforms cell data (i.e., data
  * specified per cell) into point data (i.e., data specified at cell
  * points). The method of transformation is based on averaging the data
- * values of all cells using a particular point. For large datasets with
+ * values of all cells using each point. For large datasets with
  * several cell data arrays, the filter optionally supports selective
  * processing to speed up processing. Optionally, the input cell data can
  * be passed through to the output as well.
- * Unstructured grids and polydata can have cells of different dimensions.
- * To handle different use cases in this situation, the user can specify
- * which cells contribute to the computation. The options for this are
- * All (default), Patch and DataSetMax. Patch uses only the highest dimension
- * cells attached to a point. DataSetMax uses the highest cell dimension in
- * the entire data set.
+ *
+ * Options exist to control which cells are used to perform the averaging
+ * operation. Since unstructured grids and polydata can contain cells of
+ * different dimensions, in some cases it is desirable to perform cell
+ * averaging using cells of a specified dimension. The available options to
+ * control this functionality are All (default), Patch and DataSetMax. Patch
+ * uses only the highest dimension cells attached to a point. DataSetMax uses
+ * the highest cell dimension in the entire data set.
  *
  * @warning
  * This filter is an abstract filter, that is, the output is an abstract type
@@ -36,30 +38,45 @@
  * GetPolyDataOutput(), GetStructuredPointsOutput(), etc.) to get the type
  * of output you want.
  *
+ * @warning
+ * For maximum performance, use the ContributingCellOption=All. Other options
+ * significantly, negatively impact performance (on the order of >10x).
+ *
+ * @warning
+ * This class has been threaded with vtkSMPTools. Using TBB or other
+ * non-sequential execution type (set in the CMake variable
+ * VTK_SMP_IMPLEMENTATION_TYPE) may improve performance significantly.
+ *
  * @sa
  * vtkPointData vtkCellData vtkPointDataToCellData
-*/
+ */
 
 #ifndef vtkCellDataToPointData_h
 #define vtkCellDataToPointData_h
 
-#include "vtkFiltersCoreModule.h" // For export macro
 #include "vtkDataSetAlgorithm.h"
+#include "vtkFiltersCoreModule.h" // For export macro
 
 class vtkDataSet;
 
 class VTKFILTERSCORE_EXPORT vtkCellDataToPointData : public vtkDataSetAlgorithm
 {
 public:
-  static vtkCellDataToPointData *New();
-  vtkTypeMacro(vtkCellDataToPointData,vtkDataSetAlgorithm);
+  //@{
+  /**
+   * Standard methods for instantiation, type information, and printing.
+   */
+  static vtkCellDataToPointData* New();
+  vtkTypeMacro(vtkCellDataToPointData, vtkDataSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+  //@}
 
-  /// Options to choose what cells contribute to the calculation
-  enum ContributingCellEnum {
-    All=0,        //!< All cells
-    Patch=1,      //!< Highest dimension cells in the patch of cells contributing to the calculation
-    DataSetMax=2  //!< Highest dimension cells in the data set
+  /// Options to specify what cells contribute to the cell-averaging calculation
+  enum ContributingCellEnum
+  {
+    All = 0,   //!< All cells
+    Patch = 1, //!< Highest dimension cells in the patch of cells contributing to the calculation
+    DataSetMax = 2 //!< Highest dimension cells in the data set
   };
 
   //@{
@@ -68,14 +85,14 @@ public:
    * on, then the input cell data is passed through to the output; otherwise,
    * only generated point data is placed into the output.
    */
-  vtkSetMacro(PassCellData,bool);
-  vtkGetMacro(PassCellData,bool);
-  vtkBooleanMacro(PassCellData,bool);
+  vtkSetMacro(PassCellData, bool);
+  vtkGetMacro(PassCellData, bool);
+  vtkBooleanMacro(PassCellData, bool);
   //@}
 
   //@{
   /**
-   * Option to specify what cells to include in the gradient computation.
+   * Option to specify what cells to include in the cell-averaging computation.
    * Options are all cells (All, Patch and DataSetMax). The default is All.
    */
   vtkSetClampMacro(ContributingCellOption, int, 0, 2);
@@ -84,7 +101,7 @@ public:
 
   //@{
   /**
-   * Activate selective processing of arrays. If inactive, only arrays selected
+   * Activate selective processing of arrays. If false, only arrays selected
    * by the user will be considered by this filter. The default is true.
    */
   vtkSetMacro(ProcessAllArrays, bool);
@@ -97,14 +114,14 @@ public:
    * ProcessAllArrays option is turned off. If a name is already present,
    * nothing happens.
    */
-  virtual void AddCellDataArray(const char *name);
+  virtual void AddCellDataArray(const char* name);
 
   /**
    * Removes an array to be processed. This only has an effect if the
    * ProcessAllArrays option is turned off. If the specified name is not
    * present, nothing happens.
    */
-  virtual void RemoveCellDataArray(const char *name);
+  virtual void RemoveCellDataArray(const char* name);
 
   /**
    * Removes all arrays to be processed from the list. This only has an effect
@@ -116,20 +133,19 @@ protected:
   vtkCellDataToPointData();
   ~vtkCellDataToPointData() override;
 
-  int RequestData(vtkInformation* request,
-                  vtkInformationVector** inputVector,
-                  vtkInformationVector* outputVector) override;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
   //@{
   /**
    * Special algorithm for unstructured grids and polydata to make sure
    * that we properly take into account ContributingCellOption.
    */
-  int RequestDataForUnstructuredData
-    (vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  int RequestDataForUnstructuredData(
+    vtkInformation*, vtkInformationVector**, vtkInformationVector*);
   //@}
 
-  int InterpolatePointData(vtkDataSet *input, vtkDataSet *output);
+  int InterpolatePointData(vtkDataSet* input, vtkDataSet* output);
 
   //@{
   /**
@@ -152,7 +168,7 @@ protected:
   bool ProcessAllArrays;
 
   class Internals;
-  Internals *Implementation;
+  Internals* Implementation;
 
 private:
   vtkCellDataToPointData(const vtkCellDataToPointData&) = delete;
@@ -160,5 +176,3 @@ private:
 };
 
 #endif
-
-

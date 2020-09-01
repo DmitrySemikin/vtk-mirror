@@ -36,11 +36,11 @@ const char* UGGCG_GLOBAL_POINT_IDS = "GlobalNodeIds";
 const char* UGGCG_GLOBAL_CELL_IDS = "GlobalCellIds";
 }
 
-//----------------------------------------------------------------------------
-vtkObjectFactoryNewMacro(vtkUnstructuredGridGhostCellsGenerator)
+//------------------------------------------------------------------------------
+vtkObjectFactoryNewMacro(vtkUnstructuredGridGhostCellsGenerator);
 
-  //----------------------------------------------------------------------------
-  vtkUnstructuredGridGhostCellsGenerator::vtkUnstructuredGridGhostCellsGenerator()
+//------------------------------------------------------------------------------
+vtkUnstructuredGridGhostCellsGenerator::vtkUnstructuredGridGhostCellsGenerator()
 {
   this->BuildIfRequired = true;
   this->MinimumNumberOfGhostLevels = 1;
@@ -54,14 +54,14 @@ vtkObjectFactoryNewMacro(vtkUnstructuredGridGhostCellsGenerator)
   this->SetGlobalCellIdsArrayName(UGGCG_GLOBAL_CELL_IDS);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkUnstructuredGridGhostCellsGenerator::~vtkUnstructuredGridGhostCellsGenerator()
 {
   this->SetGlobalPointIdsArrayName(nullptr);
   this->SetGlobalCellIdsArrayName(nullptr);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkUnstructuredGridGhostCellsGenerator::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os, indent);
@@ -78,7 +78,7 @@ void vtkUnstructuredGridGhostCellsGenerator::PrintSelf(ostream& os, vtkIndent in
   os << indent << "MinimumNumberOfGhostLevels: " << this->MinimumNumberOfGhostLevels << endl;
 }
 
-//--------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkUnstructuredGridGhostCellsGenerator::RequestUpdateExtent(
   vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector*)
 {
@@ -89,7 +89,7 @@ int vtkUnstructuredGridGhostCellsGenerator::RequestUpdateExtent(
   return 1;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkUnstructuredGridGhostCellsGenerator::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {

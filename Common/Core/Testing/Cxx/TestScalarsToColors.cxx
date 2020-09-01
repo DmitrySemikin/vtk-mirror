@@ -4,7 +4,7 @@
 #include "vtkVariant.h"
 #include "vtkVariantArray.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static bool TestRange()
 {
   bool success = true;
@@ -12,7 +12,7 @@ static bool TestRange()
   vtkNew<vtkScalarsToColors> lut;
 
   // Check default range.
-  const double *range = lut->GetRange();
+  const double* range = lut->GetRange();
   if (range[0] != 0.0 || range[1] != 255.0)
   {
     cerr << "Default range wrong\n";
@@ -40,7 +40,7 @@ static bool TestRange()
   return success;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static bool TestAlpha()
 {
   bool success = true;
@@ -75,15 +75,15 @@ static bool TestAlpha()
   return success;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static bool TestGetColorAndMapValue()
 {
   bool success = true;
 
   vtkNew<vtkScalarsToColors> lut;
 
-  double rgb[3] = {0.1, 0.2, 0.3};
-  const unsigned char * rgba = nullptr;
+  double rgb[3] = { 0.1, 0.2, 0.3 };
+  const unsigned char* rgba = nullptr;
 
   // Sane range.
   lut->SetRange(0.0, 1.0);
@@ -100,7 +100,6 @@ static bool TestGetColorAndMapValue()
     cerr << "MapValue result wrong\n";
     success = false;
   }
-
 
   // Tiny range.
   lut->SetRange(0.0, 1e-80);
@@ -121,7 +120,7 @@ static bool TestGetColorAndMapValue()
   return success;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static bool TestDeepCopy()
 {
   bool success = true;
@@ -164,7 +163,7 @@ static bool TestDeepCopy()
   return success;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static bool TestGeneral()
 {
   bool success = true;
@@ -232,7 +231,7 @@ static bool TestGeneral()
   return success;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int TestScalarsToColors(int, char*[])
 {
   bool success1 = TestRange();

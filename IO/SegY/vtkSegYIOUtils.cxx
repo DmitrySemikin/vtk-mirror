@@ -16,32 +16,32 @@
 #include "vtkSegYIOUtils.h"
 
 #include <cmath>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 #include <sys/types.h>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkSegYIOUtils::vtkSegYIOUtils()
 {
   this->IsBigEndian = checkIfBigEndian();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkSegYIOUtils* vtkSegYIOUtils::Instance()
 {
   static vtkSegYIOUtils vtkSegYIOUtils;
   return &vtkSegYIOUtils;
 }
 
-//----------------------------------------------------------------------------
-short vtkSegYIOUtils::readShortInteger(std::streamoff pos, std::ifstream& in)
+//------------------------------------------------------------------------------
+short vtkSegYIOUtils::readShortInteger(std::streamoff pos, std::istream& in)
 {
   in.seekg(pos, in.beg);
   return readShortInteger(in);
 }
 
-//----------------------------------------------------------------------------
-short vtkSegYIOUtils::readShortInteger(std::ifstream& in)
+//------------------------------------------------------------------------------
+short vtkSegYIOUtils::readShortInteger(std::istream& in)
 {
   char buffer[2];
   in.read(buffer, sizeof(buffer));
@@ -56,15 +56,15 @@ short vtkSegYIOUtils::readShortInteger(std::ifstream& in)
   return num;
 }
 
-//----------------------------------------------------------------------------
-int vtkSegYIOUtils::readLongInteger(std::streamoff pos, std::ifstream& in)
+//------------------------------------------------------------------------------
+int vtkSegYIOUtils::readLongInteger(std::streamoff pos, std::istream& in)
 {
   in.seekg(pos, in.beg);
   return readLongInteger(in);
 }
 
-//----------------------------------------------------------------------------
-int vtkSegYIOUtils::readLongInteger(std::ifstream& in)
+//------------------------------------------------------------------------------
+int vtkSegYIOUtils::readLongInteger(std::istream& in)
 {
   char buffer[4];
   in.read(buffer, sizeof(buffer));
@@ -80,8 +80,8 @@ int vtkSegYIOUtils::readLongInteger(std::ifstream& in)
   return num;
 }
 
-//----------------------------------------------------------------------------
-float vtkSegYIOUtils::readFloat(std::ifstream& in)
+//------------------------------------------------------------------------------
+float vtkSegYIOUtils::readFloat(std::istream& in)
 {
   char buffer[4];
   in.read(buffer, sizeof(buffer));
@@ -97,8 +97,8 @@ float vtkSegYIOUtils::readFloat(std::ifstream& in)
   return num;
 }
 
-//----------------------------------------------------------------------------
-float vtkSegYIOUtils::readIBMFloat(std::ifstream& in)
+//------------------------------------------------------------------------------
+float vtkSegYIOUtils::readIBMFloat(std::istream& in)
 {
   char buffer[4];
   in.read(buffer, sizeof(buffer));
@@ -140,23 +140,23 @@ float vtkSegYIOUtils::readIBMFloat(std::ifstream& in)
   return num;
 }
 
-//----------------------------------------------------------------------------
-char vtkSegYIOUtils::readChar(std::ifstream& in)
+//------------------------------------------------------------------------------
+char vtkSegYIOUtils::readChar(std::istream& in)
 {
   char buffer;
   in.read(&buffer, sizeof(buffer));
   return buffer;
 }
 
-//----------------------------------------------------------------------------
-unsigned char vtkSegYIOUtils::readUChar(std::ifstream& in)
+//------------------------------------------------------------------------------
+unsigned char vtkSegYIOUtils::readUChar(std::istream& in)
 {
   char buffer;
   in.read(&buffer, sizeof(buffer));
   return buffer;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkSegYIOUtils::swap(char* a, char* b)
 {
   char temp = *a;
@@ -164,8 +164,8 @@ void vtkSegYIOUtils::swap(char* a, char* b)
   *b = temp;
 }
 
-//----------------------------------------------------------------------------
-std::streamoff vtkSegYIOUtils::getFileSize(std::ifstream& in)
+//------------------------------------------------------------------------------
+std::streamoff vtkSegYIOUtils::getFileSize(std::istream& in)
 {
   in.seekg(0, in.end);
   return in.tellg();

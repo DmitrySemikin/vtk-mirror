@@ -1,5 +1,6 @@
 vtk_add_test_cxx(vtkFiltersSourcesCxxTests tests
   TestArcSource.cxx,NO_VALID
+  TestCapsuleSource.cxx,NO_VALID
   TestCellTypeSource.cxx,NO_VALID
   TestConeSource.cxx,NO_VALID
   TestCubeSource.cxx,NO_VALID
@@ -18,6 +19,7 @@ vtk_add_test_cxx(vtkFiltersSourcesCxxTests tests
   TestPlatonicSolidSource.cxx,NO_VALID
   TestPointSource.cxx,NO_VALID
   TestPolyLineSource.cxx,NO_VALID
+  TestPolyPointSource.cxx,NO_VALID
   TestProgrammableSource.cxx,NO_VALID
   TestRandomHyperTreeGridSource.cxx
   TestRectangularButtonSource.cxx,NO_VALID

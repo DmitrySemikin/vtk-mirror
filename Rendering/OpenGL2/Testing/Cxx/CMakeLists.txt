@@ -1,61 +1,95 @@
 vtk_add_test_cxx(vtkRenderingOpenGL2CxxTests tests
-  TestAppleBug.cxx
+  TestBlockOpacity.cxx TestBlockVisibility.cxx
   TestBlurAndSobelPasses.cxx
+  TestCameraShiftScale.cxx,NO_DATA
   TestCoincident.cxx
+  TestCompositeDataPointGaussian.cxx,NO_DATA
+  TestCompositeDataPointGaussianSelection.cxx,NO_DATA
+  TestCompositePolyDataMapper2.cxx,NO_DATA
+  TestCompositePolyDataMapper2CameraShiftScale.cxx,NO_DATA
+  TestCompositePolyDataMapper2CellScalars.cxx,NO_DATA
+  TestCompositePolyDataMapper2CustomShader.cxx,NO_DATA
+  TestCompositePolyDataMapper2MixedGeometryCellScalars.cxx,NO_DATA
+  TestCompositePolyDataMapper2MixedGeometryEdges.cxx,NO_DATA
   TestCompositePolyDataMapper2NaNPartial.cxx,NO_DATA
   TestCompositePolyDataMapper2Pickability.cxx,NO_DATA
+  TestCompositePolyDataMapper2Picking.cxx,NO_DATA
+  TestCompositePolyDataMapper2Scalars.cxx,NO_DATA
   TestCompositePolyDataMapper2SharedArray.cxx,NO_DATA
   TestCompositePolyDataMapper2Spheres.cxx,NO_DATA
   TestCompositePolyDataMapper2Vertices.cxx,NO_DATA
   TestCubeMap.cxx
+  TestCubeMap2.cxx
+  TestCubeMapRerender.cxx
   TestDepthOfFieldPass.cxx
+  TestDepthPeelingOcclusionQuery.cxx
   TestDepthPeelingPass.cxx
   TestDepthPeelingPassViewport.cxx
   TestEDLPass.cxx
+  TestEquirectangularToCubeMap.cxx
   TestFloor.cxx
-  TestFramebufferPass.cxx
+  TestFluidMapper.cxx
   TestFramebufferHDR.cxx
+  TestFramebufferPass.cxx
   TestFXAAFilter.cxx
+  TestFXAAPass.cxx
   TestGaussianBlurPass.cxx
-  TestGlyph3DMapperEdges.cxx
   TestGlyph3DMapperCellPicking.cxx
   TestGlyph3DMapperCulling.cxx
+  TestGlyph3DMapperEdges.cxx
   TestGlyph3DMapperPickability.cxx,NO_DATA
+  TestGlyph3DMapperTreeIndexingCompositeGlyphs.cxx,NO_DATA
+  TestHiddenLineRemovalPass.cxx
   TestLightingMapLuminancePass.cxx
   TestLightingMapNormalsPass.cxx
+  TestMultiBlockPartialArrayFieldData.cxx
+  TestMultiBlockPartialArrayPointData.cxx
   TestMultiTexturing.cxx
+  TestNormalMapping.cxx
   TestOffscreenRenderingResize.cxx
   TestOrderIndependentTranslucentPass.cxx
   TestPanoramicProjectionPass.cxx,NO_DATA
+  TestPBREdgeTint.cxx
+  TestPBRHdrEnvironment.cxx
+  TestPBRAnisotropy.cxx
+  TestPBRIrradianceHDR.cxx
+  TestPBRMapping.cxx
+  TestPBRMaterials.cxx
   TestPointFillPass.cxx
-  TestPointGaussianSelection.cxx,NO_DATA
-  TestPropPicker2Renderers.cxx,NO_DATA
   TestPointGaussianMapper.cxx
   TestPointGaussianMapperOpacity.cxx
+  TestPointGaussianSelection.cxx,NO_DATA
+  TestPropPicker2Renderers.cxx,NO_DATA
   TestRemoveActorNonCurrentContext.cxx
   TestRenderToImage.cxx
-  TestSRGB.cxx
-  TestSSAAPass.cxx
   TestSetZBuffer.cxx
   TestShadowMapBakerPass.cxx
   TestShadowMapPass.cxx
   TestSharedRenderWindow.cxx
+  TestDirectSelectionRendering.cxx
   TestSimpleMotionBlur.cxx
   TestSobelGradientMagnitudePass.cxx
   TestSphereMap.cxx
   TestSpherePoints.cxx
   TestSphereVertex.cxx
+  TestSRGB.cxx
+  TestSSAAPass.cxx
+  TestSSAOPass.cxx
+  TestSurfaceInterpolationSwitch.cxx
+  TestTexture16Bits.cxx,NO_DATA
+  TestTexture32Bits.cxx,NO_DATA
   TestToneMappingPass.cxx,NO_DATA
   TestUserShader.cxx
   TestUserShader2.cxx
+  TestValuePassFloatingPoint.cxx
   TestVBOPLYMapper.cxx
   TestVBOPointsLines.cxx
-  TestValuePass.cxx
-  TestValuePass2.cxx
+  TestWindowBlits.cxx
+  UnitTestOpenGLUniforms.cxx,NO_DATA,NO_VALID,NO_OUTPUT
   )
 
-vtk_add_test_cxx(vtkRenderingOpenGL2CxxTests tests
-  TestCubeMap2.cxx
-    "DATA{${VTK_TEST_INPUT_DIR}/skybox/,REGEX:.*}")
+if (VTK_USE_SDL2)
+  vtk_add_test_cxx(vtkRenderingOpenGL2CxxTests tests TestSDL2.cxx)
+endif ()
 
 vtk_test_cxx_executable(vtkRenderingOpenGL2CxxTests tests RENDERING_FACTORY)

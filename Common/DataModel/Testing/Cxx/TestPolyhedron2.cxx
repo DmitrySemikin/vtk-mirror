@@ -13,22 +13,27 @@
 
 =========================================================================*/
 
-#include "vtkUnstructuredGrid.h"
-#include "vtkPolyhedron.h"
-#include "vtkPlane.h"
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
 
-#include "vtkTestUtilities.h"
-#include "vtkNew.h"
-#include "vtkCutter.h"
 #include "vtkPlane.h"
+#include "vtkPolyhedron.h"
+#include "vtkUnstructuredGrid.h"
+
+#include "vtkCutter.h"
+#include "vtkNew.h"
+#include "vtkPlane.h"
+#include "vtkTestUtilities.h"
+#include "vtkXMLPolyDataWriter.h"
 #include "vtkXMLUnstructuredGridReader.h"
 #include "vtkXMLUnstructuredGridWriter.h"
-#include "vtkXMLPolyDataWriter.h"
 
-// Test of contour/clip of vtkPolyhedron. uses input from https://gitlab.kitware.com/vtk/vtk/issues/14485
-int TestPolyhedron2( int argc, char* argv[] )
+// Test of contour/clip of vtkPolyhedron. uses input from
+// https://gitlab.kitware.com/vtk/vtk/-/issues/14485
+int TestPolyhedron2(int argc, char* argv[])
 {
-  if (argc < 3) return 1; // test not run with data on the command line
+  if (argc < 3)
+    return 1; // test not run with data on the command line
 
   vtkObject::GlobalWarningDisplayOff();
 
@@ -42,7 +47,7 @@ int TestPolyhedron2( int argc, char* argv[] )
   vtkNew<vtkCutter> cutter;
   vtkNew<vtkPlane> p;
   p->SetOrigin(pGrid->GetCenter());
-  p->SetNormal(1,0,0);
+  p->SetNormal(1, 0, 0);
 
   cutter->SetCutFunction(p);
   cutter->SetGenerateTriangles(0);
@@ -53,7 +58,8 @@ int TestPolyhedron2( int argc, char* argv[] )
   vtkPolyData* output = vtkPolyData::SafeDownCast(cutter->GetOutputDataObject(0));
   if (output->GetNumberOfCells() != 2)
   {
-    std::cerr << "Expected 2 polygons but found " << output->GetNumberOfCells() << " polygons in sliced polyhedron." << std::endl;
+    std::cerr << "Expected 2 polygons but found " << output->GetNumberOfCells()
+              << " polygons in sliced polyhedron." << std::endl;
     return EXIT_FAILURE;
   }
 

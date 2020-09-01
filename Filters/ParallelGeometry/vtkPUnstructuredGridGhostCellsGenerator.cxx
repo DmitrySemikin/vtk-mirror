@@ -30,12 +30,12 @@
 #include "vtkMPIController.h"
 #include "vtkMath.h"
 #include "vtkMergeCells.h"
-#include "vtkMergePoints.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
 #include "vtkPointData.h"
 #include "vtkPoints.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkTimerLog.h"
 #include "vtkUnsignedCharArray.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -44,7 +44,7 @@
 #include <set>
 #include <vector>
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Helpers
 namespace
 {
@@ -59,19 +59,6 @@ public:
   {
     this->SendBuffer = vtkCharArray::New();
     this->RecvBuffer = vtkCharArray::New();
-  }
-
-  CommDataInfo(const CommDataInfo& c)
-  {
-    *this = c;
-    if (this->SendBuffer)
-    {
-      this->SendBuffer->Register(nullptr);
-    }
-    if (this->RecvBuffer)
-    {
-      this->RecvBuffer->Register(nullptr);
-    }
   }
 
   ~CommDataInfo()
@@ -94,6 +81,10 @@ public:
   vtkIdType RecvLen;
   int CommStep;
   int RecvSize;
+
+private:
+  CommDataInfo(const CommDataInfo&) = delete;
+  void operator=(const CommDataInfo&) = delete;
 };
 } // end anonymous namespace
 
@@ -104,17 +95,17 @@ struct vtkPUnstructuredGridGhostCellsGenerator::vtkInternals
 
   // For global ids
   std::map<vtkIdType, vtkIdType> GlobalToLocalPointIdMap;
-  std::map<int, std::vector<vtkIdType> > ProcessIdToSurfacePointIds;
+  std::map<int, std::vector<vtkIdType>> ProcessIdToSurfacePointIds;
   // Ids to send to a specific process. Only the ids of points in the
   // receive process's bounding box are sent.
-  std::map<int, std::vector<vtkIdType> > SendIds;
+  std::map<int, std::vector<vtkIdType>> SendIds;
 
   // For point coordinates
-  std::map<int, std::vector<double> > ProcessIdToSurfacePoints;
+  std::map<int, std::vector<double>> ProcessIdToSurfacePoints;
   vtkSmartPointer<vtkIdTypeArray> LocalPointsMap; // from surface id to 3d grid id
   // Points to send to a specific process. Only the points in the
   // receive process's bounding box are sent.
-  std::map<int, std::vector<double> > SendPoints;
+  std::map<int, std::vector<double>> SendPoints;
   vtkSmartPointer<vtkDataArray> MyPoints;
 
   std::map<int, CommDataInfo> CommData;
@@ -125,16 +116,16 @@ struct vtkPUnstructuredGridGhostCellsGenerator::vtkInternals
   bool UseGlobalPointIds;
 
   // cells that need to be sent to a given proc
-  std::map<int, std::set<vtkIdType> > CellsToSend;
+  std::map<int, std::set<vtkIdType>> CellsToSend;
 
   // cells that have been sent to a given proc over the entire time.
   // used to make sure we only send a cell once to a destination process.
-  std::map<int, std::set<vtkIdType> > SentCells;
+  std::map<int, std::set<vtkIdType>> SentCells;
 
   // cells that have been received from a given proc over the entire time.
   // stores global cell id. used this to make sure that we don't send
   // a cell back to a process that already sent it to this rank
-  std::map<int, std::set<vtkIdType> > ReceivedCells;
+  std::map<int, std::set<vtkIdType>> ReceivedCells;
 
   // mapping from global cell id to local cell id.
   // only stores cells which have been received (aka are ghost cells)
@@ -142,7 +133,7 @@ struct vtkPUnstructuredGridGhostCellsGenerator::vtkInternals
 
   // cells that were sent to a proc during the last round,
   // a "round" is receiving one layer of ghost cells
-  std::map<int, std::set<vtkIdType> > SentCellsLastRound;
+  std::map<int, std::set<vtkIdType>> SentCellsLastRound;
 
   // list of processes which are probably my neighbors. this
   // is based on overlapping local bounding boxes so it is
@@ -156,13 +147,13 @@ static const int UGGCG_SIZE_EXCHANGE_TAG = 9000;
 static const int UGGCG_DATA_EXCHANGE_TAG = 9001;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-vtkStandardNewMacro(vtkPUnstructuredGridGhostCellsGenerator)
+vtkStandardNewMacro(vtkPUnstructuredGridGhostCellsGenerator);
 vtkSetObjectImplementationMacro(
   vtkPUnstructuredGridGhostCellsGenerator, Controller, vtkMultiProcessController);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPUnstructuredGridGhostCellsGenerator::vtkPUnstructuredGridGhostCellsGenerator()
 {
   this->Controller = nullptr;
@@ -171,7 +162,7 @@ vtkPUnstructuredGridGhostCellsGenerator::vtkPUnstructuredGridGhostCellsGenerator
   this->Internals = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPUnstructuredGridGhostCellsGenerator::~vtkPUnstructuredGridGhostCellsGenerator()
 {
   this->SetController(nullptr);
@@ -180,13 +171,13 @@ vtkPUnstructuredGridGhostCellsGenerator::~vtkPUnstructuredGridGhostCellsGenerato
   this->Internals = nullptr;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPUnstructuredGridGhostCellsGenerator::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os, indent);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkPUnstructuredGridGhostCellsGenerator::RequestData(vtkInformation* vtkNotUsed(request),
   vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
@@ -214,8 +205,9 @@ int vtkPUnstructuredGridGhostCellsGenerator::RequestData(vtkInformation* vtkNotU
 
   int reqGhostLevel =
     outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_GHOST_LEVELS());
-  int maxGhostLevel = this->BuildIfRequired ? reqGhostLevel : std::max(reqGhostLevel,
-                                                                this->MinimumNumberOfGhostLevels);
+  int maxGhostLevel = this->BuildIfRequired
+    ? reqGhostLevel
+    : std::max(reqGhostLevel, this->MinimumNumberOfGhostLevels);
 
   if (maxGhostLevel == 0 || this->Controller->GetNumberOfProcesses() == 1)
   {
@@ -352,13 +344,17 @@ int vtkPUnstructuredGridGhostCellsGenerator::RequestData(vtkInformation* vtkNotU
 
   // obtain first level of ghost cells
   this->Internals->CurrentGrid = vtkSmartPointer<vtkUnstructuredGrid>::New();
+  vtkTimerLog::MarkStartEvent("GetFirstGhostCellLayer");
   this->GetFirstGhostLayer(maxGhostLevel, this->Internals->CurrentGrid);
+  vtkTimerLog::MarkEndEvent("GetFirstGhostCellLayer");
 
   // add additional ghost layers one at a time
+  vtkTimerLog::MarkStartEvent("Get Extra Ghost Cell Layers");
   for (int i = 1; i < maxGhostLevel; i++)
   {
     this->AddGhostLayer(i + 1, maxGhostLevel);
   }
+  vtkTimerLog::MarkEndEvent("Get Extra Ghost Cell Layers");
 
   // remove global cell ids if they were added internally
   if (!this->HasGlobalCellIds && maxGhostLevel > 1)
@@ -370,28 +366,49 @@ int vtkPUnstructuredGridGhostCellsGenerator::RequestData(vtkInformation* vtkNotU
   output->ShallowCopy(this->Internals->CurrentGrid);
   output->GetInformation()->Set(vtkDataObject::DATA_NUMBER_OF_GHOST_LEVELS(), maxGhostLevel);
 
-  delete this->Internals;
-  this->Internals = nullptr;
+  // copy field data
+  if (cleanedInput && cleanedInput->GetFieldData())
+  {
+    vtkNew<vtkFieldData> fd;
+    fd->ShallowCopy(cleanedInput->GetFieldData());
+    output->SetFieldData(fd);
+  }
 
   vtkDebugMacro("Produced " << maxGhostLevel << " ghost levels.");
+
+  delete this->Internals;
+  this->Internals = nullptr;
   return 1;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Get the first layer of ghost cells
 void vtkPUnstructuredGridGhostCellsGenerator::GetFirstGhostLayer(
   int maxGhostLevel, vtkUnstructuredGrid* output)
 {
   std::vector<double> allBounds;
+
+  vtkTimerLog::MarkStartEvent("ExchangeBoundsAndDetermineNeighbors");
   this->ExchangeBoundsAndDetermineNeighbors(allBounds);
+  vtkTimerLog::MarkEndEvent("ExchangeBoundsAndDetermineNeighbors");
+
+  vtkTimerLog::MarkStartEvent("ExtractAndReduceSurfacePointsShareData");
   this->ExtractAndReduceSurfacePointsShareData(allBounds);
+  vtkTimerLog::MarkEndEvent("ExtractAndReduceSurfacePointsShareData");
+
   allBounds.clear();
   this->UpdateProgress(1.0 / (3.0 * maxGhostLevel));
+
+  vtkTimerLog::MarkStartEvent("ComputeSharedPoints");
   this->ComputeSharedPoints();
+  vtkTimerLog::MarkEndEvent("ComputeSharedPoints");
 
   this->UpdateProgress(2.0 / (3.0 * maxGhostLevel));
 
+  vtkTimerLog::MarkStartEvent("ExtractAndSendGhostCells");
   this->ExtractAndSendGhostCells(this->Internals->Input);
+  vtkTimerLog::MarkEndEvent("ExtractAndSendGhostCells");
+
   this->UpdateProgress(2.5 / (3.0 * maxGhostLevel));
 
   // Shallow copy the input grid and initialize the ghost arrays
@@ -399,25 +416,34 @@ void vtkPUnstructuredGridGhostCellsGenerator::GetFirstGhostLayer(
   inputCopy->ShallowCopy(this->Internals->Input);
   inputCopy->AllocatePointGhostArray();
   inputCopy->AllocateCellGhostArray();
+
+  vtkTimerLog::MarkStartEvent("ReceiveAndMergeGhostCells");
   this->ReceiveAndMergeGhostCells(1, maxGhostLevel, inputCopy.Get(), output);
+  vtkTimerLog::MarkEndEvent("ReceiveAndMergeGhostCells");
 
   this->UpdateProgress(1.0 / maxGhostLevel);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Step 0: Exchange bounds, and determine your neighbors
 void vtkPUnstructuredGridGhostCellsGenerator::ExchangeBoundsAndDetermineNeighbors(
   std::vector<double>& allBounds)
 {
+  // vtkVLogF(vtkLogger::VERBOSITY_INFO, "Exchange Bounds to Determine Neighbors");
+
   // increase bounds by a certain percentage to deal with precision stuff
   double epsilon = 0.01;
 
   double bounds[6];
   this->Internals->Input->GetBounds(bounds);
 
-  // everyone shares bounds
+  // Resize allBounds to fit the 6 tuple from each mpi rank
   allBounds.resize(this->Internals->SubController->GetNumberOfProcesses() * 6);
+
+  // everyone shares bounds
+  vtkTimerLog::MarkStartEvent("AllGather 6tuple Bounds");
   this->Internals->SubController->AllGather(bounds, &allBounds[0], 6);
+  vtkTimerLog::MarkEndEvent("AllGather 6tuple Bounds");
 
   double xlength = bounds[1] - bounds[0];
   double ylength = bounds[3] - bounds[2];
@@ -433,6 +459,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExchangeBoundsAndDetermineNeighbor
   // go through bounds, and find the ones which intersect my bounds,
   // which are my possible neighbors
   int rank = this->Internals->SubController->GetLocalProcessId();
+  vtkTimerLog::MarkStartEvent("Calculate Neighbors Based on Bounds");
   for (int p = 0; p < this->Internals->SubController->GetNumberOfProcesses(); p++)
   {
     if (p == rank)
@@ -462,23 +489,23 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExchangeBoundsAndDetermineNeighbor
       }
     }
   }
+  vtkTimerLog::MarkEndEvent("Calculate Neighbors Based on Bounds");
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Step 1a: Extract surface geometry and send to my neighbors. Receive my
 // neighbor's surface points
 void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndReduceSurfacePointsShareData(
   std::vector<double>& allBounds)
 {
   // Extract boundary cells and points with the surface filter
+  vtkTimerLog::MarkStartEvent("Get Local Partition Surface Points");
   vtkNew<vtkDataSetSurfaceFilter> surfaceFilter;
   surfaceFilter->SetInputData(this->Internals->Input);
   surfaceFilter->PassThroughPointIdsOn();
   surfaceFilter->Update();
-
   vtkPolyData* surface = surfaceFilter->GetOutput();
   vtkIdType nbSurfacePoints = surface->GetNumberOfPoints();
-
   double bounds[6];
   surface->GetBounds(bounds);
   double delta[3] = { .0001 * (bounds[1] - bounds[0]), .0001 * (bounds[3] - bounds[2]),
@@ -486,7 +513,9 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndReduceSurfacePointsShare
 
   vtkIdTypeArray* surfaceOriginalPointIds = vtkArrayDownCast<vtkIdTypeArray>(
     surface->GetPointData()->GetArray(surfaceFilter->GetOriginalPointIdsName()));
+  vtkTimerLog::MarkEndEvent("Get Local Partition Surface Points");
 
+  vtkTimerLog::MarkStartEvent("Share Local Partition Surface Points With Potential Neighbors");
   std::vector<vtkMPICommunicator::Request> sendReqs(this->Internals->Neighbors.size() * 2);
 
   // reset CommStep
@@ -704,9 +733,10 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndReduceSurfacePointsShare
   // should have all point data by now
   // wait for all my sends to complete
   this->Internals->SubController->WaitAll(static_cast<int>(sendReqs.size()), &sendReqs[0]);
+  vtkTimerLog::MarkEndEvent("Share Local Partition Surface Points With Potential Neighbors");
 }
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Step 2a: browse global ids/point coordinates of other ranks and check if some
 // are duplicated locally.
 // For each neighbor rank, save the ids of the cells adjacent to the surface
@@ -761,11 +791,12 @@ void vtkPUnstructuredGridGhostCellsGenerator::ComputeSharedPoints()
     kdtree->BuildLocatorFromPoints(points);
     double bounds[6];
     kdtree->GetBounds(bounds);
-    double tolerance = 1.e-6 * sqrt((bounds[1] - bounds[0]) * (bounds[1] - bounds[0]) +
-                                 (bounds[3] - bounds[2]) * (bounds[3] - bounds[2]) +
-                                 (bounds[5] - bounds[4]) * (bounds[5] - bounds[4]));
+    double tolerance = 1.e-6 *
+      sqrt((bounds[1] - bounds[0]) * (bounds[1] - bounds[0]) +
+        (bounds[3] - bounds[2]) * (bounds[3] - bounds[2]) +
+        (bounds[5] - bounds[4]) * (bounds[5] - bounds[4]));
 
-    for (std::map<int, std::vector<double> >::iterator iter =
+    for (std::map<int, std::vector<double>>::iterator iter =
            this->Internals->ProcessIdToSurfacePoints.begin();
          iter != this->Internals->ProcessIdToSurfacePoints.end(); ++iter)
     {
@@ -805,7 +836,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ComputeSharedPoints()
   // ghost cells to share.
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Step 3: extract and send the ghost cells to the neighbor ranks
 void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndSendGhostCells(
   vtkUnstructuredGridBase* input)
@@ -819,7 +850,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndSendGhostCells(
   {
     int toRank = *iter;
     CommDataInfo& c = this->Internals->CommData[toRank];
-    std::map<int, std::set<vtkIdType> >::iterator miter = this->Internals->CellsToSend.find(toRank);
+    std::map<int, std::set<vtkIdType>>::iterator miter = this->Internals->CellsToSend.find(toRank);
     if (miter == this->Internals->CellsToSend.end())
     { // no data to send
       c.SendLen = 0;
@@ -838,11 +869,11 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndSendGhostCells(
     extractCells->Update();
     vtkUnstructuredGrid* extractGrid = extractCells->GetOutput();
 
-    //There might be case where the originalcellids needs to be removed
-    //but there are definitely cases where it shouldn't.
-    //So if you run into that case, think twice before you uncomment this
-    //next line and look carefully at paraview issue #18470
-    //extractGrid->GetCellData()->RemoveArray("vtkOriginalCellIds");
+    // There might be case where the originalcellids needs to be removed
+    // but there are definitely cases where it shouldn't.
+    // So if you run into that case, think twice before you uncomment this
+    // next line and look carefully at paraview issue #18470
+    // extractGrid->GetCellData()->RemoveArray("vtkOriginalCellIds");
 
     // Send the extracted grid to the neighbor rank asynchronously
     if (vtkCommunicator::MarshalDataObject(extractGrid, c.SendBuffer))
@@ -859,7 +890,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ExtractAndSendGhostCells(
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Step 4: Receive the ghost cells from the neighbor ranks and merge them
 // to the local grid.
 // Argument output should be an empty unstructured grid.
@@ -1006,6 +1037,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ReceiveAndMergeGhostCells(int ghos
   }
 
   // Use MergeCells to merge currentGrid + new grids to the output grid
+  vtkTimerLog::MarkStartEvent("MergeCells");
   vtkNew<vtkMergeCells> mergeCells;
   mergeCells->SetUnstructuredGrid(output);
   mergeCells->SetTotalNumberOfCells(totalNbCells);
@@ -1030,7 +1062,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ReceiveAndMergeGhostCells(int ghos
 
   // Finalize the merged output
   mergeCells->Finish();
-
+  vtkTimerLog::MarkEndEvent("MergeCells");
   // for all ghost cells, store the global cell id to local cell id mapping.
   // we need this mapping later when determining if cells we want to send
   // have been received before. only needed if we are calculating more
@@ -1062,7 +1094,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ReceiveAndMergeGhostCells(int ghos
     {
       int toRank = *iter;
       CommDataInfo& c = this->Internals->CommData[toRank];
-      std::map<int, std::set<vtkIdType> >::iterator miter =
+      std::map<int, std::set<vtkIdType>>::iterator miter =
         this->Internals->CellsToSend.find(toRank);
       if (miter == this->Internals->CellsToSend.end())
       {
@@ -1093,7 +1125,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::ReceiveAndMergeGhostCells(int ghos
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Add another ghost layer. Assumes that at least one layer of ghost cells has
 // already been created. Must be called after GetFirstGhostLayer.
 void vtkPUnstructuredGridGhostCellsGenerator::AddGhostLayer(int ghostLevel, int maxGhostLevel)
@@ -1112,7 +1144,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::AddGhostLayer(int ghostLevel, int 
   this->Internals->CurrentGrid = outputGrid;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Find all cells that need to be sent as the next layer of ghost cells.
 // Examine all cells that were sent the last round, find all cells which
 // share points with those sent cells. These cells are the new ghost layers.
@@ -1123,7 +1155,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::FindGhostCells()
   vtkNew<vtkIdList> pointId;
   pointId->SetNumberOfIds(1);
 
-  std::map<int, std::set<vtkIdType> >::iterator iter = this->Internals->SentCellsLastRound.begin();
+  std::map<int, std::set<vtkIdType>>::iterator iter = this->Internals->SentCellsLastRound.begin();
   for (; iter != this->Internals->SentCellsLastRound.end(); ++iter)
   {
     // keep track of points which we've already visited for this proc
@@ -1188,7 +1220,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::FindGhostCells()
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Add global cell ids
 void vtkPUnstructuredGridGhostCellsGenerator::AddGlobalCellIds()
 {
@@ -1229,7 +1261,7 @@ void vtkPUnstructuredGridGhostCellsGenerator::AddGlobalCellIds()
   celldata->SetGlobalIds(globalCellIds);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Remove global cell ids
 void vtkPUnstructuredGridGhostCellsGenerator::RemoveGlobalCellIds()
 {

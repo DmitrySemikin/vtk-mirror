@@ -24,10 +24,10 @@
 #ifndef vtkLabeledContourPolyDataItem_h
 #define vtkLabeledContourPolyDataItem_h
 
-#include "vtkRect.h" // For vtkRect/vtkVector/vtkTuple
-#include "vtkRenderingContext2DModule.h" // For export macro
 #include "vtkPolyDataItem.h"
-#include "vtkSmartPointer.h" // For vtkSmartPointer
+#include "vtkRect.h"                     // For vtkRect/vtkVector/vtkTuple
+#include "vtkRenderingContext2DModule.h" // For export macro
+#include "vtkSmartPointer.h"             // For vtkSmartPointer
 
 class vtkActor;
 class vtkContext2D;
@@ -36,7 +36,7 @@ class vtkRenderer;
 class vtkTextActor3D;
 class vtkTextProperty;
 class vtkTextPropertyCollection;
-struct LabelHelper;
+struct PDILabelHelper;
 
 class VTKRENDERINGCONTEXT2D_EXPORT vtkLabeledContourPolyDataItem : public vtkPolyDataItem
 {
@@ -44,7 +44,7 @@ public:
   vtkTypeMacro(vtkLabeledContourPolyDataItem, vtkPolyDataItem);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
-  static vtkLabeledContourPolyDataItem *New();
+  static vtkLabeledContourPolyDataItem* New();
 
   /**
    * Paint event for the item.
@@ -58,7 +58,7 @@ public:
    * the argument as the only property in the collection.
    * @sa SetTextProperties
    */
-  virtual void SetTextProperty(vtkTextProperty *tprop);
+  virtual void SetTextProperty(vtkTextProperty* tprop);
 
   //@{
   /**
@@ -78,8 +78,8 @@ public:
    * @sa SetTextProperty
    * @sa SetTextPropertyMapping
    */
-  virtual void SetTextProperties(vtkTextPropertyCollection *coll);
-  virtual vtkTextPropertyCollection *GetTextProperties();
+  virtual void SetTextProperties(vtkTextPropertyCollection* coll);
+  virtual vtkTextPropertyCollection* GetTextProperties();
   //@}
 
   //@{
@@ -90,7 +90,7 @@ public:
    * See SetTextProperties for more information.
    */
   virtual vtkDoubleArray* GetTextPropertyMapping();
-  virtual void SetTextPropertyMapping(vtkDoubleArray *mapping);
+  virtual void SetTextPropertyMapping(vtkDoubleArray* mapping);
   //@}
 
   //@{
@@ -99,9 +99,9 @@ public:
    * only the mapper returned by GetPolyDataMapper() will be rendered.
    * The default is to draw labels.
    */
-  vtkSetMacro(LabelVisibility, bool)
-  vtkGetMacro(LabelVisibility, bool)
-  vtkBooleanMacro(LabelVisibility, bool)
+  vtkSetMacro(LabelVisibility, bool);
+  vtkGetMacro(LabelVisibility, bool);
+  vtkBooleanMacro(LabelVisibility, bool);
   //@}
 
   //@{
@@ -109,8 +109,8 @@ public:
    * Ensure that there are at least SkipDistance pixels between labels. This
    * is only enforced on labels along the same line. The default is 0.
    */
-  vtkSetMacro(SkipDistance, double)
-  vtkGetMacro(SkipDistance, double)
+  vtkSetMacro(SkipDistance, double);
+  vtkGetMacro(SkipDistance, double);
   //@}
 
 protected:
@@ -127,7 +127,6 @@ protected:
   bool PlaceLabels();
   bool ResolveLabels();
   virtual bool CreateLabels();
-  bool RenderBackgrounds(vtkContext2D* painter);
   bool RenderLabels(vtkContext2D* painter);
 
   bool AllocateTextActors(vtkIdType num);
@@ -138,9 +137,9 @@ protected:
   bool LabelVisibility;
   vtkIdType NumberOfTextActors;
   vtkIdType NumberOfUsedTextActors;
-  vtkTextActor3D **TextActors;
+  vtkTextActor3D** TextActors;
 
-  LabelHelper** LabelHelpers;
+  PDILabelHelper** LabelHelpers;
 
   vtkSmartPointer<vtkTextPropertyCollection> TextProperties;
   vtkSmartPointer<vtkDoubleArray> TextPropertyMapping;
@@ -152,7 +151,7 @@ private:
   void operator=(const vtkLabeledContourPolyDataItem&) = delete;
 
   struct Private;
-  Private *Internal;
+  Private* Internal;
 };
 
 #endif

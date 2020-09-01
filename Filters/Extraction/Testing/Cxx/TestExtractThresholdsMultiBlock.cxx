@@ -18,6 +18,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkExtractSelection.h"
 #include "vtkIdFilter.h"
+#include "vtkIdTypeArray.h"
 #include "vtkMultiBlockDataGroupFilter.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkNew.h"
@@ -29,15 +30,19 @@ int TestExtractThresholdsMultiBlock(int vtkNotUsed(argc), char* vtkNotUsed(argv)
 {
   vtkNew<vtkSphereSource> sphere;
 
+  // To test that the point precision matches in the extracted data
+  // (default point precision is float).
+  sphere->SetOutputPointsPrecision(vtkAlgorithm::DOUBLE_PRECISION);
+
   // Block 1: has PointId point data array
   vtkNew<vtkIdFilter> spherePointIDSource;
-  spherePointIDSource->SetIdsArrayName("PointId");
+  spherePointIDSource->SetPointIdsArrayName("PointId");
   spherePointIDSource->PointIdsOn();
   spherePointIDSource->SetInputConnection(sphere->GetOutputPort());
 
   // Block 2: has CellId cell data array
   vtkNew<vtkIdFilter> sphereCellIDSource;
-  sphereCellIDSource->SetIdsArrayName("CellId");
+  sphereCellIDSource->SetCellIdsArrayName("CellId");
   sphereCellIDSource->CellIdsOn();
   sphereCellIDSource->SetInputConnection(sphere->GetOutputPort());
 
@@ -137,6 +142,18 @@ int TestExtractThresholdsMultiBlock(int vtkNotUsed(argc), char* vtkNotUsed(argv)
     std::cerr << "Unexpected number of cells in extracted selection" << std::endl;
     return EXIT_FAILURE;
   }
+  if (!vtkPointSet::SafeDownCast(extracted->GetBlock(1)))
+  {
+    std::cerr << "Block 1 was not a vtkPointSet, but a " << extracted->GetBlock(1)->GetClassName()
+              << " instead." << std::endl;
+    return EXIT_FAILURE;
+  }
+  if (vtkPointSet::SafeDownCast(extracted->GetBlock(1))->GetPoints()->GetData()->GetDataType() !=
+    VTK_DOUBLE)
+  {
+    std::cerr << "Output for block 1 should have points with double precision" << std::endl;
+    return EXIT_FAILURE;
+  }
 
   // Test table value threshold selection
   vtkNew<vtkSelectionNode> selectionNodeRows;
@@ -165,7 +182,7 @@ int TestExtractThresholdsMultiBlock(int vtkNotUsed(argc), char* vtkNotUsed(argv)
     std::cerr << "Output was not a vtkMultiBlockDataSet." << std::endl;
     return EXIT_FAILURE;
   }
-  if (extracted->GetBlock(0) || extracted->GetBlock(1) || ! extracted->GetBlock(2))
+  if (extracted->GetBlock(0) || extracted->GetBlock(1) || !extracted->GetBlock(2))
   {
     std::cerr << "Blocks were not as expected" << std::endl;
     return EXIT_FAILURE;
@@ -176,5 +193,5 @@ int TestExtractThresholdsMultiBlock(int vtkNotUsed(argc), char* vtkNotUsed(argv)
     return EXIT_FAILURE;
   }
 
-    return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

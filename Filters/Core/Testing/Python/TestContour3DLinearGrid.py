@@ -8,8 +8,8 @@ VTK_DATA_ROOT = vtkGetDataRoot()
 # Four different pipelines are created.
 
 # Control test size
-#res = 200
 res = 50
+#res = 200
 serialProcessing = 0
 mergePoints = 1
 interpolateAttr = 1
@@ -33,6 +33,9 @@ clip.SetInputConnection(sample.GetOutputPort())
 clip.SetValue(-10.0)
 clip.GenerateClippedOutputOff()
 clip.Update()
+
+# Test that filter can handle the dataset and contour array
+assert(vtk.vtkContour3DLinearGrid.CanFullyProcessDataObject(clip.GetOutput(), "scalars"))
 
 # Now contour the cells
 contour = vtk.vtkContour3DLinearGrid()

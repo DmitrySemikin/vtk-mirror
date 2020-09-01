@@ -20,16 +20,16 @@
 #include "vtkNew.h"
 #include "vtkVariantArray.h"
 
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
 #include "vtkContextScene.h"
 #include "vtkContextTransform.h"
 #include "vtkContextView.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 
 #include "vtkRegressionTestImage.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int TestCategoryLegend(int argc, char* argv[])
 {
   vtkNew<vtkVariantArray> values;
@@ -60,7 +60,7 @@ int TestCategoryLegend(int argc, char* argv[])
   vtkNew<vtkContextView> contextView;
   contextView->GetScene()->AddItem(trans);
   contextView->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
-  contextView->GetRenderWindow()->SetSize(300,200);
+  contextView->GetRenderWindow()->SetSize(300, 200);
   contextView->GetRenderWindow()->SetMultiSamples(0);
   contextView->GetRenderWindow()->Render();
 

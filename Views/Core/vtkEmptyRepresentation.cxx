@@ -26,7 +26,6 @@
 
 vtkStandardNewMacro(vtkEmptyRepresentation);
 
-
 vtkEmptyRepresentation::vtkEmptyRepresentation()
 {
   this->ConvertDomains = vtkSmartPointer<vtkConvertSelectionDomain>::New();
@@ -36,14 +35,12 @@ vtkEmptyRepresentation::vtkEmptyRepresentation()
 
 vtkEmptyRepresentation::~vtkEmptyRepresentation() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAlgorithmOutput* vtkEmptyRepresentation::GetInternalAnnotationOutputPort(
   int vtkNotUsed(port), int vtkNotUsed(conn))
 {
-  this->ConvertDomains->SetInputConnection(0,
-    this->GetAnnotationLink()->GetOutputPort(0));
-  this->ConvertDomains->SetInputConnection(1,
-    this->GetAnnotationLink()->GetOutputPort(1));
+  this->ConvertDomains->SetInputConnection(0, this->GetAnnotationLink()->GetOutputPort(0));
+  this->ConvertDomains->SetInputConnection(1, this->GetAnnotationLink()->GetOutputPort(1));
 
   return this->ConvertDomains->GetOutputPort();
 }

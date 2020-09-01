@@ -22,17 +22,23 @@
  * @sa
  * vtkRibbonFilter vtkRuledSurfaceFilter vtkInitialValueProblemSolver
  * vtkRungeKutta2 vtkRungeKutta4 vtkRungeKutta45 vtkStreamTracer
-*/
+ *
+ * This class is deprecated.
+ * Use instead one of the following classes: vtkParticleTracerBase
+ * vtkParticleTracer vtkParticlePathFilter vtkStreaklineFilter
+ * See https://blog.kitware.com/improvements-in-path-tracing-in-vtk/
+ */
 
 #ifndef vtkPTemporalStreamTracer_h
 #define vtkPTemporalStreamTracer_h
 
+#include "vtkDeprecation.h"                    // For VTK_DEPRECATED_IN_9_0_0
 #include "vtkFiltersParallelFlowPathsModule.h" // For export macro
-#include "vtkSmartPointer.h" // For protected ivars.
+#include "vtkSmartPointer.h"                   // For protected ivars.
 #include "vtkTemporalStreamTracer.h"
 
-#include <vector> // STL Header
 #include <list>   // STL Header
+#include <vector> // STL Header
 
 class vtkMultiProcessController;
 
@@ -50,76 +56,72 @@ class vtkIntArray;
 class vtkCharArray;
 class vtkAbstractParticleWriter;
 
+VTK_DEPRECATED_IN_9_0_0("Use one of vtkParticleTracerBase, vtkParticleTracer, "
+                        "vtkParticlePathFilter, or vtkStreaklineFilter")
 class VTKFILTERSPARALLELFLOWPATHS_EXPORT vtkPTemporalStreamTracer : public vtkTemporalStreamTracer
 {
 public:
+  vtkTypeMacro(vtkPTemporalStreamTracer, vtkTemporalStreamTracer);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
-    vtkTypeMacro(vtkPTemporalStreamTracer,vtkTemporalStreamTracer);
-    void PrintSelf(ostream& os, vtkIndent indent) override;
+  /**
+   * Construct object using 2nd order Runge Kutta
+   */
+  static vtkPTemporalStreamTracer* New();
 
-    /**
-     * Construct object using 2nd order Runge Kutta
-     */
-    static vtkPTemporalStreamTracer *New();
+  //@{
+  /**
+   * Set/Get the controller used when sending particles between processes
+   * The controller must be an instance of vtkMPIController.
+   */
+  virtual void SetController(vtkMultiProcessController* controller);
+  vtkGetObjectMacro(Controller, vtkMultiProcessController);
+  //@}
 
-    //@{
-    /**
-     * Set/Get the controller used when sending particles between processes
-     * The controller must be an instance of vtkMPIController.
-     */
-    virtual void SetController(vtkMultiProcessController* controller);
-    vtkGetObjectMacro(Controller, vtkMultiProcessController);
-    //@}
+protected:
+  vtkPTemporalStreamTracer();
+  ~vtkPTemporalStreamTracer();
 
-  protected:
+  //
+  // Generate output
+  //
+  virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
-     vtkPTemporalStreamTracer();
-    ~vtkPTemporalStreamTracer();
+  //
 
-    //
-    // Generate output
-    //
-    virtual int RequestData(vtkInformation* request,
-                            vtkInformationVector** inputVector,
-                            vtkInformationVector* outputVector) override;
+  //
 
-//
+  /**
+   * all the injection/seed points according to which processor
+   * they belong to. This saves us retesting at every injection time
+   * providing 1) The volumes are static, 2) the seed points are static
+   * If either are non static, then this step is skipped.
+   */
+  virtual void AssignSeedsToProcessors(vtkDataSet* source, int sourceID, int ptId,
+    vtkTemporalStreamTracerNamespace::ParticleVector& LocalSeedPoints,
+    int& LocalAssignedCount) override;
 
-//
+  /**
+   * give each one a unique ID. We need to use MPI to find out
+   * who is using which numbers.
+   */
+  virtual void AssignUniqueIds(
+    vtkTemporalStreamTracerNamespace::ParticleVector& LocalSeedPoints) override;
 
-    /**
-     * all the injection/seed points according to which processor
-     * they belong to. This saves us retesting at every injection time
-     * providing 1) The volumes are static, 2) the seed points are static
-     * If either are non static, then this step is skipped.
-     */
-    virtual void AssignSeedsToProcessors(
-      vtkDataSet *source, int sourceID, int ptId,
-      vtkTemporalStreamTracerNamespace::ParticleVector &LocalSeedPoints,
-      int &LocalAssignedCount) override;
+  /**
+   * this is used during classification of seed points and also between iterations
+   * of the main loop as particles leave each processor domain
+   */
+  virtual void TransmitReceiveParticles(
+    vtkTemporalStreamTracerNamespace::ParticleVector& outofdomain,
+    vtkTemporalStreamTracerNamespace::ParticleVector& received, bool removeself) override;
 
-    /**
-     * give each one a uniqu ID. We need to use MPI to find out
-     * who is using which numbers.
-     */
-    virtual void AssignUniqueIds(
-      vtkTemporalStreamTracerNamespace::ParticleVector &LocalSeedPoints) override;
+  void AddParticleToMPISendList(vtkTemporalStreamTracerNamespace::ParticleInformation& info);
 
-    /**
-     * this is used during classification of seed points and also between iterations
-     * of the main loop as particles leave each processor domain
-     */
-    virtual void TransmitReceiveParticles(
-      vtkTemporalStreamTracerNamespace::ParticleVector &outofdomain,
-      vtkTemporalStreamTracerNamespace::ParticleVector &received,
-      bool removeself) override;
+  //
 
-    void AddParticleToMPISendList(
-      vtkTemporalStreamTracerNamespace::ParticleInformation &info);
-
-//
-
-//
+  //
 
   // MPI controller needed when running in parallel
   vtkMultiProcessController* Controller;

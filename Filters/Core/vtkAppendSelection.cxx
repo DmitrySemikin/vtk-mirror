@@ -29,37 +29,35 @@
 
 vtkStandardNewMacro(vtkAppendSelection);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAppendSelection::vtkAppendSelection()
 {
   this->UserManagedInputs = 0;
   this->AppendByUnion = 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkAppendSelection::~vtkAppendSelection() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Add a dataset to the list of data to append.
-void vtkAppendSelection::AddInputData(vtkSelection *ds)
+void vtkAppendSelection::AddInputData(vtkSelection* ds)
 {
   if (this->UserManagedInputs)
   {
-    vtkErrorMacro(<<
-      "AddInput is not supported if UserManagedInputs is true");
+    vtkErrorMacro(<< "AddInput is not supported if UserManagedInputs is true");
     return;
   }
   this->AddInputDataInternal(0, ds);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Remove a dataset from the list of data to append.
-void vtkAppendSelection::RemoveInputData(vtkSelection *ds)
+void vtkAppendSelection::RemoveInputData(vtkSelection* ds)
 {
   if (this->UserManagedInputs)
   {
-    vtkErrorMacro(<<
-      "RemoveInput is not supported if UserManagedInputs is true");
+    vtkErrorMacro(<< "RemoveInput is not supported if UserManagedInputs is true");
     return;
   }
 
@@ -68,25 +66,23 @@ void vtkAppendSelection::RemoveInputData(vtkSelection *ds)
     return;
   }
   int numCons = this->GetNumberOfInputConnections(0);
-  for(int i=0; i<numCons; i++)
+  for (int i = 0; i < numCons; i++)
   {
     if (this->GetInput(i) == ds)
     {
-      this->RemoveInputConnection(0,
-        this->GetInputConnection(0, i));
+      this->RemoveInputConnection(0, this->GetInputConnection(0, i));
     }
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // make ProcessObject function visible
 // should only be used when UserManagedInputs is true.
 void vtkAppendSelection::SetNumberOfInputs(int num)
 {
   if (!this->UserManagedInputs)
   {
-    vtkErrorMacro(<<
-      "SetNumberOfInputs is not supported if UserManagedInputs is false");
+    vtkErrorMacro(<< "SetNumberOfInputs is not supported if UserManagedInputs is false");
     return;
   }
 
@@ -94,15 +90,13 @@ void vtkAppendSelection::SetNumberOfInputs(int num)
   this->SetNumberOfInputConnections(0, num);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // Set Nth input, should only be used when UserManagedInputs is true.
-void vtkAppendSelection::SetInputConnectionByNumber(int num,
-                                                    vtkAlgorithmOutput *input)
+void vtkAppendSelection::SetInputConnectionByNumber(int num, vtkAlgorithmOutput* input)
 {
   if (!this->UserManagedInputs)
   {
-    vtkErrorMacro(<<
-      "SetInputByNumber is not supported if UserManagedInputs is false");
+    vtkErrorMacro(<< "SetInputByNumber is not supported if UserManagedInputs is false");
     return;
   }
 
@@ -110,17 +104,15 @@ void vtkAppendSelection::SetInputConnectionByNumber(int num,
   this->SetNthInputConnection(0, num, input);
 }
 
-//----------------------------------------------------------------------------
-int vtkAppendSelection::RequestData(vtkInformation *vtkNotUsed(request),
-                                   vtkInformationVector **inputVector,
-                                   vtkInformationVector *outputVector)
+//------------------------------------------------------------------------------
+int vtkAppendSelection::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // Get the info object
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  vtkInformation* outInfo = outputVector->GetInformationObject(0);
 
   // Get the output
-  vtkSelection *output = vtkSelection::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkSelection* output = vtkSelection::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
   output->Initialize();
 
   // If there are no inputs, we are done.
@@ -132,17 +124,16 @@ int vtkAppendSelection::RequestData(vtkInformation *vtkNotUsed(request),
 
   if (!this->AppendByUnion)
   {
-    for (int idx=0; idx < numInputs; ++idx)
+    for (int idx = 0; idx < numInputs; ++idx)
     {
-      vtkInformation *inInfo = inputVector[0]->GetInformationObject(idx);
-      vtkSelection *sel = vtkSelection::GetData(inInfo);
+      vtkInformation* inInfo = inputVector[0]->GetInformationObject(idx);
+      vtkSelection* sel = vtkSelection::GetData(inInfo);
       if (sel != nullptr)
       {
         for (unsigned int j = 0; j < sel->GetNumberOfNodes(); ++j)
         {
           vtkSelectionNode* inputNode = sel->GetNode(j);
-          vtkSmartPointer<vtkSelectionNode> outputNode =
-            vtkSmartPointer<vtkSelectionNode>::New();
+          vtkSmartPointer<vtkSelectionNode> outputNode = vtkSmartPointer<vtkSelectionNode>::New();
           outputNode->ShallowCopy(inputNode);
           output->AddNode(outputNode);
         }
@@ -153,10 +144,10 @@ int vtkAppendSelection::RequestData(vtkInformation *vtkNotUsed(request),
 
   // The first non-null selection determines the required content type of all selections.
   int idx = 0;
-  vtkSelection *first = nullptr;
+  vtkSelection* first = nullptr;
   while (first == nullptr && idx < numInputs)
   {
-    vtkInformation *inInfo = inputVector[0]->GetInformationObject(idx);
+    vtkInformation* inInfo = inputVector[0]->GetInformationObject(idx);
     first = vtkSelection::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
     idx++;
   }
@@ -172,26 +163,25 @@ int vtkAppendSelection::RequestData(vtkInformation *vtkNotUsed(request),
   // Take the union of all non-null selections
   for (; idx < numInputs; ++idx)
   {
-    vtkInformation *inInfo = inputVector[0]->GetInformationObject(idx);
-    vtkSelection *s = vtkSelection::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+    vtkInformation* inInfo = inputVector[0]->GetInformationObject(idx);
+    vtkSelection* s = vtkSelection::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
     if (s != nullptr)
     {
       output->Union(s);
     } // for a non nullptr input
-  } // for each input
+  }   // for each input
 
   return 1;
 }
 
-//----------------------------------------------------------------------------
-vtkSelection *vtkAppendSelection::GetInput(int idx)
+//------------------------------------------------------------------------------
+vtkSelection* vtkAppendSelection::GetInput(int idx)
 {
-  return vtkSelection::SafeDownCast(
-    this->GetExecutive()->GetInputData(0, idx));
+  return vtkSelection::SafeDownCast(this->GetExecutive()->GetInputData(0, idx));
 }
 
-//----------------------------------------------------------------------------
-int vtkAppendSelection::FillInputPortInformation(int port, vtkInformation *info)
+//------------------------------------------------------------------------------
+int vtkAppendSelection::FillInputPortInformation(int port, vtkInformation* info)
 {
   if (!this->Superclass::FillInputPortInformation(port, info))
   {
@@ -201,10 +191,10 @@ int vtkAppendSelection::FillInputPortInformation(int port, vtkInformation *info)
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkAppendSelection::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
-  os << "UserManagedInputs: " << (this->UserManagedInputs?"On":"Off") << endl;
-  os << "AppendByUnion: " << (this->AppendByUnion? "On": "Off") << endl;
+  this->Superclass::PrintSelf(os, indent);
+  os << "UserManagedInputs: " << (this->UserManagedInputs ? "On" : "Off") << endl;
+  os << "AppendByUnion: " << (this->AppendByUnion ? "On" : "Off") << endl;
 }

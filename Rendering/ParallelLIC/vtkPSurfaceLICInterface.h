@@ -19,13 +19,13 @@
  *
  * Parallel parts of the vtkSurfaceLICInterface, see that class for
  * documentation.
-*/
+ */
 
 #ifndef vtkPSurfaceLICInterface_h
 #define vtkPSurfaceLICInterface_h
 
-#include "vtkSurfaceLICInterface.h"
 #include "vtkRenderingParallelLICModule.h" // For export macro
+#include "vtkSurfaceLICInterface.h"
 #include <string> // for string
 
 class vtkPainterCommunicator;
@@ -43,7 +43,7 @@ public:
    * update timing information is stored, it can be written to
    * disk by calling WriteLog.
    */
-  virtual void WriteTimerLog(const char *fileName) override;
+  void WriteTimerLog(const char* fileName) override;
 
 protected:
   vtkPSurfaceLICInterface();
@@ -54,10 +54,7 @@ protected:
    * In serial operation this is a no-op, in parallel it
    * is a global collective reduction.
    */
-  virtual void GetGlobalMinMax(
-        vtkPainterCommunicator *comm,
-        float &min,
-        float &max) override;
+  void GetGlobalMinMax(vtkPainterCommunicator* comm, float& min, float& max) override;
 
   /**
    * Creates a new communicator with/without the calling processes
@@ -65,13 +62,13 @@ protected:
    * is included in the new communicator. In parallel this call is mpi
    * collective on the world communicator. In serial this is a no-op.
    */
-  virtual vtkPainterCommunicator *CreateCommunicator(int include) override;
+  vtkPainterCommunicator* CreateCommunicator(int include) override;
 
   /**
    * Ensure that if any rank updates the communicator they all
    * do. This is a global collective operation.
    */
-  virtual bool NeedToUpdateCommunicator() override;
+  bool NeedToUpdateCommunicator() override;
 
   //@{
   /**
@@ -80,8 +77,8 @@ protected:
    * update timing information is stored, it can be written to
    * disk by calling WriteLog.
    */
-  virtual void StartTimerEvent(const char *name);
-  virtual void EndTimerEvent(const char *name);
+  virtual void StartTimerEvent(const char* name);
+  virtual void EndTimerEvent(const char* name);
   //@}
 
 private:

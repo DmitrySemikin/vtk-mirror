@@ -36,7 +36,7 @@ public:
   {
   }
 
-  virtual ~vtkInternals() {}
+  virtual ~vtkInternals() = default;
   virtual bool Execute(vtkDataSet* dataset, vtkSignedCharArray* insidednessArray) = 0;
 
 protected:
@@ -89,9 +89,9 @@ public:
         ptId = dataset->FindPoint(location);
         if (ptId >= 0)
         {
-          double *x = dataset->GetPoint(ptId);
+          double* x = dataset->GetPoint(ptId);
           double distance = vtkMath::Distance2BetweenPoints(x, location);
-          if (distance > radius*radius)
+          if (distance > radius * radius)
           {
             ptId = -1;
           }
@@ -146,21 +146,19 @@ public:
 };
 
 vtkStandardNewMacro(vtkLocationSelector);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkLocationSelector::vtkLocationSelector()
   : Internals(nullptr)
 {
 }
 
-//----------------------------------------------------------------------------
-vtkLocationSelector::~vtkLocationSelector()
-{
-}
+//------------------------------------------------------------------------------
+vtkLocationSelector::~vtkLocationSelector() = default;
 
-//----------------------------------------------------------------------------
-void vtkLocationSelector::Initialize(vtkSelectionNode* node, const std::string& insidednessArrayName)
+//------------------------------------------------------------------------------
+void vtkLocationSelector::Initialize(vtkSelectionNode* node)
 {
-  this->Superclass::Initialize(node, insidednessArrayName);
+  this->Superclass::Initialize(node);
 
   this->Internals.reset();
 
@@ -207,24 +205,24 @@ void vtkLocationSelector::Initialize(vtkSelectionNode* node, const std::string& 
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkLocationSelector::Finalize()
 {
   this->Internals.reset();
 }
 
-//----------------------------------------------------------------------------
-bool vtkLocationSelector::ComputeSelectedElementsForBlock(vtkDataObject* input,
-  vtkSignedCharArray* insidednessArray, unsigned int vtkNotUsed(compositeIndex),
-  unsigned int vtkNotUsed(amrLevel), unsigned int vtkNotUsed(amrIndex))
+//------------------------------------------------------------------------------
+bool vtkLocationSelector::ComputeSelectedElements(
+  vtkDataObject* input, vtkSignedCharArray* insidednessArray)
 {
   assert(input != nullptr && insidednessArray != nullptr);
   vtkDataSet* ds = vtkDataSet::SafeDownCast(input);
-  return (this->Internals != nullptr && ds != nullptr) ? this->Internals->Execute(ds, insidednessArray)
-                                                       : false;
+  return (this->Internals != nullptr && ds != nullptr)
+    ? this->Internals->Execute(ds, insidednessArray)
+    : false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkLocationSelector::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);

@@ -20,13 +20,13 @@
 
 #include "vtkInEdgeIterator.h"
 
-#include "vtkObjectFactory.h"
 #include "vtkGraph.h"
 #include "vtkGraphEdge.h"
+#include "vtkObjectFactory.h"
 
 vtkCxxSetObjectMacro(vtkInEdgeIterator, Graph, vtkGraph);
 vtkStandardNewMacro(vtkInEdgeIterator);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInEdgeIterator::vtkInEdgeIterator()
 {
   this->Vertex = 0;
@@ -36,7 +36,7 @@ vtkInEdgeIterator::vtkInEdgeIterator()
   this->GraphEdge = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInEdgeIterator::~vtkInEdgeIterator()
 {
   if (this->Graph)
@@ -49,8 +49,8 @@ vtkInEdgeIterator::~vtkInEdgeIterator()
   }
 }
 
-//----------------------------------------------------------------------------
-void vtkInEdgeIterator::Initialize(vtkGraph *graph, vtkIdType v)
+//------------------------------------------------------------------------------
+void vtkInEdgeIterator::Initialize(vtkGraph* graph, vtkIdType v)
 {
   this->SetGraph(graph);
   this->Vertex = v;
@@ -59,8 +59,8 @@ void vtkInEdgeIterator::Initialize(vtkGraph *graph, vtkIdType v)
   this->End = this->Current + nedges;
 }
 
-//----------------------------------------------------------------------------
-vtkGraphEdge *vtkInEdgeIterator::NextGraphEdge()
+//------------------------------------------------------------------------------
+vtkGraphEdge* vtkInEdgeIterator::NextGraphEdge()
 {
   vtkInEdgeType e = this->Next();
   if (!this->GraphEdge)
@@ -73,10 +73,10 @@ vtkGraphEdge *vtkInEdgeIterator::NextGraphEdge()
   return this->GraphEdge;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInEdgeIterator::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
   os << indent << "Graph: " << (this->Graph ? "" : "(null)") << endl;
   if (this->Graph)
   {

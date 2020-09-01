@@ -13,6 +13,9 @@
 
 =========================================================================*/
 
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkChartXY.h"
 #include "vtkContextScene.h"
 #include "vtkContextView.h"
@@ -24,6 +27,7 @@
 #include "vtkRenderWindowInteractor.h"
 #include "vtkTable.h"
 
+// clang-format off
 const double densities[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2.5e-005, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0.010065, 0.0500675, 0.07007, 0.0900725, 0.090075, 0.0900775, 0.07008, 0.0500825, 0.010085, 0, 0, 0, 0, 0,
@@ -46,8 +50,10 @@ const double densities[] = {
   0, 0, 0, 0, 0.00091, 0.0509125, 0.100915, 0.140918, 0.17092, 0.190922, 0.190925, 0.190928, 0.17093, 0.140933, 0.100935, 0.0509375, 0.00094, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0.010965, 0.0509675, 0.07097, 0.0909725, 0.090975, 0.0909775, 0.07098, 0.0509825, 0.010985, 0, 0, 0, 0, 0,
 };
-//----------------------------------------------------------------------------
-int TestBagPlot(int, char * [])
+// clang-format on
+
+//------------------------------------------------------------------------------
+int TestBagPlot(int, char*[])
 {
   // Set up a 2D scene, add an XY chart to it
   vtkNew<vtkContextView> view;
@@ -83,8 +89,8 @@ int TestBagPlot(int, char * [])
   {
     for (int i = 0; i < numDataI; ++i)
     {
-      table->SetValue(i + j * numDataI, 0, i); //X
-      table->SetValue(i + j * numDataI, 1, j); //Y
+      table->SetValue(i + j * numDataI, 0, i); // X
+      table->SetValue(i + j * numDataI, 1, j); // Y
       double d = densities[i + j * numDataI];
       table->SetValue(i + j * numDataI, 2, d); // Density
     }
@@ -93,8 +99,7 @@ int TestBagPlot(int, char * [])
 
   vtkNew<vtkPlotBag> bagPlot;
   chart->AddPlot(bagPlot);
-  bagPlot->SetInputData(table, arrX->GetName(),
-    arrY->GetName(), arrDensity->GetName());
+  bagPlot->SetInputData(table, arrX->GetName(), arrY->GetName(), arrDensity->GetName());
   bagPlot->SetColor(255, 0, 0, 255);
   bagPlot->SetMarkerSize(4);
 

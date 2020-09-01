@@ -18,7 +18,6 @@
 #include "vtkDataObjectTreeInternals.h"
 #include "vtkObjectFactory.h"
 
-
 class vtkDataObjectTreeIterator::vtkInternals
 {
 public:
@@ -49,14 +48,12 @@ public:
       if (this->Reverse &&
         this->ReverseIter != this->GetInternals(this->CompositeDataSet)->Children.rend())
       {
-        this->ChildIterator->Initialize(this->Reverse,
-          this->ReverseIter->DataObject);
+        this->ChildIterator->Initialize(this->Reverse, this->ReverseIter->DataObject);
       }
       else if (!this->Reverse &&
         this->Iter != this->GetInternals(this->CompositeDataSet)->Children.end())
       {
-        this->ChildIterator->Initialize(this->Reverse,
-          this->Iter->DataObject);
+        this->ChildIterator->Initialize(this->Reverse, this->Iter->DataObject);
       }
     }
 
@@ -64,6 +61,7 @@ public:
     {
       return this->Parent->GetInternals(cd);
     }
+
   public:
     vtkIterator(vtkInternals* parent)
     {
@@ -76,8 +74,6 @@ public:
       delete this->ChildIterator;
       this->ChildIterator = nullptr;
     }
-
-
 
     void Initialize(bool reverse, vtkDataObject* dataObj)
     {
@@ -119,7 +115,6 @@ public:
       return true;
     }
 
-
     bool IsDoneWithTraversal()
     {
       if (!this->DataObject)
@@ -158,8 +153,7 @@ public:
       {
         return this->DataObject;
       }
-      return this->ChildIterator?
-        this->ChildIterator->GetCurrentDataObject() : nullptr;
+      return this->ChildIterator ? this->ChildIterator->GetCurrentDataObject() : nullptr;
     }
 
     vtkInformation* GetCurrentMetaData()
@@ -200,9 +194,8 @@ public:
 
       if (this->ChildIterator->PassSelf)
       {
-        return this->Reverse?
-          (this->ReverseIter->MetaData != nullptr):
-          (this->Iter->MetaData != nullptr);
+        return this->Reverse ? (this->ReverseIter->MetaData != nullptr)
+                             : (this->Iter->MetaData != nullptr);
       }
 
       return this->ChildIterator->HasCurrentMetaData();
@@ -247,7 +240,6 @@ public:
       index.insert(index.end(), childIndex.begin(), childIndex.end());
       return index;
     }
-
   };
 
   // Description:
@@ -258,22 +250,19 @@ public:
     return this->CompositeDataIterator->GetInternals(cd);
   }
 
-  vtkInternals()
-  {
-    this->Iterator = new vtkIterator(this);
-  }
+  vtkInternals() { this->Iterator = new vtkIterator(this); }
   ~vtkInternals()
   {
     delete this->Iterator;
     this->Iterator = nullptr;
   }
 
-  vtkIterator *Iterator;
+  vtkIterator* Iterator;
   vtkDataObjectTreeIterator* CompositeDataIterator;
 };
 
 vtkStandardNewMacro(vtkDataObjectTreeIterator);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataObjectTreeIterator::vtkDataObjectTreeIterator()
 {
   this->VisitOnlyLeaves = 1;
@@ -283,23 +272,23 @@ vtkDataObjectTreeIterator::vtkDataObjectTreeIterator()
   this->Internals->CompositeDataIterator = this;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataObjectTreeIterator::~vtkDataObjectTreeIterator()
 {
   delete this->Internals;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkDataObjectTreeIterator::IsDoneWithTraversal()
 {
   return this->Internals->Iterator->IsDoneWithTraversal();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDataObjectTreeIterator::GoToFirstItem()
 {
-  this->CurrentFlatIndex = 0;
-  this->Internals->Iterator->Initialize(this->Reverse !=0, this->DataSet);
+  this->SetCurrentFlatIndex(0);
+  this->Internals->Iterator->Initialize(this->Reverse != 0, this->DataSet);
   this->NextInternal();
 
   while (!this->Internals->Iterator->IsDoneWithTraversal())
@@ -317,7 +306,7 @@ void vtkDataObjectTreeIterator::GoToFirstItem()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDataObjectTreeIterator::GoToNextItem()
 {
   if (!this->Internals->Iterator->IsDoneWithTraversal())
@@ -340,18 +329,19 @@ void vtkDataObjectTreeIterator::GoToNextItem()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDataObjectTreeIterator::NextInternal()
 {
   do
   {
     this->CurrentFlatIndex++;
     this->Internals->Iterator->Next();
-  }
-  while (!this->TraverseSubTree && this->Internals->Iterator->InSubTree());
+  } while (!this->TraverseSubTree && this->Internals->Iterator->InSubTree());
+
+  this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataObject* vtkDataObjectTreeIterator::GetCurrentDataObject()
 {
   if (!this->IsDoneWithTraversal())
@@ -362,7 +352,7 @@ vtkDataObject* vtkDataObjectTreeIterator::GetCurrentDataObject()
   return nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInformation* vtkDataObjectTreeIterator::GetCurrentMetaData()
 {
   if (!this->IsDoneWithTraversal())
@@ -373,7 +363,7 @@ vtkInformation* vtkDataObjectTreeIterator::GetCurrentMetaData()
   return nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkDataObjectTreeIterator::HasCurrentMetaData()
 {
   if (!this->IsDoneWithTraversal())
@@ -384,27 +374,25 @@ int vtkDataObjectTreeIterator::HasCurrentMetaData()
   return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataObjectTreeIndex vtkDataObjectTreeIterator::GetCurrentIndex()
 {
   return this->Internals->Iterator->GetCurrentIndex();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 unsigned int vtkDataObjectTreeIterator::GetCurrentFlatIndex()
 {
   if (this->Reverse)
   {
-    vtkErrorMacro(
-      "FlatIndex cannot be obtained when iterating in reverse order.");
+    vtkErrorMacro("FlatIndex cannot be obtained when iterating in reverse order.");
     return 0;
   }
   return this->CurrentFlatIndex;
 }
 
-//----------------------------------------------------------------------------
-vtkDataObjectTreeInternals* vtkDataObjectTreeIterator::GetInternals(
-  vtkDataObjectTree* cd)
+//------------------------------------------------------------------------------
+vtkDataObjectTreeInternals* vtkDataObjectTreeIterator::GetInternals(vtkDataObjectTree* cd)
 {
   if (cd)
   {
@@ -414,17 +402,13 @@ vtkDataObjectTreeInternals* vtkDataObjectTreeIterator::GetInternals(
   return nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkDataObjectTreeIterator::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "VisitOnlyLeaves: "
-    << (this->VisitOnlyLeaves? "On" : "Off") << endl;
-  os << indent << "Reverse: "
-    << (this->Reverse? "On" : "Off") << endl;
-  os << indent << "TraverseSubTree: "
-    << (this->TraverseSubTree? "On" : "Off") << endl;
-  os << indent << "SkipEmptyNodes: "
-    << (this->SkipEmptyNodes? "On" : "Off") << endl;
+  os << indent << "VisitOnlyLeaves: " << (this->VisitOnlyLeaves ? "On" : "Off") << endl;
+  os << indent << "Reverse: " << (this->Reverse ? "On" : "Off") << endl;
+  os << indent << "TraverseSubTree: " << (this->TraverseSubTree ? "On" : "Off") << endl;
+  os << indent << "SkipEmptyNodes: " << (this->SkipEmptyNodes ? "On" : "Off") << endl;
   os << indent << "CurrentFlatIndex: " << this->CurrentFlatIndex << endl;
 }

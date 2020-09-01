@@ -14,10 +14,9 @@
 =========================================================================*/
 /**
  * @class   vtkCompositedSynchronizedRenderers
- *
- * vtkCompositedSynchronizedRenderers is vtkSynchronizedRenderers that uses
+ * @brief   vtkCompositedSynchronizedRenderers is vtkSynchronizedRenderers that uses
  * vtkCompositer to composite the images on the root node.
-*/
+ */
 
 #ifndef vtkCompositedSynchronizedRenderers_h
 #define vtkCompositedSynchronizedRenderers_h
@@ -28,7 +27,8 @@
 class vtkFloatArray;
 class vtkCompositer;
 
-class VTKRENDERINGPARALLEL_EXPORT vtkCompositedSynchronizedRenderers : public vtkSynchronizedRenderers
+class VTKRENDERINGPARALLEL_EXPORT vtkCompositedSynchronizedRenderers
+  : public vtkSynchronizedRenderers
 {
 public:
   static vtkCompositedSynchronizedRenderers* New();
@@ -52,10 +52,10 @@ protected:
   void CaptureRenderedDepthBuffer(vtkFloatArray* depth_buffer);
 
   vtkCompositer* Compositer;
+
 private:
   vtkCompositedSynchronizedRenderers(const vtkCompositedSynchronizedRenderers&) = delete;
   void operator=(const vtkCompositedSynchronizedRenderers&) = delete;
-
 };
 
 #endif

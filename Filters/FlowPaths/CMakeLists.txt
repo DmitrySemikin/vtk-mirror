@@ -1,23 +1,27 @@
-set(Module_SRCS
-  vtkAbstractInterpolatedVelocityField.cxx
-  vtkAMRInterpolatedVelocityField.cxx
-  vtkCachingInterpolatedVelocityField.cxx
-  vtkCellLocatorInterpolatedVelocityField.cxx
-  vtkCompositeInterpolatedVelocityField.cxx
-  vtkEvenlySpacedStreamlines2D.cxx
-  vtkInterpolatedVelocityField.cxx
-  vtkLagrangianParticleTracker.cxx
-  vtkLagrangianBasicIntegrationModel.cxx
-  vtkLagrangianParticle.cxx
-  vtkLagrangianMatidaIntegrationModel.cxx
-  vtkModifiedBSPTree.cxx
-  vtkParticlePathFilter.cxx
-  vtkParticleTracer.cxx
-  vtkParticleTracerBase.cxx
-  vtkStreaklineFilter.cxx
-  vtkStreamTracer.cxx
-  vtkTemporalInterpolatedVelocityField.cxx
-  vtkTemporalStreamTracer.cxx
-  )
+set(classes
+  vtkAbstractInterpolatedVelocityField
+  vtkAMRInterpolatedVelocityField
+  vtkCachingInterpolatedVelocityField
+  vtkCellLocatorInterpolatedVelocityField
+  vtkCompositeInterpolatedVelocityField
+  vtkEvenlySpacedStreamlines2D
+  vtkInterpolatedVelocityField
+  vtkLagrangianBasicIntegrationModel
+  vtkLagrangianMatidaIntegrationModel
+  vtkLagrangianParticle
+  vtkLagrangianParticleTracker
+  vtkModifiedBSPTree
+  vtkParallelVectors
+  vtkParticlePathFilter
+  vtkParticleTracer
+  vtkParticleTracerBase
+  vtkStreaklineFilter
+  vtkStreamSurface
+  vtkStreamTracer
+  vtkTemporalInterpolatedVelocityField
+  vtkTemporalStreamTracer
+  vtkVectorFieldTopology
+  vtkVortexCore)
 
-vtk_module_library(vtkFiltersFlowPaths ${Module_SRCS})
+vtk_module_add_module(VTK::FiltersFlowPaths
+  CLASSES ${classes})

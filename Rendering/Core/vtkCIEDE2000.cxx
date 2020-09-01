@@ -49,7 +49,7 @@ SOFTWARE.
 namespace CIEDE2000
 {
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 static const int COLORSPACE_SIZE_X = 17;
 static const int COLORSPACE_SIZE_Y = 17;
 static const int COLORSPACE_SIZE_Z = 17;
@@ -62,17 +62,15 @@ typedef int PositionComponent;
 typedef std::array<PositionComponent, 3> Position;
 typedef double Distance;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline static void getPosition(const double rgb[3], Position& pos)
 {
-  static const double EPSILON = 0.000001;
-
-  pos[0] = static_cast<PositionComponent>(rgb[0] * (COLORSPACE_SIZE_X - EPSILON));
-  pos[1] = static_cast<PositionComponent>(rgb[1] * (COLORSPACE_SIZE_Y - EPSILON));
-  pos[2] = static_cast<PositionComponent>(rgb[2] * (COLORSPACE_SIZE_Z - EPSILON));
+  pos[0] = static_cast<PositionComponent>(rgb[0] * (COLORSPACE_SIZE_X - 1) + 0.5);
+  pos[1] = static_cast<PositionComponent>(rgb[1] * (COLORSPACE_SIZE_Y - 1) + 0.5);
+  pos[2] = static_cast<PositionComponent>(rgb[2] * (COLORSPACE_SIZE_Z - 1) + 0.5);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline static void getRGBColor(const Position& pos, double rgb[3])
 {
   rgb[0] = pos[0] / static_cast<double>(COLORSPACE_SIZE_X - 1);
@@ -80,7 +78,15 @@ inline static void getRGBColor(const Position& pos, double rgb[3])
   rgb[2] = pos[2] / static_cast<double>(COLORSPACE_SIZE_Z - 1);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+void MapColor(double rgb[3])
+{
+  Position pos;
+  getPosition(rgb, pos);
+  getRGBColor(pos, rgb);
+}
+
+//------------------------------------------------------------------------------
 inline static void getLabColor(const Position& pos, double _lab[3])
 {
   double rgb[3];
@@ -89,13 +95,13 @@ inline static void getLabColor(const Position& pos, double _lab[3])
   vtkMath::RGBToLab(rgb, _lab);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline static int getIndex(const Position& pos)
 {
   return pos[0] + COLORSPACE_SIZE_X * (pos[1] + COLORSPACE_SIZE_Y * pos[2]);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 double GetCIEDeltaE2000(const double lab1[3], const double lab2[3])
 {
   // The three constants used in the CIEDE2000 measure
@@ -205,11 +211,13 @@ double GetCIEDeltaE2000(const double lab1[3], const double lab2[3])
   }
 
   double T = 1.0 - 0.17 * std::cos(barhPrime - (vtkMath::Pi() * 30.0 / 180.0)) +
-    0.24 * std::cos(2.0 * barhPrime) + 0.32 * std::cos(3.0 * barhPrime + (vtkMath::Pi() * 6.0 / 180.0)) -
+    0.24 * std::cos(2.0 * barhPrime) +
+    0.32 * std::cos(3.0 * barhPrime + (vtkMath::Pi() * 6.0 / 180.0)) -
     0.20 * std::cos(4.0 * barhPrime - (vtkMath::Pi() * 63.0 / 180.0));
 
   double deltaTheta = (vtkMath::Pi() * 30.0 / 180.0) *
-    std::exp(-std::pow((barhPrime - (vtkMath::Pi() * 275.0 / 180.0)) / (vtkMath::Pi() * 25.0 / 180.0), 2.0));
+    std::exp(-std::pow(
+      (barhPrime - (vtkMath::Pi() * 275.0 / 180.0)) / (vtkMath::Pi() * 25.0 / 180.0), 2.0));
 
   double R_C =
     2.0 * std::sqrt(std::pow(barCPrime, 7.0) / (std::pow(barCPrime, 7.0) + std::pow(25.0, 7.0)));
@@ -230,8 +238,29 @@ double GetCIEDeltaE2000(const double lab1[3], const double lab2[3])
   return deltaE;
 }
 
-//----------------------------------------------------------------------------
-double GetColorPath(const double rgb1[3], const double rgb2[3], std::vector<Node>& path)
+//------------------------------------------------------------------------------
+double CorrectedDistance(std::vector<Node>& path)
+{
+  double distance = 0.0;
+
+  for (std::size_t i = 1; i < path.size(); ++i)
+  {
+    double currentLabColor[3];
+    vtkMath::RGBToLab(path.at(i).rgb, currentLabColor);
+
+    double previousLabColor[3];
+    vtkMath::RGBToLab(path.at(i - 1).rgb, previousLabColor);
+
+    distance += GetCIEDeltaE2000(currentLabColor, previousLabColor);
+    path.at(i).distance = distance;
+  }
+
+  return distance;
+}
+
+//------------------------------------------------------------------------------
+double GetColorPath(
+  const double rgb1[3], const double rgb2[3], std::vector<Node>& path, bool forceExactSupportColors)
 {
   Position pos1, pos2;
   getPosition(rgb1, pos1);
@@ -248,7 +277,7 @@ double GetColorPath(const double rgb1[3], const double rgb2[3], std::vector<Node
   // deleting the old entry and re-inserting the new entry.
   // The set is sorted first by the distance from the seed node, so that the
   // first entry always is the node that can be reached shortest.
-  std::set<std::pair<Distance, Position> > front;
+  std::set<std::pair<Distance, Position>> front;
 
   // Start backwards and use the second color as seed
   distances[getIndex(pos2)] = static_cast<Distance>(0);
@@ -294,7 +323,8 @@ double GetColorPath(const double rgb1[3], const double rgb2[3], std::vector<Node
           double neighborLabColor[3];
           getLabColor(neighborPos, neighborLabColor);
 
-          Distance deltaE = static_cast<Distance>(GetCIEDeltaE2000(currentLabColor, neighborLabColor));
+          Distance deltaE =
+            static_cast<Distance>(GetCIEDeltaE2000(currentLabColor, neighborLabColor));
 
           int neighborIdx = getIndex(neighborPos);
 
@@ -351,16 +381,21 @@ double GetColorPath(const double rgb1[3], const double rgb2[3], std::vector<Node
   }
 
   // Force the first and the last node's color to be exact
-  path.front().rgb[0] = rgb1[0];
-  path.front().rgb[1] = rgb1[1];
-  path.front().rgb[2] = rgb1[2];
-  path.back().rgb[0] = rgb2[0];
-  path.back().rgb[1] = rgb2[1];
-  path.back().rgb[2] = rgb2[2];
+  if (forceExactSupportColors)
+  {
+    for (int i = 0; i < 3; ++i)
+    {
+      path.front().rgb[i] = rgb1[i];
+      path.back().rgb[i] = rgb2[i];
+    }
+
+    // Return the corrected overall length of the path. Necessary if forcing the
+    return CorrectedDistance(path);
+  }
 
   // Return the overall length of the path
   return pathDistance;
 }
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 } // namespace CIEDE2000

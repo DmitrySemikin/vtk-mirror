@@ -13,25 +13,28 @@
 
 =========================================================================*/
 
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkChartHistogram2D.h"
 
-#include "vtkContext2D.h"
-#include "vtkBrush.h"
-#include "vtkPen.h"
-#include "vtkContextScene.h"
-#include "vtkContextMouseEvent.h"
-#include "vtkTextProperty.h"
 #include "vtkAxis.h"
-#include "vtkPlotHistogram2D.h"
+#include "vtkBrush.h"
 #include "vtkColorLegend.h"
-#include "vtkTooltipItem.h"
-#include "vtkSmartPointer.h"
+#include "vtkContext2D.h"
+#include "vtkContextMouseEvent.h"
+#include "vtkContextScene.h"
 #include "vtkObjectFactory.h"
+#include "vtkPen.h"
+#include "vtkPlotHistogram2D.h"
+#include "vtkSmartPointer.h"
+#include "vtkTextProperty.h"
+#include "vtkTooltipItem.h"
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkStandardNewMacro(vtkChartHistogram2D);
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkChartHistogram2D::vtkChartHistogram2D()
 {
   // Now for the 2D histogram
@@ -47,10 +50,10 @@ vtkChartHistogram2D::vtkChartHistogram2D()
   this->AddItem(this->Tooltip);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkChartHistogram2D::~vtkChartHistogram2D() = default;
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkChartHistogram2D::Update()
 {
   this->Histogram->Update();
@@ -58,46 +61,43 @@ void vtkChartHistogram2D::Update()
   this->vtkChartXY::Update();
 }
 
-//-----------------------------------------------------------------------------
-void vtkChartHistogram2D::SetInputData(vtkImageData *data, vtkIdType z)
+//------------------------------------------------------------------------------
+void vtkChartHistogram2D::SetInputData(vtkImageData* data, vtkIdType z)
 {
   this->Histogram->SetInputData(data, z);
 }
 
-//-----------------------------------------------------------------------------
-void vtkChartHistogram2D::SetTransferFunction(vtkScalarsToColors *function)
+//------------------------------------------------------------------------------
+void vtkChartHistogram2D::SetTransferFunction(vtkScalarsToColors* function)
 {
   this->Histogram->SetTransferFunction(function);
-  vtkColorLegend *legend = vtkColorLegend::SafeDownCast(this->Legend);
+  vtkColorLegend* legend = vtkColorLegend::SafeDownCast(this->Legend);
   if (legend)
   {
     legend->SetTransferFunction(function);
   }
 }
 
-//-----------------------------------------------------------------------------
-bool vtkChartHistogram2D::UpdateLayout(vtkContext2D *painter)
+//------------------------------------------------------------------------------
+bool vtkChartHistogram2D::UpdateLayout(vtkContext2D* painter)
 {
   this->vtkChartXY::UpdateLayout(painter);
-  vtkColorLegend *legend = vtkColorLegend::SafeDownCast(this->Legend);
+  vtkColorLegend* legend = vtkColorLegend::SafeDownCast(this->Legend);
   if (legend)
   {
     legend->SetPosition(vtkRectf(this->Point2[0] + 5, this->Point1[1],
-                                 this->Legend->GetSymbolWidth(),
-                                 this->Point2[1] - this->Point1[1]));
+      this->Legend->GetSymbolWidth(), this->Point2[1] - this->Point1[1]));
   }
   this->Legend->Update();
   return true;
 }
 
-//-----------------------------------------------------------------------------
-bool vtkChartHistogram2D::Hit(const vtkContextMouseEvent &mouse)
+//------------------------------------------------------------------------------
+bool vtkChartHistogram2D::Hit(const vtkContextMouseEvent& mouse)
 {
   vtkVector2i pos(mouse.GetScreenPos());
-  if (pos[0] > this->Point1[0] - 10 &&
-      pos[0] < this->Point2[0] + 10 &&
-      pos[1] > this->Point1[1] &&
-      pos[1] < this->Point2[1])
+  if (pos[0] > this->Point1[0] - 10 && pos[0] < this->Point2[0] + 10 && pos[1] > this->Point1[1] &&
+    pos[1] < this->Point2[1])
   {
     return true;
   }
@@ -107,7 +107,7 @@ bool vtkChartHistogram2D::Hit(const vtkContextMouseEvent &mouse)
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPlot* vtkChartHistogram2D::GetPlot(vtkIdType index)
 {
   if (index == 0)
@@ -118,8 +118,8 @@ vtkPlot* vtkChartHistogram2D::GetPlot(vtkIdType index)
   return nullptr;
 }
 
-//-----------------------------------------------------------------------------
-void vtkChartHistogram2D::PrintSelf(ostream &os, vtkIndent indent)
+//------------------------------------------------------------------------------
+void vtkChartHistogram2D::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }

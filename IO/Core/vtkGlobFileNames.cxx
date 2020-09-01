@@ -18,20 +18,19 @@
 #include "vtkDebugLeaks.h"
 #include "vtkObjectFactory.h"
 
-#include <vtksys/Glob.hxx>
-#include <vtksys/SystemTools.hxx>
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
+#include <vtksys/Glob.hxx>
+#include <vtksys/SystemTools.hxx>
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGlobFileNames* vtkGlobFileNames::New()
 {
-  VTK_STANDARD_NEW_BODY(vtkGlobFileNames)
+  VTK_STANDARD_NEW_BODY(vtkGlobFileNames);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGlobFileNames::vtkGlobFileNames()
 {
   this->Directory = nullptr;
@@ -40,39 +39,37 @@ vtkGlobFileNames::vtkGlobFileNames()
   this->FileNames = vtkStringArray::New();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkGlobFileNames::~vtkGlobFileNames()
 {
-  delete [] this->Directory;
-  delete [] this->Pattern;
+  delete[] this->Directory;
+  delete[] this->Pattern;
   this->FileNames->Delete();
   this->FileNames = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkGlobFileNames::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "Directory: " <<
-    (this->GetDirectory() ? this->GetDirectory() : " none") << "\n";
-  os << indent << "Pattern: " <<
-    (this->GetPattern() ? this->GetPattern() : " none") << "\n";
+  os << indent << "Directory: " << (this->GetDirectory() ? this->GetDirectory() : " none") << "\n";
+  os << indent << "Pattern: " << (this->GetPattern() ? this->GetPattern() : " none") << "\n";
   os << indent << "Recurse: " << (this->GetRecurse() ? "On\n" : "Off\n");
   os << indent << "FileNames:  (" << this->GetFileNames() << ")\n";
   indent = indent.GetNextIndent();
-  for(int i = 0; i < this->FileNames->GetNumberOfValues(); i++)
+  for (int i = 0; i < this->FileNames->GetNumberOfValues(); i++)
   {
     os << indent << this->FileNames->GetValue(i) << "\n";
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkGlobFileNames::Reset()
 {
   this->FileNames->Reset();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkGlobFileNames::AddFileNames(const char* pattern)
 {
   this->SetPattern(pattern);
@@ -111,8 +108,7 @@ int vtkGlobFileNames::AddFileNames(const char* pattern)
 
   if (!glob.FindFiles(fullPattern))
   {
-    vtkErrorMacro(<< "FindFileNames: Glob action failed for \"" <<
-                  fullPattern << "\"");
+    vtkErrorMacro(<< "FindFileNames: Glob action failed for \"" << fullPattern << "\"");
 
     return 0;
   }
@@ -124,9 +120,7 @@ int vtkGlobFileNames::AddFileNames(const char* pattern)
   std::sort(files.begin(), files.end());
 
   // add them onto the list of filenames
-  for ( std::vector<std::string>::const_iterator iter = files.begin();
-        iter != files.end();
-        ++iter)
+  for (std::vector<std::string>::const_iterator iter = files.begin(); iter != files.end(); ++iter)
   {
     this->FileNames->InsertNextValue(iter->c_str());
   }
@@ -134,21 +128,19 @@ int vtkGlobFileNames::AddFileNames(const char* pattern)
   return 1;
 }
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char* vtkGlobFileNames::GetNthFileName(int index)
 {
-  if(index >= this->FileNames->GetNumberOfValues() || index < 0)
+  if (index >= this->FileNames->GetNumberOfValues() || index < 0)
   {
-    vtkErrorMacro( << "Bad index for GetFileName on vtkGlobFileNames\n");
+    vtkErrorMacro(<< "Bad index for GetFileName on vtkGlobFileNames\n");
     return nullptr;
   }
 
   return this->FileNames->GetValue(index).c_str();
 }
 
-
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkGlobFileNames::GetNumberOfFileNames()
 {
   return this->FileNames->GetNumberOfValues();

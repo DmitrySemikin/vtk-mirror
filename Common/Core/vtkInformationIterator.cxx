@@ -27,7 +27,7 @@ public:
   vtkInformationInternals::MapType::iterator Iterator;
 };
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInformationIterator::vtkInformationIterator()
 {
   this->Internal = new vtkInformationIteratorInternals;
@@ -35,7 +35,7 @@ vtkInformationIterator::vtkInformationIterator()
   this->ReferenceIsWeak = false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInformationIterator::~vtkInformationIterator()
 {
   if (this->ReferenceIsWeak)
@@ -49,7 +49,7 @@ vtkInformationIterator::~vtkInformationIterator()
   delete this->Internal;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInformationIterator::SetInformation(vtkInformation* inf)
 {
   if (this->ReferenceIsWeak)
@@ -60,7 +60,7 @@ void vtkInformationIterator::SetInformation(vtkInformation* inf)
   vtkSetObjectBodyMacro(Information, vtkInformation, inf);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInformationIterator::SetInformationWeak(vtkInformation* inf)
 {
   if (!this->ReferenceIsWeak)
@@ -75,10 +75,9 @@ void vtkInformationIterator::SetInformationWeak(vtkInformation* inf)
     this->Information = inf;
     this->Modified();
   }
-
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInformationIterator::GoToFirstItem()
 {
   if (!this->Information)
@@ -89,7 +88,7 @@ void vtkInformationIterator::GoToFirstItem()
   this->Internal->Iterator = this->Information->Internal->Map.begin();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInformationIterator::GoToNextItem()
 {
   if (!this->Information)
@@ -101,7 +100,7 @@ void vtkInformationIterator::GoToNextItem()
   ++this->Internal->Iterator;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkInformationIterator::IsDoneWithTraversal()
 {
   if (!this->Information)
@@ -110,14 +109,14 @@ int vtkInformationIterator::IsDoneWithTraversal()
     return 1;
   }
 
-  if(this->Internal->Iterator == this->Information->Internal->Map.end())
+  if (this->Internal->Iterator == this->Information->Internal->Map.end())
   {
     return 1;
   }
   return 0;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkInformationKey* vtkInformationIterator::GetCurrentKey()
 {
   if (this->IsDoneWithTraversal())
@@ -128,10 +127,10 @@ vtkInformationKey* vtkInformationIterator::GetCurrentKey()
   return this->Internal->Iterator->first;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkInformationIterator::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 
   os << indent << "Information: ";
   if (this->Information)
@@ -144,4 +143,3 @@ void vtkInformationIterator::PrintSelf(ostream& os, vtkIndent indent)
     os << "(none)" << endl;
   }
 }
-

@@ -13,6 +13,9 @@
 
 =========================================================================*/
 
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkAxis.h"
 #include "vtkChartBox.h"
 #include "vtkContextScene.h"
@@ -22,14 +25,14 @@
 #include "vtkLookupTable.h"
 #include "vtkNew.h"
 #include "vtkPlotBox.h"
-#include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
 
-//----------------------------------------------------------------------------
-int TestBoxPlot(int , char* [])
+//------------------------------------------------------------------------------
+int TestBoxPlot(int, char*[])
 {
   // Set up a 2D scene, add an XY chart to it
   vtkNew<vtkContextView> view;
@@ -59,11 +62,11 @@ int TestBoxPlot(int , char* [])
   const double scale = 1e02;
   for (int i = 0; i < numParam; i++)
   {
-    inputBoxPlotTable->SetValue(0, i, (i/2) * scale); //Q0
-    inputBoxPlotTable->SetValue(1, i, (2*i + 2 - i) * scale); //Q1
-    inputBoxPlotTable->SetValue(2, i, (2*i + 4) * scale); //Q2
-    inputBoxPlotTable->SetValue(3, i, (2*i + 7) * scale); //Q3
-    inputBoxPlotTable->SetValue(4, i, (2*i + 8) * scale); //Q4
+    inputBoxPlotTable->SetValue(0, i, (i / 2) * scale);         // Q0
+    inputBoxPlotTable->SetValue(1, i, (2 * i + 2 - i) * scale); // Q1
+    inputBoxPlotTable->SetValue(2, i, (2 * i + 4) * scale);     // Q2
+    inputBoxPlotTable->SetValue(3, i, (2 * i + 7) * scale);     // Q3
+    inputBoxPlotTable->SetValue(4, i, (2 * i + 8) * scale);     // Q4
   }
 
   vtkNew<vtkLookupTable> lookup;

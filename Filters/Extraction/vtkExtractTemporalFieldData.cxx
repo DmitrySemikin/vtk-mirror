@@ -12,11 +12,15 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+
+// Hide VTK_DEPRECATED_IN_9_0_0() warnings for this class.
+#define VTK_DEPRECATION_LEVEL 0
+
 #include "vtkExtractTemporalFieldData.h"
 
 #include "vtkCompositeDataIterator.h"
-#include "vtkDataSetAttributes.h"
 #include "vtkDataSet.h"
+#include "vtkDataSetAttributes.h"
 #include "vtkDoubleArray.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -35,35 +39,39 @@ public:
 };
 
 vtkObjectFactoryNewMacro(vtkExtractTemporalFieldData);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkExtractTemporalFieldData::vtkExtractTemporalFieldData()
 {
+  VTK_LEGACY_REPLACED_BODY(
+    vtkExtractTemporalFieldData, "VTK 9.0", vtkExtractExodusGlobalTemporalVariables);
+
   this->Internals = new vtkExtractTemporalFieldData::vtkInternals();
   this->HandleCompositeDataBlocksIndividually = true;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkExtractTemporalFieldData::~vtkExtractTemporalFieldData()
 {
   delete this->Internals;
   this->Internals = nullptr;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkExtractTemporalFieldData::GetNumberOfTimeSteps()
 {
   return static_cast<int>(this->Internals->TimeSteps.size());
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkExtractTemporalFieldData::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
-  os << indent << "HandleCompositeDataBlocksIndividually: "
-     << this->HandleCompositeDataBlocksIndividually << endl;
+  this->Superclass::PrintSelf(os, indent);
+  os << indent
+     << "HandleCompositeDataBlocksIndividually: " << this->HandleCompositeDataBlocksIndividually
+     << endl;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkExtractTemporalFieldData::FillInputPortInformation(
   int vtkNotUsed(port), vtkInformation* info)
 {
@@ -72,38 +80,33 @@ int vtkExtractTemporalFieldData::FillInputPortInformation(
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkExtractTemporalFieldData::RequestDataObject(
   vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   vtkDataObject* input = vtkDataObject::GetData(inputVector[0], 0);
 
-  if (vtkCompositeDataSet::SafeDownCast(input) &&
-    this->HandleCompositeDataBlocksIndividually)
+  if (vtkCompositeDataSet::SafeDownCast(input) && this->HandleCompositeDataBlocksIndividually)
   {
     if (vtkMultiBlockDataSet::GetData(outputVector, 0) == nullptr)
     {
       vtkNew<vtkMultiBlockDataSet> mb;
-      outputVector->GetInformationObject(0)->Set(
-        vtkDataObject::DATA_OBJECT(), mb);
+      outputVector->GetInformationObject(0)->Set(vtkDataObject::DATA_OBJECT(), mb);
     }
   }
   else if (vtkTable::GetData(outputVector, 0) == nullptr)
   {
     vtkNew<vtkTable> table;
-    outputVector->GetInformationObject(0)->Set(
-      vtkDataObject::DATA_OBJECT(), table);
+    outputVector->GetInformationObject(0)->Set(vtkDataObject::DATA_OBJECT(), table);
   }
   return 1;
 }
 
-//----------------------------------------------------------------------------
-int vtkExtractTemporalFieldData::RequestInformation(
-  vtkInformation* vtkNotUsed(request),
-  vtkInformationVector** inputVector,
-  vtkInformationVector* outputVector)
+//------------------------------------------------------------------------------
+int vtkExtractTemporalFieldData::RequestInformation(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
-  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
   if (inInfo->Has(vtkStreamingDemandDrivenPipeline::TIME_STEPS()))
   {
     int size = inInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
@@ -128,11 +131,9 @@ int vtkExtractTemporalFieldData::RequestInformation(
   return 1;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkExtractTemporalFieldData::RequestData(
-  vtkInformation*,
-  vtkInformationVector** inputVector,
-  vtkInformationVector* outputVector)
+  vtkInformation*, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   if (this->GetNumberOfTimeSteps() == 0)
   {
@@ -162,7 +163,7 @@ int vtkExtractTemporalFieldData::RequestData(
     }
     else
     {
-      vtkTable *output = vtkTable::GetData(outputVector, 0);
+      vtkTable* output = vtkTable::GetData(outputVector, 0);
       assert(output);
       for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
       {
@@ -178,7 +179,7 @@ int vtkExtractTemporalFieldData::RequestData(
   }
   else if (vtkDataSet* input = vtkDataSet::SafeDownCast(inputDO))
   {
-    vtkTable *output = vtkTable::GetData(outputVector, 0);
+    vtkTable* output = vtkTable::GetData(outputVector, 0);
     this->CopyDataToOutput(input, output);
   }
   else
@@ -189,11 +190,11 @@ int vtkExtractTemporalFieldData::RequestData(
   return 1;
 }
 
-//----------------------------------------------------------------------------
-bool vtkExtractTemporalFieldData::CopyDataToOutput(vtkDataSet *input, vtkTable *output)
+//------------------------------------------------------------------------------
+bool vtkExtractTemporalFieldData::CopyDataToOutput(vtkDataSet* input, vtkTable* output)
 {
-  vtkDataSetAttributes *outRowData = output->GetRowData();
-  vtkFieldData *ifd = input->GetFieldData();
+  vtkDataSetAttributes* outRowData = output->GetRowData();
+  vtkFieldData* ifd = input->GetFieldData();
   if (!ifd || !outRowData)
   {
     return false;
@@ -201,14 +202,13 @@ bool vtkExtractTemporalFieldData::CopyDataToOutput(vtkDataSet *input, vtkTable *
 
   int numTimeSteps = this->GetNumberOfTimeSteps();
   assert(numTimeSteps > 0);
-  for (vtkIdType j=0; j<ifd->GetNumberOfArrays(); j++)
+  for (vtkIdType j = 0; j < ifd->GetNumberOfArrays(); j++)
   {
     vtkDataArray* inFieldArray = ifd->GetArray(j);
-    if (inFieldArray &&
-        inFieldArray->GetName() &&
-        inFieldArray->GetNumberOfTuples() == numTimeSteps)
+    if (inFieldArray && inFieldArray->GetName() &&
+      inFieldArray->GetNumberOfTuples() == numTimeSteps)
     {
-      vtkDataArray *outArray = inFieldArray->NewInstance();
+      vtkDataArray* outArray = inFieldArray->NewInstance();
       outArray->ShallowCopy(inFieldArray);
       outRowData->AddArray(outArray);
       outArray->Delete();
@@ -232,8 +232,8 @@ bool vtkExtractTemporalFieldData::CopyDataToOutput(vtkDataSet *input, vtkTable *
   {
     timeArray->SetName("Time");
   }
-  std::copy(this->Internals->TimeSteps.begin(), this->Internals->TimeSteps.end(),
-    timeArray->GetPointer(0));
+  std::copy(
+    this->Internals->TimeSteps.begin(), this->Internals->TimeSteps.end(), timeArray->GetPointer(0));
   outRowData->AddArray(timeArray);
   return true;
 }

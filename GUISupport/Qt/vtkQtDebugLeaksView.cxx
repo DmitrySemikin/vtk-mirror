@@ -13,8 +13,8 @@
 
 =========================================================================*/
 #include "vtkQtDebugLeaksView.h"
-#include "vtkQtDebugLeaksModel.h"
 #include "vtkObjectBase.h"
+#include "vtkQtDebugLeaksModel.h"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -26,24 +26,24 @@
 #include <QSortFilterProxyModel>
 #include <QSplitter>
 #include <QTableView>
-#include <QVBoxLayout>
 #include <QUrl>
+#include <QVBoxLayout>
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 class vtkQtDebugLeaksView::qInternal
 {
 public:
-
-  vtkQtDebugLeaksModel*    Model;
-  QSortFilterProxyModel*   ProxyModel;
-  QTableView*              TableView;
-  QTableView*              ReferenceTableView;
-  QCheckBox*               FilterCheckBox;
-  QLineEdit*               FilterLineEdit;
+  vtkQtDebugLeaksModel* Model;
+  QSortFilterProxyModel* ProxyModel;
+  QTableView* TableView;
+  QTableView* ReferenceTableView;
+  QCheckBox* FilterCheckBox;
+  QLineEdit* FilterLineEdit;
 };
 
-//----------------------------------------------------------------------------
-vtkQtDebugLeaksView::vtkQtDebugLeaksView(QWidget *p) : QWidget(p)
+//------------------------------------------------------------------------------
+vtkQtDebugLeaksView::vtkQtDebugLeaksView(QWidget* p)
+  : QWidget(p)
 {
   this->Internal = new qInternal;
 
@@ -83,24 +83,21 @@ vtkQtDebugLeaksView::vtkQtDebugLeaksView(QWidget *p) : QWidget(p)
   splitter->setSizes(sizes);
 
   this->connect(this->Internal->FilterLineEdit, SIGNAL(textChanged(const QString&)),
-                SLOT(onFilterTextChanged(const QString&)));
+    SLOT(onFilterTextChanged(const QString&)));
 
-  this->connect(this->Internal->FilterCheckBox, SIGNAL(stateChanged(int)),
-                SLOT(onFilterToggled()));
+  this->connect(this->Internal->FilterCheckBox, SIGNAL(stateChanged(int)), SLOT(onFilterToggled()));
 
   this->connect(filterHelpButton, SIGNAL(clicked()), SLOT(onFilterHelp()));
 
   this->connect(this->Internal->TableView->selectionModel(),
-                SIGNAL(currentRowChanged(const QModelIndex&, const QModelIndex&)),
-                this, SLOT(onCurrentRowChanged(const QModelIndex&)));
+    SIGNAL(currentRowChanged(const QModelIndex&, const QModelIndex&)), this,
+    SLOT(onCurrentRowChanged(const QModelIndex&)));
 
-  this->connect(this->Internal->TableView,
-                SIGNAL(doubleClicked(const QModelIndex&)),
-                this, SLOT(onRowDoubleClicked(const QModelIndex&)));
+  this->connect(this->Internal->TableView, SIGNAL(doubleClicked(const QModelIndex&)), this,
+    SLOT(onRowDoubleClicked(const QModelIndex&)));
 
-  this->connect(this->Internal->ReferenceTableView,
-                SIGNAL(doubleClicked(const QModelIndex&)),
-                this, SLOT(onRowDoubleClicked(const QModelIndex&)));
+  this->connect(this->Internal->ReferenceTableView, SIGNAL(doubleClicked(const QModelIndex&)), this,
+    SLOT(onRowDoubleClicked(const QModelIndex&)));
 
   this->resize(400, 600);
   this->setWindowTitle("VTK Debug Leaks View");
@@ -116,7 +113,7 @@ vtkQtDebugLeaksView::vtkQtDebugLeaksView(QWidget *p) : QWidget(p)
   this->setAttribute(Qt::WA_QuitOnClose, false);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkQtDebugLeaksView::~vtkQtDebugLeaksView()
 {
   this->Internal->ReferenceTableView->setModel(nullptr);
@@ -125,19 +122,19 @@ vtkQtDebugLeaksView::~vtkQtDebugLeaksView()
   delete this->Internal;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkQtDebugLeaksModel* vtkQtDebugLeaksView::model()
 {
   return this->Internal->Model;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onFilterHelp()
 {
   QDesktopServices::openUrl(QUrl("http://doc.trolltech.com/4.6/qregexp.html#introduction"));
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onCurrentRowChanged(const QModelIndex& current)
 {
   QStandardItemModel* newModel = nullptr;
@@ -160,7 +157,7 @@ void vtkQtDebugLeaksView::onCurrentRowChanged(const QModelIndex& current)
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onFilterTextChanged(const QString& text)
 {
   if (this->filterEnabled())
@@ -169,7 +166,7 @@ void vtkQtDebugLeaksView::onFilterTextChanged(const QString& text)
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onFilterToggled()
 {
   QString text = this->filterText();
@@ -181,40 +178,41 @@ void vtkQtDebugLeaksView::onFilterToggled()
   this->Internal->ProxyModel->setFilterRegExp(text);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkQtDebugLeaksView::filterEnabled() const
 {
   return this->Internal->FilterCheckBox->isChecked();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::setFilterEnabled(bool value)
 {
   this->Internal->FilterCheckBox->setChecked(value);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 QString vtkQtDebugLeaksView::filterText() const
 {
   return this->Internal->FilterLineEdit->text();
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::setFilterText(const QString& text)
 {
   this->Internal->FilterLineEdit->setText(text);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Q_DECLARE_METATYPE(vtkObjectBase*);
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onRowDoubleClicked(const QModelIndex& index)
 {
   if (index.model() == this->Internal->ReferenceTableView->model())
   {
     QModelIndex objectIndex = this->Internal->ReferenceTableView->model()->index(index.row(), 0);
-    QVariant objectVariant = this->Internal->ReferenceTableView->model()->data(objectIndex, Qt::UserRole);
+    QVariant objectVariant =
+      this->Internal->ReferenceTableView->model()->data(objectIndex, Qt::UserRole);
     vtkObjectBase* object = objectVariant.value<vtkObjectBase*>();
     this->onObjectDoubleClicked(object);
   }
@@ -223,20 +221,20 @@ void vtkQtDebugLeaksView::onRowDoubleClicked(const QModelIndex& index)
     QModelIndex sourceIndex = this->Internal->ProxyModel->mapToSource(index);
     if (sourceIndex.isValid())
     {
-      QString className = this->Internal->Model->data(
-        this->Internal->Model->index(sourceIndex.row(), 0)).toString();
+      QString className =
+        this->Internal->Model->data(this->Internal->Model->index(sourceIndex.row(), 0)).toString();
       this->onClassNameDoubleClicked(className);
     }
   }
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onObjectDoubleClicked(vtkObjectBase* object)
 {
   Q_UNUSED(object);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkQtDebugLeaksView::onClassNameDoubleClicked(const QString& className)
 {
   Q_UNUSED(className);

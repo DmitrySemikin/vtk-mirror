@@ -14,8 +14,10 @@
 =========================================================================*/
 #include "vtkNumberToString.h"
 
+// clang-format off
 #include "vtk_doubleconversion.h"
 #include VTK_DOUBLECONVERSION_HEADER(double-conversion.h)
+// clang-format on
 
 #include <sstream>
 
@@ -35,13 +37,13 @@ inline ostream& ToString(ostream& stream, const TagT& tag)
 }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 ostream& operator<<(ostream& stream, const vtkNumberToString::TagDouble& tag)
 {
   return ToString(stream, tag);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 ostream& operator<<(ostream& stream, const vtkNumberToString::TagFloat& tag)
 {
   return ToString(stream, tag);

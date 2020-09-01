@@ -15,20 +15,18 @@
 
 #include "vtkMPI4PyCommunicator.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkMPICommunicator.h"
 #include "vtkMPI.h"
+#include "vtkMPICommunicator.h"
+#include "vtkObjectFactory.h"
 
 #include <mpi4py/mpi4py.h>
 
 vtkStandardNewMacro(vtkMPI4PyCommunicator);
 
-//----------------------------------------------------------------------------
-vtkMPI4PyCommunicator::vtkMPI4PyCommunicator()
-{
-}
+//------------------------------------------------------------------------------
+vtkMPI4PyCommunicator::vtkMPI4PyCommunicator() {}
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 PyObject* vtkMPI4PyCommunicator::ConvertToPython(vtkMPICommunicator* comm)
 {
   // Import mpi4py if it does not exist.
@@ -48,7 +46,7 @@ PyObject* vtkMPI4PyCommunicator::ConvertToPython(vtkMPICommunicator* comm)
   return PyMPIComm_New(*comm->GetMPIComm()->GetHandle());
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkMPICommunicator* vtkMPI4PyCommunicator::ConvertToVTK(PyObject* comm)
 {
   // Import mpi4py if it does not exist.
@@ -65,7 +63,7 @@ vtkMPICommunicator* vtkMPI4PyCommunicator::ConvertToVTK(PyObject* comm)
     return nullptr;
   }
 
-  MPI_Comm *mpiComm = PyMPIComm_Get(comm);
+  MPI_Comm* mpiComm = PyMPIComm_Get(comm);
   vtkMPICommunicator* vtkComm = vtkMPICommunicator::New();
   vtkMPICommunicatorOpaqueComm opaqueComm(mpiComm);
   if (!vtkComm->InitializeExternal(&opaqueComm))
@@ -77,8 +75,8 @@ vtkMPICommunicator* vtkMPI4PyCommunicator::ConvertToVTK(PyObject* comm)
   return vtkComm;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkMPI4PyCommunicator::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

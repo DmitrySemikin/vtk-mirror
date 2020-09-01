@@ -12,12 +12,15 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkPython.h" // this must be the first include.
 #include "vtkPythonInterpreter.h"
+#include "vtkPython.h" // this must be the first include.
 
+#include "vtkBuild.h"
 #include "vtkCommand.h"
+#include "vtkLogger.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
+#include "vtkOutputWindow.h"
 #include "vtkPythonStdStreamCaptureHelper.h"
 #include "vtkResourceFileLocator.h"
 #include "vtkVersion.h"
@@ -34,8 +37,9 @@
 
 #if PY_VERSION_HEX >= 0x03000000
 #if defined(__APPLE__) && PY_VERSION_HEX < 0x03050000
-extern "C" {
-extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char* s, Py_ssize_t size);
+extern "C"
+{
+  extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char* s, Py_ssize_t size);
 }
 #endif
 #endif
@@ -47,16 +51,14 @@ extern wchar_t* _Py_DecodeUTF8_surrogateescape(const char* s, Py_ssize_t size);
 #endif
 
 #define VTKPY_DEBUG_MESSAGE(x)                                                                     \
-  if (vtkPythonInterpreter::GetPythonVerboseFlag() > 0)                                            \
-  {                                                                                                \
-    cout << "# vtk: " x << endl;                                                                   \
-  }
-
+  vtkVLog(vtkLogger::ConvertToVerbosity(vtkPythonInterpreter::GetLogVerbosity()), x)
 #define VTKPY_DEBUG_MESSAGE_VV(x)                                                                  \
-  if (vtkPythonInterpreter::GetPythonVerboseFlag() > 1)                                            \
-  {                                                                                                \
-    cout << "# vtk: " x << endl;                                                                   \
-  }
+  vtkVLog(vtkLogger::ConvertToVerbosity(vtkPythonInterpreter::GetLogVerbosity() + 1), x)
+
+#if defined(_WIN32) && !defined(__CYGWIN__) && defined(VTK_BUILD_SHARED_LIBS) &&                   \
+  PY_VERSION_HEX >= 0x03080000
+#define vtkPythonInterpreter_USE_DIRECTORY_COOKIE
+#endif
 
 namespace
 {
@@ -128,12 +130,12 @@ char* vtk_Py_EncodeLocale(const wchar_t* arg, size_t* size)
 }
 #endif
 
-static std::vector<vtkWeakPointer<vtkPythonInterpreter> > * GlobalInterpreters;
+static std::vector<vtkWeakPointer<vtkPythonInterpreter>>* GlobalInterpreters;
 static std::vector<std::string> PythonPaths;
 
 void NotifyInterpreters(unsigned long eventid, void* calldata = nullptr)
 {
-  std::vector<vtkWeakPointer<vtkPythonInterpreter> >::iterator iter;
+  std::vector<vtkWeakPointer<vtkPythonInterpreter>>::iterator iter;
   for (iter = GlobalInterpreters->begin(); iter != GlobalInterpreters->end(); ++iter)
   {
     if (iter->GetPointer())
@@ -153,18 +155,15 @@ inline void vtkPrependPythonPath(const char* pathtoadd)
 #else
   PyObject* newpath = PyString_FromString(pathtoadd);
 #endif
-  PyList_Insert(path, 0, newpath);
+
+  // avoid adding duplicate paths.
+  if (PySequence_Contains(path, newpath) == 0)
+  {
+    PyList_Insert(path, 0, newpath);
+  }
   Py_DECREF(newpath);
 }
 
-inline void vtkSafePrependPythonPath(const std::string& pathtoadd)
-{
-  VTKPY_DEBUG_MESSAGE_VV("trying " << pathtoadd);
-  if (!pathtoadd.empty() && vtksys::SystemTools::FileIsDirectory(pathtoadd))
-  {
-    vtkPrependPythonPath(pathtoadd.c_str());
-  }
-}
 }
 
 // Schwarz counter idiom for GlobalInterpreters object
@@ -173,7 +172,7 @@ vtkPythonGlobalInterpreters::vtkPythonGlobalInterpreters()
 {
   if (vtkPythonInterpretersCounter++ == 0)
   {
-    GlobalInterpreters = new std::vector<vtkWeakPointer<vtkPythonInterpreter> >();
+    GlobalInterpreters = new std::vector<vtkWeakPointer<vtkPythonInterpreter>>();
   };
 }
 
@@ -191,16 +190,16 @@ bool vtkPythonInterpreter::CaptureStdin = false;
 bool vtkPythonInterpreter::ConsoleBuffering = false;
 std::string vtkPythonInterpreter::StdErrBuffer;
 std::string vtkPythonInterpreter::StdOutBuffer;
-int vtkPythonInterpreter::PythonVerboseFlag = 0;
+int vtkPythonInterpreter::LogVerbosity = vtkLogger::VERBOSITY_TRACE;
 
 vtkStandardNewMacro(vtkPythonInterpreter);
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPythonInterpreter::vtkPythonInterpreter()
 {
   GlobalInterpreters->push_back(this);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPythonInterpreter::~vtkPythonInterpreter()
 {
   // We need to check that GlobalInterpreters has not been deleted yet. It can be
@@ -212,7 +211,7 @@ vtkPythonInterpreter::~vtkPythonInterpreter()
   {
     return;
   }
-  std::vector<vtkWeakPointer<vtkPythonInterpreter> >::iterator iter;
+  std::vector<vtkWeakPointer<vtkPythonInterpreter>>::iterator iter;
   for (iter = GlobalInterpreters->begin(); iter != GlobalInterpreters->end(); ++iter)
   {
     if (*iter == this)
@@ -223,19 +222,19 @@ vtkPythonInterpreter::~vtkPythonInterpreter()
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkPythonInterpreter::IsInitialized()
 {
   return (Py_IsInitialized() != 0);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkPythonInterpreter::Initialize(int initsigs /*=0*/)
 {
   if (Py_IsInitialized() == 0)
@@ -249,6 +248,17 @@ bool vtkPythonInterpreter::Initialize(int initsigs /*=0*/)
     // fail when run in embedded VTK Python environment.
     PySys_SetArgvEx(0, nullptr, 0);
 
+#ifdef VTK_PYTHON_FULL_THREADSAFE
+    int threadInit = PyEval_ThreadsInitialized();
+    if (!threadInit)
+    {
+      PyEval_InitThreads(); // initialize and acquire GIL
+    }
+    // Always release GIL, as it has been acquired either by PyEval_InitThreads
+    // prior to Python 3.7 or by Py_InitializeEx in Python 3.7 and after
+    PyEval_SaveThread();
+#endif
+
 #ifdef SIGINT
     // Put default SIGINT handler back after Py_Initialize/Py_InitializeEx.
     signal(SIGINT, SIG_DFL);
@@ -258,15 +268,6 @@ bool vtkPythonInterpreter::Initialize(int initsigs /*=0*/)
   if (!vtkPythonInterpreter::InitializedOnce)
   {
     vtkPythonInterpreter::InitializedOnce = true;
-
-#ifdef VTK_PYTHON_FULL_THREADSAFE
-    int threadInit = PyEval_ThreadsInitialized();
-    PyEval_InitThreads(); // safe to call this multiple time
-    if (!threadInit)
-    {
-      PyEval_SaveThread(); // release GIL
-    }
-#endif
 
     // HACK: Calling PyRun_SimpleString for the first time for some reason results in
     // a "\n" message being generated which is causing the error dialog to
@@ -287,6 +288,9 @@ bool vtkPythonInterpreter::Initialize(int initsigs /*=0*/)
       Py_DECREF(wrapperErr);
     }
 
+    // We call this before processing any of Python paths added by the
+    // application using `PrependPythonPath`. This ensures that application
+    // specified paths are preferred to the ones `vtkPythonInterpreter` adds.
     vtkPythonInterpreter::SetupVTKPythonPaths();
 
     for (size_t cc = 0; cc < PythonPaths.size(); cc++)
@@ -301,19 +305,40 @@ bool vtkPythonInterpreter::Initialize(int initsigs /*=0*/)
   return false;
 }
 
-//----------------------------------------------------------------------------
+#ifdef vtkPythonInterpreter_USE_DIRECTORY_COOKIE
+static PyObject* DLLDirectoryCookie = nullptr;
+
+static void CloseDLLDirectoryCookie()
+{
+  if (DLLDirectoryCookie)
+  {
+    if (PyObject_HasAttrString(DLLDirectoryCookie, "close"))
+    {
+      PyObject* result = PyObject_CallMethod(DLLDirectoryCookie, "close", nullptr);
+      Py_XDECREF(result);
+    }
+    Py_XDECREF(DLLDirectoryCookie);
+    DLLDirectoryCookie = nullptr;
+  }
+}
+#endif
+
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::Finalize()
 {
   if (Py_IsInitialized() != 0)
   {
     NotifyInterpreters(vtkCommand::ExitEvent);
     vtkPythonScopeGilEnsurer gilEnsurer(false, true);
+#ifdef vtkPythonInterpreter_USE_DIRECTORY_COOKIE
+    CloseDLLDirectoryCookie();
+#endif
     // Py_Finalize will take care of releasing gil
     Py_Finalize();
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::SetProgramName(const char* programname)
 {
   if (programname)
@@ -324,10 +349,11 @@ void vtkPythonInterpreter::SetProgramName(const char* programname)
 // contents of this storage.
 #if PY_VERSION_HEX >= 0x03000000
     wchar_t* argv0 = vtk_Py_DecodeLocale(programname, nullptr);
-    if (argv0 == 0)
+    if (argv0 == nullptr)
     {
-      fprintf(stderr, "Fatal vtkpython error: "
-                      "unable to decode the program name\n");
+      fprintf(stderr,
+        "Fatal vtkpython error: "
+        "unable to decode the program name\n");
       static wchar_t empty[1] = { 0 };
       argv0 = empty;
       Py_SetProgramName(argv0);
@@ -344,7 +370,7 @@ void vtkPythonInterpreter::SetProgramName(const char* programname)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::PrependPythonPath(const char* dir)
 {
   if (!dir)
@@ -359,11 +385,10 @@ void vtkPythonInterpreter::PrependPythonPath(const char* dir)
   std::replace(out_dir.begin(), out_dir.end(), '/', '\\');
 #endif
 
-  // save path for future use.
-  PythonPaths.push_back(out_dir);
-
   if (Py_IsInitialized() == 0)
   {
+    // save path for future use.
+    PythonPaths.push_back(out_dir);
     return;
   }
 
@@ -371,25 +396,117 @@ void vtkPythonInterpreter::PrependPythonPath(const char* dir)
   vtkPrependPythonPath(out_dir.c_str());
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+void vtkPythonInterpreter::PrependPythonPath(
+  const char* anchor, const char* landmark, bool add_landmark)
+{
+  const std::vector<std::string> prefixes = {
+    VTK_PYTHON_SITE_PACKAGES_SUFFIX
+#if defined(__APPLE__)
+    // if in an App bundle, the `sitepackages` dir is <app_root>/Contents/Python
+    ,
+    "Contents/Python"
+#endif
+    ,
+    "."
+  };
+
+  vtkNew<vtkResourceFileLocator> locator;
+  locator->SetLogVerbosity(vtkPythonInterpreter::GetLogVerbosity() + 1);
+  std::string path = locator->Locate(anchor, prefixes, landmark);
+  if (!path.empty())
+  {
+    if (add_landmark)
+    {
+      path = path + "/" + landmark;
+    }
+    vtkPythonInterpreter::PrependPythonPath(path.c_str());
+  }
+}
+
+//------------------------------------------------------------------------------
 int vtkPythonInterpreter::PyMain(int argc, char** argv)
 {
   vtksys::SystemTools::EnableMSVCDebugHook();
-  vtkPythonInterpreter::PythonVerboseFlag = 0;
+
+  int count_v = 0;
   for (int cc = 0; cc < argc; ++cc)
   {
     if (argv[cc] && strcmp(argv[cc], "-v") == 0)
     {
-      vtkPythonInterpreter::PythonVerboseFlag += 1;
+      ++count_v;
     }
     if (argv[cc] && strcmp(argv[cc], "-vv") == 0)
     {
-      vtkPythonInterpreter::PythonVerboseFlag = 2;
+      count_v += 2;
     }
   }
+
+  if (count_v > 0)
+  {
+    // change the vtkPythonInterpreter's log verbosity. We only touch it
+    // if the command line arguments explicitly requested a certain verbosity.
+    vtkPythonInterpreter::SetLogVerbosity(vtkLogger::VERBOSITY_INFO);
+    vtkLogger::SetStderrVerbosity(vtkLogger::ConvertToVerbosity(count_v - 1));
+  }
+
+  vtkLogger::Init(argc, argv, nullptr); // since `-v` and `-vv` are parsed as Python verbosity flags
+                                        // and not log verbosity flags.
+
   vtkPythonInterpreter::Initialize(1);
 
 #if PY_VERSION_HEX >= 0x03000000
+
+#if PY_VERSION_HEX >= 0x03070000 && PY_VERSION_HEX < 0x03080000
+  // Python 3.7.0 has a bug where Py_InitializeEx (called above) followed by
+  // Py_Main (at the end of this block) causes a crash. Gracefully exit with
+  // failure if we're using 3.7.0 and suggest getting the newest 3.7.x release.
+  // See <https://gitlab.kitware.com/vtk/vtk/-/issues/17434> for details.
+  {
+    bool is_ok = true;
+    vtkPythonScopeGilEnsurer gilEnsurer(false, true);
+    PyObject* sys = PyImport_ImportModule("sys");
+    if (sys)
+    {
+      // XXX: Check sys.implementation.name == 'cpython'?
+
+      PyObject* version_info = PyObject_GetAttrString(sys, "version_info");
+      if (version_info)
+      {
+        PyObject* major = PyObject_GetAttrString(version_info, "major");
+        PyObject* minor = PyObject_GetAttrString(version_info, "minor");
+        PyObject* micro = PyObject_GetAttrString(version_info, "micro");
+
+        auto py_number_cmp = [](PyObject* obj, long expected) {
+          return obj && PyLong_Check(obj) && PyLong_AsLong(obj) == expected;
+        };
+
+        // Only 3.7.0 has this issue. Any failures to get the version
+        // information is OK; we'll just crash later anyways if the version is
+        // bad.
+        is_ok = !py_number_cmp(major, 3) || !py_number_cmp(minor, 7) || !py_number_cmp(micro, 0);
+
+        Py_XDECREF(micro);
+        Py_XDECREF(minor);
+        Py_XDECREF(major);
+      }
+
+      Py_XDECREF(version_info);
+    }
+
+    Py_XDECREF(sys);
+
+    if (!is_ok)
+    {
+      std::cerr << "Python 3.7.0 has a known issue that causes a crash with a "
+                   "specific API usage pattern. This has been fixed in 3.7.1 and all "
+                   "newer 3.7.x Python releases. Exiting now to avoid the crash."
+                << std::endl;
+      return 1;
+    }
+  }
+#endif
+
   // Need two copies of args, because programs might modify the first
   wchar_t** argvWide = new wchar_t*[argc];
   wchar_t** argvWide2 = new wchar_t*[argc];
@@ -410,10 +527,11 @@ int vtkPythonInterpreter::PyMain(int argc, char** argv)
 
     argvWide[argcWide] = vtk_Py_DecodeLocale(argv[i], nullptr);
     argvWide2[argcWide] = argvWide[argcWide];
-    if (argvWide[argcWide] == 0)
+    if (argvWide[argcWide] == nullptr)
     {
-      fprintf(stderr, "Fatal vtkpython error: "
-                      "unable to decode the command line argument #%i\n",
+      fprintf(stderr,
+        "Fatal vtkpython error: "
+        "unable to decode the command line argument #%i\n",
         i + 1);
       for (int k = 0; k < argcWide; k++)
       {
@@ -438,7 +556,7 @@ int vtkPythonInterpreter::PyMain(int argc, char** argv)
 
   // process command line arguments to remove unhandled args.
   std::vector<char*> newargv;
-  for (int i=0; i < argc; ++i)
+  for (int i = 0; i < argc; ++i)
   {
     if (argv[i] && strcmp(argv[i], "--enable-bt") == 0)
     {
@@ -459,7 +577,7 @@ int vtkPythonInterpreter::PyMain(int argc, char** argv)
 #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkPythonInterpreter::RunSimpleString(const char* script)
 {
   vtkPythonInterpreter::Initialize(1);
@@ -480,14 +598,14 @@ int vtkPythonInterpreter::RunSimpleString(const char* script)
   vtkPythonInterpreter::ConsoleBuffering = false;
   if (!vtkPythonInterpreter::StdErrBuffer.empty())
   {
-    vtkOutputWindowDisplayErrorText(vtkPythonInterpreter::StdErrBuffer.c_str());
+    vtkOutputWindow::GetInstance()->DisplayErrorText(vtkPythonInterpreter::StdErrBuffer.c_str());
     NotifyInterpreters(
       vtkCommand::ErrorEvent, const_cast<char*>(vtkPythonInterpreter::StdErrBuffer.c_str()));
     vtkPythonInterpreter::StdErrBuffer.clear();
   }
   if (!vtkPythonInterpreter::StdOutBuffer.empty())
   {
-    vtkOutputWindowDisplayText(vtkPythonInterpreter::StdOutBuffer.c_str());
+    vtkOutputWindow::GetInstance()->DisplayText(vtkPythonInterpreter::StdOutBuffer.c_str());
     NotifyInterpreters(
       vtkCommand::SetOutputEvent, const_cast<char*>(vtkPythonInterpreter::StdOutBuffer.c_str()));
     vtkPythonInterpreter::StdOutBuffer.clear();
@@ -496,19 +614,19 @@ int vtkPythonInterpreter::RunSimpleString(const char* script)
   return pyReturn;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::SetCaptureStdin(bool val)
 {
   vtkPythonInterpreter::CaptureStdin = val;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 bool vtkPythonInterpreter::GetCaptureStdin()
 {
   return vtkPythonInterpreter::CaptureStdin;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::WriteStdOut(const char* txt)
 {
   if (vtkPythonInterpreter::ConsoleBuffering)
@@ -517,17 +635,15 @@ void vtkPythonInterpreter::WriteStdOut(const char* txt)
   }
   else
   {
-    vtkOutputWindowDisplayText(txt);
+    vtkOutputWindow::GetInstance()->DisplayText(txt);
     NotifyInterpreters(vtkCommand::SetOutputEvent, const_cast<char*>(txt));
   }
 }
 
-//----------------------------------------------------------------------------
-void vtkPythonInterpreter::FlushStdOut()
-{
-}
+//------------------------------------------------------------------------------
+void vtkPythonInterpreter::FlushStdOut() {}
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::WriteStdErr(const char* txt)
 {
   if (vtkPythonInterpreter::ConsoleBuffering)
@@ -536,17 +652,15 @@ void vtkPythonInterpreter::WriteStdErr(const char* txt)
   }
   else
   {
-    vtkOutputWindowDisplayErrorText(txt);
+    vtkOutputWindow::GetInstance()->DisplayErrorText(txt);
     NotifyInterpreters(vtkCommand::ErrorEvent, const_cast<char*>(txt));
   }
 }
 
-//----------------------------------------------------------------------------
-void vtkPythonInterpreter::FlushStdErr()
-{
-}
+//------------------------------------------------------------------------------
+void vtkPythonInterpreter::FlushStdErr() {}
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkStdString vtkPythonInterpreter::ReadStdin()
 {
   if (!vtkPythonInterpreter::CaptureStdin)
@@ -560,7 +674,7 @@ vtkStdString vtkPythonInterpreter::ReadStdin()
   return string;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::SetupPythonPrefix()
 {
   using systools = vtksys::SystemTools;
@@ -573,14 +687,6 @@ void vtkPythonInterpreter::SetupPythonPrefix()
     return;
   }
 
-  if (Py_GetPythonHome() != nullptr)
-  {
-    // if PYTHONHOME is set, we do nothing. Don't override an already
-    // overridden environment.
-    VTKPY_DEBUG_MESSAGE("`PYTHONHOME` already set. Leaving unchanged.");
-    return;
-  }
-
   std::string pythonlib = vtkGetLibraryPathForSymbol(Py_SetProgramName);
   if (pythonlib.empty())
   {
@@ -588,24 +694,6 @@ void vtkPythonInterpreter::SetupPythonPrefix()
                         "Set `PYTHONHOME` if Python standard library fails to load.");
     return;
   }
-
-#if PY_VERSION_HEX >= 0x03000000
-  auto oldprogramname = vtk_Py_EncodeLocale(Py_GetProgramName(), nullptr);
-#else
-  auto oldprogramname = Py_GetProgramName();
-#endif
-  if (oldprogramname != nullptr && strcmp(oldprogramname, "python") != 0 && strcmp(oldprogramname, "python3") != 0)
-  {
-    VTKPY_DEBUG_MESSAGE("program-name has been changed. Leaving unchanged.");
-#if PY_VERSION_HEX >= 0x03000000
-    PyMem_Free(oldprogramname);
-#endif
-    return;
-  }
-
-#if PY_VERSION_HEX >= 0x03000000
-  PyMem_Free(oldprogramname);
-#endif
 
   const std::string newprogramname =
     systools::GetFilenamePath(pythonlib) + VTK_PATH_SEPARATOR "vtkpython";
@@ -620,7 +708,7 @@ void vtkPythonInterpreter::SetupPythonPrefix()
 #endif
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPythonInterpreter::SetupVTKPythonPaths()
 {
   // Check Py_FrozenFlag global variable defined by Python to see if we're using
@@ -659,6 +747,25 @@ void vtkPythonInterpreter::SetupVTKPythonPaths()
   // the issue.
   if (!vtkdir.empty())
   {
+#if PY_VERSION_HEX >= 0x03080000
+    vtkPythonScopeGilEnsurer gilEnsurer(false, true);
+    CloseDLLDirectoryCookie();
+    PyObject* os = PyImport_ImportModule("os");
+    if (os)
+    {
+      PyObject* add_dll_directory = PyObject_GetAttrString(os, "add_dll_directory");
+      if (add_dll_directory && PyCallable_Check(add_dll_directory))
+      {
+        PyObject* newpath = PyUnicode_FromString(vtkdir.c_str());
+        DLLDirectoryCookie = PyObject_CallFunctionObjArgs(add_dll_directory, newpath, nullptr);
+        Py_XDECREF(newpath);
+      }
+
+      Py_XDECREF(add_dll_directory);
+    }
+
+    Py_XDECREF(os);
+#else
     std::string env_path;
     if (systools::GetEnv("PATH", env_path))
     {
@@ -668,24 +775,37 @@ void vtkPythonInterpreter::SetupVTKPythonPaths()
     {
       env_path = vtkdir;
     }
-    systools::PutEnv(std::string("PATH=")+env_path);
+    systools::PutEnv(std::string("PATH=") + env_path);
+#endif
   }
 #endif
 
-  const std::vector<std::string> prefixes = {
-    VTK_PYTHON_SITE_PACKAGES_SUFFIX
-#if defined(__APPLE__)
-    // if in an App bundle, the `sitepackages` dir is <app_root>/Contents/Python
-    ,
-    "Contents/Python"
+#if defined(VTK_BUILD_SHARED_LIBS)
+  vtkPythonInterpreter::PrependPythonPath(vtkdir.c_str(), "vtkmodules/__init__.py");
+#else
+  // since there may be other packages not zipped (e.g. mpi4py), we added path to _vtk.zip
+  // to the search path as well.
+  vtkPythonInterpreter::PrependPythonPath(vtkdir.c_str(), "_vtk.zip", /*add_landmark*/ false);
+  vtkPythonInterpreter::PrependPythonPath(vtkdir.c_str(), "_vtk.zip", /*add_landmark*/ true);
 #endif
-  };
+}
 
-  vtkNew<vtkResourceFileLocator> locator;
-  locator->SetPrintDebugInformation(vtkPythonInterpreter::GetPythonVerboseFlag() > 1);
-  std::string path = locator->Locate(vtkdir, prefixes, "vtkmodules/__init__.py");
-  if (!path.empty())
-  {
-    vtkSafePrependPythonPath(path);
-  }
+//------------------------------------------------------------------------------
+void vtkPythonInterpreter::SetLogVerbosity(int val)
+{
+  vtkPythonInterpreter::LogVerbosity = vtkLogger::ConvertToVerbosity(val);
+}
+
+//------------------------------------------------------------------------------
+int vtkPythonInterpreter::GetLogVerbosity()
+{
+  return vtkPythonInterpreter::LogVerbosity;
+}
+
+//------------------------------------------------------------------------------
+int vtkPythonInterpreter::GetPythonVerboseFlag()
+{
+  VTK_LEGACY_REPLACED_BODY(
+    vtkPythonInterpreter::GetPythonVerboseFlag, "VTK 9.0", vtkPythonInterpreter::GetLogVerbosity);
+  return vtkPythonInterpreter::LogVerbosity == vtkLogger::VERBOSITY_INFO ? 1 : 0;
 }

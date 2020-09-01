@@ -31,25 +31,25 @@
 
 vtkStandardNewMacro(vtkXMLPDataSetWriter);
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLPDataSetWriter::vtkXMLPDataSetWriter() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLPDataSetWriter::~vtkXMLPDataSetWriter() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkXMLPDataSetWriter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkDataSet* vtkXMLPDataSetWriter::GetInput()
 {
   return static_cast<vtkDataSet*>(this->Superclass::GetInput());
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int vtkXMLPDataSetWriter::WriteInternal()
 {
   vtkAlgorithmOutput* input = this->GetInputConnection(0, 0);
@@ -65,38 +65,42 @@ int vtkXMLPDataSetWriter::WriteInternal()
       vtkXMLPImageDataWriter* w = vtkXMLPImageDataWriter::New();
       w->SetInputConnection(input);
       writer = w;
-    } break;
+    }
+    break;
     case VTK_STRUCTURED_GRID:
     {
       vtkXMLPStructuredGridWriter* w = vtkXMLPStructuredGridWriter::New();
       w->SetInputConnection(input);
       writer = w;
-    } break;
+    }
+    break;
     case VTK_RECTILINEAR_GRID:
     {
       vtkXMLPRectilinearGridWriter* w = vtkXMLPRectilinearGridWriter::New();
       w->SetInputConnection(input);
       writer = w;
-    } break;
+    }
+    break;
     case VTK_UNSTRUCTURED_GRID:
     {
       vtkXMLPUnstructuredGridWriter* w = vtkXMLPUnstructuredGridWriter::New();
       w->SetInputConnection(input);
       writer = w;
-    } break;
+    }
+    break;
     case VTK_POLY_DATA:
     {
       vtkXMLPPolyDataWriter* w = vtkXMLPPolyDataWriter::New();
       w->SetInputConnection(input);
       writer = w;
-    } break;
+    }
+    break;
   }
 
   // Make sure we got a valid writer for the data set.
-  if(!writer)
+  if (!writer)
   {
-    vtkErrorMacro("Cannot write dataset type: "
-                  << this->GetInput()->GetDataObjectType());
+    vtkErrorMacro("Cannot write dataset type: " << this->GetInput()->GetDataObjectType());
     return 0;
   }
 
@@ -126,26 +130,25 @@ int vtkXMLPDataSetWriter::WriteInternal()
   return result;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char* vtkXMLPDataSetWriter::GetDataSetName()
 {
   return "DataSet";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 const char* vtkXMLPDataSetWriter::GetDefaultFileExtension()
 {
   return "vtk";
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkXMLWriter* vtkXMLPDataSetWriter::CreatePieceWriter(int)
 {
   return nullptr;
 }
-//----------------------------------------------------------------------------
-int vtkXMLPDataSetWriter::FillInputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
+//------------------------------------------------------------------------------
+int vtkXMLPDataSetWriter::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
 {
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkDataSet");
   return 1;

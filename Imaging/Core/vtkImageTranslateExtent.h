@@ -18,19 +18,19 @@
  *
  * vtkImageTranslateExtent shift the whole extent, but does not
  * change the data.
-*/
+ */
 
 #ifndef vtkImageTranslateExtent_h
 #define vtkImageTranslateExtent_h
 
-#include "vtkImagingCoreModule.h" // For export macro
 #include "vtkImageAlgorithm.h"
+#include "vtkImagingCoreModule.h" // For export macro
 
 class VTKIMAGINGCORE_EXPORT vtkImageTranslateExtent : public vtkImageAlgorithm
 {
 public:
-  static vtkImageTranslateExtent *New();
-  vtkTypeMacro(vtkImageTranslateExtent,vtkImageAlgorithm);
+  static vtkImageTranslateExtent* New();
+  vtkTypeMacro(vtkImageTranslateExtent, vtkImageAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -43,14 +43,14 @@ public:
 
 protected:
   vtkImageTranslateExtent();
-  ~vtkImageTranslateExtent() override {}
+  ~vtkImageTranslateExtent() override = default;
 
   int Translation[3];
 
-  int RequestUpdateExtent (vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
-  int RequestInformation (vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  int RequestInformation(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
 
 private:
   vtkImageTranslateExtent(const vtkImageTranslateExtent&) = delete;

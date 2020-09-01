@@ -13,11 +13,14 @@
 
 =========================================================================*/
 #include "vtkCellData.h"
+
 #include "vtkObjectFactory.h"
 
 vtkStandardNewMacro(vtkCellData);
+vtkStandardExtendedNewMacro(vtkCellData);
 
+//------------------------------------------------------------------------------
 void vtkCellData::PrintSelf(ostream& os, vtkIndent indent)
 {
-  this->Superclass::PrintSelf(os,indent);
+  this->Superclass::PrintSelf(os, indent);
 }

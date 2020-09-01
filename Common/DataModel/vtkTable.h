@@ -46,7 +46,7 @@
  * @par Thanks:
  * Thanks to Patricia Crossno, Ken Moreland, Andrew Wilson and Brian Wylie from
  * Sandia National Laboratories for their help in developing this class API.
-*/
+ */
 
 #ifndef vtkTable_h
 #define vtkTable_h
@@ -63,8 +63,9 @@ class VTKCOMMONDATAMODEL_EXPORT vtkTable : public vtkDataObject
 {
 public:
   static vtkTable* New();
+  static vtkTable* ExtendedNew();
   vtkTypeMacro(vtkTable, vtkDataObject);
-  void PrintSelf(ostream &os, vtkIndent indent) override;
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Dump table contents.  If rowLimit is -1 then the full table
@@ -72,12 +73,12 @@ public:
    * header row will be displayed.  Otherwise, if rowLimit > 0
    * then Dump will print the first rowLimit rows of data.
    */
-  void Dump( unsigned int colWidth = 16, int rowLimit = -1 );
+  void Dump(unsigned int colWidth = 16, int rowLimit = -1);
 
   /**
    * Return what type of dataset this is.
    */
-  int GetDataObjectType() override {return VTK_TABLE;}
+  int GetDataObjectType() override { return VTK_TABLE; }
 
   /**
    * Return the actual size of the data in kibibytes (1024 bytes). This number
@@ -109,7 +110,7 @@ public:
    * Set the number of rows in the table. Note that memory allocation might be performed
    * as a result of this, but no memory will be released.
    */
-  void SetNumberOfRows(const vtkIdType );
+  void SetNumberOfRows(const vtkIdType);
 
   /**
    * Get a row of the table as a vtkVariantArray which has one entry for each column.
@@ -120,23 +121,23 @@ public:
   /**
    * Get a row of the table as a vtkVariantArray which has one entry for each column.
    */
-  void GetRow(vtkIdType row, vtkVariantArray *values);
+  void GetRow(vtkIdType row, vtkVariantArray* values);
 
   /**
    * Set a row of the table with a vtkVariantArray which has one entry for each column.
    */
-  void SetRow(vtkIdType row, vtkVariantArray *values);
+  void SetRow(vtkIdType row, vtkVariantArray* values);
 
   /**
    * Insert a blank row at the end of the table.
    */
-  vtkIdType InsertNextBlankRow(double default_num_val=0.0);
+  vtkIdType InsertNextBlankRow(double default_num_val = 0.0);
 
   /**
    * Insert a row specified by a vtkVariantArray.  The number of entries in the array
    * should match the number of columns in the table.
    */
-  vtkIdType InsertNextRow(vtkVariantArray* arr);
+  vtkIdType InsertNextRow(vtkVariantArray* values);
 
   /**
    * Delete a row from the table.  Rows below the deleted row are shifted up.
@@ -217,7 +218,7 @@ public:
    * Retrieve the table from vtkInformation.
    */
   static vtkTable* GetData(vtkInformation* info);
-  static vtkTable* GetData(vtkInformationVector* v, int i=0);
+  static vtkTable* GetData(vtkInformationVector* v, int i = 0);
   //@}
 
   //@{
@@ -261,4 +262,3 @@ private:
 };
 
 #endif
-

@@ -19,7 +19,7 @@
  *
  *
  * Weights the edges of a graph based on the Euclidean distance between the points.
-*/
+ */
 
 #ifndef vtkGraphWeightEuclideanDistanceFilter_h
 #define vtkGraphWeightEuclideanDistanceFilter_h
@@ -31,14 +31,14 @@ class vtkGraph;
 
 class VTKFILTERSGENERAL_EXPORT vtkGraphWeightEuclideanDistanceFilter : public vtkGraphWeightFilter
 {
- public:
-  static vtkGraphWeightEuclideanDistanceFilter *New();
+public:
+  static vtkGraphWeightEuclideanDistanceFilter* New();
   vtkTypeMacro(vtkGraphWeightEuclideanDistanceFilter, vtkGraphWeightFilter);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
 protected:
-  vtkGraphWeightEuclideanDistanceFilter(){}
-  ~vtkGraphWeightEuclideanDistanceFilter() override {}
+  vtkGraphWeightEuclideanDistanceFilter() = default;
+  ~vtkGraphWeightEuclideanDistanceFilter() override = default;
 
   /**
    * Compute the Euclidean distance between the Points defined for the

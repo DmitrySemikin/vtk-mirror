@@ -15,7 +15,6 @@
 
 #ifndef vtkSegYTraceReader_h
 #define vtkSegYTraceReader_h
-#ifndef __VTK_WRAP__
 
 #include <fstream>
 #include <vector>
@@ -52,20 +51,13 @@ public:
   vtkSegYTraceReader();
 
   void SetXYCoordBytePositions(int x, int y);
-  void PrintTraceHeader(std::ifstream& in, int startPos);
-  void ReadTrace(std::streamoff& startPos,
-                 std::ifstream& in,
-                 int formatCode,
-                 vtkSegYTrace* trace);
-  void ReadInlineCrossline(std::streamoff& startPos,
-                           std::ifstream& in,
-                           int formatCode,
-                           int* inlineNumber, int* crosslineNumber,
-                           int* xCoord, int* yCoord, short* coordMultiplier);
+  void PrintTraceHeader(std::istream& in, int startPos);
+  void ReadTrace(std::streamoff& startPos, std::istream& in, int formatCode, vtkSegYTrace* trace);
+  void ReadInlineCrossline(std::streamoff& startPos, std::istream& in, int formatCode,
+    int* inlineNumber, int* crosslineNumber, int* xCoord, int* yCoord, short* coordMultiplier);
 
   int GetTraceSize(int numSamples, int formatCode);
 };
 
-#endif
 #endif // vtkSegYTraceReader_h
 // VTK-HeaderTest-Exclude: vtkSegYTraceReader.h

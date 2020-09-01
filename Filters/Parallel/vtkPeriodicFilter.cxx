@@ -17,12 +17,12 @@
 
 #include "vtkDataObjectTreeIterator.h"
 #include "vtkDataSet.h"
-#include "vtkInformationVector.h"
 #include "vtkInformation.h"
+#include "vtkInformationVector.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkMultiProcessController.h"
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPeriodicFilter::vtkPeriodicFilter()
 {
   this->IterationMode = VTK_ITERATION_MODE_MAX;
@@ -30,10 +30,10 @@ vtkPeriodicFilter::vtkPeriodicFilter()
   this->ReducePeriodNumbers = false;
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 vtkPeriodicFilter::~vtkPeriodicFilter() = default;
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPeriodicFilter::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
@@ -48,48 +48,46 @@ void vtkPeriodicFilter::PrintSelf(ostream& os, vtkIndent indent)
   }
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPeriodicFilter::AddIndex(unsigned int index)
 {
   this->Indices.insert(index);
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPeriodicFilter::RemoveIndex(unsigned int index)
 {
   this->Indices.erase(index);
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void vtkPeriodicFilter::RemoveAllIndices()
 {
   this->Indices.clear();
   this->Modified();
 }
 
-//----------------------------------------------------------------------------
-int vtkPeriodicFilter::FillInputPortInformation(
-  int vtkNotUsed(port), vtkInformation* info)
+//------------------------------------------------------------------------------
+int vtkPeriodicFilter::FillInputPortInformation(int vtkNotUsed(port), vtkInformation* info)
 {
   // now add our info
   info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), "vtkDataObject");
   return 1;
 }
 
-//----------------------------------------------------------------------------
-int vtkPeriodicFilter::RequestData(vtkInformation *vtkNotUsed(request),
-                                   vtkInformationVector **inputVector,
-                                   vtkInformationVector *outputVector)
+//------------------------------------------------------------------------------
+int vtkPeriodicFilter::RequestData(vtkInformation* vtkNotUsed(request),
+  vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   // Recover casted dataset
   vtkDataObject* inputObject = vtkDataObject::GetData(inputVector[0], 0);
-  vtkDataObjectTree *input = vtkDataObjectTree::SafeDownCast(inputObject);
+  vtkDataObjectTree* input = vtkDataObjectTree::SafeDownCast(inputObject);
   vtkDataSet* dsInput = vtkDataSet::SafeDownCast(inputObject);
   vtkMultiBlockDataSet* mb = nullptr;
 
-  vtkMultiBlockDataSet *output = vtkMultiBlockDataSet::GetData(outputVector, 0);
+  vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::GetData(outputVector, 0);
 
   if (dsInput)
   {
@@ -138,11 +136,11 @@ int vtkPeriodicFilter::RequestData(vtkInformation *vtkNotUsed(request),
     iter->GoToNextItem();
   }
 
-  // Reduce period number in case of parrallelism, and update empty multipieces
+  // Reduce period number in case of parallelism, and update empty multipieces
   if (this->ReducePeriodNumbers)
   {
     int* reducedPeriodNumbers = new int[this->PeriodNumbers.size()];
-    vtkMultiProcessController *controller = vtkMultiProcessController::GetGlobalController();
+    vtkMultiProcessController* controller = vtkMultiProcessController::GetGlobalController();
     if (controller)
     {
       controller->AllReduce(&this->PeriodNumbers.front(), reducedPeriodNumbers,
@@ -163,7 +161,7 @@ int vtkPeriodicFilter::RequestData(vtkInformation *vtkNotUsed(request),
         i++;
       }
     }
-    delete [] reducedPeriodNumbers;
+    delete[] reducedPeriodNumbers;
   }
   iter->Delete();
 

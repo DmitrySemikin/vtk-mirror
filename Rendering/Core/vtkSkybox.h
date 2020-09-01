@@ -22,43 +22,62 @@
 #ifndef vtkSkybox_h
 #define vtkSkybox_h
 
-#include "vtkRenderingCoreModule.h" // For export macro
 #include "vtkActor.h"
+#include "vtkRenderingCoreModule.h" // For export macro
 
-class VTKRENDERINGCORE_EXPORT vtkSkybox: public vtkActor
+class VTKRENDERINGCORE_EXPORT vtkSkybox : public vtkActor
 {
 public:
   static vtkSkybox* New();
-  vtkTypeMacro(vtkSkybox, vtkActor)
-  void PrintSelf(ostream &os, vtkIndent indent) override;
+  vtkTypeMacro(vtkSkybox, vtkActor);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   /**
    * Get the bounds for this Actor as (Xmin,Xmax,Ymin,Ymax,Zmin,Zmax). (The
    * method GetBounds(double bounds[6]) is available from the superclass.)
    */
   using Superclass::GetBounds;
-  double *GetBounds() override;
+  double* GetBounds() override;
 
+  //@{
+  /**
+   * Set/Get the projection to be used
+   */
   enum Projection
   {
     Cube,
     Sphere,
     Floor,
+    StereoSphere
   };
   vtkGetMacro(Projection, int);
   vtkSetMacro(Projection, int);
   void SetProjectionToCube() { this->SetProjection(vtkSkybox::Cube); }
-  void SetProjectionToSphere() {this->SetProjection(vtkSkybox::Sphere); }
-  void SetProjectionToFloor() {this->SetProjection(vtkSkybox::Floor); }
+  void SetProjectionToSphere() { this->SetProjection(vtkSkybox::Sphere); }
+  void SetProjectionToStereoSphere() { this->SetProjection(vtkSkybox::StereoSphere); }
+  void SetProjectionToFloor() { this->SetProjection(vtkSkybox::Floor); }
+  //@}
 
+  //@{
   /**
    * Set/Get the plane equation for the floor.
    */
   vtkSetVector4Macro(FloorPlane, float);
   vtkGetVector4Macro(FloorPlane, float);
-
   vtkSetVector3Macro(FloorRight, float);
   vtkGetVector3Macro(FloorRight, float);
+  //@}
+
+  //@{
+  /**
+   * Define if the colors should be gamma corrected.
+   * This is generally required if the input texture is in linear color space.
+   * Default is off.
+   */
+  vtkGetMacro(GammaCorrect, bool);
+  vtkSetMacro(GammaCorrect, bool);
+  vtkBooleanMacro(GammaCorrect, bool);
+  //@}
 
 protected:
   vtkSkybox();
@@ -67,6 +86,8 @@ protected:
   int Projection;
   float FloorPlane[4];
   float FloorRight[3];
+
+  bool GammaCorrect = false;
 
 private:
   vtkSkybox(const vtkSkybox&) = delete;
