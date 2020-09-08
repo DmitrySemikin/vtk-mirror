@@ -54,6 +54,7 @@ class Constants:
     def __init__(self):
         self.header_pattern = re.compile(r'^#include *[<\"](\S+)[>\"]')
         self.vtk_include_pattern = re.compile(r'^(vtk\S+)')
+        self.vtk_qt_include_pattern = re.compile(r'^(QVTK\S+)')
         self.valid_ext = ['.h', '.hxx', '.cxx', '.cpp', '.txx']
 
 
@@ -80,6 +81,10 @@ def get_users_headers(path):
                                 m = c.vtk_include_pattern.match(header_parts[1])
                                 if m:
                                     headers[m.group(1)].add(f)
+                                    continue
+                                m = c.vtk_qt_include_pattern.match(header_parts[1])
+                                if m:
+                                    headers[m.group(1)].add(f)
     return headers
 
 
@@ -104,6 +109,10 @@ def get_users_file_headers(path):
                         # We have a header name, split it from its path (if the path exists).
                         header_parts = os.path.split(m.group(1))
                         m = c.vtk_include_pattern.match(header_parts[1])
+                        if m:
+                            headers[m.group(1)].add(os.path.split(path)[1])
+                            continue
+                        m = c.vtk_qt_include_pattern.match(header_parts[1])
                         if m:
                             headers[m.group(1)].add(os.path.split(path)[1])
         else:
@@ -156,9 +165,16 @@ def disp_components(modules, module_implements):
         keys = sorted(module_implements)
         max_width = len(max(keys, key=len).split('::')[1])
         res += '    # These modules are suggested since they implement an existing module.\n'
-        res += '    # Uncomment those you need.\n'
+        res += '    # You may need to uncomment one or more of these.\n'
+        res += '    # If vtkRenderWindow is used and you want to use OpenGL,\n'
+        res += '    #   you also need the RenderingOpenGL2 module.\n'
+        res += '    # If vtkRenderWindowInteractor is used,\n'
+        res += '    #    uncomment RenderingUI and possibly InteractionStyle.\n'
+        res += '    # If text rendering is used, uncomment RenderingFreeType\n'
+        res += '    #\n'
         for key in keys:
-            res += '    # {:<{width}} # implements {:s}\n'.format(key.split('::')[1], ', '.join(sorted(module_implements[key])),
+            res += '    # {:<{width}} # implements {:s}\n'.format(key.split('::')[1],
+                                                                  ', '.join(sorted(module_implements[key])),
                                                                   width=max_width)
     res += ')'
     return res
