@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 import collections
 import json
 import os
@@ -150,12 +148,13 @@ def build_headers_modules(json_data):
     return res
 
 
-def disp_components(modules, module_implements):
+def disp_components(modules, module_implements, module_implements_desc):
     """
     For the found modules display them in a form that the user can
      copy/paste into their CMakeLists.txt file.
     :param modules: The modules.
     :param module_implements: Modules implementing other modules.
+    :param module_implements_desc: The description for modules implementing other modules.
     :return:
     """
     res = 'find_package(VTK\n COMPONENTS\n'
@@ -166,16 +165,17 @@ def disp_components(modules, module_implements):
         max_width = len(max(keys, key=len).split('::')[1])
         res += '    # These modules are suggested since they implement an existing module.\n'
         res += '    # You may need to uncomment one or more of these.\n'
-        res += '    # If vtkRenderWindow is used and you want to use OpenGL,\n'
-        res += '    #   you also need the RenderingOpenGL2 module.\n'
-        res += '    # If vtkRenderWindowInteractor is used,\n'
-        res += '    #    uncomment RenderingUI and possibly InteractionStyle.\n'
-        res += '    # If text rendering is used, uncomment RenderingFreeType\n'
         res += '    #\n'
         for key in keys:
-            res += '    # {:<{width}} # implements {:s}\n'.format(key.split('::')[1],
-                                                                  ', '.join(sorted(module_implements[key])),
-                                                                  width=max_width)
+            if module_implements_desc[key]:
+                res += '    # {:<{width}} # {:s}, implements {:s}\n'.format(key.split('::')[1],
+                                                                            module_implements_desc[key],
+                                                                            ', '.join(sorted(module_implements[key])),
+                                                                            width=max_width)
+            else:
+                res += '    # {:<{width}} # implements {:s}\n'.format(key.split('::')[1],
+                                                                      ', '.join(sorted(module_implements[key])),
+                                                                      width=max_width)
     res += ')'
     return res
 
@@ -200,33 +200,43 @@ def main():
             if not bool(headers):
                 print('File or path does not exist:', fn)
 
-        for jfn in json_paths:
-            # Assume everything we need is in modules.json.
-            with open(jfn) as data_file:
-                json_data = json.load(data_file)
-            headers_modules = build_headers_modules(json_data)
+    for jfn in json_paths:
+        # Assume everything we need is in modules.json.
+        with open(jfn) as data_file:
+            json_data = json.load(data_file)
+        headers_modules = build_headers_modules(json_data)
 
-            for incl in headers:
-                if incl in headers_modules:
-                    m = headers_modules[incl]
-                    for v in m:
-                        modules.add(v)
+    if headers:
+        for incl in headers:
+            if incl in headers_modules:
+                m = headers_modules[incl]
+                for v in m:
+                    modules.add(v)
+            else:
+                inc_no_mod.add(incl)
+                inc_no_mod_headers[incl] = headers[incl]
+
+        for m in modules:
+            if not json_data['modules'][m]['implementable']:
+                continue
+            for i in json_data['modules']:
+                if i in modules:
+                    continue
+                if m in json_data['modules'][i]['implements']:
+                    # Suggest module i since it implements m
+                    mod_implements[i].add(m)
+    mod_implements_desc = dict()
+    if mod_implements:
+        for i in mod_implements:
+            desc = json_data['modules'][i]['description'].strip()
+            if desc:
+                if len(desc) > 1:
+                    desc = desc[0].upper() + desc[1:]
                 else:
-                    inc_no_mod.add(incl)
-                    inc_no_mod_headers[incl] = headers[incl]
+                    desc = desc[0].upper()
+            mod_implements_desc[i] = desc
 
-            if headers:
-                for m in modules:
-                    if not json_data['modules'][m]['implementable']:
-                        continue
-                    for i in json_data['modules']:
-                        if i in modules:
-                            continue
-                        if m in json_data['modules'][i]['implements']:
-                            # Suggest module i since it implements m
-                            mod_implements[i].add(m)
-
-    print(disp_components(modules, mod_implements))
+    print(disp_components(modules, mod_implements, mod_implements_desc))
 
     if inc_no_mod:
         line = '*' * 64
