@@ -167,11 +167,12 @@ int TestPreserveTopology(int argc, char* argv[])
   vtkNew<vtkPlane> cutPlane;
   vtkNew<vtkClipPolyData> cutGrid;
   {
-    cutGrid->SetInputConnection(surface->GetOutputPort());
-
     cutPlane->SetOrigin(0.5 * cellSize, nJ * cellSize / 2.0, nK * cellSize / 2.0);
     cutPlane->SetNormal(1.0, 0.0, 0.5);
+
+    cutGrid->SetInputConnection(surface->GetOutputPort());
     cutGrid->SetClipFunction(cutPlane);
+    cutGrid->GenerateTrianglesOff();
   }
 
   vtkNew<vtkPlaneCutter> intersectGrid;
