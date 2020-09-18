@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    quadraticIntersection.cxx
+  Module:    TestCylindricalGridBuilder.cxx
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -12,38 +12,35 @@
   PURPOSE.  See the above copyright notice for more information.
 
   =========================================================================*/
-// .NAME
-// .SECTION Description
-// This program tests quadratic cell IntersectWithLine() methods.
 
 #include <sstream>
 
 #include "vtkDebugLeaks.h"
 
+#include "vtkCylindricalGridBuilder.h"
 #include "vtkRegressionTestImage.h"
-#include <vtkCylindricalGrid.h>
 
-#include <vtkActor.h>
-#include <vtkCamera.h>
-#include <vtkCellArray.h>
-#include <vtkDataSetSurfaceFilter.h>
-#include <vtkFeatureEdges.h>
-#include <vtkPoints.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkPolyLine.h>
-#include <vtkProperty.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderer.h>
-#include <vtkSmartPointer.h>
-#include <vtkTubeFilter.h>
-#include <vtkVersion.h>
+#include "vtkActor.h"
+#include "vtkCamera.h"
+#include "vtkCellArray.h"
+#include "vtkDataSetSurfaceFilter.h"
+#include "vtkFeatureEdges.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkPolyLine.h"
+#include "vtkProperty.h"
+#include "vtkRenderWindow.h"
+#include "vtkRenderWindowInteractor.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
+#include "vtkTubeFilter.h"
+#include "vtkVersion.h"
 
-int TestCylindricalGrid(int argc, char* argv[])
+int TestCylindricalGridBuilder(int argc, char* argv[])
 {
   std::ostringstream strm;
-  strm << "Test vtkCell::TestCylindricalGrid Start" << endl;
+  strm << "Test vtkCell::TestCylindricalGridBuilder Start" << endl;
 
   vtkNew<vtkActor> lineActor;
   {
@@ -89,7 +86,7 @@ int TestCylindricalGrid(int argc, char* argv[])
   vtkNew<vtkActor> outlineActor;
   {
     // Add the grid
-    vtkNew<vtkCylindricalGrid> grid;
+    vtkNew<vtkCylindricalGridBuilder> grid;
     grid->SetMaximumAngle(5);
     grid->InsertNextCylindricalCell(0.5, 1, 0, 360, -1, 1);
     grid->InsertNextCylindricalCell(0.5, 1, 0, 90, 1, 2);
@@ -98,7 +95,7 @@ int TestCylindricalGrid(int argc, char* argv[])
     grid->InsertNextCylindricalCell(0.5, 1, vtkMath::Pi(), vtkMath::Pi() * 2.0, 4, 5);
 
     vtkNew<vtkDataSetSurfaceFilter> surface;
-    surface->SetInputData(grid);
+    surface->SetInputData(grid->GetGrid());
 
     vtkNew<vtkPolyDataMapper> mapper;
     mapper->SetInputConnection(surface->GetOutputPort());
@@ -125,19 +122,18 @@ int TestCylindricalGrid(int argc, char* argv[])
     outlineActor->SetMapper(outlineMapper);
   }
 
-  strm << "Test vtkCell::TestCylindricalGrid End" << endl;
+  strm << "Test vtkCell::TestCylindricalGridBuilder End" << endl;
 
-  vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+  vtkNew<vtkRenderer> renderer;
   renderer->AddActor(lineActor);
   renderer->AddActor(gridActor);
   renderer->AddActor(outlineActor);
   renderer->SetBackground(0.5, 0.5, 0.5);
-  vtkSmartPointer<vtkRenderWindow> renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+  vtkNew<vtkRenderWindow> renderWindow;
   renderWindow->SetMultiSamples(0);
   renderWindow->SetSize(500, 500);
   renderWindow->AddRenderer(renderer);
-  vtkSmartPointer<vtkRenderWindowInteractor> renderWindowInteractor =
-    vtkSmartPointer<vtkRenderWindowInteractor>::New();
+  vtkNew<vtkRenderWindowInteractor> renderWindowInteractor;
   renderWindowInteractor->SetRenderWindow(renderWindow);
 
   auto camera = renderer->GetActiveCamera();

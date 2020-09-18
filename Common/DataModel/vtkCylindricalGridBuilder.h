@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkClipPolyData.h
+  Module:    vtkCylindricalGridBuilder.h
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -13,27 +13,44 @@
 
 =========================================================================*/
 /**
- * @class   vtkCylindricalGrid
- * @brief   a cylindrical dataset oriented along the z axis
+ * @class   vtkCylindricalGridBuilder
+ * @brief   a utility for building cylindrical cells around the z axis
  *
- * vtkCylindricalGrid is a data object representing a combination of cells which have a radial
- * curvature, up to and including a complete ring. Cells are represented by a cartesian radius,
- * polar theta rotation angle about the origin, and a cartesian z height.
+ * vtkCylindricalGridBuilder is a utility class for building cylindrical cells for an unstructured
+ * grid. These cells have a radial curvature, up to and including a complete ring about the z axis.
+ * Cells are represented by a cartesian radius, polar theta rotation angle about the origin, and a
+ * cartesian z height.
  *
  * @sa
  * vtkUnstructuredGrid
  */
 
-#ifndef vtkCylindricalGrid_h
-#define vtkCylindricalGrid_h
+#ifndef vtkCylindricalGridBuilder_h
+#define vtkCylindricalGridBuilder_h
 
-#include <vtkUnstructuredGrid.h>
+#include "vtkCommonDataModelModule.h" // For export macro
+#include "vtkObject.h"
+#include "vtkSmartPointer.h"
+#include "vtkUnstructuredGrid.h"
 
-class VTKCOMMONDATAMODEL_EXPORT vtkCylindricalGrid : public vtkUnstructuredGrid
+class vtkUnstructuredGrid;
+
+class VTKCOMMONDATAMODEL_EXPORT vtkCylindricalGridBuilder : public vtkObject
 {
 public:
-  static vtkCylindricalGrid* New();
-  vtkTypeMacro(vtkCylindricalGrid, vtkUnstructuredGrid);
+  static vtkCylindricalGridBuilder* New();
+  vtkTypeMacro(vtkCylindricalGridBuilder, vtkObject);
+
+  //@{
+  /**
+   * The grid to which the cells should be added.
+   *
+   * A default grid will be created which cells can be added to. If the grid the cells should be
+   * added to needs to be customized outside this class, a different grid can always be supplied.
+   */
+  void SetGrid(vtkSmartPointer<vtkUnstructuredGrid> grid) { this->Grid = grid; }
+  vtkSmartPointer<vtkUnstructuredGrid> GetGrid() { return this->Grid; }
+  //@}
 
   //@{
   /**
@@ -56,9 +73,9 @@ public:
    * Should any radial coordinates be represented in degrees (true) or radians (false)?
    * Default value is true(1).
    */
-  vtkSetMacro(UseDegrees, vtkTypeBool);
-  vtkGetMacro(UseDegrees, vtkTypeBool);
-  vtkBooleanMacro(UseDegrees, vtkTypeBool);
+  vtkSetMacro(UseDegrees, bool);
+  vtkGetMacro(UseDegrees, bool);
+  vtkBooleanMacro(UseDegrees, bool);
   //@}
 
   //@{
@@ -72,13 +89,15 @@ public:
   //@}
 
 protected:
-  vtkCylindricalGrid();
+  vtkCylindricalGridBuilder();
+
+  vtkSmartPointer<vtkUnstructuredGrid> Grid;
 
   double MaximumAngle;
-  vtkTypeBool UseDegrees;
+  bool UseDegrees;
 
 private:
   class Impl;
 };
 
-#endif // vtkCylindricalGrid_h
+#endif // vtkCylindricalGridBuilder_h

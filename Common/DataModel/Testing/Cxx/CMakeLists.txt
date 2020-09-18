@@ -107,7 +107,7 @@ vtk_add_test_cxx(vtkCommonDataModelCxxTests data_tests
   TestPolyhedron4.cxx,NO_VALID,NO_OUTPUT
   TestSmoothErrorMetric.cxx
   TestQuadraticPolygonFilters.cxx
-  TestCylindricalGrid.cxx
+  TestCylindricalGridBuilder.cxx
   )
 # add to the list but don't define a test
 list(APPEND data_tests
