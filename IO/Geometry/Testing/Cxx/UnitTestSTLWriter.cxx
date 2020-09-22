@@ -288,16 +288,18 @@ int UnitTestSTLWriter(int argc, char* argv[])
     writer2->SetInputConnection(sphere->GetOutputPort());
     writer2->SetFileTypeToASCII();
     writer2->Update();
-    status1 = errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full");
-    if (status1)
+    status1 = (errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full") +
+      errorObserver->CheckErrorMessage("/dev/full: Operation not supported."));
+    if (status1 == 2)
     {
       ++status;
     }
 
     writer2->SetInputConnection(stripper->GetOutputPort());
     writer2->Update();
-    status1 = errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full");
-    if (status1)
+    status1 = (errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full") +
+      errorObserver->CheckErrorMessage("/dev/full: Operation not supported."));
+    if (status1 == 2)
     {
       ++status;
     }
@@ -306,15 +308,17 @@ int UnitTestSTLWriter(int argc, char* argv[])
     writer2->SetInputConnection(sphere->GetOutputPort());
     writer2->SetFileTypeToBinary();
     writer2->Update();
-    status1 = errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full");
-    if (status1)
+    status1 = (errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full") +
+      errorObserver->CheckErrorMessage("/dev/full: Operation not supported."));
+    if (status1 == 2)
     {
       ++status;
     }
     writer2->SetInputConnection(stripper->GetOutputPort());
     writer2->Update();
-    status1 = errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full");
-    if (status1)
+    status1 = (errorObserver->CheckErrorMessage("Ran out of disk space; deleting file: /dev/full") +
+      errorObserver->CheckErrorMessage("/dev/full: Operation not supported."));
+    if (status1 == 2)
     {
       ++status;
     }
