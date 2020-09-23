@@ -173,7 +173,7 @@ def disp_components(modules, module_implements, module_implements_desc):
                                                                             ', '.join(sorted(module_implements[key])),
                                                                             width=max_width)
             else:
-                res += '    # {:<{width}} # implements {:s}\n'.format(key.split('::')[1],
+                res += '    # {:<{width}} # Implements {:s}\n'.format(key.split('::')[1],
                                                                       ', '.join(sorted(module_implements[key])),
                                                                       width=max_width)
     res += ')'
