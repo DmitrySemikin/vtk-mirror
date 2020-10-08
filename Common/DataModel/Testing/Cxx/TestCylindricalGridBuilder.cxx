@@ -53,14 +53,14 @@ int TestCylindricalGridBuilder(int argc, char* argv[])
     std::vector<int> cell1 = { 0, 1 };
     std::vector<std::vector<int>> cellMap{ cell1 };
 
-    for (int i = 0; i < cellMap.size(); i++)
+    for (size_t i = 0; i < cellMap.size(); i++)
     {
       auto cellN = cellMap[i];
       vtkNew<vtkPolyLine> polyline;
       polyline->GetPointIds()->SetNumberOfIds(cellN.size());
-      for (int j = 0; j < cellN.size(); j++)
+      for (size_t j = 0; j < cellN.size(); j++)
       {
-        polyline->GetPointIds()->SetId(j, cellN[j]);
+        polyline->GetPointIds()->SetId(static_cast<vtkIdType>(j), cellN[j]);
       }
       cells->InsertNextCell(polyline);
     }

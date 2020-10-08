@@ -5,6 +5,7 @@
 #include "vtkMath.h"
 #include "vtkObjectFactory.h"
 
+#include <cmath>
 #include <map>
 
 class vtkCylindricalGridBuilder::Impl
@@ -65,7 +66,7 @@ int vtkCylindricalGridBuilder::Impl::CalculateNumberOfIntermediatePointsRequired
   double p1, double p2, double maximumAngle)
 {
   double delta = p2 - p1;
-  double numberOfSegmentsRequired = ceil(abs(delta / maximumAngle));
+  double numberOfSegmentsRequired = std::ceil(std::fabs(delta / maximumAngle));
   return std::max(0, static_cast<int>(numberOfSegmentsRequired - 1));
 }
 
@@ -120,7 +121,7 @@ std::vector<vtkIdType> vtkCylindricalGridBuilder::Impl::CreatePointLine(double r
     for (int intPointIndex = 0; intPointIndex < numIntermediatePoints; intPointIndex++)
     {
       auto pInt = p1 + static_cast<double>(intPointIndex + 1) * delta;
-      if (abs(pInt - p1) <= TWO_PI_PRECISION_FACTOR * vtkMath::Pi())
+      if (std::fabs(pInt - p1) <= TWO_PI_PRECISION_FACTOR * vtkMath::Pi())
       {
         pointIDs.push_back(CreateUniquePoint(r, pInt, z, pointLookup, points));
       }
@@ -131,7 +132,7 @@ std::vector<vtkIdType> vtkCylindricalGridBuilder::Impl::CreatePointLine(double r
     }
   }
 
-  if (abs(p2 - p1) <= TWO_PI_PRECISION_FACTOR * vtkMath::Pi())
+  if (std::fabs(p2 - p1) <= TWO_PI_PRECISION_FACTOR * vtkMath::Pi())
   {
     pointIDs.push_back(CreateUniquePoint(r, p2, z, pointLookup, points));
   }
