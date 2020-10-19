@@ -20,8 +20,8 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkToolkits.h"
 
 #include "vtkOrderStatistics.h"
-#include "vtkStatisticsAlgorithmPrivate.h"
 
+#include "vtkDataSetAttributes.h"
 #include "vtkDoubleArray.h"
 #include "vtkIdTypeArray.h"
 #include "vtkInformation.h"
@@ -29,8 +29,10 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkMath.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkObjectFactory.h"
+#include "vtkStatisticsAlgorithmPrivate.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
+#include "vtkUnsignedCharArray.h"
 #include "vtkVariantArray.h"
 
 #include <cmath>
@@ -179,6 +181,10 @@ void vtkOrderStatistics::Learn(
     histogramTab->AddColumn(idTypeCol);
     idTypeCol->Delete();
 
+    auto rowData = inData->GetRowData();
+    auto ghosts =
+      vtkArrayDownCast<vtkUnsignedCharArray>(rowData->GetAbstractArray(rowData->GhostArrayName()));
+
     // Switch depending on data type
     if (vals->IsA("vtkDataArray"))
     {
@@ -189,6 +195,10 @@ void vtkOrderStatistics::Learn(
       std::map<double, vtkIdType> histogram;
       for (vtkIdType r = 0; r < nRow; ++r)
       {
+        if (ghosts && ghosts->GetValue(r))
+        {
+          continue;
+        }
         ++histogram[dvals->GetTuple1(r)];
       }
 
@@ -215,6 +225,10 @@ void vtkOrderStatistics::Learn(
           double quantum;
           for (vtkIdType r = 0; r < nRow; ++r)
           {
+            if (ghosts && ghosts->GetValue(r))
+            {
+              continue;
+            }
             reading = dvals->GetTuple1(r);
             quantum = mini + std::round((reading - mini) / width) * width;
             ++histogram[quantum];
@@ -243,6 +257,10 @@ void vtkOrderStatistics::Learn(
       std::map<vtkStdString, vtkIdType> histogram;
       for (vtkIdType r = 0; r < nRow; ++r)
       {
+        if (ghosts && ghosts->GetValue(r))
+        {
+          continue;
+        }
         ++histogram[svals->GetValue(r)];
       }
 
@@ -264,6 +282,10 @@ void vtkOrderStatistics::Learn(
       std::map<vtkVariant, vtkIdType> histogram;
       for (vtkIdType r = 0; r < nRow; ++r)
       {
+        if (ghosts && ghosts->GetValue(r))
+        {
+          continue;
+        }
         ++histogram[vvals->GetVariantValue(r)];
       }
 

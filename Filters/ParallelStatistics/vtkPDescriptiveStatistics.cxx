@@ -131,6 +131,10 @@ void vtkPDescriptiveStatistics::Learn(
     for (int i = 1; i < np; ++i)
     {
       int ns_l = n_g[i];
+      if (!ns_l)
+      {
+        continue;
+      }
       int N = ns + ns_l;
 
       int o = 4 * i;

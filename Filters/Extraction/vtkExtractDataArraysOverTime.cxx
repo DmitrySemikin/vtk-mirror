@@ -34,11 +34,13 @@
 #include "vtkSplitColumnComponents.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkTable.h"
+#include "vtkUnsignedCharArray.h"
 #include "vtkWeakPointer.h"
 
 #include <algorithm>
 #include <cassert>
 #include <map>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -386,14 +388,10 @@ vtkSmartPointer<vtkDataObject> vtkExtractDataArraysOverTime::vtkInternal::Summar
   assert(input != nullptr);
 
   const int attributeType = this->Self->GetFieldAssociation();
-  vtkFieldData* inFD = input->GetAttributesAsFieldData(attributeType);
-  assert(inFD != nullptr);
+  vtkDataSetAttributes* inDSA = input->GetAttributes(attributeType);
+  assert(inDSA != nullptr);
 
-  const vtkIdType numIDs = inFD->GetNumberOfTuples();
-  if (numIDs <= 0)
-  {
-    return nullptr;
-  }
+  const vtkIdType numIDs = inDSA->GetNumberOfTuples();
 
   // Make a vtkTable containing all fields plus possibly point coordinates.
   // We'll pass the table, after splitting multi-component arrays, to
@@ -412,7 +410,10 @@ vtkSmartPointer<vtkDataObject> vtkExtractDataArraysOverTime::vtkInternal::Summar
   orderStats->SetAssessOption(false);
 
   vtkDataSetAttributes* statInDSA = statInput->GetRowData();
-  statInDSA->ShallowCopy(inFD);
+  statInDSA->ShallowCopy(inDSA);
+
+  this->Self->SynchronizeBlocksMetaData(statInput);
+
   // Add point coordinates to selected data if we are tracking point-data.
   if (attributeType == vtkDataObject::POINT)
   {
@@ -433,6 +434,9 @@ vtkSmartPointer<vtkDataObject> vtkExtractDataArraysOverTime::vtkInternal::Summar
     }
     vtkExtractArraysAssignUniqueCoordNames(statInDSA, pX[0], pX[1], pX[2]);
   }
+
+  vtkIdType numberOfTotalInputTuples = this->Self->SynchronizeNumberOfTotalInputTuples(inDSA);
+
   splitColumns->SetInputDataObject(0, statInput);
   splitColumns->SetCalculateMagnitudes(true);
   splitColumns->Update();
@@ -441,7 +445,7 @@ vtkSmartPointer<vtkDataObject> vtkExtractDataArraysOverTime::vtkInternal::Summar
   orderStats->SetInputConnection(splitColumns->GetOutputPort());
   // Add a column holding the number of points/cells/rows
   // in the data at this timestep.
-  vtkExtractArraysAddColumnValue(statSummary, "N", VTK_DOUBLE, numIDs);
+  vtkExtractArraysAddColumnValue(statSummary, "N", VTK_DOUBLE, numberOfTotalInputTuples);
   // Compute statistics 1 column at a time to save space (esp. for order stats)
   for (int i = 0; i < splits->GetNumberOfColumns(); ++i)
   {
@@ -811,4 +815,17 @@ vtkSmartPointer<vtkDescriptiveStatistics> vtkExtractDataArraysOverTime::NewDescr
 vtkSmartPointer<vtkOrderStatistics> vtkExtractDataArraysOverTime::NewOrderStatistics()
 {
   return vtkSmartPointer<vtkOrderStatistics>::New();
+}
+
+//------------------------------------------------------------------------------
+vtkIdType vtkExtractDataArraysOverTime::SynchronizeNumberOfTotalInputTuples(
+  vtkDataSetAttributes* dsa)
+{
+  if (auto ghosts =
+        vtkArrayDownCast<vtkUnsignedCharArray>(dsa->GetAbstractArray(dsa->GhostArrayName())))
+  {
+    auto ghostsRange = vtk::DataArrayValueRange<1>(ghosts);
+    return dsa->GetNumberOfTuples() - std::accumulate(ghostsRange.cbegin(), ghostsRange.cend(), 0);
+  }
+  return dsa->GetNumberOfTuples();
 }

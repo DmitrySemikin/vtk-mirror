@@ -152,6 +152,24 @@ protected:
   virtual vtkSmartPointer<vtkDescriptiveStatistics> NewDescriptiveStatistics();
   virtual vtkSmartPointer<vtkOrderStatistics> NewOrderStatistics();
 
+  /**
+   * This method returns the total amount of non ghost tuples on which
+   * statistics are computed.
+   */
+  virtual vtkIdType SynchronizeNumberOfTotalInputTuples(vtkDataSetAttributes* dsa);
+
+  /**
+   * This method does nothing. But
+   * in the case of multi process environment, where
+   * `vtkPExtractDataArraysOverTime` should be used to compute statistics,
+   * this method  synchronizes
+   * all ranks such that the `vtkTables` in each rank have the same amount of
+   * columns, with the same names. This is particularly important in the
+   * presence of ranks having empty inputs, who are still expected to compute
+   * statistics for each input field.
+   */
+  virtual void SynchronizeBlocksMetaData(vtkTable* vtkNotUsed(splits)) {}
+
 private:
   vtkExtractDataArraysOverTime(const vtkExtractDataArraysOverTime&) = delete;
   void operator=(const vtkExtractDataArraysOverTime&) = delete;

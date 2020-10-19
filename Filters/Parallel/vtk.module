@@ -17,6 +17,7 @@ DEPENDS
   VTK::FiltersGeometry
   VTK::FiltersHybrid
   VTK::FiltersModeling
+  VTK::FiltersParallelStatistics
   VTK::FiltersSources
   VTK::FiltersTexture
 PRIVATE_DEPENDS
@@ -26,6 +27,7 @@ PRIVATE_DEPENDS
   VTK::ParallelCore
 TEST_DEPENDS
   VTK::FiltersFlowPaths
+  VTK::FiltersParallelDIY2
   VTK::FiltersParallelImaging
   VTK::IOExodus
   VTK::IOImage
