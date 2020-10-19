@@ -52,7 +52,7 @@ public:
 
   ~vtkOSPRayPassInternals() override { delete this->QuadHelper; }
 
-  void Init(vtkOpenGLRenderWindow* context, const std::string& renType)
+  void Init(vtkOpenGLRenderWindow* context, const std::string& renType, vtkRenderer* ren)
   {
     std::string FSSource = vtkOpenGLRenderUtilities::GetFullScreenQuadFragmentShaderTemplate();
 
@@ -69,7 +69,14 @@ public:
     // with legacy behavior we keep the old behavior with the sciviz backend
     if (renType == "pathtracer")
     {
-      ss << "gl_FragData[0] = vec4(pow(color.rgb, vec3(1.0/2.2)), color.a);\n";
+      // If the background image is an hdri (= mode in environment mode)
+      // we need to have an opaque background but ospray set it transparent
+      // Set it to opaque to let the tone mapping be applied on the background
+      int bgMode = vtkOSPRayRendererNode::GetBackgroundMode(ren);
+      bool useHdri = ren->GetUseImageBasedLighting() && ren->GetEnvironmentTexture() && bgMode == 2;
+      ss << "gl_FragData[0] = vec4(pow(color.rgb, vec3(1.0/2.2)), "
+         << (useHdri ? "1.0)" : "color.a)") << ";\n";
+      this->BgMode = bgMode;
     }
     else
     {
@@ -98,6 +105,7 @@ public:
   vtkNew<vtkOSPRayViewNodeFactory> Factory;
   vtkOSPRayPass* Parent = nullptr;
   std::string RendererType;
+  int BgMode;
 
   // OpenGL-based display
   vtkOpenGLQuadHelper* QuadHelper = nullptr;
@@ -290,8 +298,9 @@ void vtkOSPRayPass::RenderInternal(const vtkRenderState* s)
     vtkOpenGLRenderWindow* windowOpenGL = vtkOpenGLRenderWindow::SafeDownCast(rwin);
 
     std::string renType = vtkOSPRayRendererNode::GetRendererType(ren);
-
-    if (this->Internal->QuadHelper && this->Internal->RendererType != renType)
+    int bgMode = vtkOSPRayRendererNode::GetBackgroundMode(ren);
+    if (this->Internal->QuadHelper &&
+      (this->Internal->RendererType != renType || this->Internal->BgMode != bgMode))
     {
       delete this->Internal->QuadHelper;
       this->Internal->QuadHelper = nullptr;
@@ -299,7 +308,7 @@ void vtkOSPRayPass::RenderInternal(const vtkRenderState* s)
 
     if (!this->Internal->QuadHelper)
     {
-      this->Internal->Init(windowOpenGL, renType);
+      this->Internal->Init(windowOpenGL, renType, ren);
     }
     else
     {
