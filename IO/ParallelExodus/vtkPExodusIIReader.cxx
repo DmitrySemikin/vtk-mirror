@@ -366,8 +366,8 @@ int vtkPExodusIIReader::RequestData(vtkInformation* vtkNotUsed(request),
 
   // The whole notion of pieces for this reader is really
   // just a division of files between processors
-  processNumber = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_PIECE_NUMBER());
-  numProcessors = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_NUMBER_OF_PIECES());
+  numProcessors = this->Controller->GetNumberOfProcesses();
+  processNumber = this->Controller->GetLocalProcessId();
 
   int numFiles = this->NumberOfFileNames;
   int start = 0;
