@@ -1,5 +1,6 @@
 set(classes
-  vtkGenericMovieWriter)
+  vtkGenericMovieWriter
+  vtkMP4Writer)
 
 if (WIN32)
   # Check if VideoForWindows is supported. This also adds an option
@@ -17,6 +18,9 @@ if (WIN32)
   include(vtkTestMicrosoftMediaFoundation)
 
   if (VTK_USE_MICROSOFT_MEDIA_FOUNDATION)
+    vtk_object_factory_declare(
+      BASE vtkMP4Writer
+      OVERRIDE vtkWin32MP4Writer)
     list(APPEND classes vtkMP4Writer)
   endif ()
 endif ()

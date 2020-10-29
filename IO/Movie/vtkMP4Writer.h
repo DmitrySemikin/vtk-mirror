@@ -14,15 +14,9 @@
 =========================================================================*/
 /**
  * @class   vtkMP4Writer
- * @brief   Writes Windows MP4 files on Windows platforms.
+ * @brief   Writes MP4 video files
  *
- * vtkMP4Writer writes H.264-encoded MP4 files. Note that this class in only available
- * on the Microsoft Windows platform.
- *
- * Implementation inspired from the following tutorial:
- * https://docs.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video?redirectedfrom=MSDN
- * @sa
- * vtkGenericMovieWriter vtkAVIWriter
+ * vtkMP4Writer writes H.264-encoded MP4 files.
  */
 
 #ifndef vtkMP4Writer_h
@@ -34,19 +28,8 @@
 class VTKIOMOVIE_EXPORT vtkMP4Writer : public vtkGenericMovieWriter
 {
 public:
-  static vtkMP4Writer* New();
   vtkTypeMacro(vtkMP4Writer, vtkGenericMovieWriter);
   void PrintSelf(ostream& os, vtkIndent indent) override;
-
-  //@{
-  /**
-   * These methods start writing an MP4 file, write a frame to the file
-   * and then end the writing process.
-   */
-  void Start() override;
-  void Write() override;
-  void End() override;
-  //@}
 
   //@{
   /**
@@ -72,8 +55,8 @@ protected:
   class vtkMP4WriterInternals;
   vtkMP4WriterInternals* Internals;
 
-  int FrameRate;
-  int BitRate;
+  int FrameRate = 10;
+  int BitRate = 800000;
 
 private:
   vtkMP4Writer(const vtkMP4Writer&) = delete;
