@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkWin32MP4Writer.h
+  Module:    vtkMacOSMP4Writer.h
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -13,27 +13,24 @@
 
 =========================================================================*/
 /**
- * @class   vtkWin32MP4Writer
- * @brief   Writes Windows MP4 files on Windows platforms.
+ * @class   vtkMacOSMP4Writer
+ * @brief   Writes Windows MP4 files on macos platforms.
  *
- * vtkWin32MP4Writer writes H.264-encoded MP4 files. Note that this class in only available
- * on the Microsoft Windows platform.
- *
- * Implementation inspired from the following tutorial:
- * https://docs.microsoft.com/en-us/windows/win32/medfound/tutorial--using-the-sink-writer-to-encode-video?redirectedfrom=MSDN
+ * vtkMacOSMP4Writer writes H.264-encoded MP4 files. Note that this class in only available
+ * on macos.
  */
 
-#ifndef vtkWin32MP4Writer_h
-#define vtkWin32MP4Writer_h
+#ifndef vtkMacOSMP4Writer_h
+#define vtkMacOSMP4Writer_h
 
 #include "vtkMP4Writer.h"
 #include "vtkIOMovieModule.h" // For export macro
 
-class VTKIOMOVIE_EXPORT vtkWin32MP4Writer : public vtkMP4Writer
+class VTKIOMOVIE_EXPORT vtkMacOSMP4Writer : public vtkMP4Writer
 {
 public:
-  static vtkWin32MP4Writer* New();
-  vtkTypeMacro(vtkWin32MP4Writer, vtkMP4Writer);
+  static vtkMacOSMP4Writer* New();
+  vtkTypeMacro(vtkMacOSMP4Writer, vtkMP4Writer);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   //@{
@@ -47,15 +44,12 @@ public:
   //@}
 
 protected:
-  vtkWin32MP4Writer();
-  ~vtkWin32MP4Writer() override;
-
-  class vtkWin32MP4WriterInternals;
-  vtkWin32MP4WriterInternals* Internals;
+  vtkMacOSMP4Writer();
+  ~vtkMacOSMP4Writer() override;
 
 private:
-  vtkWin32MP4Writer(const vtkWin32MP4Writer&) = delete;
-  void operator=(const vtkWin32MP4Writer&) = delete;
+  vtkMacOSMP4Writer(const vtkMacOSMP4Writer&) = delete;
+  void operator=(const vtkMacOSMP4Writer&) = delete;
 };
 
 #endif

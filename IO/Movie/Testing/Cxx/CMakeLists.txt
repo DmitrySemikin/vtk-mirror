@@ -8,6 +8,8 @@ if(WIN32)
   if (VTK_USE_MICROSOFT_MEDIA_FOUNDATION)
     list(APPEND TEST_SRC TestMP4Writer.cxx)
   endif()
+elseif (APPLE)
+  list(APPEND TEST_SRC TestMP4Writer.cxx)
 endif()
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_tolower)
@@ -21,3 +23,7 @@ vtk_add_test_cxx(vtkIOMovieCxxTests tests
   )
 
 vtk_test_cxx_executable(vtkIOMovieCxxTests tests)
+vtk_module_autoinit(
+  TARGETS vtkIOMovieCxxTests
+  MODULES VTK::IOMovie
+)

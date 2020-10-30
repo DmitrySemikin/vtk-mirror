@@ -372,6 +372,4 @@ void vtkWin32MP4Writer::End()
 void vtkWin32MP4Writer::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "FrameRate: " << this->FrameRate << endl;
-  os << indent << "BitRate: " << this->BitRate << endl;
 }

@@ -21,12 +21,33 @@ if (WIN32)
     vtk_object_factory_declare(
       BASE vtkMP4Writer
       OVERRIDE vtkWin32MP4Writer)
-    list(APPEND classes vtkMP4Writer)
+    list(APPEND classes vtkWin32MP4Writer)
   endif ()
+elseif (APPLE)
+  vtk_object_factory_declare(
+    BASE vtkMP4Writer
+    OVERRIDE vtkMacOSMP4Writer)
+  set_source_files_properties(
+    vtkMacOSMP4Writer.mm
+    PROPERTIES
+      COMPILE_FLAGS "${VTK_REQUIRED_OBJCXX_FLAGS}")
+  list(APPEND sources vtkMacOSMP4Writer.mm)
+  list(APPEND headers vtkMacOSMP4Writer.h)
 endif ()
 
+vtk_object_factory_configure(
+  SOURCE_FILE vtk_object_factory_source
+  HEADER_FILE vtk_object_factory_header
+  EXPORT_MACRO "VTKIOMOVIE_EXPORT")
+
+message(STATUS "${vtk_object_factory_source}")
+
 vtk_module_add_module(VTK::IOMovie
-  CLASSES ${classes})
+  CLASSES ${classes}
+  SOURCES ${sources} ${vtk_object_factory_source}
+  HEADERS ${headers}
+  PRIVATE_HEADERS ${vtk_object_factory_header}
+)
 
 set(libs)
 if (WIN32)

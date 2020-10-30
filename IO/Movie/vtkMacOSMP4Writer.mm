@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    vtkMP4Writer.cxx
+  Module:    vtkMacOSMP4Writer.mm
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -12,27 +12,42 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkMP4Writer.h"
+#include "vtkMacOSMP4Writer.h"
 
 #include "vtkObjectFactory.h"
 
-//------------------------------------------------------------------------------
-vtkObjectFactoryNewMacro(vtkMP4Writer);
+#include <iostream>
 
 //------------------------------------------------------------------------------
-vtkMP4Writer::vtkMP4Writer()
+vtkStandardNewMacro(vtkMacOSMP4Writer);
+
+//------------------------------------------------------------------------------
+vtkMacOSMP4Writer::vtkMacOSMP4Writer()
 {
 }
 
 //------------------------------------------------------------------------------
-vtkMP4Writer::~vtkMP4Writer()
+vtkMacOSMP4Writer::~vtkMacOSMP4Writer()
 {
 }
 
 //------------------------------------------------------------------------------
-void vtkMP4Writer::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMacOSMP4Writer::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
-  os << indent << "FrameRate: " << this->FrameRate << endl;
-  os << indent << "BitRate: " << this->BitRate << endl;
+}
+
+//------------------------------------------------------------------------------
+void vtkMacOSMP4Writer::Start()
+{
+}
+
+//------------------------------------------------------------------------------
+void vtkMacOSMP4Writer::Write()
+{
+}
+
+//------------------------------------------------------------------------------
+void vtkMacOSMP4Writer::End()
+{
 }

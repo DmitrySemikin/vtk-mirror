@@ -24,6 +24,9 @@
 #include "vtkMP4Writer.h"
 #include "vtksys/SystemTools.hxx"
 
+#include "vtkAutoInit.h"
+VTK_MODULE_INIT(vtkIOMovie);
+
 int TestMP4Writer(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
 {
   int err = 0;
@@ -53,6 +56,7 @@ int TestMP4Writer(int vtkNotUsed(argc), char* vtkNotUsed(argv)[])
   colorize->SetInputConnection(cast->GetOutputPort());
 
   vtkMP4Writer* w = vtkMP4Writer::New();
+
   w->SetInputConnection(colorize->GetOutputPort());
   w->SetFileName("TestMP4Writer.mp4");
   cout << "Writing file TestMP4Writer.mp4..." << endl;

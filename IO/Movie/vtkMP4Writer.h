@@ -31,6 +31,12 @@ public:
   vtkTypeMacro(vtkMP4Writer, vtkGenericMovieWriter);
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
+  static vtkMP4Writer* New();
+
+  void Start() override { std::cout << "vtkMP4Writer" << std::endl; };
+  void Write() override {};
+  void End() override {};
+
   //@{
   /**
    * Set/Get the frame rate, in frame/s.
