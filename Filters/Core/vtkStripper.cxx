@@ -490,6 +490,7 @@ int vtkStripper::RequestData(vtkInformation* vtkNotUsed(request),
   if (newLines)
   {
     if (this->JoinContiguousSegments)
+#ifdef 0
     {
       // In some cases it may be possible to optimize the output
       // polylines a bit.  The algorithm thus-far sometimes outputs
@@ -615,6 +616,8 @@ int vtkStripper::RequestData(vtkInformation* vtkNotUsed(request),
       output->SetLines(compressedLines);
       delete[] used;
     }
+#else
+#endif
     else
     {
       newLines->Squeeze();
