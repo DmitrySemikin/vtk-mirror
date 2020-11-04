@@ -1,7 +1,3 @@
-vtk_module_test_data(
-  Data/lines.vtp
-  )
-
 vtk_add_test_cxx(vtkFiltersCoreCxxTests tests
   TestAppendArcLength.cxx,NO_VALID
   TestAppendDataSets.cxx,NO_VALID

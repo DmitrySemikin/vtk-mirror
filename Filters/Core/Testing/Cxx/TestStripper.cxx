@@ -112,7 +112,7 @@ bool TestChainMultiplePolylines(const bool& joinSegments, const std::string& fil
   vtkSmartPointer<vtkPolyData> merged = stripIt->GetOutput();
   if (!merged)
     return false;
-  else if (!joinSegments && merged->GetNumberOfLines() == 11)
+  else if (!joinSegments && merged->GetNumberOfLines() == 17)
     return true;
   else if (joinSegments && merged->GetNumberOfLines() == 4)
     return true;
