@@ -46,6 +46,14 @@
 #error VTK requires GCC 4.8 or newer
 #endif
 
+// Used to make things const in a way preserves backwards compatibility
+// for those that need it.
+#if defined(VTK_LEGACY_REMOVE)
+#define VTK_FUTURE_CONST const
+#else
+#define VTK_FUTURE_CONST
+#endif
+
 // Convert a macro representing a value to a string.
 //
 // Example: vtkQuoteMacro(__LINE__) will expand to "1234" whereas
@@ -240,8 +248,8 @@
       this->Modified();                                                                            \
     }                                                                                              \
   }                                                                                                \
-  virtual type Get##name##MinValue() { return min; }                                               \
-  virtual type Get##name##MaxValue() { return max; }
+  virtual type Get##name##MinValue() VTK_FUTURE_CONST { return min; }                              \
+  virtual type Get##name##MaxValue() VTK_FUTURE_CONST { return max; }
 
 //
 // This macro defines a body of set object macro. It can be used either in
@@ -339,7 +347,7 @@
 // This macro should be used in the header file.
 //
 #define vtkGetObjectMacro(name, type)                                                              \
-  virtual type* Get##name()                                                                        \
+  virtual type* Get##name() VTK_FUTURE_CONST                                                       \
   {                                                                                                \
     vtkDebugMacro(<< this->GetClassName() << " (" << this << "): returning " #name " address "     \
                   << static_cast<type*>(this->name));                                              \

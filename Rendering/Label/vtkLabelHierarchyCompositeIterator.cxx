@@ -145,7 +145,7 @@ vtkIdType vtkLabelHierarchyCompositeIterator::GetLabelId()
   return -1;
 }
 
-vtkLabelHierarchy* vtkLabelHierarchyCompositeIterator::GetHierarchy()
+vtkLabelHierarchy* vtkLabelHierarchyCompositeIterator::GetHierarchy() VTK_FUTURE_CONST
 {
   if (this->Implementation->CurrentIterator < this->Implementation->Iterators.size())
   {

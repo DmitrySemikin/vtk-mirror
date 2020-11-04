@@ -90,7 +90,7 @@ public:
   /**
    * Retrieve the current label hierarchy.
    */
-  vtkLabelHierarchy* GetHierarchy() override;
+  vtkLabelHierarchy* GetHierarchy() VTK_FUTURE_CONST override;
 
   /**
    * Retrieve the coordinates of the center of the current hierarchy node

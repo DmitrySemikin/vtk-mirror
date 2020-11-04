@@ -29,7 +29,7 @@ vtkInteractorStyleSwitchBase::vtkInteractorStyleSwitchBase() = default;
 vtkInteractorStyleSwitchBase::~vtkInteractorStyleSwitchBase() = default;
 
 //------------------------------------------------------------------------------
-vtkRenderWindowInteractor* vtkInteractorStyleSwitchBase::GetInteractor()
+vtkRenderWindowInteractor* vtkInteractorStyleSwitchBase::GetInteractor() VTK_FUTURE_CONST
 {
   static bool warned = false;
   if (!warned && strcmp(this->GetClassName(), "vtkInteractorStyleSwitchBase") == 0)

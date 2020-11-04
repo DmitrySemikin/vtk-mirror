@@ -55,7 +55,7 @@ vtkImageStack::~vtkImageStack()
 }
 
 //------------------------------------------------------------------------------
-vtkImageSlice* vtkImageStack::GetActiveImage()
+vtkImageSlice* vtkImageStack::GetActiveImage() VTK_FUTURE_CONST
 {
   vtkImageSlice* activeImage = nullptr;
 
@@ -169,7 +169,7 @@ void vtkImageStack::SetMapper(vtkImageMapper3D*)
 }
 
 //------------------------------------------------------------------------------
-vtkImageMapper3D* vtkImageStack::GetMapper()
+vtkImageMapper3D* vtkImageStack::GetMapper() VTK_FUTURE_CONST
 {
   // Get the mapper with the active layer number
   vtkImageSlice* image = this->GetActiveImage();

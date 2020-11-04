@@ -212,6 +212,7 @@ void vtkMappedUnstructuredGrid<Implementation, CellIterator>::SetImplementation(
 //------------------------------------------------------------------------------
 template <class Implementation, class CellIterator>
 Implementation* vtkMappedUnstructuredGrid<Implementation, CellIterator>::GetImplementation()
+  VTK_FUTURE_CONST
 {
   return this->Impl;
 }

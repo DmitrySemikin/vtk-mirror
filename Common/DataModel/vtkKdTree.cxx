@@ -472,7 +472,7 @@ int vtkKdTree::GetDataSetIndex(vtkDataSet* set)
   return this->DataSets->IsItemPresent(set) - 1;
 }
 
-vtkDataSet* vtkKdTree::GetDataSet(int index)
+vtkDataSet* vtkKdTree::GetDataSet(int index) VTK_FUTURE_CONST
 {
   return this->DataSets->GetItem(index);
 }
