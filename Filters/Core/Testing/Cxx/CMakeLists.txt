@@ -1,3 +1,7 @@
+vtk_module_test_data(
+  Data/lines.vtp
+  )
+
 vtk_add_test_cxx(vtkFiltersCoreCxxTests tests
   TestAppendArcLength.cxx,NO_VALID
   TestAppendDataSets.cxx,NO_VALID
@@ -54,7 +58,7 @@ vtk_add_test_cxx(vtkFiltersCoreCxxTests tests
   TestSmoothPolyDataFilter.cxx,NO_VALID
   TestSMPPipelineContour.cxx,NO_VALID
   TestSlicePlanePrecision.cxx,NO_VALID
-  TestStripper.cxx,NO_VALID
+  TestStripper.cxx,NO_VALID,NO_OUTPUT
   TestStructuredGridAppend.cxx,NO_VALID
   TestThreshold.cxx,NO_VALID
   TestThresholdPoints.cxx,NO_VALID
