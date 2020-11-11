@@ -18,6 +18,7 @@
 
 #include "vtkActor2D.h"
 #include "vtkCellArray.h"
+#include "vtkCommand.h"
 #include "vtkHardwareSelector.h"
 #include "vtkInformation.h"
 #include "vtkMath.h"
@@ -32,6 +33,7 @@
 #include "vtkOpenGLRenderer.h"
 #include "vtkOpenGLResourceFreeCallback.h"
 #include "vtkOpenGLShaderCache.h"
+#include "vtkOpenGLShaderProperty.h"
 #include "vtkOpenGLState.h"
 #include "vtkOpenGLTexture.h"
 #include "vtkOpenGLVertexArrayObject.h"
@@ -42,6 +44,7 @@
 #include "vtkProperty.h"
 #include "vtkProperty2D.h"
 #include "vtkShaderProgram.h"
+#include "vtkShaderProperty.h"
 #include "vtkTextureObject.h"
 #include "vtkTransform.h"
 #include "vtkUnsignedCharArray.h"
@@ -146,19 +149,222 @@ bool vtkOpenGLPolyDataMapper2D::GetNeedToRebuildShaders(
 }
 
 //------------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper2D::BuildShaders(std::string& VSSource, std::string& FSSource,
-  std::string& GSSource, vtkViewport* viewport, vtkActor2D* actor)
+void vtkOpenGLPolyDataMapper2D::GetShaderTemplate(
+  std::map<vtkShader::Type, vtkShader*> shaders, vtkViewport* ren, vtkActor2D* actor)
 {
-  VSSource = vtkPolyData2DVS;
-  FSSource = vtkPolyData2DFS;
-  if (this->HaveWideLines(viewport, actor))
+  vtkShaderProperty* sp = actor->GetShaderProperty();
+  if (sp->HasVertexShaderCode())
   {
-    GSSource = vtkPolyDataWideLineGS;
+    shaders[vtkShader::Vertex]->SetSource(sp->GetVertexShaderCode());
   }
   else
   {
-    GSSource.clear();
+    shaders[vtkShader::Vertex]->SetSource(vtkPolyData2DVS);
   }
+
+  if (sp->HasFragmentShaderCode())
+  {
+    shaders[vtkShader::Fragment]->SetSource(sp->GetFragmentShaderCode());
+  }
+  else
+  {
+    shaders[vtkShader::Fragment]->SetSource(vtkPolyData2DFS);
+  }
+
+  if (sp->HasGeometryShaderCode())
+  {
+    shaders[vtkShader::Geometry]->SetSource(sp->GetGeometryShaderCode());
+  }
+  else
+  {
+    if (this->HaveWideLines(ren, actor))
+    {
+      shaders[vtkShader::Geometry]->SetSource(vtkPolyDataWideLineGS);
+    }
+    else
+    {
+      shaders[vtkShader::Geometry]->SetSource("");
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkOpenGLPolyDataMapper2D::BuildShaders(
+  std::map<vtkShader::Type, vtkShader*> shaders, vtkViewport* viewport, vtkActor2D* actor)
+{
+  this->GetShaderTemplate(shaders, viewport, actor);
+
+  // user specified pre replacements
+  vtkOpenGLShaderProperty* sp = vtkOpenGLShaderProperty::SafeDownCast(actor->GetShaderProperty());
+  vtkOpenGLShaderProperty::ReplacementMap repMap = sp->GetAllShaderReplacements();
+  for (const auto& i : repMap)
+  {
+    if (i.first.ReplaceFirst)
+    {
+      std::string ssrc = shaders[i.first.ShaderType]->GetSource();
+      vtkShaderProgram::Substitute(
+        ssrc, i.first.OriginalValue, i.second.Replacement, i.second.ReplaceAll);
+      shaders[i.first.ShaderType]->SetSource(ssrc);
+    }
+  }
+
+  this->ReplaceShaderValues(shaders, viewport, actor);
+
+  // user specified post replacements
+  for (const auto& i : repMap)
+  {
+    if (!i.first.ReplaceFirst)
+    {
+      std::string ssrc = shaders[i.first.ShaderType]->GetSource();
+      vtkShaderProgram::Substitute(
+        ssrc, i.first.OriginalValue, i.second.Replacement, i.second.ReplaceAll);
+      shaders[i.first.ShaderType]->SetSource(ssrc);
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkOpenGLPolyDataMapper2D::UpdateShaders(
+  vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* actor)
+{
+  vtkOpenGLRenderWindow* renWin = vtkOpenGLRenderWindow::SafeDownCast(viewport->GetVTKWindow());
+
+  cellBO.VAO->Bind();
+  this->LastBoundBO = &cellBO;
+
+  if (this->GetNeedToRebuildShaders(cellBO, viewport, actor))
+  {
+    // build the shader source code
+    std::map<vtkShader::Type, vtkShader*> shaders;
+    vtkShader* vss = vtkShader::New();
+    vss->SetType(vtkShader::Vertex);
+    shaders[vtkShader::Vertex] = vss;
+    vtkShader* gss = vtkShader::New();
+    gss->SetType(vtkShader::Geometry);
+    shaders[vtkShader::Geometry] = gss;
+    vtkShader* fss = vtkShader::New();
+    fss->SetType(vtkShader::Fragment);
+    shaders[vtkShader::Fragment] = fss;
+
+    this->BuildShaders(shaders, viewport, actor);
+
+    // compile and bind the program if needed
+    vtkShaderProgram* newShader = renWin->GetShaderCache()->ReadyShaderProgram(shaders);
+
+    vss->Delete();
+    fss->Delete();
+    gss->Delete();
+
+    // if the shader changed reinitialize the VAO
+    if (newShader != cellBO.Program || cellBO.Program->GetMTime() > cellBO.AttributeUpdateTime)
+    {
+      cellBO.Program = newShader;
+      // reset the VAO as the shader has changed
+      cellBO.VAO->ShaderProgramChanged();
+    }
+
+    cellBO.ShaderSourceTime.Modified();
+  }
+  else
+  {
+    renWin->GetShaderCache()->ReadyShaderProgram(cellBO.Program);
+    if (cellBO.Program->GetMTime() > cellBO.AttributeUpdateTime)
+    {
+      // reset the VAO as the shader has changed
+      cellBO.VAO->ReleaseGraphicsResources();
+    }
+  }
+  vtkOpenGLCheckErrorMacro("failed after UpdateShader");
+
+  if (cellBO.Program)
+  {
+    this->SetMapperShaderParameters(cellBO, viewport, actor);
+    vtkOpenGLCheckErrorMacro("failed after SetMapperShaderParameters");
+    this->SetPropertyShaderParameters(cellBO, viewport, actor);
+    vtkOpenGLCheckErrorMacro("failed after SetPropertyShaderParameters");
+    this->SetCameraShaderParameters(cellBO, viewport, actor);
+    vtkOpenGLCheckErrorMacro("failed after SetCameraShaderParameters");
+
+    // allow the program to set what it wants
+    this->InvokeEvent(vtkCommand::UpdateShaderEvent, cellBO.Program);
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkOpenGLPolyDataMapper2D::SetMapperShaderParameters(
+  vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* actor)
+{
+  // Now to update the VAO too, if necessary.
+  if (this->VBOUpdateTime > cellBO.AttributeUpdateTime ||
+    cellBO.ShaderSourceTime > cellBO.AttributeUpdateTime)
+  {
+    cellBO.VAO->Bind();
+
+    this->VBOs->AddAllAttributesToVAO(cellBO.Program, cellBO.VAO);
+
+    cellBO.AttributeUpdateTime.Modified();
+  }
+
+  if (this->HaveCellScalars)
+  {
+    int tunit = this->CellScalarTexture->GetTextureUnit();
+    cellBO.Program->SetUniformi("textureC", tunit);
+  }
+
+  if (this->VBOs->GetNumberOfComponents("tcoordMC"))
+  {
+    vtkInformation* info = actor->GetPropertyKeys();
+    if (info && info->Has(vtkProp::GeneralTextureUnit()))
+    {
+      int tunit = info->Get(vtkProp::GeneralTextureUnit());
+      cellBO.Program->SetUniformi("texture1", tunit);
+    }
+  }
+
+  // handle wide lines
+  if (this->HaveWideLines(viewport, actor))
+  {
+    int vp[4];
+    glGetIntegerv(GL_VIEWPORT, vp);
+    float lineWidth[2];
+    lineWidth[0] = 2.0 * actor->GetProperty()->GetLineWidth() / vp[2];
+    lineWidth[1] = 2.0 * actor->GetProperty()->GetLineWidth() / vp[3];
+    cellBO.Program->SetUniform2f("lineWidthNVC", lineWidth);
+  }
+
+  vtkRenderer* ren = vtkRenderer::SafeDownCast(viewport);
+  vtkHardwareSelector* selector = ren->GetSelector();
+  if (selector && cellBO.Program->IsUniformUsed("mapperIndex"))
+  {
+    cellBO.Program->SetUniform3f("mapperIndex", selector->GetPropColorValue());
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkOpenGLPolyDataMapper2D::SetPropertyShaderParameters(
+  vtkOpenGLHelper& cellBO, vtkViewport*, vtkActor2D* actor)
+{
+  if (!this->Colors || !this->Colors->GetNumberOfComponents())
+  {
+    vtkShaderProgram* program = cellBO.Program;
+
+    // Query the actor for some of the properties that can be applied.
+    float opacity = static_cast<float>(actor->GetProperty()->GetOpacity());
+    double* dColor = actor->GetProperty()->GetColor();
+    float diffuseColor[4] = { static_cast<float>(dColor[0]), static_cast<float>(dColor[1]),
+      static_cast<float>(dColor[2]), static_cast<float>(opacity) };
+
+    program->SetUniform4f("diffuseColor", diffuseColor);
+  }
+}
+
+//------------------------------------------------------------------------------
+void vtkOpenGLPolyDataMapper2D::ReplaceShaderValues(
+  std::map<vtkShader::Type, vtkShader*> shaders, vtkViewport* viewport, vtkActor2D* actor)
+{
+  std::string VSSource = shaders[vtkShader::Vertex]->GetSource();
+  std::string GSSource = shaders[vtkShader::Geometry]->GetSource();
+  std::string FSSource = shaders[vtkShader::Fragment]->GetSource();
 
   // Build our shader if necessary.
   if (this->HaveCellScalars)
@@ -237,120 +443,15 @@ void vtkOpenGLPolyDataMapper2D::BuildShaders(std::string& VSSource, std::string&
   vtkRenderer* ren = vtkRenderer::SafeDownCast(viewport);
   if (ren && ren->GetSelector())
   {
-    this->ReplaceShaderPicking(FSSource, ren, actor);
-  }
-}
-
-//------------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper2D::UpdateShaders(
-  vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* actor)
-{
-  vtkOpenGLRenderWindow* renWin = vtkOpenGLRenderWindow::SafeDownCast(viewport->GetVTKWindow());
-
-  cellBO.VAO->Bind();
-  this->LastBoundBO = &cellBO;
-
-  if (this->GetNeedToRebuildShaders(cellBO, viewport, actor))
-  {
-    std::string VSSource;
-    std::string FSSource;
-    std::string GSSource;
-    this->BuildShaders(VSSource, FSSource, GSSource, viewport, actor);
-    vtkShaderProgram* newShader = renWin->GetShaderCache()->ReadyShaderProgram(
-      VSSource.c_str(), FSSource.c_str(), GSSource.c_str());
-    cellBO.ShaderSourceTime.Modified();
-    // if the shader changed reinitialize the VAO
-    if (newShader != cellBO.Program)
-    {
-      cellBO.Program = newShader;
-      cellBO.VAO->ShaderProgramChanged(); // reset the VAO as the shader has changed
-    }
-  }
-  else
-  {
-    renWin->GetShaderCache()->ReadyShaderProgram(cellBO.Program);
-  }
-
-  if (cellBO.Program)
-  {
-    this->SetMapperShaderParameters(cellBO, viewport, actor);
-    this->SetPropertyShaderParameters(cellBO, viewport, actor);
-    this->SetCameraShaderParameters(cellBO, viewport, actor);
-  }
-}
-
-//------------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper2D::SetMapperShaderParameters(
-  vtkOpenGLHelper& cellBO, vtkViewport* viewport, vtkActor2D* actor)
-{
-  // Now to update the VAO too, if necessary.
-  if (this->VBOUpdateTime > cellBO.AttributeUpdateTime ||
-    cellBO.ShaderSourceTime > cellBO.AttributeUpdateTime)
-  {
-    cellBO.VAO->Bind();
-
-    this->VBOs->AddAllAttributesToVAO(cellBO.Program, cellBO.VAO);
-
-    cellBO.AttributeUpdateTime.Modified();
-  }
-
-  if (this->HaveCellScalars)
-  {
-    int tunit = this->CellScalarTexture->GetTextureUnit();
-    cellBO.Program->SetUniformi("textureC", tunit);
-  }
-
-  if (this->VBOs->GetNumberOfComponents("tcoordMC"))
-  {
-    vtkInformation* info = actor->GetPropertyKeys();
-    if (info && info->Has(vtkProp::GeneralTextureUnit()))
-    {
-      int tunit = info->Get(vtkProp::GeneralTextureUnit());
-      cellBO.Program->SetUniformi("texture1", tunit);
-    }
-  }
-
-  // handle wide lines
-  if (this->HaveWideLines(viewport, actor))
-  {
-    int vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
-    float lineWidth[2];
-    lineWidth[0] = 2.0 * actor->GetProperty()->GetLineWidth() / vp[2];
-    lineWidth[1] = 2.0 * actor->GetProperty()->GetLineWidth() / vp[3];
-    cellBO.Program->SetUniform2f("lineWidthNVC", lineWidth);
-  }
-
-  vtkRenderer* ren = vtkRenderer::SafeDownCast(viewport);
-  vtkHardwareSelector* selector = ren->GetSelector();
-  if (selector && cellBO.Program->IsUniformUsed("mapperIndex"))
-  {
-    cellBO.Program->SetUniform3f("mapperIndex", selector->GetPropColorValue());
-  }
-}
-
-//------------------------------------------------------------------------------
-void vtkOpenGLPolyDataMapper2D::SetPropertyShaderParameters(
-  vtkOpenGLHelper& cellBO, vtkViewport*, vtkActor2D* actor)
-{
-  if (!this->Colors || !this->Colors->GetNumberOfComponents())
-  {
-    vtkShaderProgram* program = cellBO.Program;
-
-    // Query the actor for some of the properties that can be applied.
-    float opacity = static_cast<float>(actor->GetProperty()->GetOpacity());
-    double* dColor = actor->GetProperty()->GetColor();
-    float diffuseColor[4] = { static_cast<float>(dColor[0]), static_cast<float>(dColor[1]),
-      static_cast<float>(dColor[2]), static_cast<float>(opacity) };
-
-    program->SetUniform4f("diffuseColor", diffuseColor);
+    this->ReplaceShaderPicking(shaders, ren, actor);
   }
 }
 
 //------------------------------------------------------------------------------
 void vtkOpenGLPolyDataMapper2D::ReplaceShaderPicking(
-  std::string& fssource, vtkRenderer*, vtkActor2D*)
+  std::map<vtkShader::Type, vtkShader*> shaders, vtkRenderer*, vtkActor2D*)
 {
+  std::string fssource = shaders[vtkShader::Fragment]->GetSource();
   vtkShaderProgram::Substitute(fssource, "//VTK::Picking::Dec", "uniform vec3 mapperIndex;");
   vtkShaderProgram::Substitute(
     fssource, "//VTK::Picking::Impl", "gl_FragData[0] = vec4(mapperIndex,1.0);\n");
