@@ -393,9 +393,9 @@ namespace //begin anonymous namespace
 
     PointGradients(vtkDataSet *input, TData *a, int numComp, TData *g,
                    TData *v, TData *q, TData *d, int highestDim,
-                   int cellOption) : Input(input), HighestDim(highestDim),
-                                     CellOption(cellOption),
-                                     GradientsBase<TData>(a,numComp,g,v,q,d) {}
+                   int cellOption) :
+      GradientsBase<TData>(a,numComp,g,v,q,d), Input(input),
+      HighestDim(highestDim), CellOption(cellOption) {}
 
     void Initialize()
     {
@@ -417,8 +417,6 @@ namespace //begin anonymous namespace
       auto& cellsOnPoint = this->CellsOnPoint.Local();
       const auto array = vtk::DataArrayTupleRange(this->Array);
       vtkDataSet *input = this->Input;
-
-      vtkIdType numpts = input->GetNumberOfPoints();
       int numberOfOutputComponents = 3 * this->NumComp;
 
       // if we are doing patches for contributing cell dimensions we want to keep track of
@@ -557,8 +555,8 @@ namespace //begin anonymous namespace
     vtkSMPThreadLocal<std::vector<double>> Gradient;
 
     CellGradients(vtkDataSet *input, TData *a, int numComp, TData *g,
-                  TData *v, TData *q, TData *d) : Input(input),
-      GradientsBase<TData>(a,numComp,g,v,q,d) {}
+                  TData *v, TData *q, TData *d) :
+      GradientsBase<TData>(a,numComp,g,v,q,d), Input(input) {}
 
     void Initialize()
     {
@@ -657,7 +655,6 @@ namespace //begin anonymous namespace
                     vtkDataArray *qCriterion, vtkDataArray *divergence,
                     int fieldAssociation)
     {
-      vtkIdType numPts = array->GetNumberOfTuples();
       int numComp = array->GetNumberOfComponents();
 
       if (vtkStructuredGrid* sGrid = vtkStructuredGrid::SafeDownCast(output))
