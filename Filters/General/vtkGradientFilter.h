@@ -22,23 +22,31 @@
  * @brief   A general filter for gradient estimation.
  *
  *
- * Estimates the gradient of a field in a data set.  The gradient calculation
- * is dependent on the input dataset type.  The created gradient array is
- * of the same type as the array it is calculated from (e.g. point data or cell
- * data) but the data type will be either float or double.  At the boundary
- * the gradient is not central differencing.  The output gradient array has
- * 3*number of components of the input data array.  The ordering for the
- * output gradient tuple will be {du/dx, du/dy, du/dz, dv/dx, dv/dy, dv/dz, dw/dx,
- * dw/dy, dw/dz} for an input array {u, v, w}. There are also the options
- * to additionally compute the vorticity and Q criterion of a vector field.
- * Unstructured grids and polydata can have cells of different dimensions.
- * To handle different use cases in this situation, the user can specify
- * which cells contribute to the computation. The options for this are
- * All (default), Patch and DataSetMax. Patch uses only the highest dimension
- * cells attached to a point. DataSetMax uses the highest cell dimension in
- * the entire data set. For Patch or DataSetMax it is possible that some values
- * will not be computed. The ReplacementValueOption specifies what to use
- * for these values.
+ * This filter estimates the gradient of a field in a data set.  The gradient
+ * calculation is dependent on the input dataset type.  The created gradient
+ * array is of the same type as the array it is calculated from (e.g. point
+ * data or cell data) but the data type will be either float or double.  At
+ * the boundary the gradient does not use central differencing.  The output
+ * gradient array has 3*number of components of the input data array.  The
+ * ordering for the output gradient tuple will be {du/dx, du/dy, du/dz,
+ * dv/dx, dv/dy, dv/dz, dw/dx, dw/dy, dw/dz} for an input array {u, v,
+ * w}. There are also the options to additionally compute the vorticity and Q
+ * criterion of a vector field.  Unstructured grids and polydata can have
+ * cells of different dimensions.  To handle different use cases in this
+ * situation, the user can specify which cells contribute to the
+ * computation. The options for this are All (default), Patch and
+ * DataSetMax. Patch uses only the highest dimension cells attached to a
+ * point. DataSetMax uses the highest cell dimension in the entire data
+ * set. For Patch or DataSetMax it is possible that some values will not be
+ * computed. The ReplacementValueOption specifies what to use for these
+ * values.
+ *
+ * @sa
+ * This filter has an accelerated, threaded fast path for unstructured
+ * grids. That is, when the ContributingCellOption=All, and the input dataset
+ * type is vtkUnstructuredGrid, the filter typically executes more than an
+ * order of magnitude faster. Make sure that the CMake variable
+ * VTK_SMP_IMPLEMENTATION_TYPE is set to a non-sequential type such as TBB.
  */
 
 #ifndef vtkGradientFilter_h
@@ -50,8 +58,14 @@
 class VTKFILTERSGENERAL_EXPORT vtkGradientFilter : public vtkDataSetAlgorithm
 {
 public:
+  //@{
+  /**
+   * Standard methods for instantiation, obtaining type information, and printing.
+   */
+  static vtkGradientFilter* New();
   vtkTypeMacro(vtkGradientFilter, vtkDataSetAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent) override;
+  //@}
 
   /// Options to choose what cells contribute to the gradient calculation
   enum ContributingCellEnum
@@ -70,8 +84,6 @@ public:
     DataTypeMin = 2, //!< The minimum possible value of the input array data type
     DataTypeMax = 3  //!< The maximum possible value of the input array data type
   };
-
-  static vtkGradientFilter* New();
 
   //@{
   /**
