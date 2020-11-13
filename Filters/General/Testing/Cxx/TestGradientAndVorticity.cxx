@@ -40,6 +40,8 @@
 #include "vtkUnstructuredGridReader.h"
 
 #include <vector>
+#include <chrono>
+#include <thread>
 
 // The 3D cell with the maximum number of points is VTK_LAGRANGE_HEXAHEDRON.
 // We support up to 6th order hexahedra.
@@ -550,6 +552,8 @@ int TestGradientAndVorticity(int argc, char* argv[])
       }
     }
   }//scope for garbage detection
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
   return EXIT_SUCCESS;
 }
