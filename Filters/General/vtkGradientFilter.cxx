@@ -113,8 +113,9 @@ bool vtkGradientFilterHasArray(vtkFieldData* fieldData, vtkDataArray* array)
 
 // generic way to get the coordinate for either a cell (using
 // the parametric center) or a point
-void GetGridEntityCoordinate(
-  vtkDataSet* grid, int fieldAssociation, vtkIdType index, double coords[3])
+void GetGridEntityCoordinate(vtkDataSet* grid, int fieldAssociation,
+                             vtkIdType index, double coords[3],
+                             vtkGenericCell *cell)
 {
   if (fieldAssociation == vtkDataObject::FIELD_ASSOCIATION_POINTS)
   {
@@ -122,7 +123,7 @@ void GetGridEntityCoordinate(
   }
   else
   {
-    vtkCell* cell = grid->GetCell(index);
+    grid->GetCell(index,cell);
     double pcoords[3];
     int subId = cell->GetParametricCenter(pcoords);
     std::vector<double> weights(cell->GetNumberOfPoints() + 1);
@@ -1140,6 +1141,7 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
   GridT *Grid;
   int *Dims;
   int FieldAssociation;
+  vtkSMPThreadLocal<vtkSmartPointer<vtkGenericCell>> Cell; //prevent repeated instantiation
 
   ComputeStructuredSlice(GridT* output, int *dims, DataT* array, DataT* g,
                          int numComp, int fieldAssociation,
@@ -1147,7 +1149,10 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
     GradientsBase<DataT>(array,numComp,g,v,q,d), Grid(output), Dims(dims),
     FieldAssociation(fieldAssociation) {}
 
-  void Initialize() {}
+  void Initialize()
+  {
+    this->Cell.Local().TakeReference(vtkGenericCell::New());
+  }
 
   void operator()(vtkIdType k, vtkIdType kEnd)
   {
@@ -1157,6 +1162,7 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
     int numComp = this->NumComp;
     int fieldAssociation = this->FieldAssociation;
     const auto array = vtk::DataArrayTupleRange(this->Array);
+    auto& cell = this->Cell.Local();
 
     int idx, idx2, inputComponent;
     double xp[3], xm[3], factor;
@@ -1176,7 +1182,7 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
     std::vector<double> dValuesdZeta(numComp);
     std::vector<double> localGradients(numComp * 3);
 
-    // thread over slice
+    // thread over slices
     for ( ; k < kEnd; k++)
     {
       for (int j = 0; j < dims[1]; j++)
@@ -1202,8 +1208,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = (i + 1) + j * dims[0] + k * ijsize;
             idx2 = i + j * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1217,8 +1223,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = i + j * dims[0] + k * ijsize;
             idx2 = i - 1 + j * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1232,8 +1238,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 0.5;
             idx = (i + 1) + j * dims[0] + k * ijsize;
             idx2 = (i - 1) + j * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1271,8 +1277,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = i + (j + 1) * dims[0] + k * ijsize;
             idx2 = i + j * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1286,8 +1292,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = i + j * dims[0] + k * ijsize;
             idx2 = i + (j - 1) * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1301,8 +1307,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 0.5;
             idx = i + (j + 1) * dims[0] + k * ijsize;
             idx2 = i + (j - 1) * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1340,8 +1346,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = i + j * dims[0] + (k + 1) * ijsize;
             idx2 = i + j * dims[0] + k * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1355,8 +1361,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 1.0;
             idx = i + j * dims[0] + k * ijsize;
             idx2 = i + j * dims[0] + (k - 1) * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1370,8 +1376,8 @@ struct ComputeStructuredSlice : public GradientsBase<DataT>
             factor = 0.5;
             idx = i + j * dims[0] + (k + 1) * ijsize;
             idx2 = i + j * dims[0] + (k - 1) * ijsize;
-            GetGridEntityCoordinate(output, fieldAssociation, idx, xp);
-            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm);
+            GetGridEntityCoordinate(output, fieldAssociation, idx, xp, cell);
+            GetGridEntityCoordinate(output, fieldAssociation, idx2, xm, cell);
             auto a1 = array[idx];
             auto a2 = array[idx2];
             for (inputComponent = 0; inputComponent < numComp; inputComponent++)
@@ -1473,7 +1479,7 @@ void ComputeGradientsSG(GridT* output, DataT* array, DataT* gradients,
 {
   int dims[3];
   output->GetDimensions(dims);
-  if (fieldAssociation == vtkDataObject::FIELD_ASSOCIATION_CELLS)
+  if ( fieldAssociation == vtkDataObject::FIELD_ASSOCIATION_CELLS )
   {
     // reduce the dimensions by 1 for cells
     for (int i = 0; i < 3; i++)
@@ -1484,7 +1490,7 @@ void ComputeGradientsSG(GridT* output, DataT* array, DataT* gradients,
 
   ComputeStructuredSlice<GridT,DataT>
     structuredSliceWorker(output, dims, array, gradients, numComp, fieldAssociation,
-                vorticity, qCriterion, divergence);
+                          vorticity, qCriterion, divergence);
 
   vtkSMPTools::For(0,dims[2], structuredSliceWorker);
 }
