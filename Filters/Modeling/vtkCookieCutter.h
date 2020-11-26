@@ -14,19 +14,30 @@
 =========================================================================*/
 /**
  * @class   vtkCookieCutter
- * @brief   cut vtkPolyData defined on the 2D plane with one or more polygons
+ * @brief   Cut triangulated surfaces with polygons
  *
- * This filter crops an input vtkPolyData consisting of cells (i.e., points,
- * lines, polygons, and triangle strips) with loops specified by a second
- * input containing polygons. Note that this filter can handle concave
- * polygons and/or loops. It may produce multiple output polygons for each
- * polygon/loop interaction. Similarly, it may produce multiple line segments
- * and so on.
+ * Cut a triangulated surface with one or more polygons.
+ * It differs from vtkClipDataSet which is a Scalar-based clip operation.
+ *
+ * This filter crops an input vtkPolyData consisting of triangles
+ * with loops specified by a second input containing polygons.
+ * Note that this filter can handle concave polygons. It only produces triangles
+ * and line segments (which are inherited from given loop's edges)
+ *
+ * The result triangles will be rejected/accepted if necessary. See SetInsideOut()
+ * This is decided with a point-in-polygon test. It also handles situation where
+ * a polygon's point might coincide with a triangle's edge or a vertex.
+ *
+ * @note PointData is interpolated to output.
+ * CellData is copied over to both constraint lines, new triangles
  *
  * @warning
  * The z-values of the input vtkPolyData and the points defining the loops are
  * assumed to lie at z=constant. In other words, this filter assumes that the data lies
  * in a plane orthogonal to the z axis.
+ *
+ * @sa
+ * vtkClipDataSet vtkClipPolyData
  *
  */
 
@@ -36,62 +47,112 @@
 #include "vtkFiltersModelingModule.h" // For export macro
 #include "vtkPolyDataAlgorithm.h"
 
+#include "vtkAbstractCellLocator.h"
+#include "vtkIncrementalPointLocator.h"
+#include "vtkSmartPointer.h"
+
 class VTKFILTERSMODELING_EXPORT vtkCookieCutter : public vtkPolyDataAlgorithm
 {
 public:
-  //@{
   /**
-   * Standard methods to instantiate, print and provide type information.
+   * Construct object with tolerance 1.0e-6, InsideOut set to true,
+   * color acquired points and color loop edges
    */
   static vtkCookieCutter* New();
   vtkTypeMacro(vtkCookieCutter, vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
-  //@}
-
-  /**
-   * Specify the a second vtkPolyData input which defines loops used to cut
-   * the input polygonal data. These loops must be manifold, i.e., do not
-   * self intersect. The loops are defined from the polygons defined in
-   * this second input.
-   */
-  void SetLoopsConnection(vtkAlgorithmOutput* algOutput);
-  vtkAlgorithmOutput* GetLoopsConnection();
+  void PrintSelf(ostream& os, vtkIndent indent);
 
   //@{
   /**
-   * Specify the a second vtkPolyData input which defines loops used to cut
-   * the input polygonal data. These loops must be manifold, i.e., do not
-   * self intersect. The loops are defined from the polygons defined in
-   * this second input.
+   * Append an array to output point data to highlight acquired points. Default: On
    */
-  void SetLoopsData(vtkDataObject* loops);
-  vtkDataObject* GetLoops();
+  vtkBooleanMacro(ColorAcquiredPts, bool);
+  vtkSetMacro(ColorAcquiredPts, bool);
+  vtkGetMacro(ColorAcquiredPts, bool);
   //@}
 
   //@{
   /**
-   * Specify a spatial locator for merging points. By default, an
+   * Append an array to output cell data to highlight constrained lines. Default: On
+   */
+  vtkBooleanMacro(ColorLoopEdges, bool);
+  vtkSetMacro(ColorLoopEdges, bool);
+  vtkGetMacro(ColorLoopEdges, bool);
+  //@}
+
+  //@{
+  /**
+   * After the loop's edges are embedded onto the surface,
+   * On: remove stuff outside loop
+   * Off: remove stuff inside loop
+   */
+  vtkBooleanMacro(InsideOut, bool);
+  vtkSetMacro(InsideOut, bool);
+  vtkGetMacro(InsideOut, bool);
+  //@}
+
+  //@{
+  /**
+   * Tolerance for point merging.
+   */
+  vtkSetMacro(Tolerance, double);
+  vtkGetMacro(Tolerance, double);
+  //@}
+
+  //@{
+  /**
+   * Specify a subclass of vtkAbstractCellLocator which implements the method
+   * 'FindCellsWithinBounds()'. Ex: vtkStaticCellLocator, vtkCellLocator. Not vtkOBBTree
+   */
+  vtkSetSmartPointerMacro(CellLocator, vtkAbstractCellLocator);
+  vtkGetSmartPointerMacro(CellLocator, vtkAbstractCellLocator);
+  //@}
+
+  //@{
+  /**
+   * Specify a spatial point locator for merging points. By default, an
    * instance of vtkMergePoints is used.
    */
-  void SetLocator(vtkIncrementalPointLocator* locator);
-  vtkGetObjectMacro(Locator, vtkIncrementalPointLocator);
+  vtkSetSmartPointerMacro(PointLocator, vtkIncrementalPointLocator);
+  vtkGetSmartPointerMacro(PointLocator, vtkIncrementalPointLocator);
   //@}
 
   /**
-   * Create default locator. Used to create one when none is specified. The
-   * locator is used to merge coincident points.
+   * Specify the a second vtkPolyData input which defines loops used to cut
+   * the input polygonal data. These loops must be manifold, i.e., do not
+   * self intersect. The loops are defined from the polygons defined in
+   * this second input.
    */
-  void CreateDefaultLocator();
+  void SetLoops(vtkPointSet* loops);
+
+  /**
+   * Specify the a second vtkPolyData input which defines loops used to cut
+   * the input polygonal data. These loops must be manifold, i.e., do not
+   * self intersect. The loops are defined from the polygons defined in
+   * this second input.
+   */
+  void SetLoopsConnection(vtkAlgorithmOutput* output);
+
+  /**
+   * Create default locators. Used to create one when none are specified.
+   * The point locator is used to merge coincident points.
+   * The cell locator is used to accelerate cell searches.
+   */
+  void CreateDefaultLocators();
 
 protected:
   vtkCookieCutter();
-  ~vtkCookieCutter() override;
+  ~vtkCookieCutter();
 
-  int RequestData(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-  int RequestUpdateExtent(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
-  int FillInputPortInformation(int, vtkInformation*) override;
+  bool ColorAcquiredPts;
+  bool ColorLoopEdges;
+  bool InsideOut;
+  double Tolerance;
+  vtkSmartPointer<vtkAbstractCellLocator> CellLocator;
+  vtkSmartPointer<vtkIncrementalPointLocator> PointLocator;
 
-  vtkIncrementalPointLocator* Locator;
+  int RequestData(vtkInformation* request, vtkInformationVector** inputVector,
+    vtkInformationVector* outputVector) override;
 
 private:
   vtkCookieCutter(const vtkCookieCutter&) = delete;
