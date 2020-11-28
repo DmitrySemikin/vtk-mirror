@@ -176,8 +176,8 @@ int compare(vtkSmartPointer<vtkPolyData> pdata1, vtkSmartPointer<vtkPolyData> pd
 int TestCookieCutter(int argc, char* argv[])
 {
   vtkNew<vtkXMLMultiBlockDataReader> reader;
-  char* inoutTrueFname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/in_out_true.vtm");
-  char* inoutFalseFname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/in_out_false.vtm");
+  char* inoutTrueFname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/InOutTrue.vtm");
+  char* inoutFalseFname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/InOutFalse.vtm");
 
   vtkNew<vtkCookieCutter> cutter;
   vtkNew<vtkPolyData> triangle, loop;
