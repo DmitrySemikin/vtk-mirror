@@ -984,7 +984,7 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
 
   vtkSmartPointer<vtkAOSDataArrayTemplate<int>> insideOuts;
   if ((insideOuts = vtkAOSDataArrayTemplate<int>::FastDownCast(
-         loops->GetCellData()->GetArray("InsideOuts"))) == nullptr)
+         loops_->GetCellData()->GetArray("InsideOuts"))) == nullptr)
   {
     vtkDebugMacro(<< "Loop polygons do not have InsideOuts array. Will resort to "
                   << this->GetClassNameInternal() << "::InsideOut = " << this->InsideOut);
