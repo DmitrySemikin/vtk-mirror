@@ -717,11 +717,7 @@ struct PopTrisImpl
         const double p[3] = { points1[pt][0], points1[pt][1], points1[pt][2] };
         if (locator->InsertUniquePoint(p, newPtId))
         {
-          if (childless) // avoid computation of weights
-            weights[0] = 1.0;
-          else
-            rootTri->EvaluatePosition(p, closest, subId, pCoords, dist2, weights);
-
+          rootTri->EvaluatePosition(p, closest, subId, pCoords, dist2, weights);
           outPd->InterpolatePoint(inPd, newPtId, rootPts, weights);
 
           if (isAcquired.find(pt) != isAcquired.end())
