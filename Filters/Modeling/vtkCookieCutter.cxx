@@ -413,7 +413,7 @@ struct TriIntersect2dImpl
   template <typename PointsArr1T, typename = vtk::detail::EnableIfVtkDataArray<PointsArr1T>,
     typename PointsArr2T, typename = vtk::detail::EnableIfVtkDataArray<PointsArr1T>>
   void operator()(PointsArr1T* pointsArr1, PointsArr2T* pointsArr2, const SegmentsType& lines,
-    SegmentsType& constraints, const double& tol)
+    SegmentsType& constraints, std::unordered_set<vtkIdType>& isAcquired, const double& tol)
   {
     if (!lines.size())
       return;
@@ -499,6 +499,12 @@ struct TriIntersect2dImpl
           if (tgt >= 0 && minDist <= tol2)
           {
             hits.insert(tgt);
+            double dist2p1 = vtkMath::Distance2BetweenPoints(p2d[tgt], segP1);
+            double dist2p2 = vtkMath::Distance2BetweenPoints(p2d[tgt], segP2);
+            if (dist2p1 < tol2)
+              isAcquired.insert(tgt);
+            else if (dist2p2 < tol2)
+              isAcquired.insert(tgt);
           }
           else if (l1OnEdge)
           {
@@ -509,6 +515,7 @@ struct TriIntersect2dImpl
               inserted = pointsArr1->InsertNextTuple(px);
               processed[l1] = inserted;
               hits.insert(inserted);
+              isAcquired.insert(inserted);
             }
           }
           else if (l2OnEdge)
@@ -520,6 +527,7 @@ struct TriIntersect2dImpl
               inserted = pointsArr1->InsertNextTuple(px);
               processed[l2] = inserted;
               hits.insert(inserted);
+              isAcquired.insert(inserted);
             }
           }
         }
@@ -539,12 +547,14 @@ struct TriIntersect2dImpl
             inserted = pointsArr1->InsertNextTuple(px);
             processed[l1] = inserted;
           }
-          constraints.emplace_back(*(hits.begin()), processed.at(l1));
+          constraints.emplace_back(*(hits.begin()), processed[l1]);
+          isAcquired.insert(processed[l1]);
         }
         else if (l1OnVert)
         {
           processed[l1] = l1v;
           constraints.emplace_back(*(hits.begin()), l1v);
+          isAcquired.insert(l1v);
         }
 
         if (l2Inside || l2OnEdge)
@@ -556,11 +566,14 @@ struct TriIntersect2dImpl
             inserted = pointsArr1->InsertNextTuple(px);
             processed[l2] = inserted;
           }
-          constraints.emplace_back(*(hits.begin()), processed.at(l2));
+          constraints.emplace_back(*(hits.begin()), processed[l2]);
+          isAcquired.insert(processed[l2]);
         }
         else if (l2OnVert)
         {
+          processed[l2] = l2v;
           constraints.emplace_back(*(hits.begin()), l2v);
+          isAcquired.insert(l2v);
         }
       }
       else if (!hits.size())
@@ -586,6 +599,8 @@ struct TriIntersect2dImpl
             processed[l2] = inserted;
           }
           constraints.emplace_back(processed[l1], processed[l2]);
+          isAcquired.insert(processed[l1]);
+          isAcquired.insert(processed[l2]);
         }
       }
     }
@@ -947,8 +962,8 @@ struct SurfCutHelper
     vtkPoints* rootPoints = parent.repr->Points;
     vtkDataArray* pointsArr1 = rootPoints->GetData();
     vtkDataArray* pointsArr2 = points->GetData();
-    if (!dispatchRR::Execute(pointsArr1, pointsArr2, worker, lines, constraints, tol))
-      worker(pointsArr1, pointsArr2, lines, constraints, tol);
+    if (!dispatchRR::Execute(pointsArr1, pointsArr2, worker, lines, constraints, isAcquired, tol))
+      worker(pointsArr1, pointsArr2, lines, constraints, isAcquired, tol);
   }
 
   inline void update() { parent.update(tris); }
