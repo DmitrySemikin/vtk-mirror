@@ -123,7 +123,7 @@ public:
    * self intersect. The loops are defined from the polygons defined in
    * this second input.
    */
-  void SetLoops(vtkPointSet* loops);
+  void SetLoopsData(vtkPolyData* loops);
 
   /**
    * Specify the a second vtkPolyData input which defines loops used to cut

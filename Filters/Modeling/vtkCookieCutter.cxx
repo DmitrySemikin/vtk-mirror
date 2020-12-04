@@ -53,9 +53,9 @@ vtkStandardNewMacro(vtkCookieCutter);
 
 vtkCookieCutter::vtkCookieCutter()
   : ColorAcquiredPts(true)
-  , Tolerance(1.0e-6)
   , ColorLoopEdges(true)
   , InsideOut(true) // default: remove portions outside loop polygons.
+  , Tolerance(1.0e-6)
 {
   this->SetNumberOfInputPorts(2);
   this->SetNumberOfOutputPorts(1);
@@ -70,7 +70,7 @@ vtkCookieCutter::~vtkCookieCutter()
   vtkDebugMacro(<< "Destroyed " << this->GetClassNameInternal());
 }
 
-void vtkCookieCutter::SetLoops(vtkPointSet* loops)
+void vtkCookieCutter::SetLoopsData(vtkPolyData* loops)
 {
   this->SetInputData(1, loops);
 }
@@ -421,9 +421,6 @@ struct TriIntersect2dImpl
     auto points1 = vtk::DataArrayTupleRange<3>(pointsArr1);
     auto points2 = vtk::DataArrayTupleRange<3>(pointsArr2);
 
-    using PointsT1 = vtk::GetAPIType<PointsArr1T>;
-    using PointsT2 = vtk::GetAPIType<PointsArr2T>;
-
     double p2d[3][3] = { { points1[0][0], points1[0][1], 0.0 },
       { points1[1][0], points1[1][1], 0.0 }, { points1[2][0], points1[2][1], 0.0 } };
 
@@ -442,9 +439,6 @@ struct TriIntersect2dImpl
       double segP1[3] = { points2[l1][0], points2[l1][1], 0.0 };
       double segP2[3] = { points2[l2][0], points2[l2][1], 0.0 };
 
-      double segP1_3d[3] = { points2[l1][0], points2[l1][1], points2[l1][2] };
-      double segP2_3d[3] = { points2[l2][0], points2[l2][1], points2[l2][2] };
-
       vtkIdType l1v(-1), l2v(-1);
       vtkIdType l1e(-1), l2e(-1);
 
@@ -460,8 +454,6 @@ struct TriIntersect2dImpl
       const bool l2OnEdge = l2Pos == BaryCentricType::OnEdge;
       const bool l1OnVert = l1Pos == BaryCentricType::OnVertex;
       const bool l2OnVert = l2Pos == BaryCentricType::OnVertex;
-      const bool l1Outsid = l1Pos == BaryCentricType::Outside;
-      const bool l2Outsid = l2Pos == BaryCentricType::Outside;
 
       double px[3] = {};
       std::set<vtkIdType> hits;
@@ -631,16 +623,12 @@ struct PopTrisImpl
     auto points2 = vtk::DataArrayTupleRange<3>(pointsArr2);
     auto inOuts = vtk::DataArrayValueRange<1>(inOutsArr);
 
-    using Points1T = vtk::GetAPIType<PointsArr1T>;
-    using Points2T = vtk::GetAPIType<PointsArr2T>;
     using InOutsT = vtk::GetAPIType<InOutsArrT>;
 
     vtkTriangle* rootTri = parent.repr;
     vtkIdList* rootPts = rootTri->PointIds;
     const vtkIdType& numPoints = rootTri->GetPoints()->GetNumberOfPoints();
     auto& children = parent.children;
-    const std::size_t numChildren = children.size();
-    const bool childless = (numChildren == 1);
     const vtkIdType& rootId = parent.id;
     std::vector<vtkIdType> toNewIds(numPoints, -1);
 
@@ -853,14 +841,14 @@ struct SurfCutHelper
   SurfCutHelper(vtkPointData* inPd_, vtkPointData* outPd_, vtkCellArray* outTris_,
     vtkCellArray* outLines_, vtkCellData* inCd_, vtkCellData* outTriCd_, vtkCellData* outLineCd_,
     vtkIncrementalPointLocator* locator_)
-    : inPd(inPd_)
-    , outPd(outPd_)
-    , outTris(outTris_)
+    : outTris(outTris_)
     , outLines(outLines_)
     , inCd(inCd_)
-    , outTriCd(outTriCd_)
     , outLineCd(outLineCd_)
+    , outTriCd(outTriCd_)
     , locator(locator_)
+    , inPd(inPd_)
+    , outPd(outPd_)
   {
     tris->InsertNextCell(3, TRIVERTS);
     in->SetPoints(parent.repr->Points);
@@ -970,10 +958,10 @@ struct SurfCutHelper
   vtkNew<vtkCellArray> tris;
   vtkNew<vtkDelaunay2D> del2d;
   vtkNew<vtkPolyData> in, out;
-  vtkCellArray *outTris, *outLines;
-  vtkCellData *inCd, *outTriCd, *outLineCd;
-  vtkIncrementalPointLocator* locator;
-  vtkPointData *inPd, *outPd;
+  vtkCellArray *outTris = nullptr, *outLines = nullptr;
+  vtkCellData *inCd = nullptr, *outLineCd = nullptr, *outTriCd = nullptr;
+  vtkIncrementalPointLocator* locator = nullptr;
+  vtkPointData *inPd = nullptr, *outPd = nullptr;
 };
 }
 // anon end
@@ -1032,12 +1020,23 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
   vtkSmartPointer<vtkCellData> inCd = input->GetCellData();
 
   outTris->Allocate(numCells + numLoopPts - 1);
+  vtkDebugMacro(<< "Alloc'd " << numCells + numLoopPts - 1 << " tris");
+
   outLines->Allocate(numLoopPts - 1 + (numCells >> 4));
+  vtkDebugMacro(<< "Alloc'd " << numLoopPts - 1 + (numCells >> 4) << " lines");
+
   outPts->SetDataType(inPts->GetDataType());
   outPts->Allocate(numPts + numLoopPts);
+  vtkDebugMacro(<< "Alloc'd " << numPts + numLoopPts << " points");
+
   outPd->InterpolateAllocate(inPd, numPts + numLoopPts * 3);
+  vtkDebugMacro(<< "Alloc'd " << numPts + numLoopPts * 3 << " point data tuples");
+
   outTriCd->CopyAllocate(inCd);
+  vtkDebugMacro(<< "Alloc'd TriCellData");
+
   outLineCd->CopyAllocate(inCd);
+  vtkDebugMacro(<< "Alloc'd LinesCellData");
 
   vtkDataArray* inPtsArr = inPts->GetData();
   vtkDataArray* inLoopPtsArr = inLoopPts->GetData();
@@ -1068,9 +1067,11 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
   this->CellLocator->CacheCellBoundsOn();
   this->CellLocator->SetDataSet(input);
   this->CellLocator->BuildLocator();
+  vtkDebugMacro(<< "Built locators");
 
   this->PointLocator->SetTolerance(this->Tolerance);
   this->PointLocator->InitPointInsertion(outPts, outBnds);
+  vtkDebugMacro(<< "Init'd point insertion");
 
   // cache loops and cells that might cross.
   std::unordered_map<vtkIdType, SegmentsType> canCross;
@@ -1085,6 +1086,8 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
   {
     const vtkIdType& loopId = loopsIter->GetCurrentCellId();
 
+    vtkDebugMacro(<< "Processing loop: " << loopId);
+
     vtkSmartPointer<vtkIdList> loopPtIds = loopsInf[loopId].second;
     loopsIter->GetCurrentCell(loopPtIds);
 
@@ -1096,6 +1099,8 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
       const vtkIdType& e0 = loopPtIds->GetId(i0);
       const vtkIdType& e1 = loopPtIds->GetId(i1);
 
+      vtkDebugMacro(<< "Processing loop edge: " << lEdge << "(" << e0 << "," << e1 << ")");
+
       vtkBoundingBox lEdgeBBox;
       if (!dispatchR::Execute(inLoopPtsArr, edgeBBoxWorker, e0, e1, lEdgeBBox))
         edgeBBoxWorker(inLoopPtsArr, e0, e1, lEdgeBBox);
@@ -1105,16 +1110,30 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
       // extend up to combined {min, max} since that is what CellLocator sees.
       edgeBnds[4] = outBnds[4];
       edgeBnds[5] = outBnds[5];
+      vtkDebugMacro(<< " Xmin:" << edgeBnds[0] << " Xmax:" << edgeBnds[1] << " Ymin:" << edgeBnds[2]
+                    << " Ymax:" << edgeBnds[3] << " Zmin:" << edgeBnds[4]
+                    << " Zmax:" << edgeBnds[5]);
       this->CellLocator->FindCellsWithinBounds(edgeBnds, cells);
+
+      vtkDebugMacro(<< "Located " << cells->GetNumberOfIds() << " cells");
 
       edgeBnds[4] = 0.0; // back to 2d.
       edgeBnds[5] = 0.0;
-      for (const auto& cell : *cells)
+      for (const auto& cellId : *cells)
       {
         // rule out triangles if the two edge bounding boxes do not intersect
         const vtkIdType* pts = nullptr;
         vtkIdType npts(0);
-        inCells->GetCellAtId(cell, npts, pts);
+        inCells->GetCellAtId(cellId, npts, pts);
+        vtkDebugMacro(<< "Processing cell " << cellId << ", npts: " << npts);
+
+        if (npts != 3)
+        {
+          vtkWarningMacro(<< "Cannot cookie cut cell " << cellId << " with " << npts << " points"
+                          << ". Please triangulate with vtkTriangleFilter.");
+          continue;
+        }
+
         for (const auto& tEdge : TRIEDGES)
         {
           const vtkIdType vi = pts[tEdge[0]];
@@ -1126,10 +1145,10 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
 
           if (tEdgeBBox.IntersectBox(lEdgeBBox))
           {
-            if (!canCross[cell].size())
-              canCross[cell].reserve(10);
+            if (!canCross[cellId].size())
+              canCross[cellId].reserve(10);
 
-            canCross[cell].emplace_back(e0, e1);
+            canCross[cellId].emplace_back(e0, e1);
             break;
           }
         }
@@ -1142,14 +1161,17 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
     loopBnds[5] = 0.0;
     loopsInf[loopId].first = vtkBoundingBox(loopBnds);
   }
+  vtkDebugMacro(<< "Obtained loop edge bounding boxes");
 
   vtkNew<vtkUnsignedCharArray> acquisition;
   acquisition->SetName("Acquired");
   acquisition->SetNumberOfComponents(1);
   acquisition->Allocate(numPts + numLoopPts);
+  vtkDebugMacro(<< "Alloc'd " << numPts + numLoopPts << " towards acquistion");
 
   // roughly, a quarter no. of cells
   int reportEvery = (numCells >= 4) ? numCells >> 2 : (numCells >= 2 ? numCells >> 1 : numCells);
+  vtkDebugMacro(<< "Report progress every " << reportEvery << " cells");
 
   // strategy: 1. push triangle into helper,
   //           2. try to intersect with loops,
@@ -1162,14 +1184,21 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
   {
     const vtkIdType& cellId = cellsIter->GetCurrentCellId();
 
+    vtkDebugMacro(<< "Processing " << cellId);
     const vtkIdType* pts = nullptr;
     vtkIdType npts(0);
     cellsIter->GetCurrentCell(npts, pts);
+    vtkDebugMacro(<< "Npts: " << npts);
+
     if (npts != 3)
-      vtkWarningMacro(<< "Cannot operate on cell with " << npts << " points"
-                      << ". Please use vtkTriangleFilter first.");
+    {
+      vtkWarningMacro(<< "Cannot cookie cut cell " << cellId << " with " << npts << " points"
+                      << ". Please triangulate with vtkTriangleFilter.");
+      continue;
+    }
 
     // provide
+    vtkDebugMacro(<< "Push " << pts[0] << pts[1] << pts[2]);
     helper.push(inPts, pts, pts + 1, pts + 2, cellId);
 
     // embed
@@ -1177,12 +1206,18 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
     if (crossEdges != canCross.end())
     {
       const SegmentsType& loopEdges = crossEdges->second;
+      vtkDebugMacro(<< "Crosses " << loopEdges.size() << " edges");
+
+      vtkDebugMacro(<< "Intersect with line, tol: " << this->Tolerance);
       helper.triIntersect(inLoopPts, loopEdges, this->Tolerance);
+
+      vtkDebugMacro(<< "Triangulate, tol: " << this->Tolerance);
       helper.triangulate(this->Tolerance);
     }
     helper.update();
 
     // accept/reject
+    vtkDebugMacro(<< "Popping .. ");
     helper.pop(inLoopPts, insideOuts, loopsInf, acquisition);
     helper.reset();
 
@@ -1203,6 +1238,7 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
     acquisition->Squeeze();
     outPd->AddArray(acquisition);
   }
+  vtkDebugMacro(<< "Finalized points, pointData");
 
   const vtkIdType& numLines = output->GetNumberOfLines();
   const vtkIdType& numTris = output->GetNumberOfPolys();
@@ -1231,6 +1267,7 @@ int vtkCookieCutter::RequestData(vtkInformation* vtkNotUsed(request),
 
     outCd->SetScalars(constrained);
   }
+  vtkDebugMacro(<< "Finalized cells, cellData");
 
   return 1;
 }
