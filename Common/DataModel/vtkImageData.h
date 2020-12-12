@@ -94,11 +94,11 @@ public:
   int GetCellType(vtkIdType cellId) override;
   void GetCellPoints(vtkIdType cellId, vtkIdList* ptIds) override
   {
-    vtkStructuredData::GetCellPoints(cellId, ptIds, this->DataDescription, this->GetDimensions());
+    vtkStructuredData::GetCellPoints(cellId, ptIds, this->DataDescription, this->Dimensions);
   }
   void GetPointCells(vtkIdType ptId, vtkIdList* cellIds) override
   {
-    vtkStructuredData::GetPointCells(ptId, cellIds, this->GetDimensions());
+    vtkStructuredData::GetPointCells(ptId, cellIds, this->Dimensions);
   }
   void ComputeBounds() override;
   int GetMaxCellSize() override { return 8; } // voxel is the largest
@@ -122,18 +122,9 @@ public:
   /**
    * Get dimensions of this structured points dataset.
    * It is the number of points on each axis.
-   * Dimensions are computed from Extents during this call.
-   * \warning Non thread-safe, use second signature if you want it to be.
-   */
-  virtual int* GetDimensions() VTK_SIZEHINT(3);
-
-  /**
-   * Get dimensions of this structured points dataset.
-   * It is the number of points on each axis.
    * This method is thread-safe.
-   * \warning The Dimensions member variable is not updated during this call.
    */
-  virtual void GetDimensions(int dims[3]);
+  vtkGetVector3Macro(Dimensions, int);
 #if VTK_ID_TYPE_IMPL != VTK_INT
   virtual void GetDimensions(vtkIdType dims[3]);
 #endif
@@ -197,10 +188,10 @@ public:
 
   //@{
   /**
-   * Set/Get the extent. On each axis, the extent is defined by the index
-   * of the first point and the index of the last point.  The extent should
-   * be set before the "Scalars" are set or allocated.  The Extent is
-   * stored in the order (X, Y, Z).
+   * Set/Get the extent.  The dimensions are also set when the extent is set.
+   * On each axis, the extent is defined by the index of the first point
+   * and the index of the last point.  The extent should be set before the
+   * "Scalars" are set or allocated.  The Extent is stored in (X, Y, Z) order.
    * The dataset extent does not have to start at (0,0,0). (0,0,0) is just the
    * extent of the origin.
    * The first point (the one with Id=0) is at extent
@@ -539,9 +530,7 @@ protected:
   vtkImageData();
   ~vtkImageData() override;
 
-  // The extent of what is currently in the structured grid.
-  // Dimensions is just an array to return a value.
-  // Its contents are out of data until GetDimensions is called.
+  // The Dimensions are set whenever the Extent is set and vice-versa
   int Dimensions[3];
   vtkIdType Increments[3];
 
@@ -552,6 +541,7 @@ protected:
   vtkMatrix4x4* IndexToPhysicalMatrix;
   vtkMatrix4x4* PhysicalToIndexMatrix;
 
+  // The Extent is set whenever the Dimensions are set and vice-versa
   int Extent[6];
 
   // The first method assumes Active Scalars

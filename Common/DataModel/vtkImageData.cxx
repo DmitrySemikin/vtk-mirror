@@ -1976,23 +1976,11 @@ void vtkImageData::SetExtent(int* extent)
 
   this->SetDataDescription(description);
 
+  this->Dimensions[0] = this->Extent[1] - this->Extent[0] + 1;
+  this->Dimensions[1] = this->Extent[3] - this->Extent[2] + 1;
+  this->Dimensions[2] = this->Extent[5] - this->Extent[4] + 1;
+
   this->Modified();
-}
-
-//------------------------------------------------------------------------------
-int* vtkImageData::GetDimensions()
-{
-  this->GetDimensions(this->Dimensions);
-  return this->Dimensions;
-}
-
-//------------------------------------------------------------------------------
-void vtkImageData::GetDimensions(int* dOut)
-{
-  const int* extent = this->Extent;
-  dOut[0] = extent[1] - extent[0] + 1;
-  dOut[1] = extent[3] - extent[2] + 1;
-  dOut[2] = extent[5] - extent[4] + 1;
 }
 
 #if VTK_ID_TYPE_IMPL != VTK_INT
@@ -2000,10 +1988,9 @@ void vtkImageData::GetDimensions(int* dOut)
 void vtkImageData::GetDimensions(vtkIdType dims[3])
 {
   // Use vtkIdType to avoid overflow on large images
-  const int* extent = this->Extent;
-  dims[0] = extent[1] - extent[0] + 1;
-  dims[1] = extent[3] - extent[2] + 1;
-  dims[2] = extent[5] - extent[4] + 1;
+  dims[0] = this->Dimensions[0];
+  dims[1] = this->Dimensions[1];
+  dims[2] = this->Dimensions[2];
 }
 #endif
 
