@@ -559,13 +559,16 @@ void vtkResliceCursor::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "HoleWidthInPixels: " << this->HoleWidthInPixels << endl;
   os << indent << "Thickness: (" << this->Thickness[0] << "," << this->Thickness[1] << ","
      << this->Thickness[2] << ")" << endl;
-  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1] << this->Center[2]
-     << endl;
-  os << indent << "XAxis: (" << this->XAxis[0] << "," << this->XAxis[1] << this->XAxis[2] << endl;
-  os << indent << "YAxis: (" << this->YAxis[0] << "," << this->YAxis[1] << this->YAxis[2] << endl;
-  os << indent << "ZAxis: (" << this->ZAxis[0] << "," << this->ZAxis[1] << this->ZAxis[2] << endl;
-  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1] << this->Center[2]
-     << endl;
+  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1] << "," << this->Center[2]
+     << ")" << endl;
+  os << indent << "XAxis: (" << this->XAxis[0] << "," << this->XAxis[1] << "," << this->XAxis[2]
+     << ")" << endl;
+  os << indent << "YAxis: (" << this->YAxis[0] << "," << this->YAxis[1] << "," << this->YAxis[2]
+     << ")" << endl;
+  os << indent << "ZAxis: (" << this->ZAxis[0] << "," << this->ZAxis[1] << "," << this->ZAxis[2]
+     << ")" << endl;
+  os << indent << "Center: (" << this->Center[0] << "," << this->Center[1] << "," << this->Center[2]
+     << ")" << endl;
   os << indent << "Image: " << this->Image << "\n";
   if (this->Image)
   {
