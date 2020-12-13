@@ -427,6 +427,7 @@ void vtkFieldData::DeepCopy(vtkFieldData* f)
 {
   vtkAbstractArray *data, *newData;
 
+  this->InitializeFields();
   this->AllocateArrays(f->GetNumberOfArrays());
   for (int i = 0; i < f->GetNumberOfArrays(); i++)
   {
@@ -441,6 +442,7 @@ void vtkFieldData::DeepCopy(vtkFieldData* f)
     this->AddArray(newData);
     newData->Delete();
   }
+  this->CopyFlags(f);
 }
 
 //------------------------------------------------------------------------------
@@ -762,12 +764,15 @@ void vtkFieldData::CopyFlags(const vtkFieldData* source)
     {
       this->CopyFieldFlags[i].ArrayName = new char[strlen(source->CopyFieldFlags[i].ArrayName) + 1];
       strcpy(this->CopyFieldFlags[i].ArrayName, source->CopyFieldFlags[i].ArrayName);
+      this->CopyFieldFlags[i].IsCopied = source->CopyFieldFlags[i].IsCopied;
     }
   }
   else
   {
     this->CopyFieldFlags = nullptr;
   }
+  this->DoCopyAllOn = source->DoCopyAllOn;
+  this->DoCopyAllOff = source->DoCopyAllOff;
 }
 
 //------------------------------------------------------------------------------
