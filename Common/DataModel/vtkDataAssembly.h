@@ -375,6 +375,11 @@ public:
    */
   void DeepCopy(vtkDataAssembly* other);
 
+  std::vector<int> GetProperties(int nodeid);
+  std::string GetProperty(int nodeid, int property);
+  int SetProperty(int nodeid, int property, const char* value);
+  int UnSetProperty(int nodeid, int property);
+
 protected:
   vtkDataAssembly();
   ~vtkDataAssembly() override;

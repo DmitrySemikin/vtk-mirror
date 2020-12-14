@@ -52,6 +52,7 @@ set(classes
   vtkDataObjectTree
   vtkDataObjectTreeIterator
   vtkDataObjectTypes
+  vtkDataProperties
   vtkDataSet
   vtkDataSetAttributes
   vtkDataSetAttributesFieldList
