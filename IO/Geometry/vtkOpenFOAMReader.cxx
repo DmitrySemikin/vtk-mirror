@@ -2730,6 +2730,8 @@ public:
     io.ReadExpecting(']');
   }
 
+  bool ReadRealNonuniformList(vtkFoamIOobject& io, const vtkFoamToken& token);
+
   template <vtkFoamToken::tokenType listType, typename traitsT>
   void ReadNonuniformList(vtkFoamIOobject& io);
 
@@ -3932,6 +3934,71 @@ void vtkFoamEntryValue::ReadDictionary(vtkFoamIOobject& io, const vtkFoamToken& 
   this->Superclass::DictPtr->Read(io, true, firstKeyword);
 }
 
+bool vtkFoamEntryValue::ReadRealNonuniformList(vtkFoamIOobject& io, const vtkFoamToken& currToken)
+{
+  if (currToken == "List<scalar>")
+  {
+    if (io.GetUse64BitFloats())
+    {
+      this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, double>>(io);
+    }
+    else
+    {
+      this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, float>>(io);
+    }
+  }
+  else if (currToken == "List<sphericalTensor>")
+  {
+    if (io.GetUse64BitFloats())
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 1, false>>(io);
+    }
+    else
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 1, false>>(io);
+    }
+  }
+  else if (currToken == "List<vector>")
+  {
+    if (io.GetUse64BitFloats())
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 3, false>>(io);
+    }
+    else
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 3, false>>(io);
+    }
+  }
+  else if (currToken == "List<symmTensor>")
+  {
+    if (io.GetUse64BitFloats())
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 6, false>>(io);
+    }
+    else
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 6, false>>(io);
+    }
+  }
+  else if (currToken == "List<tensor>")
+  {
+    if (io.GetUse64BitFloats())
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 9, false>>(io);
+    }
+    else
+    {
+      this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 9, false>>(io);
+    }
+  }
+  else
+  {
+    return false; // no supported List<> found
+  }
+
+  return true; // some supported List<> found
+}
+
 // guess the type of the given entry value and read it
 // return value: 0 if encountered end of entry (';') during parsing
 // composite entry value, 1 otherwise
@@ -3998,60 +4065,8 @@ int vtkFoamEntryValue::Read(vtkFoamIOobject& io)
       throw vtkFoamError() << "Expected list type specifier, found EOF";
     }
     this->IsUniform = false;
-    if (currToken == "List<scalar>")
+    if (this->ReadRealNonuniformList(io, currToken))
     {
-      if (io.GetUse64BitFloats())
-      {
-        this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, double>>(io);
-      }
-      else
-      {
-        this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, float>>(io);
-      }
-    }
-    else if (currToken == "List<sphericalTensor>")
-    {
-      if (io.GetUse64BitFloats())
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 1, false>>(io);
-      }
-      else
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 1, false>>(io);
-      }
-    }
-    else if (currToken == "List<vector>")
-    {
-      if (io.GetUse64BitFloats())
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 3, false>>(io);
-      }
-      else
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 3, false>>(io);
-      }
-    }
-    else if (currToken == "List<symmTensor>")
-    {
-      if (io.GetUse64BitFloats())
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 6, false>>(io);
-      }
-      else
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 6, false>>(io);
-      }
-    }
-    else if (currToken == "List<tensor>")
-    {
-      if (io.GetUse64BitFloats())
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, double, 9, false>>(io);
-      }
-      else
-      {
-        this->ReadNonuniformList<VECTORLIST, vectorListTraits<vtkFloatArray, float, 9, false>>(io);
-      }
     }
     // List<bool> may or may not be read as List<label>,
     // this needs checking but not many bool fields in use
@@ -4087,19 +4102,10 @@ int vtkFoamEntryValue::Read(vtkFoamIOobject& io)
       throw vtkFoamError() << "Unsupported nonuniform list type " << currToken;
     }
   }
-  // turbulentTemperatureCoupledBaffleMixed boundary condition
-  // uses lists without a uniform/nonuniform keyword
-  else if (currToken == "List<scalar>")
+  // there can also be additional lists without the "nonuniform" keyword
+  // in the dicts (these are just not geometrically related to cells)
+  else if (this->ReadRealNonuniformList(io, currToken))
   {
-    this->IsUniform = false;
-    if (io.GetUse64BitFloats())
-    {
-      this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, double>>(io);
-    }
-    else
-    {
-      this->ReadNonuniformList<SCALARLIST, listTraits<vtkFloatArray, float>>(io);
-    }
   }
   // zones have list without a uniform/nonuniform keyword
   else if (currToken == "List<label>")
