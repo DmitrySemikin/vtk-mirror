@@ -175,7 +175,7 @@ public:
   vtkMTimeType GetMTime() override;
 
   void SetImplementation(ImplementationType* impl);
-  ImplementationType* GetImplementation();
+  ImplementationType* GetImplementation() VTK_FUTURE_CONST;
 
 protected:
   vtkMappedUnstructuredGrid();

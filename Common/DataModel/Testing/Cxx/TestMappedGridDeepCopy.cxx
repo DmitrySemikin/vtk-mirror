@@ -279,7 +279,10 @@ public:
 
   static MappedGrid* New();
 
-  vtkPoints* GetPoints() override { return this->GetImplementation()->GetPoints(); }
+  vtkPoints* GetPoints() VTK_FUTURE_CONST override
+  {
+    return this->GetImplementation()->GetPoints();
+  }
 
   vtkIdType GetNumberOfPoints() override
   {

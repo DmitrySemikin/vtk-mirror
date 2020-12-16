@@ -83,12 +83,12 @@ public:
    * LayerNumber is the ActiveLayer.  If no image matches, then NULL
    * will be returned.
    */
-  vtkImageSlice* GetActiveImage();
+  vtkImageSlice* GetActiveImage() VTK_FUTURE_CONST;
 
   /**
    * Get the mapper for the currently active image.
    */
-  vtkImageMapper3D* GetMapper() override;
+  vtkImageMapper3D* GetMapper() VTK_FUTURE_CONST override;
 
   /**
    * Get the property for the currently active image.

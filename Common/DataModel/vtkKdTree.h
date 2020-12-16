@@ -222,13 +222,13 @@ public:
   /**
    * Return the n'th data set.
    */
-  vtkDataSet* GetDataSet(int n);
+  vtkDataSet* GetDataSet(int n) VTK_FUTURE_CONST;
 
   /**
    * Return the 0'th data set.  For compatibility with the superclass'
    * interface.
    */
-  vtkDataSet* GetDataSet() override { return this->GetDataSet(0); }
+  vtkDataSet* GetDataSet() VTK_FUTURE_CONST override { return this->GetDataSet(0); }
 
   //@{
   /**
