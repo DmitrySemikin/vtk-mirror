@@ -18,6 +18,8 @@
 #include "vtkAssemblyNode.h"
 #include "vtkAssemblyPath.h"
 #include "vtkCellArray.h"
+#include "vtkCompositeDataIterator.h"
+#include "vtkCompositeDataSet.h"
 #include "vtkDataSet.h"
 #include "vtkFloatArray.h"
 #include "vtkGeometryFilter.h"
@@ -42,6 +44,34 @@
 #include <sstream>
 
 vtkStandardNewMacro(vtkOBJExporter);
+
+namespace
+{
+vtkPolyData* findPolyData(vtkDataObject* input)
+{
+  // do we have polydata?
+  vtkPolyData* pd = vtkPolyData::SafeDownCast(input);
+  if (pd)
+  {
+    return pd;
+  }
+  vtkCompositeDataSet* cd = vtkCompositeDataSet::SafeDownCast(input);
+  if (cd)
+  {
+    vtkSmartPointer<vtkCompositeDataIterator> iter;
+    iter.TakeReference(cd->NewIterator());
+    for (iter->InitTraversal(); !iter->IsDoneWithTraversal(); iter->GoToNextItem())
+    {
+      pd = vtkPolyData::SafeDownCast(iter->GetCurrentDataObject());
+      if (pd)
+      {
+        return pd;
+      }
+    }
+  }
+  return nullptr;
+}
+}
 
 vtkOBJExporter::vtkOBJExporter()
 {
@@ -168,7 +198,6 @@ void vtkOBJExporter::WriteData()
 void vtkOBJExporter::WriteAnActor(
   vtkActor* anActor, std::ostream& fpObj, std::ostream& fpMtl, std::string& modelName, int& idStart)
 {
-  vtkDataSet* ds;
   vtkNew<vtkPolyData> pd;
   vtkPointData* pntData;
   vtkPoints* points;
@@ -239,27 +268,20 @@ void vtkOBJExporter::WriteAnActor(
   }
 
   // get the mappers input and matrix
-  ds = anActor->GetMapper()->GetInput();
   // see if the mapper has an input.
-  if (ds == nullptr)
+  if (!anActor->GetMapper()->GetInputAlgorithm())
   {
     return;
   }
   anActor->GetMapper()->GetInputAlgorithm()->Update();
-  trans->SetMatrix(anActor->vtkProp3D::GetMatrix());
+  vtkPolyData* input = findPolyData(anActor->GetMapper()->GetInputDataObject(0, 0));
+  if (!input || input->GetNumberOfCells() == 0)
+  {
+    return;
+  }
+  pd->DeepCopy(input);
 
-  // we really want polydata
-  if (ds->GetDataObjectType() != VTK_POLY_DATA)
-  {
-    vtkNew<vtkGeometryFilter> gf;
-    gf->SetInputConnection(anActor->GetMapper()->GetInputConnection(0, 0));
-    gf->Update();
-    pd->DeepCopy(gf->GetOutput());
-  }
-  else
-  {
-    pd->DeepCopy(ds);
-  }
+  trans->SetMatrix(anActor->vtkProp3D::GetMatrix());
 
   // write out the points
   points = vtkPoints::New();
