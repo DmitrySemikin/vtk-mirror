@@ -1,4 +1,8 @@
 vtk_module_test_data(
+  Data/InOutTrue.vtm
+  Data/InOutTrue/,REGEX:.*
+  Data/InOutFalse.vtm
+  Data/InOutFalse/,REGEX:.*
   Data/SemiDisk/SemiDisk-0.vtp
   Data/SemiDisk/SemiDisk-1.vtp)
 
