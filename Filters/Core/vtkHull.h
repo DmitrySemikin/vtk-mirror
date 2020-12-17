@@ -42,6 +42,7 @@
 #define vtkHull_h
 
 #include "vtkFiltersCoreModule.h" // For export macro
+#include "vtkIdTypeArray.h"
 #include "vtkPolyDataAlgorithm.h"
 
 class vtkCellArray;
@@ -183,7 +184,8 @@ protected:
 
   // Internal method used to create the actual polygons from the set
   // of planes
-  void ClipPolygonsFromPlanes(vtkPoints* points, vtkCellArray* polys, const double* bounds);
+  void ClipPolygonsFromPlanes(
+    vtkPoints* points, vtkCellArray* polys, vtkIdTypeArray* planeIDs, const double* bounds);
 
   // Internal method used to create the initial "big" polygon from the
   // plane equation. This polygon is clipped by all other planes to form
