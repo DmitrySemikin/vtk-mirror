@@ -17,6 +17,7 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
+#include "vtkIdTypeArray.h"
 #include "vtkIncrementalPointLocator.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -43,6 +44,7 @@ vtkFeatureEdges::vtkFeatureEdges()
   this->NonManifoldEdges = true;
   this->ManifoldEdges = false;
   this->Coloring = true;
+  this->GeneratePedigreeIds = false;
   this->Locator = nullptr;
   this->OutputPointsPrecision = vtkAlgorithm::DEFAULT_PRECISION;
 }
@@ -219,6 +221,12 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
   vtkIdType progressInterval = numCells / 20 + 1;
 
   numBEdges = numNonManifoldEdges = numFedges = numManifoldEdges = 0;
+  vtkSmartPointer<vtkIdTypeArray> pedigree;
+  if (this->GeneratePedigreeIds)
+  {
+    pedigree = vtkSmartPointer<vtkIdTypeArray>::New();
+    pedigree->SetName("Pedigree ID");
+  }
   for (cellId = 0, newPolys->InitTraversal(); newPolys->GetNextCell(npts, pts) && !abort; cellId++)
   {
     if (!(cellId % progressInterval)) // manage progress / early abort
@@ -322,11 +330,19 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
       if (this->Locator->InsertUniquePoint(x1, lineIds[0]))
       {
         outPD->CopyData(pd, p1, lineIds[0]);
+        if (pedigree)
+        {
+          pedigree->InsertNextValue(p1);
+        }
       }
 
       if (this->Locator->InsertUniquePoint(x2, lineIds[1]))
       {
         outPD->CopyData(pd, p2, lineIds[1]);
+        if (pedigree)
+        {
+          pedigree->InsertNextValue(p2);
+        }
       }
 
       newId = newLines->InsertNextCell(2, lineIds);
@@ -336,6 +352,10 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
         newScalars->InsertTuple(newId, &scalar);
       }
     }
+  }
+  if (pedigree)
+  {
+    outPD->SetPedigreeIds(pedigree);
   }
 
   vtkDebugMacro(<< "Created " << numBEdges << " boundary edges, " << numNonManifoldEdges

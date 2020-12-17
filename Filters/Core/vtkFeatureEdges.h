@@ -126,6 +126,19 @@ public:
 
   //@{
   /**
+   * Turn on/off whether a point pedigree ID array will be created
+   * to map output points back to their corresponding input points.
+   *
+   * This is off by default for backward compatibility and space
+   * savings.
+   */
+  vtkSetMacro(GeneratePedigreeIds, bool);
+  vtkGetMacro(GeneratePedigreeIds, bool);
+  vtkBooleanMacro(GeneratePedigreeIds, bool);
+  //@}
+
+  //@{
+  /**
    * Set / get a spatial locator for merging points. By
    * default an instance of vtkMergePoints is used.
    */
@@ -167,6 +180,7 @@ protected:
   bool NonManifoldEdges;
   bool ManifoldEdges;
   bool Coloring;
+  bool GeneratePedigreeIds;
   int OutputPointsPrecision;
   vtkIncrementalPointLocator* Locator;
 
