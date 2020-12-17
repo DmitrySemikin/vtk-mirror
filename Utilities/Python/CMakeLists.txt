@@ -151,6 +151,19 @@ if (VTK_PYTHON_OPTIONAL_LINK AND TARGET "${vtk_python_embed_target}")
   set(needs_flags "$<NOT:$<BOOL:${vtk_undefined_symbols_allowed}>>")
   set(direct_link "$<BOOL:$<TARGET_PROPERTY:INTERFACE_vtk_python_direct_link>>")
   set(should_use "$<OR:${is_exe},${direct_link}>")
+
+  # XXX(cray): There is a bug where `--no-as-needed` is dropped by the Cray
+  # compiler wrappers. This causes a "hiccup" in the argument parsing which
+  # exposes `--unresolved-symbols=` to the compiler directly rather than the
+  # linker. Note that `$<MATCHES>` is not a thing, so we cannot use a genex for
+  # this and we're left with a hack. Whenever we drop support for Cray
+  # compilers with this problem, we can drop this condition and the variable
+  # use later in this file.
+  set(is_broken_cray_pe_wrapper 0)
+  if (CMAKE_CXX_COMPILER_WRAPPER MATCHES "CrayPrgEnv")
+    set(is_broken_cray_pe_wrapper 1)
+  endif ()
+
   set(platform_flags
     # Apple flags.
     "$<$<PLATFORM_ID:Darwin>:-undefined;dynamic_lookup>"
@@ -158,7 +171,7 @@ if (VTK_PYTHON_OPTIONAL_LINK AND TARGET "${vtk_python_embed_target}")
     # The linker is allowed to skip libraries not used by the end result. This
     # can exclude the `libpython` DT_NEEDED entry at the final executable if it
     # itself does not actually use any libpython symbols.
-    "$<$<AND:${is_exe},$<PLATFORM_ID:Linux>>:LINKER:--no-as-needed>"
+    "$<$<AND:${is_exe},$<PLATFORM_ID:Linux>,$<NOT:${is_broken_cray_pe_wrapper}>>:LINKER:--no-as-needed>"
     # Due to the above making the symbols actually available, we can ignore
     # unresolved symbols in the shared libraries that are being linked to.
     "$<$<AND:${is_exe},$<PLATFORM_ID:Linux>>:LINKER:--unresolved-symbols=ignore-in-shared-libs>")
