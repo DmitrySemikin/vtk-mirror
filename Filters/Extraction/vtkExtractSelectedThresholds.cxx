@@ -255,9 +255,8 @@ int vtkExtractSelectedThresholds::ExtractCells(
     {
       pointInArray->SetValue(i, flag);
     }
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
 
     cellInArray = vtkSignedCharArray::New();
     cellInArray->SetNumberOfComponents(1);
@@ -266,9 +265,8 @@ int vtkExtractSelectedThresholds::ExtractCells(
     {
       cellInArray->SetValue(i, flag);
     }
-    cellInArray->SetName("vtkInsidedness");
+    cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outCD->AddArray(cellInArray);
-    outCD->SetScalars(cellInArray);
   }
   else
   {
@@ -473,9 +471,8 @@ int vtkExtractSelectedThresholds::ExtractPoints(
     {
       pointInArray->SetValue(i, flag);
     }
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
   }
   else
   {
@@ -600,7 +597,7 @@ int vtkExtractSelectedThresholds::ExtractRows(
     rowInArray->SetNumberOfComponents(1);
     rowInArray->SetNumberOfTuples(numRows);
     std::fill(rowInArray->GetPointer(0), rowInArray->GetPointer(0) + numRows, flag);
-    rowInArray->SetName("vtkInsidedness");
+    rowInArray->SetName(this->GetTopologyFilterOutputArrayName());
     outRD->AddArray(rowInArray);
   }
   else

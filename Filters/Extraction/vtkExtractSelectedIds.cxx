@@ -13,6 +13,7 @@
 
 =========================================================================*/
 #include "vtkExtractSelectedIds.h"
+#include "vtkExtractSelectedIdUtils.h"
 
 #include "vtkArrayDispatch.h"
 #include "vtkCellArray.h"
@@ -121,93 +122,34 @@ int vtkExtractSelectedIds::RequestData(vtkInformation* vtkNotUsed(request),
   return 1;
 }
 
-// Copy the points marked as "in" and build a pointmap
-static void vtkExtractSelectedIdsCopyPoints(
-  vtkDataSet* input, vtkDataSet* output, signed char* inArray, vtkIdType* pointMap)
+static void vtkFilterPreviousSelectedIds(vtkSignedCharArray* previousPointInArray,
+  vtkSignedCharArray* pointInArray, vtkSignedCharArray* previousCellInArray,
+  vtkSignedCharArray* cellInArray, signed char flag)
 {
-  vtkPoints* newPts = vtkPoints::New();
-
-  vtkIdType i, numPts = input->GetNumberOfPoints();
-
-  vtkIdTypeArray* originalPtIds = vtkIdTypeArray::New();
-  originalPtIds->SetNumberOfComponents(1);
-  originalPtIds->SetName("vtkOriginalPointIds");
-
-  vtkPointData* inPD = input->GetPointData();
-  vtkPointData* outPD = output->GetPointData();
-  outPD->SetCopyGlobalIds(1);
-  outPD->CopyAllocate(inPD);
-
-  for (i = 0; i < numPts; i++)
+  if (previousPointInArray)
   {
-    if (inArray[i] > 0)
+    vtkIdType numPreviousPoints =
+      (std::min)(previousPointInArray->GetSize(), pointInArray->GetSize());
+    for (vtkIdType i = 0; i < numPreviousPoints; i++)
     {
-      pointMap[i] = newPts->InsertNextPoint(input->GetPoint(i));
-      outPD->CopyData(inPD, i, pointMap[i]);
-      originalPtIds->InsertNextValue(i);
-    }
-    else
-    {
-      pointMap[i] = -1;
+      if (previousPointInArray->GetValue(i) != pointInArray->GetValue(i))
+      {
+        pointInArray->SetValue(i, flag);
+      }
     }
   }
 
-  outPD->AddArray(originalPtIds);
-  originalPtIds->Delete();
-
-  // outputDS must be either vtkPolyData or vtkUnstructuredGrid
-  vtkPointSet::SafeDownCast(output)->SetPoints(newPts);
-  newPts->Delete();
-}
-
-// Copy the cells marked as "in" using the given pointmap
-template <class T>
-void vtkExtractSelectedIdsCopyCells(
-  vtkDataSet* input, T* output, signed char* inArray, vtkIdType* pointMap)
-{
-  vtkIdType numCells = input->GetNumberOfCells();
-  output->AllocateEstimate(numCells / 4, 1);
-
-  vtkCellData* inCD = input->GetCellData();
-  vtkCellData* outCD = output->GetCellData();
-  outCD->SetCopyGlobalIds(1);
-  outCD->CopyAllocate(inCD);
-
-  vtkIdTypeArray* originalIds = vtkIdTypeArray::New();
-  originalIds->SetNumberOfComponents(1);
-  originalIds->SetName("vtkOriginalCellIds");
-
-  vtkIdType i, j, newId = 0;
-  vtkIdList* ptIds = vtkIdList::New();
-  for (i = 0; i < numCells; i++)
+  if (previousCellInArray)
   {
-    if (inArray[i] > 0)
+    vtkIdType numPreviousCells = (std::min)(previousCellInArray->GetSize(), cellInArray->GetSize());
+    for (vtkIdType i = 0; i < numPreviousCells; i++)
     {
-      // special handling for polyhedron cells
-      if (vtkUnstructuredGrid::SafeDownCast(input) && vtkUnstructuredGrid::SafeDownCast(output) &&
-        input->GetCellType(i) == VTK_POLYHEDRON)
+      if (previousCellInArray->GetValue(i) != cellInArray->GetValue(i))
       {
-        ptIds->Reset();
-        vtkUnstructuredGrid::SafeDownCast(input)->GetFaceStream(i, ptIds);
-        vtkUnstructuredGrid::ConvertFaceStreamPointIds(ptIds, pointMap);
+        cellInArray->SetValue(i, flag);
       }
-      else
-      {
-        input->GetCellPoints(i, ptIds);
-        for (j = 0; j < ptIds->GetNumberOfIds(); j++)
-        {
-          ptIds->SetId(j, pointMap[ptIds->GetId(j)]);
-        }
-      }
-      output->InsertNextCell(input->GetCellType(i), ptIds);
-      outCD->CopyData(inCD, i, newId++);
-      originalIds->InsertNextValue(i);
     }
   }
-
-  outCD->AddArray(originalIds);
-  originalIds->Delete();
-  ptIds->Delete();
 }
 
 namespace
@@ -609,14 +551,12 @@ int vtkExtractSelectedIds::ExtractCells(
   if (passThrough)
   {
     output->ShallowCopy(input);
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkPointData* outPD = output->GetPointData();
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
-    cellInArray->SetName("vtkInsidedness");
+    cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkCellData* outCD = output->GetCellData();
     outCD->AddArray(cellInArray);
-    outCD->SetScalars(cellInArray);
   }
 
   // decide what the IDS mean
@@ -726,6 +666,18 @@ int vtkExtractSelectedIds::ExtractCells(
   idxArray->Delete();
   labelArray->Delete();
 
+  // Filter out any items from previous filters that this filter needs to remove
+  vtkSignedCharArray* previousPointInArray = this->GetTopologyFilterInputArrayName() != nullptr
+    ? vtkArrayDownCast<vtkSignedCharArray>(
+        input->GetPointData()->GetArray(this->GetTopologyFilterInputArrayName()))
+    : nullptr;
+  vtkSignedCharArray* previousCellInArray = this->GetTopologyFilterInputArrayName() != nullptr
+    ? vtkArrayDownCast<vtkSignedCharArray>(
+        input->GetCellData()->GetArray(this->GetTopologyFilterInputArrayName()))
+    : nullptr;
+  vtkFilterPreviousSelectedIds(
+    previousPointInArray, pointInArray, previousCellInArray, cellInArray, flag);
+
   if (!passThrough)
   {
     vtkIdType* pointMap = new vtkIdType[numPts]; // maps old point ids into new
@@ -798,16 +750,14 @@ int vtkExtractSelectedIds::ExtractPoints(
   if (passThrough)
   {
     output->ShallowCopy(input);
-    pointInArray->SetName("vtkInsidedness");
+    pointInArray->SetName(this->GetTopologyFilterOutputArrayName());
     vtkPointData* outPD = output->GetPointData();
     outPD->AddArray(pointInArray);
-    outPD->SetScalars(pointInArray);
     if (containingCells)
     {
-      cellInArray->SetName("vtkInsidedness");
+      cellInArray->SetName(this->GetTopologyFilterOutputArrayName());
       vtkCellData* outCD = output->GetCellData();
       outCD->AddArray(cellInArray);
-      outCD->SetScalars(cellInArray);
     }
   }
 
@@ -914,6 +864,18 @@ int vtkExtractSelectedIds::ExtractPoints(
   idArray->Delete();
   idxArray->Delete();
   labelArray->Delete();
+
+  // Filter out any items from previous filters that this filter needs to remove
+  vtkSignedCharArray* previousPointInArray = this->GetTopologyFilterInputArrayName() != nullptr
+    ? vtkArrayDownCast<vtkSignedCharArray>(
+        input->GetPointData()->GetArray(this->GetTopologyFilterInputArrayName()))
+    : nullptr;
+  vtkSignedCharArray* previousCellInArray = this->GetTopologyFilterInputArrayName() != nullptr
+    ? vtkArrayDownCast<vtkSignedCharArray>(
+        input->GetCellData()->GetArray(this->GetTopologyFilterInputArrayName()))
+    : nullptr;
+  vtkFilterPreviousSelectedIds(
+    previousPointInArray, pointInArray, previousCellInArray, cellInArray, flag);
 
   if (!passThrough)
   {

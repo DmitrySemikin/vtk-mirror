@@ -41,6 +41,7 @@
 #include "vtkPolyData.h"
 #include "vtkRectilinearGrid.h"
 #include "vtkRectilinearSynchronizedTemplates.h"
+#include "vtkSignedCharArray.h"
 #include "vtkSmartPointer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStructuredGrid.h"
@@ -68,6 +69,9 @@ vtkCutter::vtkCutter(vtkImplicitFunction* cf)
   this->Locator = nullptr;
   this->GenerateTriangles = 1;
   this->OutputPointsPrecision = DEFAULT_PRECISION;
+  this->FilterTopology = 0;
+  this->TopologyFilterArrayName = nullptr;
+  this->SetTopologyFilterArrayName("vtkInsidedness");
 
   this->SynchronizedTemplates3D = vtkSynchronizedTemplates3D::New();
   this->SynchronizedTemplatesCutter3D = vtkSynchronizedTemplatesCutter3D::New();
@@ -828,6 +832,13 @@ void vtkCutter::UnstructuredGridCutter(vtkDataSet* input, vtkPolyData* output)
   cellScalars->SetNumberOfComponents(cutScalars->GetNumberOfComponents());
   cellScalars->Allocate(VTK_CELL_SIZE * cutScalars->GetNumberOfComponents());
 
+  // Check for a filtering array if cells need to be removed
+  vtkSignedCharArray* includedCells =
+    (this->FilterTopology && this->GetTopologyFilterArrayName() != nullptr)
+    ? vtkArrayDownCast<vtkSignedCharArray>(inCD->GetArray(this->GetTopologyFilterArrayName()))
+    : nullptr;
+  vtkIdType numIncludedCells = includedCells ? includedCells->GetNumberOfValues() : 0;
+
   vtkContourHelper helper(this->Locator, newVerts, newLines, newPolys, inPD, inCD, outPD, outCD,
     estimatedSize, this->GenerateTriangles != 0);
   if (this->SortBy == VTK_SORT_BY_CELL)
@@ -854,6 +865,16 @@ void vtkCutter::UnstructuredGridCutter(vtkDataSet* input, vtkPolyData* output)
           vtkDebugMacro(<< "Cutting #" << cut);
           this->UpdateProgress(static_cast<double>(cut) / numCuts);
           abortExecute = this->GetAbortExecute();
+        }
+
+        // Filter out cells if filtering is enabled
+        {
+          vtkIdType cellId = cellIter->GetCellId();
+          if (includedCells &&
+            (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+          {
+            continue;
+          }
         }
 
         pointIdList = cellIter->GetPointIds();
@@ -935,6 +956,13 @@ void vtkCutter::UnstructuredGridCutter(vtkDataSet* input, vtkPolyData* output)
           vtkDebugMacro(<< "Cutting #" << cellId);
           this->UpdateProgress(static_cast<double>(cellId) / numCuts);
           abortExecute = this->GetAbortExecute();
+        }
+
+        // Filter out cells if filtering is enabled
+        if (includedCells &&
+          (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+        {
+          continue;
         }
 
         // Just fetch the cell type -- least expensive.

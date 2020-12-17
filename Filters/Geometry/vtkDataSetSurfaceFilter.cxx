@@ -41,6 +41,7 @@
 #include "vtkPyramid.h"
 #include "vtkRectilinearGrid.h"
 #include "vtkRectilinearGridGeometryFilter.h"
+#include "vtkSignedCharArray.h"
 #include "vtkSmartPointer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkStructuredData.h"
@@ -145,6 +146,10 @@ vtkDataSetSurfaceFilter::vtkDataSetSurfaceFilter()
   this->NonlinearSubdivisionLevel = 1;
 
   this->Delegation = false;
+
+  this->FilterTopology = false;
+  this->TopologyFilterArrayName = nullptr;
+  this->SetTopologyFilterArrayName("vtkInsidedness");
 }
 
 //------------------------------------------------------------------------------
@@ -1456,6 +1461,9 @@ void vtkDataSetSurfaceFilter::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "OriginalPointIdsName: " << this->GetOriginalPointIdsName() << endl;
 
   os << indent << "NonlinearSubdivisionLevel: " << this->GetNonlinearSubdivisionLevel() << endl;
+
+  os << indent << "FilterTopology: " << (this->GetFilterTopology() ? "On\n" : "Off\n");
+  os << indent << "TopologyFilterArrayName: " << this->GetTopologyFilterArrayName() << endl;
 }
 
 //========================================================================
@@ -1619,9 +1627,25 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
     this->OriginalPointIds->SetNumberOfComponents(1);
   }
 
+  // Check for a filtering array if cells need to be removed from the surface
+  vtkSignedCharArray* includedCells =
+    (this->FilterTopology && this->GetTopologyFilterArrayName() != nullptr)
+    ? vtkArrayDownCast<vtkSignedCharArray>(inputCD->GetArray(this->GetTopologyFilterArrayName()))
+    : nullptr;
+  vtkIdType numIncludedCells = includedCells ? includedCells->GetNumberOfValues() : 0;
+
   // First insert all points.  Points have to come first in poly data.
   for (cellIter->InitTraversal(); !cellIter->IsDoneWithTraversal(); cellIter->GoToNextCell())
   {
+    vtkIdType cellId = cellIter->GetCellId();
+
+    // Filter out cells if filtering is enabled
+    if (includedCells &&
+      (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+    {
+      continue;
+    }
+
     cellType = cellIter->GetCellType();
 
     // A couple of common cases to see if things go faster.
@@ -1637,7 +1661,6 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
         outPtId = this->GetOutputPointId(*(pointIdArray++), input, newPts, outputPD);
         newVerts->InsertCellPoint(outPtId);
       }
-      vtkIdType cellId = cellIter->GetCellId();
       this->RecordOrigCellId(this->NumberOfNewCells, cellId);
       outputCD->CopyData(cd, cellId, this->NumberOfNewCells++);
     }
@@ -1655,6 +1678,7 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
        cellIter->GoToNextCell())
   {
     vtkIdType cellId = cellIter->GetCellId();
+
     // Progress and abort method support
     if (progressCount >= progressInterval)
     {
@@ -1664,6 +1688,13 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
       progressCount = 0;
     }
     progressCount++;
+
+    // Filter out cells if filtering is enabled
+    if (includedCells &&
+      (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+    {
+      continue;
+    }
 
     cellType = cellIter->GetCellType();
     switch (cellType)
@@ -1933,6 +1964,13 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
     vtkIdType cellId = cellIter->GetCellId();
     cellType = cellIter->GetCellType();
     numCellPts = cellIter->GetNumberOfPoints();
+
+    // Filter out cells if filtering is enabled
+    if (includedCells &&
+      (cellId < 0 || cellId >= numIncludedCells || includedCells->GetValue(cellId) < 1))
+    {
+      continue;
+    }
 
     // If we have a quadratic face and our subdivision level is zero, just treat
     // it as a linear cell.  This should work so long as the first points of the
