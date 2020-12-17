@@ -60,6 +60,29 @@ class vtkMutableDirectedGraph;
 class vtkDirectedGraph;
 class XdmfDomain;
 
+/**
+ * Provides configuration options for ParseFiniteElementFunctionLagrange
+ */
+enum VTKIOXDMF3_EXPORT FiniteElementLagrangeConfig
+{
+  Invalid = 0,
+  Continuous = 1,
+  Explicit = 2,
+  Row = 4,
+  VTK = 8,
+  Default = 16
+};
+inline FiniteElementLagrangeConfig operator|(
+  FiniteElementLagrangeConfig a, FiniteElementLagrangeConfig b)
+{
+  return static_cast<FiniteElementLagrangeConfig>(static_cast<int>(a) | static_cast<int>(b));
+}
+inline FiniteElementLagrangeConfig operator&(
+  FiniteElementLagrangeConfig a, FiniteElementLagrangeConfig b)
+{
+  return static_cast<FiniteElementLagrangeConfig>(static_cast<int>(a) & static_cast<int>(b));
+}
+
 class VTKIOXDMF3_EXPORT vtkXdmf3DataSet
 {
 public:
@@ -231,7 +254,8 @@ public:
    * type.
    */
   static int GetVTKFiniteElementCellType(unsigned int element_degree,
-    const std::string& element_family, shared_ptr<const XdmfTopologyType> topologyType);
+    const std::string& element_family, shared_ptr<const XdmfTopologyType> topologyType,
+    bool enable_lagrange);
 
   /**
    * Parses finite element function defined in Attribute.
@@ -245,6 +269,21 @@ public:
    *
    */
   static void ParseFiniteElementFunction(vtkDataObject* dObject,
+    shared_ptr<XdmfAttribute> xmfAttribute, vtkDataArray* array, XdmfGrid* grid,
+    vtkXdmf3ArrayKeeper* keeper = nullptr);
+
+  /**
+   * Parses finite element function defined in Attribute and uses lagrange cells.
+   *
+   * This method changes geometry stored in vtkDataObject
+   * and adds Point/Cell data field.
+   *
+   * XdmfAttribute must contain min. 2 arrays - one is the XdmfAttribute itself and
+   * remaining one the auxiliary array. Interpretation of the arrays is
+   * described in XDMF wiki page http://www.xdmf.org/index.php/XDMF_Model_and_Format#Attribute
+   *
+   */
+  static void ParseFiniteElementFunctionLagrange(vtkDataObject* dObject,
     shared_ptr<XdmfAttribute> xmfAttribute, vtkDataArray* array, XdmfGrid* grid,
     vtkXdmf3ArrayKeeper* keeper = nullptr);
 };
