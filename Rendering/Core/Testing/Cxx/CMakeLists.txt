@@ -59,6 +59,7 @@ vtk_add_test_cxx(vtkRenderingCoreCxxTests tests
   TestOpacity.cxx
   TestOrderedTriangulator.cxx
   TestOSConeCxx.cxx
+  TestPartitionedDataSetCollectionMapper.cxx
   TestPickingManager.cxx,NO_VALID
   TestPickTextActor.cxx,NO_VALID
   TestPointSelection.cxx,NO_VALID

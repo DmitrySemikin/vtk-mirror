@@ -15,6 +15,7 @@
 #include "vtkDataAssembly.h"
 
 #include "vtkDataAssemblyVisitor.h"
+#include "vtkDataProperties.h"
 #include "vtkLogger.h"
 #include "vtkNew.h"
 #include "vtkObjectFactory.h"
@@ -25,9 +26,12 @@
 #include <cassert>
 #include <deque>
 #include <functional>
+#include <limits>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+
+using namespace vtkDataProperties;
 
 //============================================================================
 //** vtkDataAssemblyVisitor **
@@ -63,6 +67,30 @@ std::vector<unsigned int> vtkDataAssemblyVisitor::GetCurrentDataSetIndices() con
     indices.push_back(child.attribute("id").as_uint());
   }
   return indices;
+}
+
+//------------------------------------------------------------------------------
+std::vector<int> vtkDataAssemblyVisitor::GetCurrentProperties() const
+{
+  std::vector<int> output;
+  auto& node = this->Internals->CurrentNode;
+  for (auto it = node.attributes_begin(); it != node.attributes_end(); ++it)
+  {
+    int prop = GetPropertiesFromString(it->name());
+    if (prop != std::numeric_limits<int>::max())
+    {
+      output.push_back(prop);
+    }
+  }
+
+  return output;
+}
+
+//------------------------------------------------------------------------------
+std::string vtkDataAssemblyVisitor::GetCurrentProperty(int prop) const
+{
+  const char* propStr = GetStringFromDataProperties(prop);
+  return this->Internals->CurrentNode.attribute(propStr).value();
 }
 
 //------------------------------------------------------------------------------
@@ -422,6 +450,88 @@ void vtkDataAssembly::DeepCopy(vtkDataAssembly* other)
   {
     this->Initialize();
   }
+}
+
+//------------------------------------------------------------------------------
+std::vector<int> vtkDataAssembly::GetProperties(int nodeid)
+{
+  auto node = this->Internals->FindNode(nodeid);
+  if (!node)
+  {
+    vtkErrorMacro("Node with id=" << nodeid << " not found.");
+    return {};
+  }
+  std::vector<int> output;
+  for (auto it = node.attributes_begin(); it != node.attributes_end(); ++it)
+  {
+    int prop = GetPropertiesFromString(it->name());
+    if (prop != std::numeric_limits<int>::max())
+    {
+      output.push_back(prop);
+    }
+  }
+
+  return output;
+}
+
+//------------------------------------------------------------------------------
+std::string vtkDataAssembly::GetProperty(int nodeid, int property)
+{
+  auto node = this->Internals->FindNode(nodeid);
+  const char* propStr = GetStringFromDataProperties(property);
+  if (!node)
+  {
+    vtkErrorMacro("Node with id=" << nodeid << " not found.");
+    return {};
+  }
+
+  return node.attribute(propStr).value();
+}
+
+//------------------------------------------------------------------------------
+int vtkDataAssembly::SetProperty(int nodeid, int property, const char* value)
+{
+  auto node = this->Internals->FindNode(nodeid);
+  const char* propStr = GetStringFromDataProperties(property);
+  if (!node)
+  {
+    vtkErrorMacro("Node with id=" << nodeid << " not found.");
+    return -1;
+  }
+
+  if (node.attribute(propStr))
+  {
+    node.attribute(propStr).set_value(value);
+  }
+  else
+  {
+    node.append_attribute(propStr).set_value(value);
+  }
+
+  this->Modified();
+
+  return nodeid;
+}
+
+//------------------------------------------------------------------------------
+int vtkDataAssembly::UnSetProperty(int nodeid, int property)
+{
+  auto node = this->Internals->FindNode(nodeid);
+  const char* propStr = GetStringFromDataProperties(property);
+  if (!node)
+  {
+    vtkErrorMacro("Node with id=" << nodeid << " not found.");
+    return -1;
+  }
+
+  if (node.attribute(propStr))
+  {
+    node.remove_attribute(propStr);
+  }
+
+  this->Modified();
+
+  return nodeid;
 }
 
 //------------------------------------------------------------------------------

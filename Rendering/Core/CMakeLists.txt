@@ -68,6 +68,8 @@ set(classes
   vtkMapper2D
   vtkMapperCollection
   vtkObserverMediator
+  vtkPartitionedDataSetCollectionMapper
+  vtkPartitionedDataSetMapper
   vtkPointGaussianMapper
   vtkPolyDataMapper
   vtkPolyDataMapper2D

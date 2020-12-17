@@ -109,6 +109,9 @@ protected:
   std::vector<unsigned int> GetCurrentDataSetIndices() const;
   //@}
 
+  std::vector<int> GetCurrentProperties() const;
+  std::string GetCurrentProperty(int) const;
+
 private:
   vtkDataAssemblyVisitor(const vtkDataAssemblyVisitor&) = delete;
   void operator=(const vtkDataAssemblyVisitor&) = delete;
