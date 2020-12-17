@@ -1499,6 +1499,12 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
     return 1;
   }
 
+  // Avoid leaking the vtkGeometryFilterHelper object with non-linear cells
+  if (info != nullptr)
+  {
+    delete info;
+  }
+
   // If here, the data is gnarly and this filter will process it.
   vtkSmartPointer<vtkCellIterator> cellIter =
     vtkSmartPointer<vtkCellIterator>::Take(input->NewCellIterator());
