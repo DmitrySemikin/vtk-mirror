@@ -16,6 +16,7 @@ vtk_add_test_cxx(vtkRenderingOpenGL2CxxTests tests
   TestCompositePolyDataMapper2CustomShader.cxx,NO_DATA
   TestCompositePolyDataMapper2MixedGeometryCellScalars.cxx,NO_DATA
   TestCompositePolyDataMapper2MixedGeometryEdges.cxx,NO_DATA
+  TestCompositePolyDataMapper2MixedOpacities.cxx,NO_DATA
   TestCompositePolyDataMapper2NaNPartial.cxx,NO_DATA
   TestCompositePolyDataMapper2Pickability.cxx,NO_DATA
   TestCompositePolyDataMapper2Picking.cxx,NO_DATA
