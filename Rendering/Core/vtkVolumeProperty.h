@@ -437,7 +437,10 @@ public:
   /**
    * Set/Get the intensity value for voxels in the clipped space for gradient
    * computations (for shading and gradient based opacity modulation).
-   * By default, this is set to VTK_DOUBLE_MIN.
+   *
+   * The value should be sufficiently different from voxel values in the volume
+   * yet not too small or large, to avoid numerical instabilities.
+   * By default, it is set to -1e-10.
    *
    * \note This value is only used when UseClippedVoxelIntensity is true.
    * \note This property is only used by the vtkGPUVolumeRayCastMapper for now.

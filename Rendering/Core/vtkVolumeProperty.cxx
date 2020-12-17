@@ -34,7 +34,9 @@ vtkVolumeProperty::vtkVolumeProperty()
   this->InterpolationType = VTK_NEAREST_INTERPOLATION;
 
   this->UseClippedVoxelIntensity = 0;
-  this->ClippedVoxelIntensity = VTK_FLOAT_MIN;
+  // -1e-10 value is sufficiently different from most commonly used voxel values
+  // but not too large number, to avoid numerical instability.
+  this->ClippedVoxelIntensity = -1e10;
 
   for (int i = 0; i < VTK_MAX_VRCOMP; i++)
   {
