@@ -209,7 +209,7 @@ void vtkOBJExporter::WriteAnActor(
   fpMtl << "Ks " << convert(temp * tempd[0]) << " " << convert(temp * tempd[1]) << " "
         << convert(temp * tempd[2]) << "\n";
   fpMtl << "Ns " << convert(prop->GetSpecularPower()) << "\n";
-  fpMtl << "Tr " << convert(prop->GetOpacity()) << "\n";
+  fpMtl << "d" << convert(prop->GetOpacity()) << "\n";
   fpMtl << "illum 3\n";
 
   // Actor has the texture
