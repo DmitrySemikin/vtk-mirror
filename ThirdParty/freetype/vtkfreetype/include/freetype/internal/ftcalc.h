@@ -20,7 +20,7 @@
 #define FTCALC_H_
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include FT_FREETYPE_H
 
 

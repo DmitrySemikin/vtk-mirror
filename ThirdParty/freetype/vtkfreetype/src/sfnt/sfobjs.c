@@ -16,7 +16,7 @@
  */
 
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include "sfobjs.h"
 #include "ttload.h"
 #include "ttcmap.h"

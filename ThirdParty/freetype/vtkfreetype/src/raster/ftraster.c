@@ -62,7 +62,7 @@
 
 #else /* !STANDALONE_ */
 
-#include <ft2build.h>
+#include <vtkfreetype/include/ft2build.h>
 #include "ftraster.h"
 #include FT_INTERNAL_CALC_H   /* for FT_MulDiv and FT_MulDiv_No_Round */
 #include FT_OUTLINE_H         /* for FT_Outline_Get_CBox              */
