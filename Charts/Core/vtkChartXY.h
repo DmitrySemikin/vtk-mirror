@@ -41,6 +41,7 @@ class vtkPlotGrid;
 class vtkTooltipItem;
 
 class vtkChartXYPrivate; // Private class to keep my STL vector in...
+#include <vector>
 
 class VTKCHARTSCORE_EXPORT vtkChartXY : public vtkChart
 {
@@ -353,6 +354,11 @@ public:
    * Key press event.
    */
   bool KeyPressEvent(const vtkContextKeyEvent& key) override;
+
+  /**
+   *  Get the vector of vtkContextTransform
+   */
+  const std::vector<vtkContextTransform*>& GetTransforms() const;
 
   /**
    * Populate the annotation link with the supplied selectionIds array, and set
