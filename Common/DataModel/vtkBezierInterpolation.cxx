@@ -49,13 +49,13 @@ static constexpr vtkIdType binomials[]{ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0
 
 static vtkIdType BinomialCoefficient(const int n, int k)
 {
-  if (n <= 10)
-  {
-    return binomials[(n * 11) + k];
-  }
-  else if ((k < 0) || (k > n))
+  if ((k < 0) || (n < 0))
   {
     return 0;
+  }
+  else if (n <= 10)
+  {
+    return binomials[(n * 11) + k];
   }
   else
   {
