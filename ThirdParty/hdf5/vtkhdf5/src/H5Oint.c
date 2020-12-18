@@ -45,7 +45,6 @@
 #include "H5Opkg.h"             /* Object headers                           */
 #include "H5SMprivate.h"        /* Shared object header messages            */
 
-
 /****************/
 /* Local Macros */
 /****************/
@@ -83,7 +82,8 @@ static herr_t H5O__free_visit_visited(void *item, void *key,
 static herr_t H5O__visit_cb(hid_t group, const char *name, const H5L_info_t *linfo,
     void *_udata);
 static const H5O_obj_class_t *H5O__obj_class_real(const H5O_t *oh);
-
+uint8_t H5O_get_oh_flags(const H5O_t *oh);
+herr_t H5CX_get_ohdr_flags(uint8_t *ohdr_flags);
 
 /*********************/
 /* Package Variables */
