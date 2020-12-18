@@ -4,6 +4,7 @@ set(classes
   vtkDataSetGhostGenerator
   vtkDataSetRegionSurfaceFilter
   vtkDataSetSurfaceFilter
+  vtkDiscoverRegions
   vtkExplicitStructuredGridSurfaceFilter
   vtkGeometryFilter
   vtkHierarchicalDataSetGeometryFilter
