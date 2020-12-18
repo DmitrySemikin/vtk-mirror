@@ -737,26 +737,23 @@ int vtkWin32RenderWindowInteractor::OnTouch(HWND hWnd, UINT wParam, UINT lParam)
           {
             this->SetPointerIndex(index);
             didUpOrDown = true;
-            this->InvokeEvent(vtkCommand::LeftButtonReleaseEvent, nullptr);
+            this->LeftButtonReleaseEvent();
             this->ClearPointerIndex(index);
           }
           if (ti.dwFlags & TOUCHEVENTF_DOWN)
           {
             this->SetPointerIndex(index);
             didUpOrDown = true;
-            this->InvokeEvent(vtkCommand::LeftButtonPressEvent, nullptr);
+            this->LeftButtonPressEvent();
           }
           this->SetPointerIndex(index);
         }
       }
       if (!didUpOrDown)
       {
-        ret = this->InvokeEvent(vtkCommand::MouseMoveEvent, nullptr);
+        this->MouseMoveEvent();
       }
-      else
-      {
-        ret = 1;
-      }
+      ret = 1;
     }
     CloseTouchInputHandleType CTIH = (CloseTouchInputHandleType)GetProcAddress(
       GetModuleHandle(TEXT("user32")), "CloseTouchInputHandle");

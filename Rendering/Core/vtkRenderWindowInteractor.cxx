@@ -648,12 +648,14 @@ void vtkRenderWindowInteractor::RecognizeGesture(vtkCommand::EventIds event)
 
   // what are the two pointers we are working with
   int count = 0;
+  int* lastPosVals[2];
   int* posVals[2];
   int* startVals[2];
   for (int i = 0; i < VTKI_MAX_POINTERS; i++)
   {
     if (this->PointersDown[i])
     {
+      lastPosVals[count] = this->LastEventPositions[i];
       posVals[count] = this->EventPositions[i];
       startVals[count] = this->StartingEventPositions[i];
       count++;
@@ -748,14 +750,16 @@ void vtkRenderWindowInteractor::RecognizeGesture(vtkCommand::EventIds event)
 
     if (this->CurrentGesture == vtkCommand::PinchEvent)
     {
-      vtkErrorMacro("See pinch");
       this->SetScale(newDistance / originalDistance);
       this->PinchEvent();
     }
 
     if (this->CurrentGesture == vtkCommand::PanEvent)
     {
-      this->SetTranslation(trans);
+      double lastTrans[2];
+      lastTrans[0] = (posVals[0][0] - lastPosVals[0][0] + posVals[1][0] - lastPosVals[1][0]) / 2.0;
+      lastTrans[1] = (posVals[0][1] - lastPosVals[0][1] + posVals[1][1] - lastPosVals[1][1]) / 2.0;
+      this->SetTranslation(lastTrans);
       this->PanEvent();
     }
   }
@@ -1111,6 +1115,12 @@ void vtkRenderWindowInteractor::LeftButtonReleaseEvent()
 
   if (this->RecognizeGestures)
   {
+    // did we just transition from multitouch?
+    if (this->PointersDownCount == 2)
+    {
+      this->RecognizeGesture(vtkCommand::LeftButtonReleaseEvent);
+    }
+
     if (this->PointersDown[this->PointerIndex])
     {
       this->PointersDown[this->PointerIndex] = 0;
