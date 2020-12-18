@@ -483,6 +483,22 @@ if(MSVC)
       COMPILE_FLAGS /bigobj)
 endif()
 
+if(MINGW AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set_source_files_properties(
+      vtkGenericDataArray.cxx
+      vtkDataArray.cxx
+      PROPERTIES
+        COMPILE_FLAGS -Wa,-mbig-obj)
+  else()
+    set_source_files_properties(
+      vtkGenericDataArray.cxx
+      vtkDataArray.cxx
+      PROPERTIES
+        COMPILE_FLAGS -Og)
+  endif()
+endif()
+
 vtk_module_add_module(VTK::CommonCore
   CLASSES           ${classes}
   TEMPLATE_CLASSES  ${template_classes}
