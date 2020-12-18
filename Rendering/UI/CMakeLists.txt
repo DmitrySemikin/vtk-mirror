@@ -110,3 +110,9 @@ endif ()
 if (APPLE_IOS)
   vtk_module_link(VTK::RenderingUI PUBLIC "-framework UIKit")
 endif ()
+
+if(VTK_MODULE_ENABLE_RenderingTDx) 
+  include_directories("../TDx")
+  add_definitions(-DVTK_USE_TDX)
+
+endif()

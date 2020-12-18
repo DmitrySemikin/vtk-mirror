@@ -1,0 +1,21 @@
+NAME
+  VTK::RenderingTDx
+LIBRARY_NAME
+  vtkRenderingTDx
+IMPLEMENTABLE
+KIT
+  VTK::Rendering
+GROUPS
+  Rendering
+DEPENDS
+    VTK::CommonCore
+    VTK::InteractionStyle
+    VTK::RenderingCore
+PRIVATE_DEPENDS
+
+TEST_DEPENDS
+    VTK::TestingCore
+    VTK::TestingRendering
+    VTK::InteractionWidgets
+    VTK::IOPLY
+    VTK::IOXML

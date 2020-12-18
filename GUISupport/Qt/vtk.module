@@ -9,6 +9,8 @@ DEPENDS
   VTK::RenderingCore
   VTK::RenderingOpenGL2
   VTK::InteractionWidgets
+OPTIONAL_DEPENDS
+  VTK::RenderingTDx
 PRIVATE_DEPENDS
   VTK::CommonDataModel
   VTK::FiltersExtraction

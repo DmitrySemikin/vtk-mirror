@@ -1,8 +1,3 @@
-# The TDx support has not been moved, this header is here to define nothing,
-# and so allow classes in other modules to safely include it and keep going.
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/vtkTDxConfigure.h.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h")
 
 set(classes
   vtkAbstractHyperTreeGridMapper
@@ -173,7 +168,6 @@ set(headers
   vtkRayCastStructures.h
   vtkRenderingCoreEnums.h
   vtkStateStorage.h
-  "${CMAKE_CURRENT_BINARY_DIR}/vtkTDxConfigure.h"
   vtkTDxMotionEventInfo.h)
 
 vtk_module_add_module(VTK::RenderingCore
