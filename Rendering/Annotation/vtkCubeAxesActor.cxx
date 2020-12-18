@@ -274,12 +274,16 @@ vtkCubeAxesActor::vtkCubeAxesActor()
   this->DrawYGridpolys = 0;
   this->DrawZGridpolys = 0;
 
-  this->XLabelFormat = new char[8];
-  snprintf(this->XLabelFormat, 8, "%s", "%-#6.3g");
-  this->YLabelFormat = new char[8];
-  snprintf(this->YLabelFormat, 8, "%s", "%-#6.3g");
-  this->ZLabelFormat = new char[8];
-  snprintf(this->ZLabelFormat, 8, "%s", "%-#6.3g");
+  this->XLabelFormat = nullptr;
+  this->YLabelFormat = nullptr;
+  this->ZLabelFormat = nullptr;
+
+  this->XLabelInternalFormat = nullptr;
+  this->YLabelInternalFormat = nullptr;
+  this->ZLabelInternalFormat = nullptr;
+  SetXLabelInternalFormat("%-#6.3g");
+  SetYLabelInternalFormat("%-#6.3g");
+  SetZLabelInternalFormat("%-#6.3g");
 
   this->CornerOffset = 0.0;
 
@@ -505,6 +509,15 @@ vtkCubeAxesActor::~vtkCubeAxesActor()
 
   delete[] this->ZLabelFormat;
   this->ZLabelFormat = nullptr;
+
+  delete[] this->XLabelInternalFormat;
+  this->XLabelInternalFormat = nullptr;
+
+  delete[] this->YLabelInternalFormat;
+  this->YLabelInternalFormat = nullptr;
+
+  delete[] this->ZLabelInternalFormat;
+  this->ZLabelInternalFormat = nullptr;
 
   delete[] this->XTitle;
   this->XTitle = nullptr;
@@ -816,9 +829,20 @@ void vtkCubeAxesActor::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Y Axis Visibility: " << (this->YAxisVisibility ? "On\n" : "Off\n");
   os << indent << "Z Axis Visibility: " << (this->ZAxisVisibility ? "On\n" : "Off\n");
 
-  os << indent << "X Axis Label Format: " << this->XLabelFormat << "\n";
-  os << indent << "Y Axis Label Format: " << this->YLabelFormat << "\n";
-  os << indent << "Z Axis Label Format: " << this->ZLabelFormat << "\n";
+  os << indent
+     << "X Axis Label Format: " << (this->XLabelFormat != nullptr ? this->XLabelFormat : "")
+     << "\n";
+  os << indent
+     << "Y Axis Label Format: " << (this->YLabelFormat != nullptr ? this->YLabelFormat : "")
+     << "\n";
+  os << indent
+     << "Z Axis Label Format: " << (this->ZLabelFormat != nullptr ? this->ZLabelFormat : "")
+     << "\n";
+
+  os << indent << "X Axis Label Internal Format: " << this->XLabelInternalFormat << "\n";
+  os << indent << "Y Axis Label Internal Format: " << this->YLabelInternalFormat << "\n";
+  os << indent << "Z Axis Label Internal Format: " << this->ZLabelInternalFormat << "\n";
+
   os << indent << "Inertia: " << this->Inertia << "\n";
   os << indent << "Corner Offset: " << this->CornerOffset << "\n";
 
@@ -1278,7 +1302,7 @@ void vtkCubeAxesActor::AdjustRange(const double ranges[6])
   {
     char format[16];
     snprintf(format, sizeof(format), "%%.%df", xAxisDigits);
-    this->SetXLabelFormat(format);
+    this->SetXLabelInternalFormat(format);
     this->LastXAxisDigits = xAxisDigits;
   }
 
@@ -1287,7 +1311,7 @@ void vtkCubeAxesActor::AdjustRange(const double ranges[6])
   {
     char format[16];
     snprintf(format, sizeof(format), "%%.%df", yAxisDigits);
-    this->SetYLabelFormat(format);
+    this->SetYLabelInternalFormat(format);
     this->LastYAxisDigits = yAxisDigits;
   }
 
@@ -1296,7 +1320,7 @@ void vtkCubeAxesActor::AdjustRange(const double ranges[6])
   {
     char format[16];
     snprintf(format, sizeof(format), "%%.%df", zAxisDigits);
-    this->SetZLabelFormat(format);
+    this->SetZLabelInternalFormat(format);
     this->LastZAxisDigits = zAxisDigits;
   }
 }
@@ -2192,19 +2216,19 @@ void vtkCubeAxesActor::BuildLabels(vtkAxisActor* axes[NUMBER_OF_ALIGNED_AXIS])
   {
     case vtkAxisActor::VTK_AXIS_TYPE_X:
       axisIndex = 0;
-      format = this->XLabelFormat;
+      format = this->XLabelFormat != nullptr ? this->XLabelFormat : this->XLabelInternalFormat;
       mustAdjustValue = this->MustAdjustXValue;
       lastPow = this->LastXPow;
       break;
     case vtkAxisActor::VTK_AXIS_TYPE_Y:
       axisIndex = 1;
-      format = this->YLabelFormat;
+      format = this->YLabelFormat != nullptr ? this->YLabelFormat : this->YLabelInternalFormat;
       mustAdjustValue = this->MustAdjustYValue;
       lastPow = this->LastYPow;
       break;
     case vtkAxisActor::VTK_AXIS_TYPE_Z:
       axisIndex = 2;
-      format = this->ZLabelFormat;
+      format = this->ZLabelFormat != nullptr ? this->ZLabelFormat : this->ZLabelInternalFormat;
       mustAdjustValue = this->MustAdjustZValue;
       lastPow = this->LastZPow;
       break;

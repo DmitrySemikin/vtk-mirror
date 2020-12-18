@@ -225,7 +225,7 @@ public:
   //@{
   /**
    * Set/Get the format with which to print the labels on each of the
-   * x-y-z axes.
+   * x-y-z axes. Overrides the internal format
    */
   vtkSetStringMacro(XLabelFormat);
   vtkGetStringMacro(XLabelFormat);
@@ -638,6 +638,16 @@ protected:
 
   void UpdateLabels(vtkAxisActor** axis, int index);
 
+  // Description:
+  // Set/Get the internal format with which to print the labels on each of the
+  // x-y-z axes.
+  vtkSetStringMacro(XLabelInternalFormat);
+  vtkGetStringMacro(XLabelInternalFormat);
+  vtkSetStringMacro(YLabelInternalFormat);
+  vtkGetStringMacro(YLabelInternalFormat);
+  vtkSetStringMacro(ZLabelInternalFormat);
+  vtkGetStringMacro(ZLabelInternalFormat);
+
   vtkCamera* Camera;
 
   int FlyMode;
@@ -754,6 +764,10 @@ protected:
   vtkTypeBool DrawXGridpolys;
   vtkTypeBool DrawYGridpolys;
   vtkTypeBool DrawZGridpolys;
+
+  char* XLabelInternalFormat;
+  char* YLabelInternalFormat;
+  char* ZLabelInternalFormat;
 
   char* XLabelFormat;
   char* YLabelFormat;
