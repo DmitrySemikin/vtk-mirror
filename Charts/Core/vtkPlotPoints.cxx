@@ -71,6 +71,8 @@ vtkStandardNewMacro(vtkPlotPoints);
 vtkPlotPoints::vtkPlotPoints()
 {
   this->Points = nullptr;
+  this->XErrors = nullptr;
+  this->YErrors = nullptr;
   this->Sorted = nullptr;
   this->BadPoints = nullptr;
   this->ValidPointMask = nullptr;
@@ -82,6 +84,7 @@ vtkPlotPoints::vtkPlotPoints()
   this->LookupTable = nullptr;
   this->Colors = nullptr;
   this->ScalarVisibility = 0;
+  this->PlotErrorBars = 0;
 
   this->UnscaledInputBounds[0] = this->UnscaledInputBounds[2] = vtkMath::Inf();
   this->UnscaledInputBounds[1] = this->UnscaledInputBounds[3] = -vtkMath::Inf();
@@ -94,6 +97,16 @@ vtkPlotPoints::~vtkPlotPoints()
   {
     this->Points->Delete();
     this->Points = nullptr;
+  }
+  if (this->XErrors)
+  {
+    this->XErrors->Delete();
+    this->XErrors = nullptr;
+  }
+  if (this->YErrors)
+  {
+    this->YErrors->Delete();
+    this->YErrors = nullptr;
   }
   delete this->Sorted;
   if (this->BadPoints)
@@ -173,6 +186,40 @@ bool vtkPlotPoints::Paint(vtkContext2D* painter)
     if (width < 8.0)
     {
       width = 8.0;
+    }
+  }
+
+  // Draw error bars if required
+  if (this->PlotErrorBars)
+  {
+    float* points = static_cast<float*>(this->Points->GetVoidPointer(0));
+
+    if (this->BadPoints && this->BadPoints->GetNumberOfTuples() > 0)
+    {
+      vtkIdType lastGood = 0;
+      vtkIdType bpIdx = 0;
+      vtkIdType nPoints = this->Points->GetNumberOfPoints();
+      vtkIdType nBadPoints = this->BadPoints->GetNumberOfTuples();
+
+      while (lastGood < nPoints)
+      {
+        vtkIdType id =
+          bpIdx < nBadPoints ? this->BadPoints->GetValue(bpIdx) : this->Points->GetNumberOfPoints();
+
+        // render from last good point to one before this bad point
+        if (id - lastGood > 0)
+        {
+          // Draw lines for error bars
+          PaintErrorBars(painter, points + 2 * (lastGood), id - lastGood);
+        }
+        lastGood = id + 1;
+        bpIdx++;
+      }
+    }
+    else
+    {
+      // draw all of the error bars
+      this->PaintErrorBars(painter, points, this->Points->GetNumberOfPoints());
     }
   }
 
@@ -281,7 +328,62 @@ bool vtkPlotPoints::PaintLegend(vtkContext2D* painter, const vtkRectf& rect, int
   return true;
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void vtkPlotPoints::PaintErrorBars(vtkContext2D* painter, float* points, int n)
+{
+  // Set temporary pen to use for error bars
+  vtkNew<vtkPen> oldPen;
+  oldPen->SetColor(painter->GetPen()->GetColor());
+  oldPen->SetWidth(painter->GetPen()->GetWidth());
+  oldPen->SetLineType(painter->GetPen()->GetLineType());
+  oldPen->SetOpacity(painter->GetPen()->GetOpacity());
+  vtkNew<vtkPen> errorPen;
+  errorPen->SetColor(0.0, 0.0, 0.0);
+  errorPen->SetWidth(1.0);
+  errorPen->SetLineType(vtkPen::SOLID_LINE);
+  errorPen->SetOpacity(255);
+  painter->ApplyPen(errorPen);
+
+  float capLengthX = (this->GetXAxis()->GetMaximum() - this->GetXAxis()->GetMinimum()) / 100,
+        capLengthY = (this->GetYAxis()->GetMaximum() - this->GetYAxis()->GetMinimum()) / 100;
+
+  for (int i = 0; i < n; ++i)
+  {
+    float thisX = points[2 * i], thisY = points[2 * i + 1];
+    if (this->XErrors && this->XErrors->GetNumberOfValues() > i)
+    {
+      float thisError = this->XErrors->GetValue(i);
+
+      if (thisError > 0)
+      {
+        painter->DrawLine(thisX, thisY, thisX - thisError, thisY);
+        painter->DrawLine(
+          thisX - thisError, thisY - capLengthY, thisX - thisError, thisY + capLengthY);
+        painter->DrawLine(thisX, thisY, thisX + thisError, thisY);
+        painter->DrawLine(
+          thisX + thisError, thisY - capLengthY, thisX + thisError, thisY + capLengthY);
+      }
+    }
+    if (this->YErrors && this->YErrors->GetNumberOfValues() > i)
+    {
+      float thisError = this->YErrors->GetValue(i);
+
+      if (thisError > 0)
+      {
+        painter->DrawLine(thisX, thisY, thisX, thisY - thisError);
+        painter->DrawLine(
+          thisX - capLengthX, thisY - thisError, thisX + capLengthX, thisY - thisError);
+        painter->DrawLine(thisX, thisY, thisX, thisY + thisError);
+        painter->DrawLine(
+          thisX - capLengthX, thisY + thisError, thisX + capLengthX, thisY + thisError);
+      }
+    }
+  }
+  // Reset pen
+  painter->ApplyPen(oldPen);
+}
+
+//-----------------------------------------------------------------------------
 void vtkPlotPoints::GetBounds(double bounds[4])
 {
   if (this->Points)
@@ -637,10 +739,32 @@ void CopyToPointsSwitch(vtkPoints2D* points, A* a, vtkDataArray* b, int n, const
   }
 }
 
+// Copy the data array into the X error array
+template <typename A>
+void CopyToXErrors(vtkFloatArray* xErrors, A* a, int n, const vtkRectd& ss)
+{
+  xErrors->Initialize();
+  for (int i = 0; i < n; ++i)
+  {
+    xErrors->InsertNextValue(static_cast<float>((a[i] + ss[0]) * ss[2]));
+  }
 }
 
-//------------------------------------------------------------------------------
-bool vtkPlotPoints::GetDataArrays(vtkTable* table, vtkDataArray* array[2])
+// Copy the data array into the Y error array
+template <typename A>
+void CopyToYErrors(vtkFloatArray* yErrors, A* a, int n, const vtkRectd& ss)
+{
+  yErrors->Initialize();
+  for (int i = 0; i < n; ++i)
+  {
+    yErrors->InsertNextValue(static_cast<float>((a[i] + ss[1]) * ss[3]));
+  }
+}
+
+}
+
+//-----------------------------------------------------------------------------
+bool vtkPlotPoints::GetDataArrays(vtkTable* table, vtkDataArray* array[4])
 {
   if (!table)
   {
@@ -650,6 +774,8 @@ bool vtkPlotPoints::GetDataArrays(vtkTable* table, vtkDataArray* array[2])
   // Get the x and y arrays (index 0 and 1 respectively)
   array[0] = this->UseIndexForXSeries ? nullptr : this->Data->GetInputArrayToProcess(0, table);
   array[1] = this->Data->GetInputArrayToProcess(1, table);
+  array[2] = this->PlotErrorBars ? this->Data->GetInputArrayToProcess(2, table) : nullptr;
+  array[3] = this->PlotErrorBars ? this->Data->GetInputArrayToProcess(3, table) : nullptr;
 
   if (!array[0] && !this->UseIndexForXSeries)
   {
@@ -674,7 +800,7 @@ bool vtkPlotPoints::GetDataArrays(vtkTable* table, vtkDataArray* array[2])
 //------------------------------------------------------------------------------
 bool vtkPlotPoints::UpdateTableCache(vtkTable* table)
 {
-  vtkDataArray* array[2] = { nullptr, nullptr };
+  vtkDataArray* array[4] = { nullptr, nullptr, nullptr, nullptr };
   if (!this->GetDataArrays(table, array))
   {
     this->BuildTime.Modified();
@@ -705,6 +831,38 @@ bool vtkPlotPoints::UpdateTableCache(vtkTable* table)
         y, x->GetNumberOfTuples(), this->ShiftScale));
     }
   }
+
+  // Copy the error data into the relevant structures
+  if (this->PlotErrorBars)
+  {
+    if (!this->XErrors)
+    {
+      this->XErrors = vtkFloatArray::New();
+    }
+    if (!this->YErrors)
+    {
+      this->YErrors = vtkFloatArray::New();
+    }
+    vtkDataArray* xErr = array[2];
+    if (xErr)
+    {
+      switch (xErr->GetDataType())
+      {
+        vtkTemplateMacro(CopyToXErrors(this->XErrors, static_cast<VTK_TT*>(xErr->GetVoidPointer(0)),
+          xErr->GetNumberOfTuples(), this->ShiftScale));
+      }
+    }
+    vtkDataArray* yErr = array[3];
+    if (yErr)
+    {
+      switch (yErr->GetDataType())
+      {
+        vtkTemplateMacro(CopyToYErrors(this->YErrors, static_cast<VTK_TT*>(yErr->GetVoidPointer(0)),
+          yErr->GetNumberOfTuples(), this->ShiftScale));
+      }
+    }
+  }
+
   this->CalculateLogSeries();
   this->FindBadPoints();
   this->Points->Modified();
@@ -747,7 +905,7 @@ bool vtkPlotPoints::UpdateTableCache(vtkTable* table)
 void vtkPlotPoints::CalculateUnscaledInputBounds()
 {
   vtkTable* table = this->Data->GetInput();
-  vtkDataArray* array[2] = { nullptr, nullptr };
+  vtkDataArray* array[4] = { nullptr, nullptr, nullptr, nullptr };
   if (!this->GetDataArrays(table, array))
   {
     return;
@@ -828,7 +986,7 @@ void vtkPlotPoints::FindBadPoints()
 
   // Scan through and find any bad points.
   vtkTable* table = this->Data->GetInput();
-  vtkDataArray* array[2] = { nullptr, nullptr };
+  vtkDataArray* array[4] = { nullptr, nullptr, nullptr, nullptr };
   if (!this->GetDataArrays(table, array))
   {
     return;

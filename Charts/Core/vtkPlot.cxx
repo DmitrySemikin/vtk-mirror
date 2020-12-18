@@ -514,7 +514,36 @@ void vtkPlot::SetInputData(vtkTable* table, vtkIdType xColumn, vtkIdType yColumn
   this->SetInputData(table, table->GetColumnName(xColumn), table->GetColumnName(yColumn));
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void vtkPlot::SetInputData(vtkTable* table, const vtkStdString& xColumn,
+  const vtkStdString& yColumn, const vtkStdString& xErrorColumn, const vtkStdString& yErrorColumn)
+{
+  vtkDebugMacro(<< "Setting input, X column = \"" << xColumn.c_str() << "\", "
+                << "Y column = \"" << yColumn.c_str() << "\", "
+                << "X error column = \"" << xErrorColumn.c_str() << "\", "
+                << "Y error column = \"" << yErrorColumn.c_str() << "\"");
+
+  this->Data->SetInputData(table);
+  this->Data->SetInputArrayToProcess(
+    0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_ROWS, xColumn.c_str());
+  this->Data->SetInputArrayToProcess(
+    1, 0, 0, vtkDataObject::FIELD_ASSOCIATION_ROWS, yColumn.c_str());
+  this->Data->SetInputArrayToProcess(
+    2, 0, 0, vtkDataObject::FIELD_ASSOCIATION_ROWS, xErrorColumn.c_str());
+  this->Data->SetInputArrayToProcess(
+    3, 0, 0, vtkDataObject::FIELD_ASSOCIATION_ROWS, yErrorColumn.c_str());
+  this->AutoLabels = nullptr; // No longer valid
+}
+
+//-----------------------------------------------------------------------------
+void vtkPlot::SetInputData(vtkTable* table, vtkIdType xColumn, vtkIdType yColumn,
+  vtkIdType xErrorColumn, vtkIdType yErrorColumn)
+{
+  this->SetInputData(table, table->GetColumnName(xColumn), table->GetColumnName(yColumn),
+    table->GetColumnName(xErrorColumn), table->GetColumnName(yErrorColumn));
+}
+
+//-----------------------------------------------------------------------------
 vtkTable* vtkPlot::GetInput()
 {
   return this->Data->GetInput();

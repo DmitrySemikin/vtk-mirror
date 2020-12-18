@@ -269,6 +269,17 @@ public:
   void SetInputData(vtkTable* table, vtkIdType xColumn, vtkIdType yColumn);
   //@}
 
+  //@{
+  /**
+   * This is a convenience function to set the input table and the x, y,
+   * x error and y error columns for the plot.
+   */
+  void SetInputData(vtkTable* table, const vtkStdString& xColumn, const vtkStdString& yColumn,
+    const vtkStdString& xErrorColumn, const vtkStdString& yErrorColumn);
+  void SetInputData(vtkTable* table, vtkIdType xColumn, vtkIdType yColumn, vtkIdType xErrorColumn,
+    vtkIdType yErrorColumn);
+  //@}
+
   /**
    * Get the input table used by the plot.
    */

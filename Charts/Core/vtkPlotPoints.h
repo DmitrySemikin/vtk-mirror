@@ -79,12 +79,19 @@ public:
   bool PaintLegend(vtkContext2D* painter, const vtkRectf& rect, int legendIndex) override;
 
   /**
+   * Paint event for the XY plot error bars, called whenever the chart needs
+   * to be drawn and PlotErrorBars is true
+   */
+  void PaintErrorBars(vtkContext2D* painter, float* points, int n);
+
+  /**
    * Get the bounds for this plot as (Xmin, Xmax, Ymin, Ymax).
    */
   void GetBounds(double bounds[4]) override;
 
   /**
-   * Get the non-log-scaled bounds on chart inputs for this plot as (Xmin, Xmax, Ymin, Ymax).
+   * Get the non-log-scaled bounds on chart inputs for this plot as (Xmin, Xmax,
+   * Ymin, Ymax).
    */
   void GetUnscaledInputBounds(double bounds[4]) override;
 
@@ -125,6 +132,16 @@ public:
    * Get the array name to color by.
    */
   vtkStdString GetColorArrayName();
+
+  //@{
+  /**
+   * Turn on/off flag to control whether error bars are plotted.
+   * The default is off.
+   */
+  vtkSetMacro(PlotErrorBars, vtkTypeBool);
+  vtkGetMacro(PlotErrorBars, vtkTypeBool);
+  vtkBooleanMacro(PlotErrorBars, vtkTypeBool);
+  //@}
 
   /**
    * Function to query a plot for the nearest point to the specified coordinate.
@@ -191,7 +208,7 @@ protected:
   /**
    * Populate the data arrays ready to operate on input data.
    */
-  bool GetDataArrays(vtkTable* table, vtkDataArray* array[2]);
+  bool GetDataArrays(vtkTable* table, vtkDataArray* array[4]);
 
   /**
    * Update the table cache.
@@ -232,6 +249,14 @@ protected:
    */
   vtkPoints2D* Points;
   vtkNew<vtkFloatArray> SelectedPoints;
+  //@}
+
+  //@{
+  /**
+   * Store two arrays of error data (x/y) for this data series.
+   */
+  vtkFloatArray* XErrors;
+  vtkFloatArray* YErrors;
   //@}
 
   //@{
@@ -282,6 +307,13 @@ protected:
   vtkUnsignedCharArray* Colors;
   vtkTypeBool ScalarVisibility;
   vtkStdString ColorArrayName;
+  //@}
+
+  //@{
+  /**
+   * Bool controlling whether to plot error bars
+   */
+  vtkTypeBool PlotErrorBars;
   //@}
 
   /**
