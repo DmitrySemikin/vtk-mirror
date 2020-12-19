@@ -73,6 +73,7 @@ int TestClipLabels(int argc, char* argv[])
   vtkSmartPointer<vtkLabeledDataMapper> pointMapper = vtkSmartPointer<vtkLabeledDataMapper>::New();
   pointMapper->SetInputConnection(visPts->GetOutputPort());
   pointMapper->SetLabelModeToLabelFieldData();
+  pointMapper->SetFieldDataName("vtkIdFilter_Ids");
 
   vtkSmartPointer<vtkActor2D> pointLabels = vtkSmartPointer<vtkActor2D>::New();
   pointLabels->SetMapper(pointMapper);

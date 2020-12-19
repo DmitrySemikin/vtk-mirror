@@ -72,6 +72,9 @@ int vtkIdFilter::RequestData(vtkInformation* vtkNotUsed(request),
   // First, copy the input to the output as a starting point
   output->CopyStructure(input);
 
+  outPD->PassData(inPD);
+  outCD->PassData(inCD);
+
   numPts = input->GetNumberOfPoints();
   numCells = input->GetNumberOfCells();
 
@@ -92,12 +95,10 @@ int vtkIdFilter::RequestData(vtkInformation* vtkNotUsed(request),
     {
       int idx = outPD->AddArray(ptIds);
       outPD->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
-      outPD->CopyScalarsOff();
     }
     else
     {
       outPD->AddArray(ptIds);
-      outPD->CopyFieldOff(this->PointIdsArrayName);
     }
     ptIds->Delete();
   }
@@ -119,18 +120,13 @@ int vtkIdFilter::RequestData(vtkInformation* vtkNotUsed(request),
     {
       int idx = outCD->AddArray(cellIds);
       outCD->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
-      outCD->CopyScalarsOff();
     }
     else
     {
       outCD->AddArray(cellIds);
-      outCD->CopyFieldOff(this->CellIdsArrayName);
     }
     cellIds->Delete();
   }
-
-  outPD->PassData(inPD);
-  outCD->PassData(inCD);
 
   return 1;
 }

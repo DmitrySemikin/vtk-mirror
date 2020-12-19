@@ -74,6 +74,7 @@ ldm.SetInputConnection(visPts.GetOutputPort())
 #    ldm.SetLabelModeToLabelScalars()
 #    ldm.SetLabelModeToLabelNormals()
 ldm.SetLabelModeToLabelFieldData()
+ldm.SetFieldDataName("vtkIdFilter_Ids")
 #    ldm.SetLabeledComponent(0)
 
 pointLabels = vtk.vtkActor2D()

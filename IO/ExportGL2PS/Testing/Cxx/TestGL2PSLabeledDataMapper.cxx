@@ -94,6 +94,7 @@ int TestGL2PSLabeledDataMapper(int, char*[])
   vtkNew<vtkLabeledDataMapper> ldm;
   ldm->SetInputConnection(visPts->GetOutputPort());
   ldm->SetLabelModeToLabelFieldData();
+  ldm->SetFieldDataName("vtkIdFilter_Ids");
 
   vtkNew<vtkActor2D> pointLabels;
   pointLabels->SetMapper(ldm);
