@@ -1,7 +1,15 @@
 set(TEST_SRC)
 
-if(WIN32 AND VTK_USE_VIDEO_FOR_WINDOWS)
-  list(APPEND TEST_SRC TestAVIWriter.cxx)
+if(WIN32)
+  if (VTK_USE_VIDEO_FOR_WINDOWS)
+    list(APPEND TEST_SRC TestAVIWriter.cxx)
+  endif()
+
+  if (VTK_USE_MICROSOFT_MEDIA_FOUNDATION)
+    list(APPEND TEST_SRC TestMP4Writer.cxx)
+  endif()
+elseif (APPLE)
+  list(APPEND TEST_SRC TestMP4Writer.cxx)
 endif()
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" cmake_build_type_tolower)
@@ -15,3 +23,7 @@ vtk_add_test_cxx(vtkIOMovieCxxTests tests
   )
 
 vtk_test_cxx_executable(vtkIOMovieCxxTests tests)
+vtk_module_autoinit(
+  TARGETS vtkIOMovieCxxTests
+  MODULES VTK::IOMovie
+)
