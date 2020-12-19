@@ -406,6 +406,36 @@ void vtkOpenGLGlyph3DMapper::Render(vtkRenderer* ren, vtkActor* actor, vtkDataSe
   if (found == this->GlyphValues->Entries.end())
   {
     subarray = new vtkOpenGLGlyph3DMapper::vtkOpenGLGlyph3DMapperSubArray();
+
+    // Iterate over GlyphValues (map of vtkDataset and vtkOpenGLGlyph3DMapperSubArray)
+    for (auto gvIt = this->GlyphValues->Entries.begin(); gvIt != this->GlyphValues->Entries.end();)
+    {
+      // Check the reference count of vtkDataSet. If it is equal to 1, it is safe to remove this entry because it's the
+      // second value in tuple (vtkOpenGLGlyph3DMapperEntry) who holds this reference, otherwise the dataset
+      // would be already deleted.
+      if (((vtkDataSet *)(gvIt->first))->GetReferenceCount() <= 1)
+      {
+        // First, release graphics resources before removing entries.
+        // Iterate vector of vtkOpenGLGlyph3DMapperEntry
+        for (auto entryIt = gvIt->second->Entries.begin(); entryIt != gvIt->second->Entries.end(); ++entryIt)
+        {
+          // Iterate map of all vtkOpenGLGlyph3DHelper (different DataObjects have each their own helper).
+          for (auto helperIt = (*entryIt)->Mappers.begin(); helperIt != (*entryIt)->Mappers.end(); ++helperIt)
+          {
+            helperIt->second->ReleaseGraphicsResources(ren->GetRenderWindow());
+          }
+        }
+
+        // Second, delete the SubArray which will cascade and delete all other resources in maps and vectors.
+        // This should also unregister the dataset and release it (see ~vtkOpenGLGlyph3DMapperEntry).
+        delete gvIt->second;
+        // Finally, it's safe to remove this entry from GlyphValues.
+        gvIt = this->GlyphValues->Entries.erase(gvIt);
+        continue;
+      }
+      ++gvIt;
+    }
+
     this->GlyphValues->Entries.insert(std::make_pair(dataset, subarray));
     rebuild = true;
   }
