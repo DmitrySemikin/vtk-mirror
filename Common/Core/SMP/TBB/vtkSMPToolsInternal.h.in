@@ -72,9 +72,8 @@ void vtkSMPTools_Impl_For(
   {
     // When the grain is not specified, automatically calculate an appropriate grain size so
     // most of the time will still be spent running the calculation and not task overhead.
-    const vtkIdType numberThreadsEstimate = 40; // Estimate of how many threads we might be able to run
     const vtkIdType batchesPerThread = 5; // Plan for a few batches per thread so one busy core doesn't stall the whole system
-    const vtkIdType batches = numberThreadsEstimate * batchesPerThread;
+    const vtkIdType batches = vtkSMPTools::GetEstimatedNumberOfThreads() * batchesPerThread;
 
     if (range >= batches)
     {
