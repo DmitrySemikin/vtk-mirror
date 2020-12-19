@@ -32,15 +32,30 @@ set(headers
 set(private_headers
   QVTKInteractorInternal.h)
 
-set(qt5_components
+find_package(Qt6Widgets QUIET)
+set(_vtk_qt_version 6)
+if(NOT Qt6Widgets_FOUND)
+  find_package(Qt5Widgets QUIET)
+  if(NOT Qt5Widgets_FOUND)
+    message(FATAL_ERROR "Could not find a valid Qt installation.")
+  endif()
+  set(_vtk_qt_version 5)
+endif()
+set(VTK_QT_MAJOR_VERSION ${_vtk_qt_version} CACHE INTERNAL
+  "Major version number for the Qt installation used.")
+set(qt_components
+  OpenGL
   Widgets)
+if(VTK_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
+  list(APPEND qt_components OpenGLWidgets)
+endif()
 
 vtk_module_find_package(
-  PACKAGE     Qt5
+  PACKAGE     Qt${VTK_QT_MAJOR_VERSION}
   VERSION     5.9
-  COMPONENTS  ${qt5_components}
+  COMPONENTS  ${qt_components}
   FORWARD_VERSION_REQ MINOR
-  VERSION_VAR         Qt5_VERSION)
+  VERSION_VAR         Qt${VTK_QT_MAJOR_VERSION}_VERSION)
 
 set(CMAKE_AUTOMOC 1)
 
@@ -49,5 +64,9 @@ vtk_module_add_module(VTK::GUISupportQt
   HEADERS ${headers}
   PRIVATE_HEADERS ${private_headers})
 
+foreach(_qt_comp ${qt_components})
+  list(APPEND qt_modules "Qt${VTK_QT_MAJOR_VERSION}::${_qt_comp}")
+endforeach()
+
 vtk_module_definitions(VTK::GUISupportQt PRIVATE QT_NO_KEYWORDS)
-vtk_module_link(VTK::GUISupportQt PUBLIC Qt5::Widgets)
+vtk_module_link(VTK::GUISupportQt PUBLIC ${qt_modules})
