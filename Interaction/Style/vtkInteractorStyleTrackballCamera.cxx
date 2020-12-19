@@ -270,6 +270,29 @@ void vtkInteractorStyleTrackballCamera::Rotate()
   camera->Elevation(ryf);
   camera->OrthogonalizeViewUp();
 
+  // Fly-over implementation
+
+  if (this->KeepZUp)
+  {
+
+    double p[3];
+    camera->GetDirectionOfProjection(p);
+
+    if (abs(p[2]) < 0.8)
+    {
+      camera->SetViewUp(0, 0, 1);
+    }
+    else
+    {
+      double factor = 5 * (1 - abs(p[2]));
+      // factor = 0 --> camera is vertically up or down
+
+      double up[3];
+      camera->GetViewUp(up);
+      camera->SetViewUp((1 - factor) * up[0], (1 - factor) * up[1], (1 - factor * up[2]) + factor);
+    }
+  }
+
   if (this->AutoAdjustCameraClippingRange)
   {
     this->CurrentRenderer->ResetCameraClippingRange();

@@ -79,11 +79,20 @@ public:
   vtkGetMacro(MotionFactor, double);
   //@}
 
+  //@{
+  /**
+   * Force horizontal camera (Z up).
+   */
+  vtkSetMacro(KeepHorizontal, bool);
+  vtkGetMacro(KeepHorizontal, bool);
+  //@}
+
 protected:
   vtkInteractorStyleTrackballCamera();
   ~vtkInteractorStyleTrackballCamera() override;
 
   double MotionFactor;
+  bool KeepHorizontal{ false };
 
   virtual void Dolly(double factor);
 
