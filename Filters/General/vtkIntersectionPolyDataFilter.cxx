@@ -2257,6 +2257,17 @@ int vtkIntersectionPolyDataFilter::RequestData(vtkInformation* vtkNotUsed(reques
     return 1;
   }
 
+  if (input0 == nullptr
+   || input1 == nullptr
+   || input0->GetNumberOfPoints() == 0
+   || input1->GetNumberOfPoints() == 0
+   || input0->GetNumberOfCells() == 0
+   || input1->GetNumberOfCells() == 0)
+  {
+    vtkDebugMacro(<< "Empty input data");
+    return 1;
+  }
+
   if (this->CheckInput)
   {
     vtkDebugMacro(<< "Checking Input 0");
