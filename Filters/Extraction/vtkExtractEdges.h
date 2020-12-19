@@ -40,6 +40,15 @@ public:
 
   //@{
   /**
+   * Set / get whether to merge coincident points
+   */
+  //@}
+  vtkSetMacro(Merging, int);
+  vtkGetMacro(Merging, int);
+  vtkBooleanMacro(Merging, int);
+
+  //@{
+  /**
    * Set / get a spatial locator for merging points. By
    * default an instance of vtkMergePoints is used.
    */
@@ -67,6 +76,8 @@ protected:
   int FillInputPortInformation(int port, vtkInformation* info) override;
 
   vtkIncrementalPointLocator* Locator;
+
+  int Merging;
 
 private:
   vtkExtractEdges(const vtkExtractEdges&) = delete;

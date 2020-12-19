@@ -14,6 +14,8 @@
 =========================================================================*/
 #include "vtkFeatureEdges.h"
 
+#include <vector>
+
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -45,6 +47,7 @@ vtkFeatureEdges::vtkFeatureEdges()
   this->Coloring = true;
   this->Locator = nullptr;
   this->OutputPointsPrecision = vtkAlgorithm::DEFAULT_PRECISION;
+  this->Merging = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -186,13 +189,23 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
   outPD->CopyAllocate(pd, numPts);
   outCD->CopyAllocate(cd, numCells);
 
-  // Get our locator for merging points
-  //
-  if (this->Locator == nullptr)
+  // stores mapping of original to copied point ids when not merging
+  std::vector<vtkIdType> pointMap;
+
+  if (this->Merging)
   {
-    this->CreateDefaultLocator();
+    // Get our locator for merging points
+    if (this->Locator == nullptr)
+    {
+      this->CreateDefaultLocator();
+    }
+    this->Locator->InitPointInsertion(newPts, input->GetBounds());
   }
-  this->Locator->InitPointInsertion(newPts, input->GetBounds());
+  else
+  {
+    // Initialize to no points copied
+    pointMap.resize(numPts, -1);
+  }
 
   // Loop over all polygons generating boundary, non-manifold,
   // and feature edges
@@ -319,14 +332,40 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
       Mesh->GetPoint(p1, x1);
       Mesh->GetPoint(p2, x2);
 
-      if (this->Locator->InsertUniquePoint(x1, lineIds[0]))
+      if (this->Merging)
       {
-        outPD->CopyData(pd, p1, lineIds[0]);
-      }
+        if (this->Locator->InsertUniquePoint(x1, lineIds[0]))
+        {
+          outPD->CopyData(pd, p1, lineIds[0]);
+        }
 
-      if (this->Locator->InsertUniquePoint(x2, lineIds[1]))
+        if (this->Locator->InsertUniquePoint(x2, lineIds[1]))
+        {
+          outPD->CopyData(pd, p2, lineIds[1]);
+        }
+      }
+      else
       {
-        outPD->CopyData(pd, p2, lineIds[1]);
+        if (pointMap[p1] < 0)
+        {
+          lineIds[0] = newPts->InsertNextPoint(x1);
+          pointMap[p1] = lineIds[0];
+          outPD->CopyData(pd, p1, lineIds[0]);
+        }
+        else
+        {
+          lineIds[0] = pointMap[p1];
+        }
+        if (pointMap[p2] < 0)
+        {
+          lineIds[1] = newPts->InsertNextPoint(x2);
+          pointMap[p2] = lineIds[1];
+          outPD->CopyData(pd, p2, lineIds[1]);
+        }
+        else
+        {
+          lineIds[1] = pointMap[p2];
+        }
       }
 
       newId = newLines->InsertNextCell(2, lineIds);
@@ -357,7 +396,10 @@ int vtkFeatureEdges::RequestData(vtkInformation* vtkNotUsed(request),
 
   output->SetLines(newLines);
   newLines->Delete();
-  this->Locator->Initialize(); // release any extra memory
+  if (this->Locator)
+  {
+    this->Locator->Initialize(); // release any extra memory
+  }
   if (this->Coloring)
   {
     int idx = outCD->AddArray(newScalars);
@@ -474,4 +516,5 @@ void vtkFeatureEdges::PrintSelf(ostream& os, vtkIndent indent)
   }
 
   os << indent << "Output Points Precision: " << this->OutputPointsPrecision << "\n";
+  os << indent << "Merging: " << (this->Merging ? "On\n" : "Off\n");
 }

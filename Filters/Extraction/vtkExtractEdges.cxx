@@ -14,6 +14,8 @@
 =========================================================================*/
 #include "vtkExtractEdges.h"
 
+#include <vector>
+
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkDataSet.h"
@@ -34,6 +36,7 @@ vtkStandardNewMacro(vtkExtractEdges);
 vtkExtractEdges::vtkExtractEdges()
 {
   this->Locator = nullptr;
+  this->Merging = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -104,13 +107,23 @@ int vtkExtractEdges::RequestData(vtkInformation* vtkNotUsed(request),
   vtkIdList *edgeIds, *HEedgeIds = vtkIdList::New();
   vtkPoints *edgePts, *HEedgePts = vtkPoints::New();
 
-  // Get our locator for merging points
-  //
-  if (this->Locator == nullptr)
+  // stores mapping of original to copied point id when not merging
+  std::vector<vtkIdType> pointMap;
+
+  if (this->Merging)
   {
-    this->CreateDefaultLocator();
+    // Get our locator for merging points
+    if (this->Locator == nullptr)
+    {
+      this->CreateDefaultLocator();
+    }
+    this->Locator->InitPointInsertion(newPts, input->GetBounds());
   }
-  this->Locator->InitPointInsertion(newPts, input->GetBounds());
+  else
+  {
+    // Initialize to no points copied
+    pointMap.resize(numPts, -1);
+  }
 
   // Loop over all cells, extracting non-visited edges.
   //
@@ -142,14 +155,46 @@ int vtkExtractEdges::RequestData(vtkInformation* vtkNotUsed(request),
           pt1 = edgeIds->GetId(2 * i);
           pt2 = edgeIds->GetId(2 * i + 1);
           edgePts->GetPoint(2 * i, x);
-          if (this->Locator->InsertUniquePoint(x, pts[0]))
+          if (this->Merging)
           {
-            outPD->CopyData(pd, pt1, pts[0]);
+            if (this->Locator->InsertUniquePoint(x, pts[0]))
+            {
+              outPD->CopyData(pd, pt1, pts[0]);
+            }
+          }
+          else
+          {
+            if (pointMap[pt1] < 0)
+            {
+              pts[0] = newPts->InsertNextPoint(x);
+              outPD->CopyData(pd, pt1, pts[0]);
+              pointMap[pt1] = pts[0];
+            }
+            else
+            {
+              pts[0] = pointMap[pt1];
+            }
           }
           edgePts->GetPoint(2 * i + 1, x);
-          if (this->Locator->InsertUniquePoint(x, pts[1]))
+          if (this->Merging)
           {
-            outPD->CopyData(pd, pt2, pts[1]);
+            if (this->Locator->InsertUniquePoint(x, pts[1]))
+            {
+              outPD->CopyData(pd, pt2, pts[1]);
+            }
+          }
+          else
+          {
+            if (pointMap[pt2] < 0)
+            {
+              pts[1] = newPts->InsertNextPoint(x);
+              outPD->CopyData(pd, pt2, pts[1]);
+              pointMap[pt2] = pts[1];
+            }
+            else
+            {
+              pts[1] = pointMap[pt2];
+            }
           }
           if (edgeTable->IsEdge(pt1, pt2) == -1)
           {
@@ -169,9 +214,25 @@ int vtkExtractEdges::RequestData(vtkInformation* vtkNotUsed(request),
         {
           pt2 = edgeIds->GetId(i);
           edgePts->GetPoint(i, x);
-          if (this->Locator->InsertUniquePoint(x, pts[1]))
+          if (this->Merging)
           {
-            outPD->CopyData(pd, pt2, pts[1]);
+            if (this->Locator->InsertUniquePoint(x, pts[1]))
+            {
+              outPD->CopyData(pd, pt2, pts[1]);
+            }
+          }
+          else
+          {
+            if (pointMap[pt2] < 0)
+            {
+              pts[1] = newPts->InsertNextPoint(x);
+              outPD->CopyData(pd, pt2, pts[1]);
+              pointMap[pt2] = pts[1];
+            }
+            else
+            {
+              pts[1] = pointMap[pt2];
+            }
           }
           if (i > 0 && edgeTable->IsEdge(pt1, pt2) == -1)
           {
@@ -257,6 +318,7 @@ void vtkExtractEdges::PrintSelf(ostream& os, vtkIndent indent)
   {
     os << indent << "Locator: (none)\n";
   }
+  os << indent << "Merging: " << (this->Merging ? "On\n" : "Off\n");
 }
 
 //------------------------------------------------------------------------------

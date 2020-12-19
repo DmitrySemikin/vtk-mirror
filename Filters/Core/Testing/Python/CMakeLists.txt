@@ -28,6 +28,7 @@ vtk_add_test_python(
   TestContour3DLinearGridScalarTree.py
   TestDecimatePolylineMaximumError.py
   TestElevationFilter.py
+  TestFeatureEdges.py,NO_DATA,NO_VALID
   TestFlyingEdges2D.py
   TestFlyingEdges2D2.py
   TestFlyingEdges3D.py

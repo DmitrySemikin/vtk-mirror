@@ -153,6 +153,15 @@ public:
   vtkGetMacro(OutputPointsPrecision, int);
   //@}
 
+  //@{
+  /**
+   * Set / get whether to merge coincident points
+   */
+  //@}
+  vtkSetMacro(Merging, int);
+  vtkGetMacro(Merging, int);
+  vtkBooleanMacro(Merging, int);
+
 protected:
   vtkFeatureEdges();
   ~vtkFeatureEdges() override;
@@ -169,6 +178,7 @@ protected:
   bool Coloring;
   int OutputPointsPrecision;
   vtkIncrementalPointLocator* Locator;
+  int Merging;
 
 private:
   vtkFeatureEdges(const vtkFeatureEdges&) = delete;
