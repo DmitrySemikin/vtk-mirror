@@ -18,7 +18,11 @@
 #include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
 #include "vtkStripper.h"
+#include "vtkTestUtilities.h"
+#include "vtkXMLPolyDataReader.h"
+
 #include <cassert>
+#include <string>
 
 bool TestSpherePlaneIntersection(bool joinSegments)
 {
@@ -94,7 +98,29 @@ bool TestSpherePlaneIntersection(bool joinSegments)
   return true;
 }
 
-int TestStripper(int, char*[])
+bool TestChainMultiplePolylines(const bool& joinSegments, const std::string& filename)
+{
+  vtkNew<vtkXMLPolyDataReader> reader;
+  vtkNew<vtkStripper> stripIt;
+  stripIt->SetInputConnection(reader->GetOutputPort());
+
+  reader->SetFileName(filename.c_str());
+  stripIt->SetMaximumLength(VTK_INT_MAX);
+  stripIt->SetJoinContiguousSegments(joinSegments);
+  stripIt->Update();
+
+  vtkSmartPointer<vtkPolyData> merged = stripIt->GetOutput();
+  if (!merged)
+    return false;
+  else if (!joinSegments && merged->GetNumberOfLines() == 17)
+    return true;
+  else if (joinSegments && merged->GetNumberOfLines() == 4)
+    return true;
+  else
+    return false;
+}
+
+int TestStripper(int argc, char* argv[])
 {
   if (!TestSpherePlaneIntersection(false))
   {
@@ -102,6 +128,19 @@ int TestStripper(int, char*[])
   }
 
   if (!TestSpherePlaneIntersection(true))
+  {
+    return EXIT_FAILURE;
+  }
+
+  char* fname = vtkTestUtilities::ExpandDataFileName(argc, argv, "Data/lines.vtp");
+  std::cout << "Load lines from " << fname << std::endl;
+
+  if (!TestChainMultiplePolylines(false, fname))
+  {
+    return EXIT_FAILURE;
+  }
+
+  if (!TestChainMultiplePolylines(true, fname))
   {
     return EXIT_FAILURE;
   }

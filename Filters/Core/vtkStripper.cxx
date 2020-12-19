@@ -14,7 +14,13 @@
 =========================================================================*/
 #include "vtkStripper.h"
 
+#include <sstream> // used in debug to print connectivity map
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 #include "vtkCellArray.h"
+#include "vtkCellArrayIterator.h"
 #include "vtkCellData.h"
 #include "vtkIdList.h"
 #include "vtkIdTypeArray.h"
@@ -491,129 +497,177 @@ int vtkStripper::RequestData(vtkInformation* vtkNotUsed(request),
   {
     if (this->JoinContiguousSegments)
     {
-      // In some cases it may be possible to optimize the output
-      // polylines a bit.  The algorithm thus-far sometimes outputs
-      // polylines that could be joined together but are not.  We now
-      // go through joining any lines that we can.
-
-      // compressedLines will be our output line set, possibly
-      // with some lines joined together.
-      vtkSmartPointer<vtkCellArray> compressedLines = vtkSmartPointer<vtkCellArray>::New();
-
-      bool* used = new bool[newLines->GetNumberOfCells()];
-      for (i = 0; i < newLines->GetNumberOfCells(); i++)
+      /// approach: chain through polylines and merge until search algorithm passes through all
+      /// junctions.
+      // 1. build a dictionary from end points to polylines and a cache of old polylines.
+      const vtkIdType& numPlines = newLines->GetNumberOfCells();
+      std::unordered_map<vtkIdType, std::vector<vtkIdType>> endPtsToPlines;
+      std::vector<std::vector<vtkIdType>> oldPlinesCache(numPlines), newPlines;
+      auto pLinesIter = vtk::TakeSmartPointer(newLines->NewIterator());
+      vtkIdType iPline(0);
+      endPtsToPlines.reserve(numPlines);
+      for (pLinesIter->GoToFirstCell(); !pLinesIter->IsDoneWithTraversal();
+           pLinesIter->GoToNextCell(), ++iPline)
       {
-        used[i] = false;
+        vtkIdType npts;
+        const vtkIdType* ptIds = nullptr;
+        pLinesIter->GetCurrentCell(npts, ptIds);
+
+        auto& head = endPtsToPlines[ptIds[0]];
+        auto& tail = endPtsToPlines[ptIds[npts - 1]];
+        auto& pline = oldPlinesCache[iPline];
+
+        head.push_back(iPline);
+        tail.push_back(iPline);
+        pline.assign(ptIds, ptIds + npts);
+
+        vtkDebugMacro(<< "Polyline (" << iPline << ") : " << pline.size() << " verts");
+        vtkDebugMacro(<< "Head (" << ptIds[0] << "): ");
+        vtkDebugMacro(<< "Tail (" << ptIds[npts - 1] << "): ");
       }
-
-      bool done = false;
-      while (!done)
+      if (this->Debug)
       {
-        int out_n = 0;
-        const size_t out_p_size = static_cast<size_t>(
-          newLines->GetNumberOfCells() + newLines->GetNumberOfConnectivityIds());
-        vtkIdType* out_p = new vtkIdType[out_p_size];
-
-        newLines->InitTraversal();
-        int id = -1;
-        vtkIdType n;
-        const vtkIdType* p;
-
-        // Find a line from the original set that has not yet been used
-        do
+        vtkDebugMacro(<< "Points to polylines summary");
+        for (const auto& node : endPtsToPlines)
         {
-          if (newLines->GetNextCell(n, p) == 0)
-          {
-            done = true;
-          }
-          id++;
-        } while (!done && (used[id] == 1));
+          std::stringstream nodeLinks;
+          nodeLinks << "|";
+          for (const auto& pl : node.second)
+            nodeLinks << pl << "|";
+          vtkDebugMacro(<< "Node (" << node.first << "): " << nodeLinks.str().c_str());
+        }
+        vtkDebugMacro(<< "End summary");
+      }
+      // 2. chain through
+      std::vector<vtkIdType> currentChain;
+      std::unordered_set<vtkIdType> passedThru;
+      std::size_t nnodes = endPtsToPlines.size();
+      currentChain.reserve(numPlines);
+      newPlines.reserve(numPlines);
+      passedThru.reserve(nnodes);
 
-        if (done == false)
+      vtkIdType newChainId(-1), head(-1);
+      vtkDebugMacro(<< "Begin chaining");
+      while (true)
+      {
+        // chaining = currentChain.size()
+        // if not chaining
+        //  start a new chain
+        // traverse currentChain until it's end. (flip traversal if needed)
+        // if other routes exist, set hints to the next chain and continue..
+        // if all nodes have not yet been passed through, capture currentChain and clear its verts,
+        // continue.. else break;
+        bool chaining = currentChain.size() > 0;
+        if (!chaining)
         {
-          // Write it into our output line
-          memcpy(out_p + out_n, p, n * sizeof(vtkIdType));
-          out_n += n;
-          used[id] = true;
-
-          // Now add any unused lines that adjoin this current line
-          bool finished_new_line = false;
-          while (!finished_new_line)
+          newChainId = -1;
+          head = -1;
+          for (auto& node : endPtsToPlines)
           {
-            // Here's the start and end of our current line
-            vtkIdType ca = out_p[0];
-            vtkIdType cb = out_p[out_n - 1];
-
-            vtkIdType ta;
-            vtkIdType tb;
-            bool found = false;
-
-            // Look for any lines which adjoin this one
-            while (!finished_new_line && !found)
+            bool wenthThru = passedThru.find(node.first) != passedThru.end();
+            bool chainFromHere = !wenthThru && (node.second.size() == 1);
+            if (chainFromHere)
             {
-              if (newLines->GetNextCell(n, p) == 0)
-              {
-                finished_new_line = true;
-              }
-              id++;
-
-              if (!finished_new_line && (used[id] == 0))
-              {
-                ta = p[0];
-                tb = p[n - 1];
-                if ((ca == ta) || (ca == tb) || (cb == ta) || (cb == tb))
-                {
-                  found = true;
-                  // Here's a line which adjoins this one somehow; add it in
-                  vtkIdType* add_to;
-
-                  if (ca == ta || ca == tb)
-                  {
-                    // This line will go in before our current one; move
-                    // the current one forwards to make room
-                    memmove(out_p + n, out_p, out_n * sizeof(vtkIdType));
-                    add_to = out_p;
-                  }
-                  else
-                  {
-                    // This line will go in after our current one
-                    add_to = out_p + out_n;
-                  }
-
-                  // Add the new line to our current one, either forwards
-                  // or backwards as appropriate
-                  if (ca == ta || cb == tb)
-                  {
-                    for (vtkIdType x = 0; x < n; x++)
-                    {
-                      add_to[x] = p[n - x - 1];
-                    }
-                  }
-                  else
-                  {
-                    memcpy(add_to, p, n * sizeof(vtkIdType));
-                  }
-                  out_n += n;
-                  used[id] = true;
-                }
-                else
-                {
-                  finished_new_line = true;
-                }
-              }
+              newChainId = node.second.front();
+              head = node.first;
+              vtkDebugMacro(<< "ChainFromHere " << head << "@" << newChainId);
+              break;
             }
           }
-
-          // We've finished this new line, so add it to the list
-          compressedLines->InsertNextCell(out_n, out_p);
+          bool noMoreChains = head < 0 && newChainId < 0;
+          if (noMoreChains)
+          {
+            vtkDebugMacro(<< "NoMoreChains");
+            vtkDebugMacro(<< "Exit type 1");
+            break; // possible exit 1
+          }
+          else
+            endPtsToPlines.erase(head); // trash this head
+        }
+        else
+        {
+          vtkDebugMacro(<< "IsChaining");
         }
 
-        delete[] out_p;
+        vtkDebugMacro(<< "newChainId : " << newChainId);
+        vtkDebugMacro(<< "Head       : " << head);
+
+        // this step inserts a duplicate head/tail, but we'll remove all duplicate verts later.
+        auto& pline = oldPlinesCache[newChainId];
+        if (head == pline.back()) // flip direction
+          currentChain.insert(currentChain.end(), pline.rbegin(), pline.rend());
+        else
+          currentChain.insert(currentChain.end(), pline.begin(), pline.end());
+
+        vtkDebugMacro(<< "Traversal  : " << pline.size() << " verts"
+                      << (head == pline.back() ? " in reverse" : "."));
+
+        // say hi to the tail
+        const vtkIdType& tail = currentChain.back();
+        passedThru.insert(tail);
+        vtkDebugMacro(<< "Tail       : " << tail);
+
+        // any other routes from here on?
+        bool otherRoutesExist = endPtsToPlines.find(tail) != endPtsToPlines.end();
+        auto& otherRoutes = endPtsToPlines[tail];
+        otherRoutesExist &= otherRoutes.size() > 0;
+        bool continueThisChain(false);
+        if (otherRoutesExist)
+        {
+          vtkDebugMacro(<< "OtherRoutesExist");
+          for (const auto& route : otherRoutes)
+          {
+            if (route != newChainId)
+            {
+              newChainId = route;
+              head = tail;
+              continueThisChain = true;
+              break;
+            }
+          }
+        }
+        if (continueThisChain)
+        {
+          vtkDebugMacro(<< "ContinueThisChain [" << currentChain.front() << ","
+                        << currentChain.back() << "]@" << newChainId);
+          continue;
+        }
+
+        // nope, end this chain right here.
+        bool endThisChain = passedThru.size() != nnodes;
+        if (endThisChain)
+        {
+          vtkDebugMacro(<< "EndThisChain [" << currentChain.front() << "," << currentChain.back()
+                        << "]@" << newChainId);
+          newPlines.emplace_back(currentChain);
+          currentChain.clear();
+        }
+        else
+        {
+          vtkDebugMacro(<< "Exit type 2");
+          break; // possible exit 2
+        }
       }
 
-      compressedLines->Squeeze();
-      output->SetLines(compressedLines);
-      delete[] used;
+      // 3. Finalize and remove duplicates.
+      numLines = newPlines.size();
+      auto mergedLines = vtkSmartPointer<vtkCellArray>::New();
+      mergedLines->Allocate(newPlines.size());
+      for (auto& pline : newPlines)
+      {
+        std::unordered_set<vtkIdType> seen;
+        auto newEnd = std::remove_if(pline.begin(), pline.end(), [&seen](const vtkIdType& value) {
+          if (seen.find(value) != seen.end())
+            return true;
+
+          seen.insert(value);
+          return false;
+        });
+        pline.erase(newEnd, pline.end());
+        mergedLines->InsertNextCell(pline.size(), pline.data());
+        longestLine = (static_cast<int>(pline.size()) > longestLine) ? pline.size() : longestLine;
+      }
+      output->SetLines(mergedLines);
     }
     else
     {
