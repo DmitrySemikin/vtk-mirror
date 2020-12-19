@@ -41,8 +41,6 @@
 
 #include <vector>
 
-#define VTK_CREATE(type, var) vtkSmartPointer<type> var = vtkSmartPointer<type>::New()
-
 // The 3D cell with the maximum number of points is VTK_LAGRANGE_HEXAHEDRON.
 // We support up to 6th order hexahedra.
 #define VTK_MAXIMUM_NUMBER_OF_POINTS 216
@@ -80,7 +78,7 @@ bool ArePointsWithinTolerance(double v1, double v2)
 void CreateCellData(vtkDataSet* grid, int numberOfComponents, int offset, const char* arrayName)
 {
   vtkIdType numberOfCells = grid->GetNumberOfCells();
-  VTK_CREATE(vtkDoubleArray, array);
+  vtkNew<vtkDoubleArray> array;
   array->SetNumberOfComponents(numberOfComponents);
   array->SetNumberOfTuples(numberOfCells);
   std::vector<double> tupleValues(numberOfComponents);
@@ -105,7 +103,7 @@ void CreateCellData(vtkDataSet* grid, int numberOfComponents, int offset, const 
 void CreatePointData(vtkDataSet* grid, int numberOfComponents, int offset, const char* arrayName)
 {
   vtkIdType numberOfPoints = grid->GetNumberOfPoints();
-  VTK_CREATE(vtkDoubleArray, array);
+  vtkNew<vtkDoubleArray> array;
   array->SetNumberOfComponents(numberOfComponents);
   array->SetNumberOfTuples(numberOfPoints);
   std::vector<double> tupleValues(numberOfComponents);
@@ -267,13 +265,13 @@ int PerformTest(vtkDataSet* grid)
   CreateCellData(grid, numberOfComponents, offset, fieldName);
   CreatePointData(grid, numberOfComponents, offset, fieldName);
 
-  VTK_CREATE(vtkGradientFilter, cellGradients);
+  vtkNew<vtkGradientFilter> cellGradients;
   cellGradients->SetInputData(grid);
   cellGradients->SetInputScalars(vtkDataObject::FIELD_ASSOCIATION_CELLS, fieldName);
   const char resultName[] = "Result";
   cellGradients->SetResultArrayName(resultName);
 
-  VTK_CREATE(vtkGradientFilter, pointGradients);
+  vtkNew<vtkGradientFilter> pointGradients;
   pointGradients->SetInputData(grid);
   pointGradients->SetInputScalars(vtkDataObject::FIELD_ASSOCIATION_POINTS, fieldName);
   pointGradients->SetResultArrayName(resultName);
@@ -311,7 +309,7 @@ int PerformTest(vtkDataSet* grid)
     }
 
     // now check on the vorticity calculations
-    VTK_CREATE(vtkGradientFilter, cellVorticity);
+    vtkNew<vtkGradientFilter> cellVorticity;
     cellVorticity->SetInputData(grid);
     cellVorticity->SetInputScalars(vtkDataObject::FIELD_ASSOCIATION_CELLS, fieldName);
     cellVorticity->SetResultArrayName(resultName);
@@ -319,7 +317,7 @@ int PerformTest(vtkDataSet* grid)
     cellVorticity->SetContributingCellOption(option);
     cellVorticity->Update();
 
-    VTK_CREATE(vtkGradientFilter, pointVorticity);
+    vtkNew<vtkGradientFilter> pointVorticity;
     pointVorticity->SetInputData(grid);
     pointVorticity->SetInputScalars(vtkDataObject::FIELD_ASSOCIATION_POINTS, fieldName);
     pointVorticity->SetResultArrayName(resultName);
@@ -392,7 +390,7 @@ int TestGradientAndVorticity(int argc, char* argv[])
   vtkStdString filename;
   filename = data_root;
   filename += "/Data/SampleStructGrid.vtk";
-  VTK_CREATE(vtkStructuredGridReader, structuredGridReader);
+  vtkNew<vtkStructuredGridReader> structuredGridReader;
   structuredGridReader->SetFileName(filename.c_str());
   structuredGridReader->Update();
   vtkDataSet* grid = vtkDataSet::SafeDownCast(structuredGridReader->GetOutput());
@@ -403,7 +401,7 @@ int TestGradientAndVorticity(int argc, char* argv[])
   }
 
   // convert the structured grid to an unstructured grid
-  VTK_CREATE(vtkUnstructuredGrid, ug);
+  vtkNew<vtkUnstructuredGrid> ug;
   ug->SetPoints(vtkStructuredGrid::SafeDownCast(grid)->GetPoints());
   ug->Allocate(grid->GetNumberOfCells());
   for (vtkIdType id = 0; id < grid->GetNumberOfCells(); id++)
