@@ -1984,9 +1984,22 @@ int vtkDataSetSurfaceFilter::UnstructuredGridExecute(
         outPtId = this->GetOutputPointId(inPtId, input, newPts, outputPD);
         pts->InsertId(i, outPtId);
       }
-      newPolys->InsertNextCell(pts);
-      this->RecordOrigCellId(this->NumberOfNewCells, cellId);
-      outputCD->CopyData(cd, cellId, this->NumberOfNewCells++);
+
+      // Check for degenerate cells before adding them to avoid sending singularities in this
+      // output. If all the points in the cell have the same id, downstream filters will not be able
+      // to do things like calculate normals because the cell has no surface area.
+      bool validTriangle = cellType == VTK_TRIANGLE &&
+        (pts->GetId(0) != pts->GetId(1) || pts->GetId(0) != pts->GetId(2));
+      bool validQuad = cellType == VTK_QUAD &&
+        (pts->GetId(0) != pts->GetId(1) || pts->GetId(0) != pts->GetId(2) ||
+          pts->GetId(0) != pts->GetId(3));
+
+      if (cellType == VTK_POLYGON || validTriangle || validQuad)
+      {
+        newPolys->InsertNextCell(pts);
+        this->RecordOrigCellId(this->NumberOfNewCells, cellId);
+        outputCD->CopyData(cd, cellId, this->NumberOfNewCells++);
+      }
     }
     else if (cellType == VTK_TRIANGLE_STRIP)
     {
