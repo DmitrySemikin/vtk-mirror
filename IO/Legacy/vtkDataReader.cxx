@@ -282,7 +282,8 @@ int vtkDataReader::ReadLine(char result[256])
 int vtkDataReader::ReadString(char result[256])
 {
   this->IS->width(256);
-  *this->IS >> result;
+  // Cast to known-length array reference for P0487R1 in C++20.
+  *this->IS >> reinterpret_cast<char(&)[256]>(result);
   if (this->IS->fail())
   {
     return 0;
