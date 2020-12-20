@@ -255,3 +255,15 @@ void vtkXYZMolReader2::PrintSelf(ostream& os, vtkIndent indent)
   os << indent << "Number of Atoms: " << this->NumberOfAtoms << endl;
   os << indent << "Number of TimeSteps: " << this->NumberOfTimeSteps;
 }
+
+int vtkXYZMolReader2::CanReadFile(const char* filename)
+{
+  // a simple check to see if we have a positive integer on the firs line
+  vtksys::ifstream file_in(filename);
+  int natoms;
+  file_in >> natoms;
+  if (file_in.fail() || natoms <= 0)
+    return 0;
+  file_in.close();
+  return 1;
+}

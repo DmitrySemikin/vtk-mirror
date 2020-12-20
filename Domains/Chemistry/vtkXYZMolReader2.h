@@ -57,6 +57,11 @@ public:
   vtkGetStringMacro(FileName);
   //@}
 
+  /**
+   * A simple, non-exhaustive check to see if a file is a valid XYZ Mol file.
+   */
+  static int CanReadFile(const char* filename);
+
 protected:
   vtkXYZMolReader2();
   ~vtkXYZMolReader2() override;
