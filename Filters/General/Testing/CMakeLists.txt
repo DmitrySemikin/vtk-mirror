@@ -1,5 +1,16 @@
 vtk_module_test_data(
   Data/Quadratic/CylinderQuadratic.vtk
+  Data/BooleanClipping/chamber01.vtk
+  Data/BooleanClipping/skull01.vtk
+  Data/BooleanClipping/chamber02.vtk
+  Data/BooleanClipping/skull02.vtk
+  Data/BooleanClipping/chamber__cc7.vtk
+  Data/BooleanClipping/chamber__rc3.vtk
+  Data/BooleanClipping/skull_for_cc7_rc3.vtk
+  Data/BooleanClipping/chamber__cc5.vtk
+  Data/BooleanClipping/chamber__rc1.vtk
+  Data/BooleanClipping/chamber__rc5.vtk
+  Data/BooleanClipping/skull_for_cc5_rc1_rc5.vtk
   Data/Tango/TangoIcons.png
   Data/UCD2D/UCD_00005.inp
   Data/fullhead15.png

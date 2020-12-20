@@ -51,6 +51,10 @@ vtk_add_test_cxx(vtkFiltersGeneralCxxTests tests
 vtk_add_test_cxx(vtkFiltersGeneralCxxTests data_tests
   BoxClipPointData.cxx
   BoxClipOrientedPointData.cxx
+  TestBooleanOperationPolyDataFilter3.cxx
+  TestBooleanOperationPolyDataFilter4.cxx
+  TestBooleanOperationPolyDataFilter5.cxx
+  TestBooleanOperationPolyDataFilter6.cxx
   TestDataSetGradient.cxx
   TestDataSetGradientPrecompute.cxx
   TestDateToNumeric.cxx
