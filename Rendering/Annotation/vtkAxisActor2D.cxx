@@ -285,8 +285,9 @@ void vtkAxisActor2D::PrintSelf(ostream& os, vtkIndent indent)
 //------------------------------------------------------------------------------
 void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
 {
-  int i, *x, viewportSizeHasChanged, positionsHaveChanged;
+  int i, *x1, *x2, viewportSizeHasChanged, positionsHaveChanged;
   vtkIdType ptIds[2];
+  double pI1[3], pI2[3];
   double p1[3], p2[3], offset;
   double interval, deltaX, deltaY;
   double xTick[3];
@@ -348,25 +349,53 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
   this->UpdateAdjustedRange();
 
   interval = (this->AdjustedRange[1] - this->AdjustedRange[0]) / (this->AdjustedNumberOfLabels - 1);
-
+  double innerinterval = interval / (this->NumberOfMinorTicks + 1);
   this->NumberOfLabelsBuilt = this->AdjustedNumberOfLabels;
 
   // Generate the axis and tick marks.
   // We'll do our computation in viewport coordinates. First determine the
   // location of the endpoints.
-  x = this->PositionCoordinate->GetComputedViewportValue(viewport);
-  p1[0] = x[0];
-  p1[1] = x[1];
-  p1[2] = 0.0;
-  this->LastPosition[0] = x[0];
-  this->LastPosition[1] = x[1];
+  x1 = this->PositionCoordinate->GetComputedViewportValue(viewport);
+  x2 = this->Position2Coordinate->GetComputedViewportValue(viewport);
+  pI1[0] = x1[0];
+  pI1[1] = x1[1];
+  pI1[2] = 0.0;
+  pI2[0] = x2[0];
+  pI2[1] = x2[1];
+  pI2[2] = 0.0;
 
-  x = this->Position2Coordinate->GetComputedViewportValue(viewport);
-  p2[0] = x[0];
-  p2[1] = x[1];
+  if (this->AdjustLabels)
+  {
+    // we have to adjust the line to cover the nice text ranges
+    // otherwise we draw the new text on the wrong places within the old line segment
+    double x1p[2], x2p[2];
+    double dx = x2[0] - x1[0];
+    double dy = x2[1] - x1[1];
+    double dv = this->Range[1] - this->Range[0];
+    double rate[2] = { dv == 0 ? 0 : dx / dv, dv == 0 ? 0 : dy / dv };
+
+    x1p[0] = x1[0] - (this->Range[0] - this->AdjustedRange[0]) * rate[0];
+    x1p[1] = x1[1] - (this->Range[0] - this->AdjustedRange[0]) * rate[1];
+    x2p[0] = x2[0] - (this->Range[1] - this->AdjustedRange[1]) * rate[0];
+    x2p[1] = x2[1] - (this->Range[1] - this->AdjustedRange[1]) * rate[1];
+
+    x1[0] = x1p[0];
+    x1[1] = x1p[1];
+    x2[0] = x2p[0];
+    x2[1] = x2p[1];
+  }
+
+  p1[0] = x1[0];
+  p1[1] = x1[1];
+  p1[2] = 0.0;
+  this->LastPosition[0] = x1[0];
+  this->LastPosition[1] = x1[1];
+
+  p2[0] = x2[0];
+  p2[1] = x2[1];
   p2[2] = 0.0;
-  this->LastPosition2[0] = x[0];
-  this->LastPosition2[1] = x[1];
+  this->LastPosition2[0] = x2[0];
+  this->LastPosition2[1] = x2[1];
 
   double *xp1, *xp2, len = 0.0;
   if (this->SizeFontRelativeToAxis)
@@ -397,9 +426,9 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
   }
 
   // First axis point, where first tick is located
-  ptIds[0] = pts->InsertNextPoint(p1);
-  xTick[0] = p1[0] + this->TickLength * sin(theta);
-  xTick[1] = p1[1] - this->TickLength * cos(theta);
+  ptIds[0] = pts->InsertNextPoint(pI1);
+  xTick[0] = pI1[0] + this->TickLength * sin(theta);
+  xTick[1] = pI1[1] - this->TickLength * cos(theta);
   xTick[2] = 0.0;
   pts->InsertNextPoint(xTick);
 
@@ -464,9 +493,9 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
   }
 
   // Last axis point
-  ptIds[1] = pts->InsertNextPoint(p2);
-  xTick[0] = p2[0] + this->TickLength * sin(theta);
-  xTick[1] = p2[1] - this->TickLength * cos(theta);
+  ptIds[1] = pts->InsertNextPoint(pI2);
+  xTick[0] = pI2[0] + this->TickLength * sin(theta);
+  xTick[1] = pI2[1] - this->TickLength * cos(theta);
   pts->InsertNextPoint(xTick);
 
   // Add the axis if requested
@@ -475,14 +504,21 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
     lines->InsertNextCell(2, ptIds);
   }
 
+  auto rangeMin = std::min(this->Range[0], this->Range[1]);
+  auto rangeMax = std::max(this->Range[0], this->Range[1]);
+
   // Create lines representing the tick marks
   if (this->TickVisibility)
   {
-    for (i = 0; i < numTicks; i++)
+    for (i = 1; i < numTicks - 1; i++)
     {
-      ptIds[0] = 2 * i;
-      ptIds[1] = 2 * i + 1;
-      lines->InsertNextCell(2, ptIds);
+      val = this->AdjustedRange[0] + i * innerinterval;
+      if (val > rangeMin && val < rangeMax)
+      {
+        ptIds[0] = 2 * i;
+        ptIds[1] = 2 * i + 1;
+        lines->InsertNextCell(2, ptIds);
+      }
     }
   }
 
@@ -502,7 +538,11 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
       {
         val = this->AdjustedRange[0] + i * interval;
         snprintf(string, sizeof(string), this->LabelFormat, val);
-        this->LabelMappers[i]->SetInput(string);
+        this->LabelMappers[i]->SetInput("");
+        if (val > rangeMin && val < rangeMax)
+        {
+          this->LabelMappers[i]->SetInput(string);
+        }
 
         // Check if the label text has changed
 
@@ -567,7 +607,16 @@ void vtkAxisActor2D::BuildAxis(vtkViewport* viewport)
     // Position the mappers
     for (i = 0; i < this->AdjustedNumberOfLabels; i++)
     {
-      pts->GetPoint((this->NumberOfMinorTicks + 1) * 2 * i + 1, xTick);
+      val = this->AdjustedRange[0] + i * interval;
+      if (val > rangeMin && val < rangeMax)
+      {
+        pts->GetPoint((this->NumberOfMinorTicks + 1) * 2 * i + 1, xTick);
+        this->LabelActors[i]->VisibilityOn();
+      }
+      else
+      {
+        this->LabelActors[i]->VisibilityOff();
+      }
       this->LabelMappers[i]->GetSize(viewport, stringSize);
       this->SetOffsetPosition(xTick, theta, this->LastMaxLabelSize[0], this->LastMaxLabelSize[1],
         this->TickOffset, this->LabelActors[i]);
@@ -667,110 +716,47 @@ void vtkAxisActor2D::UpdateAdjustedRange()
   this->AdjustedRangeBuildTime.Modified();
 }
 
-// this is a helper function that computes some useful functions
-// for an axis. It returns the number of ticks
-static int vtkAxisActor2DComputeTicks(double sRange[2], double& interval, double& root)
+// This is a helper function that computes some useful functions for an axis. It returns the number
+// of ticks.
+static int vtkAxisActor2DComputeTicks(
+  double sRange[2], int inNumTicks, int ticksMin, int ticksMax, double& interval)
 {
-  // first we try assuming the first value is reasonable
-  int numTicks;
+  // Check the range to establish a baseline for number of ticks required
+  double desiredTicks = static_cast<double>(inNumTicks);
   double range = fabs(sRange[1] - sRange[0]);
-  int rootPower = static_cast<int>(floor(log10(range) - 1));
-  root = pow(10.0, rootPower);
-  // val will be between 10 and 100 inclusive of 10 but not 100
-  double val = range / root;
-  // first we check for an exact match
-  for (numTicks = 5; numTicks < 9; ++numTicks)
+  int rootPower = static_cast<int>(floor(log10(range) + 1));
+  double root = pow(10.0, rootPower);
+  double rangeRoot = range / root;
+
+  // Dynamically adjust the number of ticks shown to keep reasonable reference points as ticks
+  // become sparse
+  bool recalculate = false;
+  if (rangeRoot <= 0.15) // Too close to the next lower power -> use that instead
   {
-    if (fabs(val / (numTicks - 1.0) - floor(val / (numTicks - 1.0))) < .0001)
-    {
-      interval = val * root / (numTicks - 1.0);
-      return numTicks;
-    }
+    rootPower -= 1;
+    recalculate = true;
+  }
+  else if (rangeRoot <= 0.35)
+  {
+    rootPower -= 1;
+    desiredTicks /= 2.0;
+    recalculate = true;
+  }
+  else if (rangeRoot <= 0.6)
+  {
+    desiredTicks *= 2.0;
+  }
+  if (recalculate)
+  {
+    root = pow(10.0, rootPower);
+    rangeRoot = range / root;
   }
 
-  // if there isn't an exact match find a reasonable value
-  int newIntScale = 10;
-  if (val > 10)
-  {
-    newIntScale = 12;
-  }
-  if (val > 12)
-  {
-    newIntScale = 15;
-  }
-  if (val > 15)
-  {
-    newIntScale = 18;
-  }
-  if (val > 18)
-  {
-    newIntScale = 20;
-  }
-  if (val > 20)
-  {
-    newIntScale = 25;
-  }
-  if (val > 25)
-  {
-    newIntScale = 30;
-  }
-  if (val > 30)
-  {
-    newIntScale = 40;
-  }
-  if (val > 40)
-  {
-    newIntScale = 50;
-  }
-  if (val > 50)
-  {
-    newIntScale = 60;
-  }
-  if (val > 60)
-  {
-    newIntScale = 70;
-  }
-  if (val > 70)
-  {
-    newIntScale = 80;
-  }
-  if (val > 80)
-  {
-    newIntScale = 90;
-  }
-  if (val > 90)
-  {
-    newIntScale = 100;
-  }
-
-  // how many ticks should we have
-  switch (newIntScale)
-  {
-    case 12:
-    case 20:
-    case 40:
-    case 80:
-      numTicks = 5;
-      break;
-    case 18:
-    case 30:
-    case 60:
-    case 90:
-      numTicks = 7;
-      break;
-    case 10:
-    case 15:
-    case 25:
-    case 50:
-    case 100:
-      numTicks = 6;
-      break;
-    case 70:
-      numTicks = 8;
-      break;
-  }
-
-  interval = newIntScale * root / (numTicks - 1.0);
+  // Calculate the number of ticks and matching intervals
+  interval = root / desiredTicks;
+  int numTicks =
+    fmin(fmax(fmax(ceil(desiredTicks * range / root), 0.0) + 2.0, static_cast<double>(ticksMin)),
+      static_cast<double>(ticksMax));
   return numTicks;
 }
 
@@ -780,8 +766,8 @@ static int vtkAxisActor2DComputeTicks(double sRange[2], double& interval, double
 // satisfied. First the final range includes at least the initial range, and
 // second the final range divided by the number of ticks (minus one) will be a
 // reasonable interval
-void vtkAxisActor2D::ComputeRange(double inRange[2], double outRange[2], int vtkNotUsed(inNumTicks),
-  int& numTicks, double& interval)
+void vtkAxisActor2D::ComputeRange(
+  double inRange[2], double outRange[2], int inNumTicks, int& numTicks, double& interval)
 {
   // Handle the range
   double sRange[2];
@@ -810,33 +796,12 @@ void vtkAxisActor2D::ComputeRange(double inRange[2], double outRange[2], int vtk
     }
   }
 
-  double root;
-  numTicks = vtkAxisActor2DComputeTicks(sRange, interval, root);
+  numTicks = vtkAxisActor2DComputeTicks(sRange, inNumTicks, 2.0, VTK_MAX_LABELS, interval);
 
-  // is the starting point reasonable?
-  if (fabs(sRange[0] / root - floor(sRange[0] / root)) < 0.01)
-  {
-    outRange[0] = sRange[0];
-    outRange[1] = outRange[0] + (numTicks - 1.0) * interval;
-  }
-  else
-  {
-    // OK the starting point is not a good number, so we must widen the range
-    // First see if the current range will handle moving the start point
-    outRange[0] = floor(sRange[0] / root) * root;
-    if (outRange[0] + (numTicks - 1.0) * interval <= sRange[1])
-    {
-      outRange[1] = outRange[0] + (numTicks - 1.0) * interval;
-    }
-    else
-    {
-      // Finally in this case we must switch to a larger range to
-      // have reasonable starting and ending values
-      sRange[0] = outRange[0];
-      numTicks = vtkAxisActor2DComputeTicks(sRange, interval, root);
-      outRange[1] = outRange[0] + (numTicks - 1.0) * interval;
-    }
-  }
+  outRange[0] = floor(sRange[0] / interval) * interval;
+  sRange[0] = outRange[0];
+  numTicks = vtkAxisActor2DComputeTicks(sRange, inNumTicks, 2.0, VTK_MAX_LABELS, interval);
+  outRange[1] = outRange[0] + (numTicks - 1.0) * interval;
 
   // Adust if necessary
   if (inRange[0] > inRange[1])
