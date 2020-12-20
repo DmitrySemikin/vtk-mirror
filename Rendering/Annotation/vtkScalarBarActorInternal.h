@@ -62,12 +62,28 @@ public:
     this->SwatchColors = nullptr;
     this->SwatchPts = nullptr;
     this->Polys = nullptr;
+
+    this->ScalarBarBorder = nullptr;
+    this->ScalarBarBorderMapper = nullptr;
+    this->ScalarBarBorderActor = nullptr;
+
+    this->TextLeaders = nullptr;
+    this->TextLeadersMapper = nullptr;
+    this->TextLeadersActor = nullptr;
+    this->TextLeaderBackgrounds = nullptr;
+    this->TextLeaderBackgroundsMapper = nullptr;
+    this->TextLeaderBackgroundsActor = nullptr;
+
     this->AnnotationBoxes = nullptr;
     this->AnnotationBoxesMapper = nullptr;
     this->AnnotationBoxesActor = nullptr;
     this->AnnotationLeaders = nullptr;
     this->AnnotationLeadersMapper = nullptr;
     this->AnnotationLeadersActor = nullptr;
+    this->AnnotationLeaderBackgrounds = nullptr;
+    this->AnnotationLeaderBackgroundsMapper = nullptr;
+    this->AnnotationLeaderBackgroundsActor = nullptr;
+
     this->NanSwatch = nullptr;
     this->NanSwatchMapper = nullptr;
     this->NanSwatchActor = nullptr;
@@ -166,15 +182,31 @@ public:
   /// Cache of classes holding geometry assembled and ready for rendering.
   //@{
   ActorVector TextActors;
+
+  vtkPolyData* ScalarBarBorder;
+  vtkPolyDataMapper2D* ScalarBarBorderMapper;
+  vtkActor2D* ScalarBarBorderActor;
+
+  vtkPolyData* TextLeaders;
+  vtkPolyDataMapper2D* TextLeadersMapper;
+  vtkActor2D* TextLeadersActor;
+  vtkPolyData* TextLeaderBackgrounds;
+  vtkPolyDataMapper2D* TextLeaderBackgroundsMapper;
+  vtkActor2D* TextLeaderBackgroundsActor;
+
   vtkPolyData* AnnotationBoxes;
   vtkPolyDataMapper2D* AnnotationBoxesMapper;
   vtkActor2D* AnnotationBoxesActor;
   vtkPolyData* AnnotationLeaders;
   vtkPolyDataMapper2D* AnnotationLeadersMapper;
   vtkActor2D* AnnotationLeadersActor;
+  vtkPolyData* AnnotationLeaderBackgrounds;
+  vtkPolyDataMapper2D* AnnotationLeaderBackgroundsMapper;
+  vtkActor2D* AnnotationLeaderBackgroundsActor;
   ActorVector AnnotationLabels;
   DoubleVector AnnotationAnchors;
   ColorVector AnnotationColors;
+
   vtkPolyData* NanSwatch;
   vtkPolyDataMapper2D* NanSwatchMapper;
   vtkActor2D* NanSwatchActor;

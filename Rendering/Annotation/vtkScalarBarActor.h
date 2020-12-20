@@ -289,6 +289,17 @@ public:
 
   //@{
   /**
+   * Whether the annotation leaders should touch the scalar bar (true)
+   * or use a dynamic padding distance between the scalar bar and the
+   * leader (false). The default is false.
+   */
+  vtkSetMacro(AnnotationLeaderTouchesScalarBar, vtkTypeBool);
+  vtkGetMacro(AnnotationLeaderTouchesScalarBar, vtkTypeBool);
+  vtkBooleanMacro(AnnotationLeaderTouchesScalarBar, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
    * Set/get whether text annotations should be rendered or not.
    * Currently, this only affects rendering when \a IndexedLookup is true.
    * The default is true.
@@ -414,11 +425,56 @@ public:
 
   //@{
   /**
+   * Set/Get whether the color bar border should be drawn. Default is off.
+   */
+  vtkSetMacro(DrawColorBarBorder, vtkTypeBool);
+  vtkGetMacro(DrawColorBarBorder, vtkTypeBool);
+  vtkBooleanMacro(DrawColorBarBorder, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
    * Set/Get whether the tick labels should be drawn. Default is on.
    */
   vtkSetMacro(DrawTickLabels, vtkTypeBool);
   vtkGetMacro(DrawTickLabels, vtkTypeBool);
   vtkBooleanMacro(DrawTickLabels, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * Set/Get whether the tick label leaders should be drawn. Default is off.
+   */
+  vtkSetMacro(DrawTickLeaders, vtkTypeBool);
+  vtkGetMacro(DrawTickLeaders, vtkTypeBool);
+  vtkBooleanMacro(DrawTickLeaders, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * Set/Get whether the tick label leaders should be drawn across the color bar.
+   * Default is off.
+   */
+  vtkSetMacro(DrawTickLeadersAcrossColorBar, vtkTypeBool);
+  vtkGetMacro(DrawTickLeadersAcrossColorBar, vtkTypeBool);
+  vtkBooleanMacro(DrawTickLeadersAcrossColorBar, vtkTypeBool);
+  //@}
+
+  //@{
+  /**
+   * Set/get the amount of padding between the end of the tick line and the label.
+   * Default is 2.0.
+   */
+  vtkGetMacro(TickLeaderLabelPadding, double);
+  vtkSetMacro(TickLeaderLabelPadding, double);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the annotation leaders property.
+   */
+  virtual void SetAnnotationLeaderProperty(vtkProperty2D* p);
+  vtkGetObjectMacro(AnnotationLeaderProperty, vtkProperty2D);
   //@}
 
   //@{
@@ -431,10 +487,26 @@ public:
 
   //@{
   /**
+   * Set/Get the color bar border property.
+   */
+  virtual void SetColorBarBorderProperty(vtkProperty2D* p);
+  vtkGetObjectMacro(ColorBarBorderProperty, vtkProperty2D);
+  //@}
+
+  //@{
+  /**
    * Set/Get the frame property.
    */
   virtual void SetFrameProperty(vtkProperty2D* p);
   vtkGetObjectMacro(FrameProperty, vtkProperty2D);
+  //@}
+
+  //@{
+  /**
+   * Set/Get the tick leader property.
+   */
+  virtual void SetTickLeaderProperty(vtkProperty2D* p);
+  vtkGetObjectMacro(TickLeaderProperty, vtkProperty2D);
   //@}
 
   //@{
@@ -642,6 +714,13 @@ protected:
   virtual void ConfigureAnnotations();
 
   /**
+   * Generate/configure the annotation label backgrounds using the
+   * configured annotation data. Used to make the annotation leaders
+   * still visible when overlaid on top of a similar color.
+   */
+  virtual void ConfigureAnnotationBackgrounds();
+
+  /**
    * Generate/configure the representation of the frame from laid-out geometry.
    */
   virtual void ConfigureFrame();
@@ -657,6 +736,11 @@ protected:
   virtual void ConfigureScalarBar();
 
   /**
+   * Generate/configure the scalar bar border from laid-out geometry.
+   */
+  virtual void ConfigureScalarBarBorder();
+
+  /**
    * Generate/configure the title actor using the laid-out geometry.
    */
   virtual void ConfigureTitle();
@@ -665,6 +749,11 @@ protected:
    * Generate/configure the tick-mark actors using the laid-out geometry.
    */
   virtual void ConfigureTicks();
+
+  /**
+   * Generate/configure the tick-mark leaders using the laid-out geometry.
+   */
+  virtual void ConfigureTickLeaders();
 
   /**
    * Generate/configure the NaN swatch using the laid-out geometry.
@@ -724,13 +813,20 @@ protected:
   vtkTypeBool DrawBackground; // off by default
   vtkTypeBool DrawFrame;      // off by default
   vtkTypeBool DrawColorBar;   // on by default
+  vtkTypeBool DrawColorBarBorder;
   vtkTypeBool DrawTickLabels; // on by default
+  vtkTypeBool DrawTickLeaders;
+  vtkTypeBool DrawTickLeadersAcrossColorBar;
+  double TickLeaderLabelPadding;
   vtkTypeBool DrawAnnotations;
   vtkTypeBool DrawNanAnnotation;
   vtkTypeBool AnnotationTextScaling; // off by default
   vtkTypeBool FixedAnnotationLeaderLineColor;
+  vtkProperty2D* AnnotationLeaderProperty;
   vtkProperty2D* BackgroundProperty;
+  vtkProperty2D* ColorBarBorderProperty;
   vtkProperty2D* FrameProperty;
+  vtkProperty2D* TickLeaderProperty;
   char* Title;
   char* ComponentTitle;
   char* LabelFormat;
@@ -741,6 +837,7 @@ protected:
   char* BelowRangeAnnotation;
   char* AboveRangeAnnotation;
   double AnnotationLeaderPadding;
+  vtkTypeBool AnnotationLeaderTouchesScalarBar;
   int MaximumWidthInPixels;
   int MaximumHeightInPixels;
   int TextPad;
