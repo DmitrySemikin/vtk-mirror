@@ -18,17 +18,12 @@
  *
  * vtkPExtractDataArraysOverTime adds distributed data support to
  * vtkExtractDataArraysOverTime.
+ * This filter is ghost aware, i.e. it ignores ghost cells / ghost points, which
+ * is needed to compute correct statistics in a distributed data set.
  *
- * It combines results from all ranks and produce non-empty result only on rank 0.
- *
- * @caveats Caveats Caveats
- *
- * This filter's behavior when `ReportStatisticsOnly` is true is buggy and will
- * change in the future. When `ReportStatisticsOnly` currently, each rank
- * computes separate stats for local data. Consequently, this filter preserves
- * each processes results separately (by adding suffix **rank=<rank num>** to each
- * of the block names, as appropriate. In future, we plan to fix this to
- * correctly compute stats in parallel for each block.
+ * @warning Point ghosts are needed to correctly
+ * compute statistics on points on distributed data. Using
+ * `vtkGenerateGlobalIds` bedore this filter is a way to produce such ghosts.
  */
 
 #ifndef vtkPExtractDataArraysOverTime_h
@@ -36,8 +31,12 @@
 
 #include "vtkExtractDataArraysOverTime.h"
 #include "vtkFiltersParallelModule.h" // For export macro
+#include "vtkSmartPointer.h"          // For vtkSmartPointer
 
+class vtkDataSetAttributes;
+class vtkInformation;
 class vtkMultiProcessController;
+class vtkTable;
 
 class VTKFILTERSPARALLEL_EXPORT vtkPExtractDataArraysOverTime : public vtkExtractDataArraysOverTime
 {
@@ -54,19 +53,32 @@ public:
   vtkGetObjectMacro(Controller, vtkMultiProcessController);
   //@}
 
+  vtkSmartPointer<vtkDescriptiveStatistics> NewDescriptiveStatistics() override;
+  vtkSmartPointer<vtkOrderStatistics> NewOrderStatistics() override;
+
 protected:
   vtkPExtractDataArraysOverTime();
   ~vtkPExtractDataArraysOverTime() override;
 
-  void PostExecute(vtkInformation* request, vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector) override;
+  /**
+   * This method returns the total amount of non ghost tuples on which
+   * statistics are computed, accumulated over each ranks.
+   */
+  vtkIdType SynchronizeNumberOfTotalInputTuples(vtkDataSetAttributes* fd) override;
+
+  /**
+   * See superclass documentation.
+   */
+  void SynchronizeBlocksMetaData(vtkTable* splits) override;
 
   vtkMultiProcessController* Controller;
+
+  void PostExecute(vtkInformation*, vtkInformationVector**, vtkInformationVector*) override;
+  void ReorganizeData(vtkMultiBlockDataSet* dataset);
 
 private:
   vtkPExtractDataArraysOverTime(const vtkPExtractDataArraysOverTime&) = delete;
   void operator=(const vtkPExtractDataArraysOverTime&) = delete;
-  void ReorganizeData(vtkMultiBlockDataSet* dataset);
 };
 
 #endif

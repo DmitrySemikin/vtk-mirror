@@ -18,21 +18,22 @@
   the U.S. Government retains certain rights in this software.
 -------------------------------------------------------------------------*/
 
-#include "vtkToolkits.h"
-
 #include "vtkDescriptiveStatistics.h"
-#include "vtkStatisticsAlgorithmPrivate.h"
 
 #include "vtkDataObjectCollection.h"
+#include "vtkDataSetAttributes.h"
 #include "vtkDoubleArray.h"
 #include "vtkIdTypeArray.h"
 #include "vtkInformation.h"
 #include "vtkMath.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkObjectFactory.h"
+#include "vtkStatisticsAlgorithmPrivate.h"
 #include "vtkStdString.h"
 #include "vtkStringArray.h"
 #include "vtkTable.h"
+#include "vtkToolkits.h"
+#include "vtkUnsignedCharArray.h"
 #include "vtkVariantArray.h"
 
 #include <limits>
@@ -296,21 +297,34 @@ void vtkDescriptiveStatistics::Learn(
     double mom3 = 0.;
     double mom4 = 0.;
 
-    double n, inv_n, val, delta, A, B;
-    for (vtkIdType r = 0; r < nRow; ++r)
+    double inv_n, val, delta, A, B, numberOfAddedValues = 0.0;
+
+    auto rowData = inData->GetRowData();
+    auto ghosts =
+      vtkArrayDownCast<vtkUnsignedCharArray>(rowData->GetAbstractArray(rowData->GhostArrayName()));
+
+    // Iterate over all model rows
+    for (int r = 0; r < nRow; ++r)
     {
-      n = r + 1.;
-      inv_n = 1. / n;
+      if (ghosts && ghosts->GetValue(r))
+      {
+        continue;
+      }
+
+      inv_n = 1. / (numberOfAddedValues + 1);
 
       val = inData->GetValueByName(r, varName).ToDouble();
       delta = val - mean;
 
       A = delta * inv_n;
       mean += A;
-      mom4 += A * (A * A * delta * r * (n * (n - 3.) + 3.) + 6. * A * mom2 - 4. * mom3);
+      mom4 += A *
+        (A * A * delta * numberOfAddedValues *
+            ((numberOfAddedValues + 1) * (numberOfAddedValues - 2) + 3.) +
+          6. * A * mom2 - 4. * mom3);
 
       B = val - mean;
-      mom3 += A * (B * delta * (n - 2.) - 3. * mom2);
+      mom3 += A * (B * delta * (numberOfAddedValues - 1) - 3. * mom2);
       mom2 += delta * B;
 
       if (val < minVal)
@@ -321,6 +335,7 @@ void vtkDescriptiveStatistics::Learn(
       {
         maxVal = val;
       }
+      ++numberOfAddedValues;
     }
 
     vtkVariantArray* row = vtkVariantArray::New();
@@ -328,7 +343,7 @@ void vtkDescriptiveStatistics::Learn(
     row->SetNumberOfValues(8);
 
     row->SetValue(0, varName);
-    row->SetValue(1, nRow);
+    row->SetValue(1, numberOfAddedValues);
     row->SetValue(2, minVal);
     row->SetValue(3, maxVal);
     row->SetValue(4, mean);

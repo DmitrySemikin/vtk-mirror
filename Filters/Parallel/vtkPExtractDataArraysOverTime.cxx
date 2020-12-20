@@ -14,19 +14,23 @@
 =========================================================================*/
 #include "vtkPExtractDataArraysOverTime.h"
 
+#include "vtkAbstractArray.h"
 #include "vtkDataSetAttributes.h"
 #include "vtkInformation.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkMultiProcessController.h"
 #include "vtkMultiProcessStream.h"
 #include "vtkObjectFactory.h"
+#include "vtkPDescriptiveStatistics.h"
+#include "vtkPOrderStatistics.h"
+#include "vtkSmartPointer.h"
 #include "vtkTable.h"
 #include "vtkUnsignedCharArray.h"
 
-#include <cassert>
 #include <map>
+#include <set>
 #include <sstream>
-#include <string>
+#include <vector>
 
 namespace
 {
@@ -75,7 +79,10 @@ vtkSmartPointer<vtkTable> vtkMergeTable(vtkTable* dest, vtkTable* src)
   }
   return dest;
 }
-}
+static constexpr int NUMBER_OF_COLUMNS_COM = 25096;
+static constexpr int ARRAY_NAME_LENGTH_COM = 25097;
+static constexpr int BUFFER_COM = 25098;
+} // anonymous namespace
 
 vtkStandardNewMacro(vtkPExtractDataArraysOverTime);
 vtkCxxSetObjectMacro(vtkPExtractDataArraysOverTime, Controller, vtkMultiProcessController);
@@ -100,15 +107,131 @@ void vtkPExtractDataArraysOverTime::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 //------------------------------------------------------------------------------
+void vtkPExtractDataArraysOverTime::SynchronizeBlocksMetaData(vtkTable* splits)
+{
+  // We share among processes array information (type, name and number of
+  // components) so MPI calls can be done for each array
+  // The final buffer layout is
+  // ArrayType - NumberOfComponents - ArrayName
+  int localNumberOfColumns = splits->GetNumberOfColumns();
+  int numberOfProcesses = this->Controller->GetNumberOfProcesses();
+  std::vector<int> globalNumberOfColumns(numberOfProcesses);
+  int localProcessId = this->Controller->GetLocalProcessId();
+  this->Controller->AllGather(&localNumberOfColumns, globalNumberOfColumns.data(), 1);
+
+  int maxId = 0;
+  {
+    int processId = 0;
+    for (; processId < numberOfProcesses; ++processId)
+    {
+      if (localNumberOfColumns < globalNumberOfColumns[processId])
+      {
+        maxId = processId;
+        break;
+      }
+      else if (localNumberOfColumns > globalNumberOfColumns[processId])
+      {
+        break;
+      }
+      else
+      {
+        maxId = processId;
+      }
+    }
+    // No need to exchange data, no process are empty
+    if (processId == numberOfProcesses)
+    {
+      return;
+    }
+  }
+
+  // I have to send array information to processes lacking some.
+  if (maxId == localProcessId)
+  {
+    std::set<int> emptyProcessIds;
+    for (int processId = 0; processId < numberOfProcesses; ++processId)
+    {
+      if (localNumberOfColumns > globalNumberOfColumns[processId])
+      {
+        emptyProcessIds.insert(processId);
+      }
+    }
+    vtkIdType numberOfColumns = splits->GetNumberOfColumns();
+    for (int processId : emptyProcessIds)
+    {
+      this->Controller->Send(&numberOfColumns, 1, processId, NUMBER_OF_COLUMNS_COM);
+    }
+
+    vtkIdType numberOfChars = 0;
+    std::vector<std::size_t> arrayNameLength(numberOfColumns);
+    for (vtkIdType colId = 0; colId < splits->GetNumberOfColumns(); ++colId)
+    {
+      arrayNameLength[colId] = strlen(splits->GetColumnName(colId));
+      numberOfChars += arrayNameLength[colId];
+    }
+
+    for (int processId : emptyProcessIds)
+    {
+      this->Controller->Send(
+        arrayNameLength.data(), numberOfColumns, processId, ARRAY_NAME_LENGTH_COM);
+    }
+
+    vtkIdType bufferSize = numberOfChars + (2 + sizeof(int)) * numberOfColumns;
+    std::vector<char> sendBuffer(bufferSize);
+    char* sendBufferCurrent = sendBuffer.data();
+    for (int processId : emptyProcessIds)
+    {
+      for (vtkIdType colId = 0; colId < splits->GetNumberOfColumns(); ++colId)
+      {
+        *(sendBufferCurrent++) = static_cast<char>(splits->GetColumn(colId)->GetDataType());
+        *(reinterpret_cast<int*>(sendBufferCurrent)) =
+          splits->GetColumn(colId)->GetNumberOfComponents();
+        sendBufferCurrent += sizeof(int);
+        std::size_t len = strlen(splits->GetColumnName(colId));
+        memcpy(sendBufferCurrent, splits->GetColumnName(colId), len + 1);
+        sendBufferCurrent += len + 1;
+      }
+      this->Controller->Send(sendBuffer.data(), bufferSize, processId, BUFFER_COM);
+    }
+  }
+  // I need array informations from process of id maxId
+  else if (maxId != numberOfProcesses)
+  {
+    vtkIdType numberOfColumns;
+    this->Controller->Receive(&numberOfColumns, 1, maxId, NUMBER_OF_COLUMNS_COM);
+
+    std::vector<std::size_t> arrayNameLength(numberOfColumns);
+    this->Controller->Receive(
+      arrayNameLength.data(), numberOfColumns, maxId, ARRAY_NAME_LENGTH_COM);
+
+    vtkIdType numberOfChars = 0;
+    for (vtkIdType colId = 0; colId < numberOfColumns; ++colId)
+    {
+      numberOfChars += arrayNameLength[colId];
+    }
+
+    vtkIdType bufferSize = numberOfChars + (2 + sizeof(int)) * numberOfColumns;
+    std::vector<char> receiveBuffer(bufferSize);
+    this->Controller->Receive(receiveBuffer.data(), bufferSize, maxId, BUFFER_COM);
+
+    char* receiveBufferCurrent = receiveBuffer.data();
+    for (vtkIdType colId = 0; colId < numberOfColumns; ++colId)
+    {
+      auto array = vtkSmartPointer<vtkAbstractArray>::Take(
+        vtkAbstractArray::CreateArray(*(receiveBufferCurrent++)));
+      array->SetNumberOfComponents(*(reinterpret_cast<int*>(receiveBufferCurrent)));
+      receiveBufferCurrent += sizeof(int);
+      array->SetName(receiveBufferCurrent);
+      receiveBufferCurrent += arrayNameLength[colId] + 1;
+      splits->AddColumn(array);
+    }
+  }
+}
+
 void vtkPExtractDataArraysOverTime::PostExecute(
   vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   this->Superclass::PostExecute(request, inputVector, outputVector);
-  if (!this->Controller || this->Controller->GetNumberOfProcesses() < 2)
-  {
-    return;
-  }
-
   vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::GetData(outputVector, 0);
   assert(output);
   this->ReorganizeData(output);
@@ -117,17 +240,29 @@ void vtkPExtractDataArraysOverTime::PostExecute(
 //------------------------------------------------------------------------------
 void vtkPExtractDataArraysOverTime::ReorganizeData(vtkMultiBlockDataSet* dataset)
 {
+  // If we only report statistics, we empty blocks of rank different than 0 to
+  // eliminate duplicate information.
+  // Else:
   // 1. Send all blocks to 0.
   // 2. Rank 0 then reorganizes blocks. This is done as follows:
-  //    i. If blocks form different ranks have same names, then we check if they
-  //       are referring to the same global-id. If so, the tables are merged
-  //       into one. If not, we the tables separately, with their names
-  //       uniquified with rank number.
+  //    i. The tables of blocks of same id are merged
+  //       into one.
   // 3. Rank 0 send info about number blocks and their names to everyone
   // 4. Satellites, then, simply initialize their output to and make it match
   //    the structure reported by rank 0.
 
   const int myRank = this->Controller->GetLocalProcessId();
+  if (this->ReportStatisticsOnly)
+  {
+    if (myRank)
+    {
+      for (unsigned int blockId = 0; blockId < dataset->GetNumberOfBlocks(); ++blockId)
+      {
+        dataset->SetBlock(blockId, nullptr);
+      }
+    }
+    return;
+  }
   const int numRanks = this->Controller->GetNumberOfProcesses();
   if (myRank != 0)
   {
@@ -179,38 +314,42 @@ void vtkPExtractDataArraysOverTime::ReorganizeData(vtkMultiBlockDataSet* dataset
     for (auto& item : collection)
     {
       const std::string& name = item.first;
-
-      // as we using global ids, if so merge the tables.
-      if (strncmp(name.c_str(), "gid=", 4) == 0)
+      vtkSmartPointer<vtkTable> mergedTable;
+      for (auto& sitem : item.second)
       {
-        vtkSmartPointer<vtkTable> mergedTable;
-        for (auto& sitem : item.second)
-        {
-          mergedTable = vtkMergeTable(mergedTable, sitem.second);
-        }
-
-        auto idx = mb->GetNumberOfBlocks();
-        mb->SetBlock(idx, mergedTable);
-        mb->GetMetaData(idx)->Set(vtkCompositeDataSet::NAME(), name.c_str());
-        stream << name;
+        mergedTable = vtkMergeTable(mergedTable, sitem.second);
       }
-      else
-      {
-        // if not gids, then add each table separately with rank info.
-        for (auto& sitem : item.second)
-        {
-          auto idx = mb->GetNumberOfBlocks();
-          mb->SetBlock(idx, sitem.second);
 
-          std::ostringstream str;
-          str << name << " rank=" << sitem.first;
-          mb->GetMetaData(idx)->Set(vtkCompositeDataSet::NAME(), str.str().c_str());
-          stream << str.str();
-        }
-      }
+      auto idx = mb->GetNumberOfBlocks();
+      mb->SetBlock(idx, mergedTable);
+      mb->GetMetaData(idx)->Set(vtkCompositeDataSet::NAME(), name.c_str());
+      stream << name;
     }
 
     this->Controller->Broadcast(stream, 0);
     dataset->ShallowCopy(mb);
   } // end rank 0
+}
+
+//------------------------------------------------------------------------------
+vtkSmartPointer<vtkDescriptiveStatistics> vtkPExtractDataArraysOverTime::NewDescriptiveStatistics()
+{
+  return vtkSmartPointer<vtkPDescriptiveStatistics>::New();
+}
+
+//------------------------------------------------------------------------------
+vtkSmartPointer<vtkOrderStatistics> vtkPExtractDataArraysOverTime::NewOrderStatistics()
+{
+  return vtkSmartPointer<vtkPOrderStatistics>::New();
+}
+
+//------------------------------------------------------------------------------
+vtkIdType vtkPExtractDataArraysOverTime::SynchronizeNumberOfTotalInputTuples(
+  vtkDataSetAttributes* dsa)
+{
+  vtkIdType localNumberOfTotalInputTuples = Superclass::SynchronizeNumberOfTotalInputTuples(dsa);
+  vtkIdType numberOfTotalInputTuples = 0;
+  this->Controller->AllReduce(
+    &localNumberOfTotalInputTuples, &numberOfTotalInputTuples, 1, vtkCommunicator::SUM_OP);
+  return numberOfTotalInputTuples;
 }
