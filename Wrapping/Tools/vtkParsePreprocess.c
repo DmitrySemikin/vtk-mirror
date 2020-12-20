@@ -4035,7 +4035,7 @@ const char* vtkParsePreprocess_ExpandMacro(
   const char* pp = NULL;
   const char* dp = NULL;
   const char* wp = NULL;
-  char stack_rp[128];
+  static char stack_rp[128];
   char* rp = NULL;
   size_t rs = 0;
   size_t i = 0;
@@ -4422,7 +4422,7 @@ const char* vtkParsePreprocess_ExpandMacro(
  */
 const char* vtkParsePreprocess_ProcessString(PreprocessInfo* info, const char* text)
 {
-  char stack_rp[128];
+  static char stack_rp[128];
   char* rp;
   char* ep;
   size_t i = 0;
