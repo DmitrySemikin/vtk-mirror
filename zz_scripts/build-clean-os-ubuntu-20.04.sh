@@ -38,6 +38,7 @@ mkdir "${BUILD_DIR}" \
 && cd "${BUILD_DIR}" \
 && cmake -DVTK_GROUP_ENABLE_Qt=YES -DCMAKE_INSTALL_PREFIX= "${ROOT_DIR}" \
 && cmake --build . \
+&& cmake --install .
 
 if [[ "$?" -ne "0" ]]; then
     echo "ERROR: Failed to build the package" >&2
