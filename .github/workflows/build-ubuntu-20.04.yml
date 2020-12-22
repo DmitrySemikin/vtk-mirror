@@ -1,6 +1,7 @@
 name: build-ubuntu-20.04
 
-on: push
+on: workflow_dispatch
+#on: push
 
 jobs:
 
