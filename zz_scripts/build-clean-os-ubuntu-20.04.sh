@@ -58,7 +58,7 @@ ninja --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 BUILD_LOG_NAME="build.log"
 BUILD_LOG="${WORKING_DIR}/${BUILD_LOG_NAME}"
 
-mkdir "${BUILD_DIR}" \
+mkdir -p "${BUILD_DIR}" \
 && cmake \
   -G Ninja \
   -DCMAKE_VERBOSE_MAKEFILE=ON \
