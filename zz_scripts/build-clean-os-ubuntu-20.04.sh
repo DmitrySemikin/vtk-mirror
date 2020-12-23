@@ -28,7 +28,7 @@ RC=$?
 INSTALL_ENDTIME=$(date +%s)
 echo "It takes $(($INSTALL_ENDTIME - $INSTALL_STARTTIME)) seconds to complete the installation..."
 
-if [[ $RC != 0 ]]; then
+if [[ ${RC} != 0 ]]; then
   echo "ERROR: Failed to install packages" >&2
   exit 1;
 fi
@@ -39,10 +39,13 @@ BUILD_STARTTIME=$(date +%s)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SRC_DIR="${SCRIPT_DIR}/.."
 WORKING_DIR="$( cd "${SRC_DIR}/.." >/dev/null 2>&1 && pwd )"
-BUILD_DIR="${WORKING_DIR}/vtk-build"
-INSTALL_DIR="${WORKING_DIR}/vtk-install"
+BUILD_DIR_NAME="vtk-build"
+INSTALL_DIR_NAME="vtk-install"
+BUILD_DIR="${WORKING_DIR}/${BUILD_DIR_NAME}"
+INSTALL_DIR="${WORKING_DIR}/${INSTALL_DIR_NAME}"
 
-ENV_DESCRIPTION_FILE="${WORKING_DIR}/vtk-build-env.txt"
+ENV_DESCRIPTION_FILE_NAME="vtk-build-env.txt"
+ENV_DESCRIPTION_FILE="${WORKING_DIR}/${ENV_DESCRIPTION_FILE_NAME}"
 echo "GCC --version" > "${ENV_DESCRIPTION_FILE}"
 gcc --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 echo "qmake --version" >> "${ENV_DESCRIPTION_FILE}"
@@ -52,7 +55,8 @@ cmake --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 echo "ninja --version" >> "${ENV_DESCRIPTION_FILE}"
 ninja --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 
-BUILD_LOG="${WORKING_DIR}/build.log"
+BUILD_LOG_NAME="build.log"
+BUILD_LOG="${WORKING_DIR}/${BUILD_LOG_NAME}"
 
 mkdir "${BUILD_DIR}" \
 && cmake \
@@ -73,8 +77,9 @@ RC=$?
 BUILD_ENDTIME=$(date +%s)
 echo "It takes $(($BUILD_ENDTIME - $BUILD_STARTTIME)) seconds to complete the build..."
 
-if [[ RC != 0 ]]; then
+if [[ ${RC} != 0 ]]; then
     echo "ERROR: Failed to build the package" >&2
+    echo "Return code: ${RC}"
     exit 1;
 fi
 
@@ -86,10 +91,10 @@ tar \
   --file=vtk-binaries.tar.bz2 \
   --use-compress-program=pbzip2 \
   --directory="${WORKING_dir}" \
-  "${BUILD_DIR}" \
-  "${INSTALL_DIR}" \
-  "${ENV_DESCRIPTION_FILE}" \
-  "${BUILD_LOG}"
+  "${BUILD_DIR_NAME}" \
+  "${INSTALL_DIR_NAME}" \
+  "${ENV_DESCRIPTION_FILE_NAME}" \
+  "${BUILD_LOG_NAME}"
 
 ARCH_ENDTIME=$(date +%s)
 echo "It takes $(($ARCH_ENDTIME - $ARCH_STARTTIME)) seconds to complete the arch..."
