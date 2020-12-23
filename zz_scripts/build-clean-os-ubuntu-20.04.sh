@@ -90,7 +90,7 @@ tar \
   --create \
   --file=vtk-binaries.tar.bz2 \
   --use-compress-program=pbzip2 \
-  --directory="${WORKING_dir}" \
+  --directory="${WORKING_DIR}" \
   "${BUILD_DIR_NAME}" \
   "${INSTALL_DIR_NAME}" \
   "${ENV_DESCRIPTION_FILE_NAME}" \
