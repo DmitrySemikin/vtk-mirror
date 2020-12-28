@@ -11,4 +11,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      - name: Build
+        run: bash ./zz_scripts/build-clean-os-ubuntu-20.04.sh
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: vtk-bin
+          path: |
+            ../vtk-build/*.tar.gz
+            ../vtk-build/*.tgz
+            ../build.log
+            ../vtk-build-env.txt
+            ../vtk-cmake-variables-values.txt
