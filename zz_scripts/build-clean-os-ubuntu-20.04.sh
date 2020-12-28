@@ -58,43 +58,86 @@ ninja --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 BUILD_LOG_NAME="build.log"
 BUILD_LOG="${WORKING_DIR}/${BUILD_LOG_NAME}"
 
-mkdir -p "${BUILD_DIR}" \
-&& cmake \
-  -G Ninja \
-  -DCMAKE_VERBOSE_MAKEFILE=ON \
-  -DVTK_GROUP_ENABLE_Qt=YES \
-  -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
-  -S "${SRC_DIR}" \
-  -B "${BUILD_DIR}"\
-  2>&1 > "${BUILD_LOG}" \
-&& cmake --build "${BUILD_DIR}" \
-  2>&1 >> "${BUILD_LOG}" \
-&& cmake --install "${BUILD_DIR}" \
-  2>&1 > "${BUILD_LOG}"
 
+# Defines variable $VTK_DISABLE_MODULES
+source "${SCRIPT_DIR}/define-disable-modules-variable.sh"
+if [[ -z "${VTK_DISABLE_MODULES}" ]]; then
+    echo "ERROR: Failed to source script, which defines VTK_DISABLE_MODULES variable." >&2
+    exit 1;
+fi
+
+
+mkdir -p "${BUILD_DIR}"
 RC=$?
-
-BUILD_ENDTIME=$(date +%s)
-echo "It takes $(($BUILD_ENDTIME - $BUILD_STARTTIME)) seconds to complete the build..."
-
 if [[ ${RC} != 0 ]]; then
-    echo "ERROR: Failed to build the package" >&2
+    echo "ERROR: Failed to create build directory." >&2
     echo "Return code: ${RC}"
     exit 1;
 fi
 
 
+cmake \
+  -G Ninja \
+  -DCMAKE_VERBOSE_MAKEFILE=ON \
+  -DVTK_GROUP_ENABLE_Qt=YES \
+  -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" \
+  -DCMAKE_BUILD_TYPE="MinSizeRel" \
+  ${VTK_DISABLE_MODULES} \
+  -S "${SRC_DIR}" \
+  -B "${BUILD_DIR}"\
+  2>&1 > "${BUILD_LOG}"
+
+RC=$?
+if [[ ${RC} != 0 ]]; then
+    echo "ERROR: Failed to generate VTK project files (cmake run)." >&2
+    echo "Return code: ${RC}"
+    exit 1;
+fi
+
+
+cmake --build "${BUILD_DIR}" 2>&1 >> "${BUILD_LOG}"
+RC=$?
+if [[ ${RC} != 0 ]]; then
+    echo "ERROR: Failed to build VTK." >&2
+    echo "Return code: ${RC}"
+    exit 1;
+fi
+
+
+# cmake --install "${BUILD_DIR}" 2>&1 >> "${BUILD_LOG}"
+
+# RC=$?
+# if [[ ${RC} != 0 ]]; then
+#     echo "ERROR: Failed to install VTK" >&2
+#     echo "Return code: ${RC}"
+#     exit 1;
+# fi
+
+
+BUILD_ENDTIME=$(date +%s)
+echo "It takes $(($BUILD_ENDTIME - $BUILD_STARTTIME)) seconds to complete the build..."
+
+
+
 ARCH_STARTTIME=$(date +%s)
 
-tar \
-  --create \
-  --file=vtk-binaries.tar.bz2 \
-  --use-compress-program=pbzip2 \
-  --directory="${WORKING_DIR}" \
-  "${BUILD_DIR_NAME}" \
-  "${INSTALL_DIR_NAME}" \
-  "${ENV_DESCRIPTION_FILE_NAME}" \
-  "${BUILD_LOG_NAME}"
+cpack -G TGZ -B "${BUILD_DIR}" 2>&1 >> "${BUILD_LOG}"
+RC=$?
+if [[ ${RC} != 0 ]]; then
+    echo "ERROR: Failed to create package (cpack invocation)." >&2
+    echo "Return code: ${RC}"
+    exit 1;
+fi
+
+# tar \
+#   --create \
+#   --file=vtk-binaries.tar.bz2 \
+#   --use-compress-program=pbzip2 \
+#   --directory="${WORKING_DIR}" \
+#   "${BUILD_DIR_NAME}" \
+#   "${INSTALL_DIR_NAME}" \
+#   "${ENV_DESCRIPTION_FILE_NAME}" \
+#   "${BUILD_LOG_NAME}"
 
 ARCH_ENDTIME=$(date +%s)
 echo "It takes $(($ARCH_ENDTIME - $ARCH_STARTTIME)) seconds to complete the arch..."
