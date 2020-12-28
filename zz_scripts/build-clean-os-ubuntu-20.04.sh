@@ -14,7 +14,8 @@ STARTTIME=$(date +%s)
 
 INSTALL_STARTTIME=$(date +%s)
 
-sudo apt-get -y install \
+sudo apt-get update \
+&& sudo apt-get -y install \
   git \
   g++ \
   cmake \
