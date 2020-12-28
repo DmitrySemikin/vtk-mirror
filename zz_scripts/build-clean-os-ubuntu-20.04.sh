@@ -125,7 +125,19 @@ echo "It takes $(($BUILD_ENDTIME - $BUILD_STARTTIME)) seconds to complete the bu
 
 ARCH_STARTTIME=$(date +%s)
 
-cpack -G TGZ -B "${BUILD_DIR}" 2>&1 >> "${BUILD_LOG}"
+# It is impossible to specify input directory for cpack (or I could not find, how to do it),
+# so we need to cd there
+
+cd "${BUILD_DIR}"
+RC=$?
+if [[ ${RC} != 0 ]]; then
+    echo "ERROR: Cannot CD to BUILD directory to invoke cpack." >&2
+    echo "Return code: ${RC}"
+    exit 1;
+fi
+
+
+cpack -G TGZ 2>&1 >> "${BUILD_LOG}"
 RC=$?
 if [[ ${RC} != 0 ]]; then
     echo "ERROR: Failed to create package (cpack invocation)." >&2
