@@ -58,6 +58,9 @@ ninja --version 2>&1 >> "${ENV_DESCRIPTION_FILE}"
 BUILD_LOG_NAME="build.log"
 BUILD_LOG="${WORKING_DIR}/${BUILD_LOG_NAME}"
 
+VTK_CMAKE_VARIABLES_VALUES_FILE_NAME="vtk-cmake-variables-values.txt"
+VTK_CMAKE_VARIABLES_VALUES_FILE="${WORKING_DIR}/${VTK_CMAKE_VARIABLES_VALUES_FILE_NAME}"
+
 
 # Defines variable $VTK_DISABLE_MODULES
 source "${SCRIPT_DIR}/define-disable-modules-variable.sh"
@@ -84,7 +87,7 @@ cmake \
   -DCMAKE_BUILD_TYPE="Release" \
   ${VTK_DISABLE_MODULES} \
   -S "${SRC_DIR}" \
-  -B "${BUILD_DIR}"\
+  -B "${BUILD_DIR}" \
   2>&1 > "${BUILD_LOG}"
 
 RC=$?
@@ -94,6 +97,7 @@ if [[ ${RC} != 0 ]]; then
     exit 1;
 fi
 
+cmake -LA -N -S "${SRC_DIR}" -B "${BUILD_DIR}" 2>&1 > "${VTK_CMAKE_VARIABLES_VALUES_FILE}"
 
 cmake --build "${BUILD_DIR}" 2>&1 >> "${BUILD_LOG}"
 RC=$?
