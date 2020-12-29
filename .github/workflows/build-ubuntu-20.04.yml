@@ -13,13 +13,25 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: bash ./zz_scripts/build-clean-os-ubuntu-20.04.sh
-      - name: Archive artifacts
+        # TODO: Upload logs even if the build fails.
+      - name: Archive and upload vtk-build-env.txt
         uses: actions/upload-artifact@v2
         with:
-          name: vtk-bin
-          path: |
-            ../vtk-build/*.tar.gz
-            ../vtk-build/*.tgz
-            ../build.log
-            ../vtk-build-env.txt
-            ../vtk-cmake-variables-values.txt
+          name: vtk-build-env.txt
+          path: ../vtk-build-env.txt
+      - name: Archive and upload vtk-cmake-variables-values.txt
+        uses: actions/upload-artifact@v2
+        with:
+          name: vtk-cmake-variables-values.txt
+          path: ../vtk-cmake-variables-values.txt
+      - name: Archive and upload build.log
+        uses: actions/upload-artifact@v2
+        with:
+          name: build.log
+          path: ../build.log
+      - name: Archive and upload binary package artifact
+        uses: actions/upload-artifact@v2
+        with:
+          # TODO: Adjust version in CMakeLists.txt or in build script (cpack invocation) and here.
+          name: VTK-1.10-Linux.tar.gz
+          path: ../vtk-build/VTK-1.10-Linux.tar.gz
