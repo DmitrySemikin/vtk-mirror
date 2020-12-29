@@ -38,7 +38,7 @@ fi
 BUILD_STARTTIME=$(date +%s)
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-SRC_DIR="${SCRIPT_DIR}/.."
+SRC_DIR="$( cd ${SCRIPT_DIR}/.. >/dev/null 2>&1 && pwd )"
 WORKING_DIR="$( cd "${SRC_DIR}/.." >/dev/null 2>&1 && pwd )"
 BUILD_DIR_NAME="vtk-build"
 INSTALL_DIR_NAME="vtk-install"
@@ -62,6 +62,13 @@ BUILD_LOG="${WORKING_DIR}/${BUILD_LOG_NAME}"
 VTK_CMAKE_VARIABLES_VALUES_FILE_NAME="vtk-cmake-variables-values.txt"
 VTK_CMAKE_VARIABLES_VALUES_FILE="${WORKING_DIR}/${VTK_CMAKE_VARIABLES_VALUES_FILE_NAME}"
 
+OUTPUT_DIR_NAME="build-output"
+OUTPUT_DIR="${SRC_DIR}/${OUTPUT_DIR_NAME}"
+
+PACKAGE_FILE_BASENAME="daswb-depends_vtk-9.0.1_ubuntu-20.04"
+PACKAGE_FILE_NAME="${PACKAGE_FILE_BASENAME}.tar.gz"
+PACKAGE_FILE="${BUILD_DIR}/${PACKAGE_FILE_NAME}"
+
 
 # Defines variable $VTK_DISABLE_MODULES
 source "${SCRIPT_DIR}/define-disable-modules-variable.sh"
@@ -70,6 +77,7 @@ if [[ -z "${VTK_DISABLE_MODULES}" ]]; then
     exit 1;
 fi
 
+# TODO: Use `tee` for copying output to stdout (to see on website), but beware failing behavior
 
 mkdir -p "${BUILD_DIR}"
 RC=$?
@@ -138,7 +146,11 @@ if [[ ${RC} != 0 ]]; then
 fi
 
 
-cpack -G TGZ -P daswb-depends-vtk -R 9.0.1 2>&1 >> "${BUILD_LOG}"
+# for cpack there should be a whitespace between -D and variable name
+cpack \
+    -G TGZ \
+    -D CPACK_PACKAGE_FILE_NAME="${PACKAGE_FILE_BASENAME}" \
+    2>&1 >> "${BUILD_LOG}"
 RC=$?
 if [[ ${RC} != 0 ]]; then
     echo "ERROR: Failed to create package (cpack invocation)." >&2
@@ -158,6 +170,18 @@ fi
 
 ARCH_ENDTIME=$(date +%s)
 echo "It takes $(($ARCH_ENDTIME - $ARCH_STARTTIME)) seconds to complete the arch..."
+
+mkdir -p "${OUTPUT_DIR}"
+RC=$?
+if [[ ${RC} != 0 ]]; then
+    echo "ERROR: cannot create output dir." >&2
+    exit 1
+fi
+
+cp "${BUILD_LOG}" "${OUTPUT_DIR}"
+cp "${VTK_CMAKE_VARIABLES_VALUES_FILE_NAME}" "${OUTPUT_DIR}"
+cp "${ENV_DESCRIPTION_FILE}" "${OUTPUT_DIR}"
+cp "${PACKAGE_FILE}" "${OUTPUT_DIR}"
 
 
 ENDTIME=$(date +%s)

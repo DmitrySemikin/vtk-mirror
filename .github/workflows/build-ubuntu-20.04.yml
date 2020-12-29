@@ -18,20 +18,20 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: vtk-build-env.txt
-          path: ../vtk-build-env.txt
+          path: build-output/vtk-build-env.txt
       - name: Archive and upload vtk-cmake-variables-values.txt
         uses: actions/upload-artifact@v2
         with:
           name: vtk-cmake-variables-values.txt
-          path: ../vtk-cmake-variables-values.txt
+          path: build-output/vtk-cmake-variables-values.txt
       - name: Archive and upload build.log
         uses: actions/upload-artifact@v2
         with:
           name: build.log
-          path: ../build.log
+          path: build-output/build.log
       - name: Archive and upload binary package artifact
         uses: actions/upload-artifact@v2
         with:
           # TODO: Adjust version in CMakeLists.txt or in build script (cpack invocation) and here.
-          name: VTK-1.10-Linux.tar.gz
-          path: ../vtk-build/VTK-1.10-Linux.tar.gz
+          name: daswb-depends_vtk-9.0.1_ubuntu-20.04.tar.gz
+          path: build-output/daswb-depends_vtk-9.0.1_ubuntu-20.04.tar.gz
