@@ -138,7 +138,7 @@ if [[ ${RC} != 0 ]]; then
 fi
 
 
-cpack -G TGZ 2>&1 >> "${BUILD_LOG}"
+cpack -G TGZ -P daswb-depends-vtk -R 9.0.1 2>&1 >> "${BUILD_LOG}"
 RC=$?
 if [[ ${RC} != 0 ]]; then
     echo "ERROR: Failed to create package (cpack invocation)." >&2
